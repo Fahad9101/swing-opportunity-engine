@@ -100,7 +100,7 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
                         "sma200": market.sma200,
                         "rsi14": market.rsi14,
                         "pullback_from_50d_high_pct": market.pullback_from_50d_high_pct,
-                        "avg_dollar_volume20d": market.avg_dollar_volume20d,
+                        "avg_dollar_volume_20d": market.avg_dollar_volume_20d,
                     },
                     "fundamental": None if fundamental is None else {
                         "revenue_growth": fundamental.revenue_growth,
