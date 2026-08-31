@@ -13,6 +13,7 @@ from app.domain.schemas import FieldProvenance, FundamentalSnapshot, OHLCVBar
 MIN_HISTORY_OBSERVATIONS = 4
 MAX_BAR_LAG_DAYS = 7
 MAX_SHARE_STALENESS_DAYS = 140
+SHARE_DISCONTINUITY_RATIO = 1.45
 
 
 class ValuationReferenceLike(Protocol):
@@ -81,6 +82,27 @@ def _shares_for_end(rows: list[dict[str, Any]], end: date) -> float | None:
     return value
 
 
+def _has_share_discontinuity(rows: list[dict[str, Any]], through: date) -> bool:
+    """Detect split/restatement patterns in SEC instant share history.
+
+    SEC companyfacts may mix pre-split and retrospectively restated share facts
+    across filings. Yahoo's historical chart series is split-adjusted. A large
+    alternating share-count jump would therefore corrupt historical P/E or P/S
+    if period-end SEC shares were multiplied by adjusted historical prices.
+    When detected, the valuation history uses the current share basis for all
+    observations. This is a data-normalization safeguard, not an investment
+    rule or scoring change.
+    """
+    shares = [(end, value) for end, value in _dedupe_rows(rows) if end <= through and value > 0]
+    if len(shares) < 2:
+        return False
+    for (_, previous), (_, current) in zip(shares, shares[1:]):
+        low, high = sorted((previous, current))
+        if low > 0 and high / low >= SHARE_DISCONTINUITY_RATIO:
+            return True
+    return False
+
+
 def _price_for_end(bars: list[OHLCVBar], end: date) -> float | None:
     eligible = [bar for bar in bars if bar.date <= end and 0 <= (end - bar.date).days <= MAX_BAR_LAG_DAYS]
     if not eligible:
@@ -95,25 +117,26 @@ def _multiple_observations(
     bars: list[OHLCVBar],
     *,
     earnings: bool,
-) -> tuple[list[dict[str, float | str]], tuple[date, float, float] | None]:
+) -> tuple[list[dict[str, float | str]], tuple[date, float, float] | None, str]:
     ttm = _ttm_series(metric_rows)
     if not ttm:
-        return [], None
+        return [], None, "UNAVAILABLE"
 
     current_end, current_metric = ttm[-1]
     current_shares = _shares_for_end(shares_rows, current_end)
     current = (current_end, current_metric, current_shares) if current_shares is not None else None
+    split_normalized = current_shares is not None and _has_share_discontinuity(shares_rows, current_end)
+    share_basis = "CURRENT_SHARES_SPLIT_NORMALIZED" if split_normalized else "PERIOD_END_SHARES"
 
     observations: list[dict[str, float | str]] = []
     for end, metric in ttm[:-1]:
         if metric <= 0:
             continue
-        shares = _shares_for_end(shares_rows, end)
+        shares = current_shares if split_normalized else _shares_for_end(shares_rows, end)
         price = _price_for_end(bars, end)
         if shares is None or price is None:
             continue
-        denominator = metric
-        multiple = (price * shares) / denominator
+        multiple = (price * shares) / metric
         if multiple <= 0 or not math.isfinite(multiple):
             continue
         observations.append(
@@ -124,9 +147,10 @@ def _multiple_observations(
                 "ttm_metric": metric,
                 "multiple": multiple,
                 "metric": "P/E" if earnings else "P/S",
+                "share_basis": share_basis,
             }
         )
-    return observations[-8:], current
+    return observations[-8:], current, share_basis
 
 
 def derive_historical_normalized_value(
@@ -144,7 +168,7 @@ def derive_historical_normalized_value(
 
     net_income_rows = history.get("net_income_quarters") or []
     if isinstance(net_income_rows, list):
-        observations, current = _multiple_observations(net_income_rows, shares_rows, bars, earnings=True)
+        observations, current, share_basis = _multiple_observations(net_income_rows, shares_rows, bars, earnings=True)
         if current is not None and current[1] > 0 and len(observations) >= MIN_HISTORY_OBSERVATIONS:
             current_end, current_income, current_shares = current
             normalized_multiple = median(float(row["multiple"]) for row in observations)
@@ -157,6 +181,7 @@ def derive_historical_normalized_value(
                     "current_metric_period_end": current_end.isoformat(),
                     "current_ttm_metric": current_income,
                     "current_shares": current_shares,
+                    "share_basis": share_basis,
                     "observation_count": len(observations),
                     "observations": observations,
                 }
@@ -164,7 +189,7 @@ def derive_historical_normalized_value(
     if allow_sales_fallback:
         revenue_rows = history.get("revenue_quarters") or []
         if isinstance(revenue_rows, list):
-            observations, current = _multiple_observations(revenue_rows, shares_rows, bars, earnings=False)
+            observations, current, share_basis = _multiple_observations(revenue_rows, shares_rows, bars, earnings=False)
             if current is not None and current[1] > 0 and len(observations) >= MIN_HISTORY_OBSERVATIONS:
                 current_end, current_revenue, current_shares = current
                 normalized_multiple = median(float(row["multiple"]) for row in observations)
@@ -177,6 +202,7 @@ def derive_historical_normalized_value(
                         "current_metric_period_end": current_end.isoformat(),
                         "current_ttm_metric": current_revenue,
                         "current_shares": current_shares,
+                        "share_basis": share_basis,
                         "observation_count": len(observations),
                         "observations": observations,
                     }
@@ -198,12 +224,13 @@ def enrich_fundamental_valuation(
     frozen Re-Rating `valuation_discount` condition retains its original
     meaning: current price is below a normalized/historical valuation anchor.
 
-    `expected_swing_upside` is a discovery-stage valuation-headroom proxy, not
-    a Milestone-3 T2 target. When both anchors exist it uses the lower of the
-    historical normalized value and the analyst consensus mean target. This is
-    intentionally conservative and prevents a 12-month target from overriding
-    self-relative valuation. If only the analyst target exists, that target is
-    used as the proxy while fundamental valuation support remains unavailable.
+    `expected_swing_upside` is kept logically separate from valuation support.
+    It is a prototype discovery-stage headroom proxy based on the current
+    analyst consensus mean target, not a Milestone-3 T2 and not a claim that
+    the target can be reached within 1-8 weeks. Separating the two inputs avoids
+    double-counting historical valuation: the frozen 12-point upside component
+    and frozen 8-point valuation-support component remain independent exactly
+    as designed.
     """
     if not bars:
         return fundamental
@@ -237,14 +264,7 @@ def enrich_fundamental_valuation(
         if target_mean is not None and not reference_stale
         else None
     )
-
-    expected_swing_upside = None
-    expected_anchor = None
-    if consensus_upside is not None:
-        expected_anchor = target_mean
-        if normalized_value is not None:
-            expected_anchor = min(target_mean, normalized_value)
-        expected_swing_upside = expected_anchor / current_price - 1
+    expected_swing_upside = consensus_upside
 
     raw = dict(fundamental.raw)
     raw["valuation"] = {
@@ -255,14 +275,8 @@ def enrich_fundamental_valuation(
         "consensus_target_high": getattr(reference, "target_high_price", None) if reference else None,
         "analyst_opinions": getattr(reference, "analyst_opinions", None) if reference else None,
         "consensus_target_upside": consensus_upside,
-        "expected_swing_value_anchor": expected_anchor,
-        "expected_swing_upside_method": (
-            "LOWER_OF_HISTORICAL_NORMALIZED_VALUE_AND_CONSENSUS_TARGET"
-            if consensus_upside is not None and normalized_value is not None
-            else "CONSENSUS_TARGET_HEADROOM_PROXY"
-            if consensus_upside is not None
-            else None
-        ),
+        "expected_swing_value_anchor": target_mean if consensus_upside is not None else None,
+        "expected_swing_upside_method": "CONSENSUS_TARGET_HEADROOM_PROXY_NOT_MILESTONE3_TARGET" if consensus_upside is not None else None,
         "milestone3_target": False,
     }
 
@@ -293,17 +307,12 @@ def enrich_fundamental_valuation(
     if expected_swing_upside is not None and reference is not None:
         expected_fetched_at = max(fetched_at, reference.fetched_at)
         expected_as_of = min(market_as_of, reference.as_of)
-        source = (
-            "Yahoo Finance analyst target + SEC/Yahoo historical valuation anchor (prototype discovery headroom)"
-            if normalized_value is not None
-            else "Yahoo Finance analyst target (prototype discovery headroom)"
-        )
         provenance["expected_swing_upside"] = FieldProvenance(
-            source=source,
+            source="Yahoo Finance analyst consensus mean target (prototype discovery headroom; not Milestone-3 T2)",
             as_of=expected_as_of,
             fetched_at=expected_fetched_at,
             stale=stale or reference.stale,
-            raw_field="financialData.targetMeanPrice constrained by historical normalized value when available",
+            raw_field="financialData.targetMeanPrice",
         )
         fetched_at = expected_fetched_at
         stale = stale or reference.stale
