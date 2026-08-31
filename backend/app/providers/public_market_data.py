@@ -148,8 +148,6 @@ class PublicMarketDataProvider:
             else:
                 missing.append(ticker)
 
-        # One chart request per symbol is required for OHLCV. A shared client and bounded
-        # concurrency provide rate-limit awareness while avoiding thousands of handshakes.
         concurrency = max(16, min(100, self.concurrency * 16))
         semaphore = asyncio.Semaphore(concurrency)
         headers = {"User-Agent": "Mozilla/5.0 SOE-Free-Public-Validation/1.0", "Accept": "application/json"}
@@ -180,9 +178,27 @@ class PublicMarketDataProvider:
         async with httpx.AsyncClient(timeout=max(30, self.timeout), headers=headers, limits=limits, transport=self.transport) as client:
             await asyncio.gather(*(fetch(client, ticker) for ticker in missing))
 
+    def _load_cached_bars(self, ticker: str, sessions: int) -> bool:
+        cached = self.cache.get_entry(f"public-ohlcv:{ticker}:{sessions}")
+        if not cached:
+            return False
+        self._bars[ticker] = [OHLCVBar.model_validate(item) for item in cached.data]
+        return bool(self._bars[ticker])
+
     async def get_ohlcv(self, ticker: str, sessions: int = 260) -> list[OHLCVBar]:
-        if ticker not in self._bars:
-            await self.prefetch([ticker], sessions, retain=True)
+        bars = self._bars.get(ticker)
+        if bars is None or len(bars) < sessions:
+            loaded = self._load_cached_bars(ticker, sessions)
+            if not loaded:
+                # Full scans prefetch 520 sessions once for both technical and
+                # Milestone-2.5G historical valuation work. A 260-session
+                # technical request can therefore reuse the larger cache.
+                for cached_sessions in (520, 756, 1260):
+                    if cached_sessions >= sessions and self._load_cached_bars(ticker, cached_sessions):
+                        loaded = True
+                        break
+            if not loaded:
+                await self.prefetch([ticker], sessions, retain=True)
         bars = self._bars.get(ticker)
         if not bars:
             raise ProviderError(self.name, "TICKER_DATA_UNAVAILABLE", "No usable OHLCV returned for ticker.", retryable=False, ticker=ticker, endpoint=YAHOO_CHART_URL.format(symbol=ticker))
