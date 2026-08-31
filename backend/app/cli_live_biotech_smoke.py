@@ -6,7 +6,7 @@ import json
 from app.core.config import get_settings, load_rules
 from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.nasdaq_calendar import NasdaqEarningsCalendar
-from app.providers.sec_biotech_fallback import SecBiotechLiquidityFallbackProvider
+from app.providers.sec_biotech_validated import SecBiotechValidatedProvider
 from app.providers.sec_edgar import SecEdgarProvider
 from app.services.biotech_validation_service import build_biotech_validation
 from app.services.cache_service import JsonFileCache
@@ -31,7 +31,7 @@ async def smoke() -> list[dict]:
         user_agent=settings.sec_user_agent,
         rules=rules,
     )
-    biotech = SecBiotechLiquidityFallbackProvider(
+    biotech = SecBiotechValidatedProvider(
         sec=sec,
         cache=cache,
         submissions_zip_path=settings.sec_submissions_zip_path,
@@ -62,6 +62,7 @@ async def smoke() -> list[dict]:
                 "cash_runway_months": enriched.cash_runway_months,
                 "runway_status": validation["runway_status"],
                 "runway_method_status": runway.get("status"),
+                "runway_as_of": runway.get("as_of"),
                 "reported_cash": runway.get("cash"),
                 "marketable_securities": runway.get("marketable_securities"),
                 "runway_liquidity": runway.get("liquidity"),
@@ -69,6 +70,7 @@ async def smoke() -> list[dict]:
                 "filing_liquidity_source": filing_liquidity.get("source_url"),
                 "financing_secured": enriched.financing_secured,
                 "financing_status": financing.get("status"),
+                "financing_balance_sheet_date": financing.get("balance_sheet_date"),
                 "financing_matched_filing": financing.get("matched_filing"),
                 "catalyst_status": validation["catalyst"]["status"],
                 "scanner_catalyst_eligible": validation["catalyst"]["scanner_catalyst_eligible"],
@@ -95,6 +97,8 @@ def main() -> None:
     if arwr and arwr.get("runway_status") == "AUTO_REJECT_BELOW_9M":
         raise SystemExit("Live biotech smoke failed: ARWR remains below 9 months despite latest periodic-filing liquidity evidence.")
     for row in usable:
+        if row.get("runway_as_of") and row.get("financing_balance_sheet_date") and row["runway_as_of"] != row["financing_balance_sheet_date"]:
+            raise SystemExit(f"Live biotech smoke failed: {row['ticker']} financing date is not aligned with runway date.")
         if row.get("financing_secured") is True and not row.get("financing_matched_filing"):
             raise SystemExit(f"Live biotech smoke failed: {row['ticker']} financing was marked secured without matched SEC filing evidence.")
         if row.get("scanner_catalyst_eligible") is True:

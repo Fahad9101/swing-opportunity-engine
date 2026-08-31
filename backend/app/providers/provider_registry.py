@@ -9,7 +9,7 @@ from app.providers.nasdaq_calendar import NasdaqEarningsCalendar
 from app.providers.cboe_vix import CboeVixProvider
 from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.public_market_data import PublicMarketDataProvider
-from app.providers.sec_biotech_fallback import SecBiotechLiquidityFallbackProvider
+from app.providers.sec_biotech_validated import SecBiotechValidatedProvider
 from app.providers.sec_edgar import SecEdgarProvider
 from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
 from app.providers.yahoo_ownership import YahooOwnershipProvider
@@ -38,7 +38,7 @@ def get_provider(name: str | None = None) -> object:
             user_agent=settings.sec_user_agent,
             rules=rules,
         )
-        biotech_intelligence = SecBiotechLiquidityFallbackProvider(
+        biotech_intelligence = SecBiotechValidatedProvider(
             sec=sec,
             cache=cache,
             submissions_zip_path=settings.sec_submissions_zip_path,
