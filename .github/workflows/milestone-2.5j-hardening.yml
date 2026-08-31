@@ -46,7 +46,19 @@ jobs:
           PROVIDER_NAME: fixture
         run: python -m pytest
 
-      - name: Download and validate SEC bulk archives
+      - name: Set SEC cache date
+        shell: bash
+        run: echo "SEC_CACHE_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
+
+      - name: Restore validated SEC bulk cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/soe/sec
+          key: ${{ runner.os }}-soe-sec-bulk-${{ env.SEC_CACHE_DATE }}
+          restore-keys: |
+            ${{ runner.os }}-soe-sec-bulk-
+
+      - name: Download or reuse validated SEC bulk archives
         run: PYTHONPATH=backend python -m app.cli_sec_bulk
 
       - name: Run Milestone 2.5J full-market validation
