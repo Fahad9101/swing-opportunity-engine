@@ -1,0 +1,31 @@
+name: Live Yahoo Estimate Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install SOE
+        run: python -m pip install -e '.[test]'
+
+      - name: Query live key-free Yahoo analyst estimates
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_smoke.db
+          PROVIDER_NAME: free_public
+          SEC_USER_AGENT: "SwingOpportunityEngine-Smoke/1.0 (ci@example.invalid)"
+        run: PYTHONPATH=backend python -m app.cli_live_estimate_smoke
