@@ -1,0 +1,101 @@
+model_version: "SOE-1.0.0"
+
+universe:
+  min_price: 7.0
+  min_market_cap: 500000000
+  biotech_min_market_cap: 300000000
+  min_avg_dollar_volume: 10000000
+  biotech_min_avg_dollar_volume: 5000000
+  min_trading_days: 120
+  allowed_exchanges: [NASDAQ, NYSE, NYSE American]
+  allowed_asset_types: [COMMON_STOCK, ADR]
+
+technical:
+  max_below_sma50_pct: 0.03
+  preferred_pullback_min: 0.05
+  preferred_pullback_max: 0.20
+  sweet_spot_pullback_min: 0.07
+  sweet_spot_pullback_max: 0.15
+  around_sma200_pct: 0.03
+  low_volume_pullback_ratio: 0.80
+  accumulation_up_down_ratio: 1.15
+  reversal_min_relative_volume: 1.20
+
+growth:
+  normal_min_revenue_growth: 0.15
+  large_cap_market_cap: 20000000000
+  large_cap_min_revenue_growth: 0.10
+  min_forward_eps_growth: 0.15
+  min_fcf_growth: 0.15
+  min_margin_expansion_bps: 100
+  min_forward_ebitda_growth: 0.15
+
+rerating:
+  min_forward_eps_growth: 0.10
+  min_conditions_required: 4
+
+biotech:
+  preferred_cash_runway_months: 18
+  standard_min_cash_runway_months: 12
+  automatic_reject_cash_runway_months: 9
+  catalyst_exception_days: 28
+  catalyst_exception_min_stable_sessions: 5
+  catalyst_exception_no_low_sessions: 10
+  catalyst_exception_min_rsi: 35
+
+catalyst:
+  max_horizon_days: 56
+
+opportunity:
+  minimum_upside_top: 0.20
+  minimum_rr: 2.5
+  preferred_rr: 3.0
+
+scores:
+  minimum_watch: 75
+  actionable: 80
+  top_swing: 85
+
+market_regime:
+  green_vix_max: 25.0
+  red_vix_min: 35.0
+  green_breadth_min_pct: 45.0
+  red_breadth_max_pct: 30.0
+
+penalties:
+  recent_guidance_cut: [-15, -5]
+  major_customer_loss: [-10, -5]
+  accounting_concern: [-20, -10]
+  unexpected_dilution: [-15, -5]
+  abnormal_insider_selling: [-8, -3]
+  short_float_over_25: [-2, -2]
+  extreme_event_volatility: [-5, -2]
+  litigation_regulatory: [-10, -3]
+
+data_quality:
+  staleness_hours:
+    price: 24
+    technicals: 24
+    calendar: 24
+    estimates: 48
+    fundamentals: 2880
+  cache_ttl_seconds:
+    universe: 86400
+    ohlcv: 21600
+    price: 900
+    fundamentals: 86400
+    estimates: 43200
+    calendar: 21600
+    regime: 900
+  provider:
+    timeout_seconds: 20
+    max_retries: 3
+    initial_backoff_seconds: 0.5
+    max_concurrency: 8
+    batch_size: 100
+  validation:
+    max_abs_growth_rate: 20.0
+    max_abs_margin: 5.0
+    market_cap_relative_tolerance: 0.20
+    sma_relative_tolerance: 0.000001
+    split_jump_threshold: 0.60
