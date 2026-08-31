@@ -14,8 +14,8 @@ The investment rules remain frozen in `config/soe_v1_0_rules.yaml` (SHA-256 `59c
 | Analyst estimates / valuation reference | Yahoo Finance `quoteSummary` / `earningsTrend,financialData` | Prototype-only forward EPS growth, 30-day EPS up/down revision counts, 30/90-day EPS consensus change, forward revenue, analyst count, and consensus target mean/low/high used only as discovery-stage expected-upside headroom |
 | Ownership / short float | Yahoo Finance `quoteSummary` / `majorHoldersBreakdown,defaultKeyStatistics` | Prototype-only institutional ownership and short float; ownership feeds the existing liquidity score and short float above 25% activates the existing fixed −2 penalty |
 | Daily OHLCV | Yahoo Finance chart endpoint | Replaceable prototype-only adapter; completed EOD sessions; derives all SOE technicals and historical price points used by self-relative valuation |
-| Earnings | Nasdaq public earnings calendar | Date and timing when supplied; event only, not a scored catalyst |
-| Trials | ClinicalTrials.gov API v2 | On-demand primary/completion milestones; event only, never fabricated into an FDA/PDUFA date or scored A/B catalyst |
+| Earnings / catalyst evidence | Nasdaq public earnings calendar | Exact public date and timing when supplied, with date-confidence/provenance metadata; evidence remains unscored when materiality or surprise is unavailable |
+| Trials / catalyst evidence | ClinicalTrials.gov API v2 | Sponsor-matched primary/completion milestones with exact date precision/windows; never fabricated into a readout, FDA/PDUFA date, or scored catalyst |
 | Regime | Completed EOD SPY/QQQ/IWM plus Cboe VIX history | Deterministic regime inputs; breadth explicitly unavailable |
 
 Yahoo and Nasdaq web endpoints are suitable for prototype validation but have no contractual SLA or explicit commercial redistribution grant in this project. Replace or separately license them before commercial production. SEC, Cboe, and ClinicalTrials adapters are isolated so provider-native payloads never reach scanner or scoring code.
@@ -35,6 +35,26 @@ Yahoo historical prices are split-adjusted while SEC share facts can contain pre
 
 Generic historical-multiple valuation is intentionally not forced onto biotech, ADRs, or Real Estate names where the current free stack lacks the correct specialized valuation adapter. Financial companies may use the earnings-based path when valid, but generic P/S fallback is disabled. Biotech remains outside conventional Buffett-style multiple valuation and retains its separate catalyst/runway framework.
 
+## Free/public catalyst-intelligence methodology
+
+Milestone 2.5H separates **public catalyst evidence** from **scored catalysts** so incomplete public data cannot manufacture catalyst points.
+
+Every normalized public event can retain:
+
+- exact date or explicit date window;
+- date precision (`DAY`, `MONTH`, `YEAR`);
+- frozen A/B/C date-confidence evidence;
+- source, source URL, `as_of`, `fetched_at` and stale state;
+- whether it is a catalyst candidate;
+- whether all frozen score inputs are available;
+- an explicit list of missing score fields.
+
+The frozen catalyst score remains unchanged: materiality 0–10, timing 0–5, date confidence A/B/C = 5/3/0, and surprise/re-rating potential 0–5. An event is promoted into the existing scored `Catalyst` model only when the required numerical inputs are explicitly available and the evidence is valid. Missing materiality or surprise remains `null`, not zero.
+
+Nasdaq earnings-calendar records can therefore provide verified exact-day catalyst evidence without automatically receiving catalyst points. ClinicalTrials.gov primary/completion dates are retained as study milestones with their true precision/window; they are **not** assumed to be data-readout dates and are never converted into FDA/PDUFA dates. Sponsor matching is applied before trial events are associated with a biotech ticker.
+
+This means Milestone 2.5H improves catalyst discovery and auditability while leaving the 25-point catalyst component unavailable whenever public evidence cannot support all frozen inputs.
+
 ## Missing-data semantics
 
 - Missing values remain `null`; they are never converted to zero.
@@ -45,7 +65,8 @@ Generic historical-multiple valuation is intentionally not forced onto biotech, 
 - Analyst target mean/low/high may be populated from Yahoo `financialData`; only a current non-stale mean target can populate the discovery headroom proxy.
 - Institutional ownership and short float may be populated from Yahoo's ownership/statistics modules when available. Missing ownership or short float remains `null`; no score or penalty is fabricated.
 - The frozen `short_float_over_25` penalty is applied only when normalized short float is strictly greater than 25%; exactly 25% does not trigger it.
-- Revenue/EBITDA revision counts, scored catalysts, market breadth, guidance deterioration, and several biotech-specific catalyst/runway inputs remain unavailable unless a later adapter explicitly supplies them.
+- Public event evidence may be available while the scored catalyst remains unavailable. Missing catalyst materiality/surprise cannot be backfilled with arbitrary defaults.
+- Revenue/EBITDA revision counts, market breadth, guidance deterioration, and several biotech-specific runway/readout/regulatory inputs remain unavailable unless a later adapter explicitly supplies them.
 - Every normalized production record retains source, `as_of`, `fetched_at`, and `stale`; field-level provenance is retained for derived values.
 
 The previously tested Nasdaq `/api/analyst/{symbol}/forecast` path was retired after a live smoke run returned `PROVIDER_SYMBOL_NOT_FOUND` across DELL, AVGO, FAST, LUV, and ARWR. It is not used by the active free provider.
@@ -77,13 +98,19 @@ The archive and all API caches live under `.cache/soe` and are excluded from the
 
 ## Cache and resilience
 
-Configured lifetimes are: universe 24h, OHLCV 6h, price 15m, fundamentals 24h, estimates/ownership 12h, calendar 6h, and regime 15m. The SEC bulk archive is a nightly operator refresh. Calls use caching, retry/backoff, rate-limit handling, timeouts, atomic cache writes, and structured errors. One provider or ticker failure cannot terminate the scan. Optional ownership, estimate, and valuation-reference failures are recorded without discarding otherwise valid SEC fundamentals.
+Configured lifetimes are: universe 24h, OHLCV 6h, price 15m, fundamentals 24h, estimates/ownership 12h, calendar 6h, and regime 15m. The SEC bulk archive is a nightly operator refresh. Calls use caching, retry/backoff, rate-limit handling, timeouts, atomic cache writes, and structured errors. One provider or ticker failure cannot terminate the scan. Optional ownership, estimate, valuation-reference and catalyst-evidence failures are recorded without discarding otherwise valid SEC fundamentals or market data.
 
 ## Run
 
 ```bash
 PYTHONPATH=backend PROVIDER_NAME=free_public python -m app.cli
 python -m pytest
+```
+
+Targeted catalyst-evidence smoke validation:
+
+```bash
+PYTHONPATH=backend PROVIDER_NAME=free_public python -m app.cli_live_catalyst_smoke
 ```
 
 API:
@@ -96,10 +123,10 @@ Endpoints: `GET /api/v1/health`, `POST /api/v1/scans`, `GET /api/v1/scans/{id}`,
 
 ## Validation and audit
 
-Automatic checks cover impossible percentages, EOD staleness, price/share market-cap inconsistencies, invalid negative fields, SMA mismatches, RSI range, null-to-zero conversion, duplicate tickers, provider symbol mismatches, ADR/common-stock confusion, possible split discontinuities, historical-valuation observation sufficiency, and stale analyst targets. Provider and validation errors persist against the scan run.
+Automatic checks cover impossible percentages, EOD staleness, price/share market-cap inconsistencies, invalid negative fields, SMA mismatches, RSI range, null-to-zero conversion, duplicate tickers, provider symbol mismatches, ADR/common-stock confusion, possible split discontinuities, historical-valuation observation sufficiency, stale analyst targets, public date precision, catalyst score-input completeness, and ClinicalTrials.gov sponsor association. Provider and validation errors persist against the scan run.
 
-See `MILESTONE_2_5_REPORT.md` for the original real 5,156-security free-data run, `MILESTONE_2_5E_REPORT.md` for targeted estimate/revision validation, `MILESTONE_2_5F_REPORT.md` for ownership/short-float validation, and `MILESTONE_2_5G_REPORT.md` for free/public valuation and expected-upside validation. A fresh full-market validation run remains required before Milestone 2.5 can be considered fully production-validated.
+See `MILESTONE_2_5_REPORT.md` for the original real 5,156-security free-data run, `MILESTONE_2_5E_REPORT.md` for targeted estimate/revision validation, `MILESTONE_2_5F_REPORT.md` for ownership/short-float validation, `MILESTONE_2_5G_REPORT.md` for free/public valuation and expected-upside validation, and `MILESTONE_2_5H_REPORT.md` for free/public catalyst-intelligence validation. A fresh full-market validation run remains required before Milestone 2.5 can be considered fully production-validated.
 
 ## Explicitly deferred
 
-Entry Score, support, stops, T1/T2, R:R, maximum acceptable entry, Why Now/Why Not, thesis breaker, polished dashboard, Execution Engine handoff, alerts, and historical outcome tracking are not implemented.
+Entry Score, support, stops, T1/T2, R:R, maximum acceptable entry, Why Now/Why Not, thesis breaker, polished dashboard, Execution Engine handoff, alerts, and historical outcome tracking are not implemented. Fully automated qualitative materiality/surprise scoring and authoritative biotech readout/regulatory-date extraction also remain deferred until they can be implemented without changing or fabricating frozen SOE-1.0.0 rules.

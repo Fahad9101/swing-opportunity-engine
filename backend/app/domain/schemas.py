@@ -177,6 +177,17 @@ class CorporateEvent(Provenance):
     event_date: date
     timing: str | None = None
     verified: bool = True
+    date_confidence: CatalystGrade | None = None
+    date_precision: str | None = None
+    window_start: date | None = None
+    window_end: date | None = None
+    catalyst_candidate: bool = False
+    materiality: int | None = Field(default=None, ge=0, le=10)
+    surprise_potential: int | None = Field(default=None, ge=0, le=5)
+    scoring_ready: bool = False
+    missing_score_fields: list[str] = Field(default_factory=list)
+    evidence_status: str | None = None
+    source_url: str | None = None
     field_provenance: dict[str, FieldProvenance] = Field(default_factory=dict)
 
 

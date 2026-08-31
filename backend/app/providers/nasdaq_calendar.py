@@ -10,6 +10,7 @@ from app.domain.schemas import CorporateEvent, FieldProvenance
 from app.providers.errors import ProviderError
 from app.providers.http_client import ResilientJsonClient
 from app.services.cache_service import JsonFileCache
+from app.services.catalyst_evidence_service import annotate_catalyst_evidence
 
 
 class NasdaqEarningsCalendar:
@@ -62,7 +63,29 @@ class NasdaqEarningsCalendar:
                         continue
                     timing = {"time-pre-market": "PRE_MARKET", "time-after-hours": "AFTER_HOURS"}.get(row.get("time"), row.get("time"))
                     provenance = {field: FieldProvenance(source="Nasdaq Earnings Calendar", as_of=as_of, fetched_at=result.fetched_at, stale=stale, raw_field=raw) for field, raw in {"event_date": "query.date", "timing": "data.rows[].time", "title": "data.rows[].name"}.items()}
-                    mapping.setdefault(ticker, []).append(CorporateEvent(ticker=ticker, type="EARNINGS", title=f"{row.get('name') or ticker} earnings", event_date=day, timing=timing, verified=True, source="Nasdaq Earnings Calendar", as_of=as_of, fetched_at=result.fetched_at, stale=stale, field_provenance=provenance))
+                    base = CorporateEvent(
+                        ticker=ticker,
+                        type="EARNINGS",
+                        title=f"{row.get('name') or ticker} earnings",
+                        event_date=day,
+                        timing=timing,
+                        verified=True,
+                        source="Nasdaq Earnings Calendar",
+                        as_of=as_of,
+                        fetched_at=result.fetched_at,
+                        stale=stale,
+                        field_provenance=provenance,
+                    )
+                    event = annotate_catalyst_evidence(
+                        base,
+                        date_precision="DAY",
+                        window_start=day,
+                        window_end=day,
+                        catalyst_candidate=True,
+                        evidence_status="VERIFIED_EARNINGS_DATE_SCORE_INPUTS_INCOMPLETE",
+                        source_url="https://www.nasdaq.com/market-activity/earnings",
+                    )
+                    mapping.setdefault(ticker, []).append(event)
         self._events = mapping
 
     async def get_events(self, ticker: str) -> list[CorporateEvent]:
