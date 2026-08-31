@@ -6,7 +6,7 @@ import json
 from app.core.config import get_settings, load_rules
 from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.nasdaq_calendar import NasdaqEarningsCalendar
-from app.providers.sec_biotech import SecBiotechIntelligenceProvider
+from app.providers.sec_biotech_fallback import SecBiotechLiquidityFallbackProvider
 from app.providers.sec_edgar import SecEdgarProvider
 from app.services.biotech_validation_service import build_biotech_validation
 from app.services.cache_service import JsonFileCache
@@ -31,7 +31,7 @@ async def smoke() -> list[dict]:
         user_agent=settings.sec_user_agent,
         rules=rules,
     )
-    biotech = SecBiotechIntelligenceProvider(
+    biotech = SecBiotechLiquidityFallbackProvider(
         sec=sec,
         cache=cache,
         submissions_zip_path=settings.sec_submissions_zip_path,
@@ -54,6 +54,7 @@ async def smoke() -> list[dict]:
         validation = build_biotech_validation(enriched, events, rules)
         financing = enriched.raw.get("biotech_financing") or {}
         runway = enriched.raw.get("biotech_runway") or {}
+        filing_liquidity = enriched.raw.get("biotech_filing_liquidity") or {}
         rows.append(
             {
                 "ticker": ticker,
@@ -64,6 +65,8 @@ async def smoke() -> list[dict]:
                 "reported_cash": runway.get("cash"),
                 "marketable_securities": runway.get("marketable_securities"),
                 "runway_liquidity": runway.get("liquidity"),
+                "liquidity_fallback_method": runway.get("liquidity_fallback_method"),
+                "filing_liquidity_source": filing_liquidity.get("source_url"),
                 "financing_secured": enriched.financing_secured,
                 "financing_status": financing.get("status"),
                 "financing_matched_filing": financing.get("matched_filing"),
@@ -88,6 +91,9 @@ def main() -> None:
         raise SystemExit("Live biotech smoke failed: fewer than three sample tickers produced deterministic SEC cash runway.")
     if any(float(row["cash_runway_months"]) < 0 for row in runway_usable):
         raise SystemExit("Live biotech smoke failed: negative cash runway detected.")
+    arwr = next((row for row in usable if row["ticker"] == "ARWR"), None)
+    if arwr and arwr.get("runway_status") == "AUTO_REJECT_BELOW_9M":
+        raise SystemExit("Live biotech smoke failed: ARWR remains below 9 months despite latest periodic-filing liquidity evidence.")
     for row in usable:
         if row.get("financing_secured") is True and not row.get("financing_matched_filing"):
             raise SystemExit(f"Live biotech smoke failed: {row['ticker']} financing was marked secured without matched SEC filing evidence.")
