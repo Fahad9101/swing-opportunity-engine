@@ -105,11 +105,11 @@ def test_historical_support_and_analyst_headroom_feed_independent_frozen_compone
 def test_historical_overvaluation_remains_negative_support_even_with_positive_analyst_headroom():
     history, ends = _history(metric=25.0)
     bars = _bars(ends, historical_price=200.0, current_price=250.0)
-    result = enrich_fundamental_valuation(_fundamental(history), bars, _reference(300.0))
+    result = enrich_fundamental_valuation(_fundamental(history), bars, _reference(305.0))
 
     assert result.fundamental_undervaluation == pytest.approx(-0.20)
     assert result.valuation_discount is False
-    assert result.expected_swing_upside == pytest.approx(0.20)
+    assert result.expected_swing_upside == pytest.approx(0.22)
     score = score_valuation(result)
     assert score.score == 6  # upside contributes; historical support correctly contributes zero
 
