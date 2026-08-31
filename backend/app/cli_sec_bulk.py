@@ -14,15 +14,29 @@ SUBMISSIONS_URL = "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submi
 STREAM_CHUNK_BYTES = 1024 * 1024
 
 
-async def _download_archive(url: str, destination: Path) -> Path:
-    """Download an SEC ZIP with a normal streamed GET.
+def _valid_zip(path: Path) -> bool:
+    if not path.exists() or path.stat().st_size == 0:
+        return False
+    try:
+        with zipfile.ZipFile(path) as archive:
+            return archive.testzip() is None
+    except (OSError, zipfile.BadZipFile):
+        return False
 
-    SEC edge nodes can reject HEAD requests from some hosted runners even when
-    ordinary GET requests are permitted. The previous downloader depended on a
-    successful HEAD followed by parallel range requests. This implementation
-    avoids that transport assumption while preserving retries, atomic replace,
-    ZIP integrity validation, and the same destination paths.
+
+async def _download_archive(url: str, destination: Path) -> Path:
+    """Download an SEC ZIP with validated-cache reuse and streamed GET.
+
+    GitHub-hosted runners can intermittently receive SEC edge 403 responses even
+    with a declared User-Agent. A previously validated nightly archive is safer
+    than repeatedly hammering the SEC endpoint. The GitHub workflow therefore
+    restores a dated Actions cache; this function reuses it only after ZIP
+    integrity validation. If no valid cache is present, it performs a normal
+    streamed GET with bounded exponential retries.
     """
+
+    if _valid_zip(destination):
+        return destination
 
     settings = get_settings()
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -31,12 +45,13 @@ async def _download_archive(url: str, destination: Path) -> Path:
         "User-Agent": settings.sec_user_agent,
         "Accept": "application/zip,application/octet-stream,*/*",
         "Accept-Encoding": "identity",
+        "Connection": "keep-alive",
     }
 
     timeout = httpx.Timeout(connect=30.0, read=300.0, write=60.0, pool=60.0)
-    async with httpx.AsyncClient(timeout=timeout, headers=headers, follow_redirects=True) as client:
+    async with httpx.AsyncClient(timeout=timeout, headers=headers, follow_redirects=True, http2=False) as client:
         last_error: Exception | None = None
-        for attempt in range(4):
+        for attempt in range(6):
             try:
                 if temporary.exists():
                     temporary.unlink()
@@ -45,21 +60,17 @@ async def _download_archive(url: str, destination: Path) -> Path:
                     with temporary.open("wb") as target:
                         async for chunk in response.aiter_bytes(STREAM_CHUNK_BYTES):
                             target.write(chunk)
-                if not temporary.exists() or temporary.stat().st_size == 0:
-                    raise ValueError("SEC archive download was empty")
-                with zipfile.ZipFile(temporary) as archive:
-                    corrupt = archive.testzip()
-                    if corrupt:
-                        raise ValueError(f"Corrupt SEC archive entry: {corrupt}")
+                if not _valid_zip(temporary):
+                    raise ValueError("SEC archive download failed ZIP integrity validation")
                 temporary.replace(destination)
                 return destination
             except (httpx.HTTPError, OSError, ValueError, zipfile.BadZipFile) as exc:
                 last_error = exc
                 if temporary.exists():
                     temporary.unlink()
-                if attempt == 3:
+                if attempt == 5:
                     break
-                await asyncio.sleep(1.0 * (2**attempt))
+                await asyncio.sleep(min(60.0, 2.0 * (2**attempt)))
 
     assert last_error is not None
     raise last_error
