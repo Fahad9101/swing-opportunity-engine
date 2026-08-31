@@ -1,8 +1,6 @@
 name: Live Yahoo Ownership Smoke
 
 on:
-  push:
-    branches: [milestone-2.5f-ownership-shortfloat]
   workflow_dispatch:
 
 permissions:
