@@ -58,8 +58,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-soe-sec-bulk-
 
-      - name: Download or reuse validated SEC bulk archives
+      - name: Attempt preferred SEC bulk archives
+        id: sec_bulk
+        continue-on-error: true
         run: PYTHONPATH=backend python -m app.cli_sec_bulk
+
+      - name: Validate official SEC JSON fallback when bulk is unavailable
+        if: steps.sec_bulk.outcome != 'success'
+        shell: bash
+        run: |
+          PYTHONPATH=backend python - <<'PY'
+          import asyncio
+          import json
+          from app.providers.provider_registry import get_provider
+
+          async def main():
+              provider = get_provider('free_public')
+              result = await provider.sec.network_smoke_test()
+              print(json.dumps(result, indent=2))
+
+          asyncio.run(main())
+          PY
 
       - name: Run Milestone 2.5J full-market validation
         shell: bash
