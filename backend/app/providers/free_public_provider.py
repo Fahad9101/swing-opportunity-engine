@@ -14,12 +14,25 @@ from app.providers.sec_edgar import SecEdgarProvider
 from app.providers.symbol_directory import NasdaqSymbolDirectory
 from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
 from app.providers.yahoo_ownership import OwnershipSnapshot, YahooOwnershipProvider
+from app.services.catalyst_evidence_service import promote_scoring_ready_event
 from app.services.valuation_service import enrich_fundamental_valuation
 
 
 def _is_biotech(sector: str | None, industry: str | None) -> bool:
     text = f"{sector or ''} {industry or ''}".lower()
     return "biotech" in text or "biological product" in text or "biotechnology" in text
+
+
+def _sponsor_name(company_name: str) -> str:
+    name = company_name.split(" - ", 1)[0]
+    for suffix in (
+        ", Inc.", " Inc.", ", Inc", " Inc", " Corporation", " Corp.", " Corp", " plc", " PLC", " Limited", " Ltd.", " Ltd",
+        " Common Stock", " Class A Common Stock", " Class B Common Stock", " Class C Common Stock",
+    ):
+        if name.endswith(suffix):
+            name = name[: -len(suffix)]
+            break
+    return name.strip()
 
 
 def merge_ownership_into_fundamentals(
@@ -91,12 +104,14 @@ class FreePublicProvider:
         self.calendar, self.clinical_trials, self.vix, self.rules = calendar, clinical_trials, vix, rules
         self.provider_errors: list[dict[str, Any]] = []
         self._instruments: dict[str, Instrument] = {}
+        self._catalyst_evidence: dict[str, list[CorporateEvent]] = {}
 
     def _record(self, error: ProviderError) -> None:
         self.provider_errors.append(error.as_dict() | {"occurred_at": datetime.now(UTC).isoformat()})
 
     async def list_instruments(self) -> list[Instrument]:
         self.provider_errors.clear()
+        self._catalyst_evidence.clear()
         securities = await self.symbol_directory.list_securities(self.rules["data_quality"]["cache_ttl_seconds"]["universe"])
         allowed_exchanges = set(self.rules["universe"]["allowed_exchanges"])
         allowed_types = {AssetType(value) for value in self.rules["universe"]["allowed_asset_types"]}
@@ -201,24 +216,47 @@ class FreePublicProvider:
     async def get_estimates(self, ticker: str) -> EstimateSnapshot | None:
         return await self.analyst.get_estimates(ticker)
 
+    async def get_catalyst_evidence(self, ticker: str) -> list[CorporateEvent]:
+        key = ticker.upper().replace(".", "-")
+        if key in self._catalyst_evidence:
+            return list(self._catalyst_evidence[key])
+
+        events = list(await self.calendar.get_events(key))
+        instrument = self._instruments.get(key)
+        if instrument and instrument.is_biotech:
+            sponsor = _sponsor_name(instrument.company_name)
+            try:
+                events.extend(await self.clinical_trials.get_events(key, sponsor, self.rules["catalyst"]["max_horizon_days"]))
+            except ProviderError as exc:
+                self._record(exc)
+        events.sort(key=lambda item: (item.window_start or item.event_date, item.type, item.title))
+        self._catalyst_evidence[key] = events
+        return list(events)
+
     async def get_catalysts(self, ticker: str) -> list[Catalyst] | None:
-        # Public event calendars do not provide SOE's frozen materiality and
-        # surprise inputs, so they are intentionally not promoted into scored
-        # A/B catalysts.
-        return None
+        # Evidence is allowed to carry the frozen A/B/C date-confidence field,
+        # but it is promoted into a scored Catalyst only when materiality and
+        # surprise are explicitly available. The current free/public sources do
+        # not supply those numeric inputs, so missing values remain unavailable.
+        evidence = await self.get_catalyst_evidence(ticker)
+        promoted = [item for event in evidence if (item := promote_scoring_ready_event(event)) is not None]
+        return promoted or None
 
     async def prefetch_calendar(self) -> None:
+        self._catalyst_evidence.clear()
         await self.calendar.prefetch()
         self.provider_errors.extend(self.calendar.errors)
 
     async def get_calendar_events(self, ticker: str) -> list[CorporateEvent]:
-        return await self.calendar.get_events(ticker)
+        # Preserve the existing pipeline interface while returning the richer
+        # Milestone 2.5H evidence stream (earnings + biotech trial milestones).
+        return await self.get_catalyst_evidence(ticker)
 
     async def get_clinical_trial_events(self, ticker: str) -> list[CorporateEvent]:
-        """On-demand deterministic trial milestones; intentionally not scored as catalysts."""
+        """On-demand deterministic trial milestones; never auto-labeled as readouts."""
         instrument = self._instruments.get(ticker)
         if instrument and instrument.is_biotech:
-            sponsor = instrument.company_name.split(" - ", 1)[0].split(", Inc.", 1)[0].split(" Inc.", 1)[0]
+            sponsor = _sponsor_name(instrument.company_name)
             try:
                 return await self.clinical_trials.get_events(ticker, sponsor, self.rules["catalyst"]["max_horizon_days"])
             except ProviderError as exc:
