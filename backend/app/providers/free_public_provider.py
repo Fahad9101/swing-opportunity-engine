@@ -8,6 +8,7 @@ from app.domain.schemas import Catalyst, CorporateEvent, EstimateSnapshot, Funda
 from app.providers.cboe_vix import CboeVixProvider
 from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.errors import ProviderError
+from app.providers.nasdaq_analyst import NasdaqAnalystEstimateProvider
 from app.providers.nasdaq_calendar import NasdaqEarningsCalendar
 from app.providers.public_market_data import PublicMarketDataProvider
 from app.providers.sec_edgar import SecEdgarProvider
@@ -20,12 +21,29 @@ def _is_biotech(sector: str | None, industry: str | None) -> bool:
 
 
 class FreePublicProvider:
-    """Normalized SOE adapter for the Milestone 2.5 free/public validation stack."""
+    """Normalized SOE adapter for the free/public validation stack.
+
+    All provider-native payloads are normalized before reaching scanner or
+    scoring code.  Missing public data remain unavailable rather than being
+    converted to zero or synthetic values.
+    """
 
     name = "free_public"
 
-    def __init__(self, *, symbol_directory: NasdaqSymbolDirectory, market: PublicMarketDataProvider, sec: SecEdgarProvider, calendar: NasdaqEarningsCalendar, clinical_trials: ClinicalTrialsProvider, vix: CboeVixProvider, rules: dict[str, Any]):
+    def __init__(
+        self,
+        *,
+        symbol_directory: NasdaqSymbolDirectory,
+        market: PublicMarketDataProvider,
+        sec: SecEdgarProvider,
+        analyst: NasdaqAnalystEstimateProvider,
+        calendar: NasdaqEarningsCalendar,
+        clinical_trials: ClinicalTrialsProvider,
+        vix: CboeVixProvider,
+        rules: dict[str, Any],
+    ):
         self.symbol_directory, self.market, self.sec = symbol_directory, market, sec
+        self.analyst = analyst
         self.calendar, self.clinical_trials, self.vix, self.rules = calendar, clinical_trials, vix, rules
         self.provider_errors: list[dict[str, Any]] = []
         self._instruments: dict[str, Instrument] = {}
@@ -80,10 +98,12 @@ class FreePublicProvider:
         return await self.sec.get_fundamentals(ticker)
 
     async def get_estimates(self, ticker: str) -> EstimateSnapshot | None:
-        return None
+        return await self.analyst.get_estimates(ticker)
 
     async def get_catalysts(self, ticker: str) -> list[Catalyst] | None:
-        # Free public sources provide event metadata, not SOE's scored A/B catalyst inputs.
+        # Public event calendars do not provide SOE's frozen materiality and
+        # surprise inputs, so they are intentionally not promoted into scored
+        # A/B catalysts.
         return None
 
     async def prefetch_calendar(self) -> None:
