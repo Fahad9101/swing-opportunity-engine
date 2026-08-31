@@ -11,6 +11,7 @@ from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.public_market_data import PublicMarketDataProvider
 from app.providers.sec_edgar import SecEdgarProvider
 from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
+from app.providers.yahoo_ownership import YahooOwnershipProvider
 from app.services.cache_service import JsonFileCache
 
 
@@ -29,10 +30,12 @@ def get_provider(name: str | None = None) -> object:
         cache = JsonFileCache(settings.cache_dir)
         market = PublicMarketDataProvider(cache=cache, rules=rules)
         analyst = YahooAnalystEstimateProvider(cache=cache, rules=rules)
+        ownership = YahooOwnershipProvider(cache=cache, rules=rules)
         provider = FreePublicProvider(
             symbol_directory=NasdaqSymbolDirectory(cache=cache), market=market,
             sec=SecEdgarProvider(cache=cache, zip_path=settings.sec_companyfacts_zip_path, user_agent=settings.sec_user_agent, rules=rules),
             analyst=analyst,
+            ownership=ownership,
             calendar=NasdaqEarningsCalendar(cache=cache, rules=rules),
             clinical_trials=ClinicalTrialsProvider(timeout_seconds=rules["data_quality"]["provider"]["timeout_seconds"]),
             vix=CboeVixProvider(cache=cache), rules=rules,

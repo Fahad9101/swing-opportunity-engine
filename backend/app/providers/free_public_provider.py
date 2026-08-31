@@ -13,11 +13,53 @@ from app.providers.public_market_data import PublicMarketDataProvider
 from app.providers.sec_edgar import SecEdgarProvider
 from app.providers.symbol_directory import NasdaqSymbolDirectory
 from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
+from app.providers.yahoo_ownership import OwnershipSnapshot, YahooOwnershipProvider
 
 
 def _is_biotech(sector: str | None, industry: str | None) -> bool:
     text = f"{sector or ''} {industry or ''}".lower()
     return "biotech" in text or "biological product" in text or "biotechnology" in text
+
+
+def merge_ownership_into_fundamentals(
+    fundamental: FundamentalSnapshot,
+    ownership: OwnershipSnapshot | None,
+) -> FundamentalSnapshot:
+    """Enrich SEC fundamentals without changing frozen SOE rules.
+
+    The existing SOE-1.0.0 penalty named ``short_float_over_25`` is activated
+    only when the normalized short-float fraction is strictly greater than
+    0.25. Missing ownership data stay null and no penalty is synthesized.
+    """
+    if ownership is None:
+        return fundamental
+
+    raw = dict(fundamental.raw)
+    penalty_flags = list(raw.get("penalty_flags") or [])
+    if ownership.short_float is not None and ownership.short_float > 0.25:
+        if not any(flag.get("code") == "short_float_over_25" for flag in penalty_flags if isinstance(flag, dict)):
+            penalty_flags.append(
+                {
+                    "code": "short_float_over_25",
+                    "reason": f"Short float {ownership.short_float:.1%} exceeds the frozen 25% threshold.",
+                    "points": -2,
+                    "source": ownership.source,
+                    "timestamp": ownership.as_of,
+                }
+            )
+    if penalty_flags:
+        raw["penalty_flags"] = penalty_flags
+
+    return fundamental.model_copy(
+        update={
+            "institutional_ownership": ownership.institutional_ownership,
+            "short_float": ownership.short_float,
+            "raw": raw,
+            "field_provenance": {**fundamental.field_provenance, **ownership.field_provenance},
+            "fetched_at": max(fundamental.fetched_at, ownership.fetched_at),
+            "stale": fundamental.stale or ownership.stale,
+        }
+    )
 
 
 class FreePublicProvider:
@@ -37,13 +79,14 @@ class FreePublicProvider:
         market: PublicMarketDataProvider,
         sec: SecEdgarProvider,
         analyst: YahooAnalystEstimateProvider,
+        ownership: YahooOwnershipProvider,
         calendar: NasdaqEarningsCalendar,
         clinical_trials: ClinicalTrialsProvider,
         vix: CboeVixProvider,
         rules: dict[str, Any],
     ):
         self.symbol_directory, self.market, self.sec = symbol_directory, market, sec
-        self.analyst = analyst
+        self.analyst, self.ownership = analyst, ownership
         self.calendar, self.clinical_trials, self.vix, self.rules = calendar, clinical_trials, vix, rules
         self.provider_errors: list[dict[str, Any]] = []
         self._instruments: dict[str, Instrument] = {}
@@ -95,7 +138,15 @@ class FreePublicProvider:
         return await self.market.get_ohlcv(ticker, sessions)
 
     async def get_fundamentals(self, ticker: str) -> FundamentalSnapshot | None:
-        return await self.sec.get_fundamentals(ticker)
+        fundamental = await self.sec.get_fundamentals(ticker)
+        if fundamental is None:
+            return None
+        try:
+            ownership = await self.ownership.get_ownership(ticker)
+        except ProviderError as exc:
+            self._record(exc)
+            ownership = None
+        return merge_ownership_into_fundamentals(fundamental, ownership)
 
     async def get_estimates(self, ticker: str) -> EstimateSnapshot | None:
         return await self.analyst.get_estimates(ticker)
