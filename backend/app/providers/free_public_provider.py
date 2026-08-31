@@ -8,11 +8,11 @@ from app.domain.schemas import Catalyst, CorporateEvent, EstimateSnapshot, Funda
 from app.providers.cboe_vix import CboeVixProvider
 from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.errors import ProviderError
-from app.providers.nasdaq_analyst import NasdaqAnalystEstimateProvider
 from app.providers.nasdaq_calendar import NasdaqEarningsCalendar
 from app.providers.public_market_data import PublicMarketDataProvider
 from app.providers.sec_edgar import SecEdgarProvider
 from app.providers.symbol_directory import NasdaqSymbolDirectory
+from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
 
 
 def _is_biotech(sector: str | None, industry: str | None) -> bool:
@@ -24,7 +24,7 @@ class FreePublicProvider:
     """Normalized SOE adapter for the free/public validation stack.
 
     All provider-native payloads are normalized before reaching scanner or
-    scoring code.  Missing public data remain unavailable rather than being
+    scoring code. Missing public data remain unavailable rather than being
     converted to zero or synthetic values.
     """
 
@@ -36,7 +36,7 @@ class FreePublicProvider:
         symbol_directory: NasdaqSymbolDirectory,
         market: PublicMarketDataProvider,
         sec: SecEdgarProvider,
-        analyst: NasdaqAnalystEstimateProvider,
+        analyst: YahooAnalystEstimateProvider,
         calendar: NasdaqEarningsCalendar,
         clinical_trials: ClinicalTrialsProvider,
         vix: CboeVixProvider,
