@@ -1,6 +1,8 @@
 name: Targeted Real-Data Scanner Audit
 
 on:
+  push:
+    branches: [milestone-2.5g-free-valuation]
   workflow_dispatch:
 
 permissions:
