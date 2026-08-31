@@ -1,8 +1,6 @@
 name: Targeted Real-Data Scanner Audit
 
 on:
-  push:
-    branches: [milestone-2.5e-targeted-scan-validation]
   workflow_dispatch:
 
 permissions:
