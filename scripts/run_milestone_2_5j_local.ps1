@@ -1,5 +1,6 @@
 param(
-    [string]$SecUserAgent = "SwingOpportunityEngine-LocalValidation/1.0 (contact: GitHub/Fahad9101)",
+    [string]$SecUserAgent = "",
+    [string]$SecContactEmail = "",
     [switch]$SkipInstall,
     [switch]$SkipTests
 )
@@ -56,6 +57,23 @@ if (-not $SkipInstall) {
     Invoke-Checked "Install SOE + test dependencies" { & $Python -m pip install -e ".[test]" }
 }
 
+# SEC fair-access guidance asks automated clients to declare a User-Agent that
+# identifies the application/organization and contains a real contact email.
+# Do not persist the email in git; prompt locally unless an explicit User-Agent
+# was supplied on the command line.
+if ([string]::IsNullOrWhiteSpace($SecUserAgent)) {
+    if ([string]::IsNullOrWhiteSpace($SecContactEmail)) {
+        $SecContactEmail = Read-Host "SEC requires a declared contact email for automated access. Enter the email to use only for this local run"
+    }
+    if ($SecContactEmail -notmatch '^[^\s@]+@[^\s@]+\.[^\s@]+$') {
+        throw "A valid SEC contact email is required. It is used only in the request User-Agent and is not written to the repository."
+    }
+    $SecUserAgent = "SwingOpportunityEngine LocalValidation $SecContactEmail"
+}
+elseif ($SecUserAgent -notmatch '@') {
+    throw "SEC_USER_AGENT must include a contact email under SEC fair-access guidance."
+}
+
 $env:DATABASE_URL = "sqlite+pysqlite:///./soe_milestone_2_5j_local.db"
 $env:PROVIDER_NAME = "free_public"
 $env:SEC_USER_AGENT = $SecUserAgent
@@ -90,9 +108,14 @@ Write-Host "`n=== Download/reuse official SEC bulk archives ==="
 & $Python -m app.cli_sec_bulk
 if ($LASTEXITCODE -ne 0) {
     throw @"
-SEC bulk download failed from this network. Do not continue with a 5,000+ ticker per-company fallback.
-Try the same command from another normal residential/corporate connection that can access sec.gov, then rerun this script.
-No SOE rule or scoring change is justified by an SEC network denial.
+SEC bulk download was denied even with an SEC-compliant declared User-Agent.
+Do not continue with a 5,000+ ticker per-company fallback and do not change SOE rules.
+If the same network can open the official SEC bulk links in a normal browser, manually save:
+  https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip
+  -> .cache/soe/sec/companyfacts.zip
+  https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip
+  -> .cache/soe/sec/submissions.zip
+Then rerun this script with -SkipInstall -SkipTests; validated local ZIPs will be reused.
 "@
 }
 
