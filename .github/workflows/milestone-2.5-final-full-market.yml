@@ -16,7 +16,7 @@ jobs:
     env:
       DATABASE_URL: sqlite+pysqlite:///./soe_final_full_market.db
       PROVIDER_NAME: free_public
-      SEC_USER_AGENT: "SwingOpportunityEngine-FinalValidation/1.0 (contact: GitHub/Fahad9101)"
+      SEC_USER_AGENT: "SwingOpportunityEngine-FinalValidation/1.0 (soe-validation@example.invalid)"
       SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/companyfacts.zip
       SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/submissions.zip
       CACHE_DIR: .cache/soe
