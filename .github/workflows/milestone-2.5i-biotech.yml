@@ -1,0 +1,41 @@
+name: Milestone 2.5I Biotech Validation
+
+on:
+  push:
+    branches: [milestone-2.5i-free-biotech]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Run deterministic test suite
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_25i_ci.db
+          PROVIDER_NAME: fixture
+          SEC_USER_AGENT: "SwingOpportunityEngine-CI/1.0 (ci@example.invalid)"
+        run: python -m pytest
+
+      - name: Run live free/public biotech validation smoke
+        env:
+          PROVIDER_NAME: free_public
+          SEC_USER_AGENT: "SwingOpportunityEngine-Validation/1.0 (ci@example.invalid)"
+          SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/nonexistent-companyfacts.zip
+          SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/nonexistent-submissions.zip
+        run: PYTHONPATH=backend python -m app.cli_live_biotech_smoke

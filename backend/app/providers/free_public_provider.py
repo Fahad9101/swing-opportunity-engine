@@ -10,10 +10,12 @@ from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.errors import ProviderError
 from app.providers.nasdaq_calendar import NasdaqEarningsCalendar
 from app.providers.public_market_data import PublicMarketDataProvider
+from app.providers.sec_biotech import SecBiotechIntelligenceProvider
 from app.providers.sec_edgar import SecEdgarProvider
 from app.providers.symbol_directory import NasdaqSymbolDirectory
 from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
 from app.providers.yahoo_ownership import OwnershipSnapshot, YahooOwnershipProvider
+from app.services.biotech_validation_service import build_biotech_validation
 from app.services.catalyst_evidence_service import promote_scoring_ready_event
 from app.services.valuation_service import enrich_fundamental_valuation
 
@@ -98,10 +100,12 @@ class FreePublicProvider:
         clinical_trials: ClinicalTrialsProvider,
         vix: CboeVixProvider,
         rules: dict[str, Any],
+        biotech_intelligence: SecBiotechIntelligenceProvider | None = None,
     ):
         self.symbol_directory, self.market, self.sec = symbol_directory, market, sec
         self.analyst, self.ownership = analyst, ownership
         self.calendar, self.clinical_trials, self.vix, self.rules = calendar, clinical_trials, vix, rules
+        self.biotech_intelligence = biotech_intelligence
         self.provider_errors: list[dict[str, Any]] = []
         self._instruments: dict[str, Instrument] = {}
         self._catalyst_evidence: dict[str, list[CorporateEvent]] = {}
@@ -169,15 +173,20 @@ class FreePublicProvider:
             ownership = None
         fundamental = merge_ownership_into_fundamentals(fundamental, ownership)
 
-        # Valuation requires instrument classification so the adapter can avoid
-        # generic historical-multiple treatment for biotech, ADRs and REIT-like
-        # real-estate names. Direct unit tests that bypass list_instruments()
-        # therefore retain the valid SEC/ownership record without enrichment.
+        # Valuation and biotech specialization require instrument classification.
+        # Direct unit tests that bypass list_instruments() retain the valid SEC /
+        # ownership record without classification-specific enrichment.
         instrument = self._instruments.get(ticker)
         if instrument is None:
             return fundamental
 
         is_biotech = instrument.is_biotech
+        if is_biotech and self.biotech_intelligence is not None:
+            try:
+                fundamental = await self.biotech_intelligence.enrich_fundamental(ticker, fundamental)
+            except ProviderError as exc:
+                self._record(exc)
+
         is_adr = instrument.asset_type == AssetType.ADR
         sector = (instrument.sector or "").strip().lower()
         is_real_estate = sector == "real estate"
@@ -241,6 +250,14 @@ class FreePublicProvider:
         evidence = await self.get_catalyst_evidence(ticker)
         promoted = [item for event in evidence if (item := promote_scoring_ready_event(event)) is not None]
         return promoted or None
+
+    async def get_biotech_validation(self, ticker: str) -> dict[str, Any]:
+        instrument = self._instruments.get(ticker.upper().replace(".", "-"))
+        if instrument is None or not instrument.is_biotech:
+            return {"ticker": ticker, "status": "NOT_CLASSIFIED_AS_BIOTECH"}
+        fundamental = await self.get_fundamentals(instrument.ticker)
+        events = await self.get_catalyst_evidence(instrument.ticker)
+        return {"ticker": instrument.ticker, **build_biotech_validation(fundamental, events, self.rules)}
 
     async def prefetch_calendar(self) -> None:
         self._catalyst_evidence.clear()

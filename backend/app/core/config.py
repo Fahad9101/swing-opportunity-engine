@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     alpaca_trading_base_url: str = "https://paper-api.alpaca.markets"
     sec_user_agent: str = "SwingOpportunityEngine/1.0 (+https://fahadalmalkimd.com)"
     sec_companyfacts_zip_path: Path = PROJECT_ROOT / ".cache" / "soe" / "sec" / "companyfacts.zip"
+    sec_submissions_zip_path: Path = PROJECT_ROOT / ".cache" / "soe" / "sec" / "submissions.zip"
     cache_dir: Path = PROJECT_ROOT / ".cache" / "soe"
     production_allow_partial: bool = True
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

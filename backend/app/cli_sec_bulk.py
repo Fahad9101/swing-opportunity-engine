@@ -10,19 +10,19 @@ import httpx
 from app.core.config import get_settings
 
 
-URL = "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip"
+COMPANYFACTS_URL = "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip"
+SUBMISSIONS_URL = "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip"
 CHUNK_BYTES = 16 * 1024 * 1024
 
 
-async def download() -> Path:
+async def _download_archive(url: str, destination: Path) -> Path:
     settings = get_settings()
-    destination = settings.sec_companyfacts_zip_path
     destination.parent.mkdir(parents=True, exist_ok=True)
-    part_dir = destination.with_suffix(".parts")
+    part_dir = destination.with_suffix(destination.suffix + ".parts")
     part_dir.mkdir(parents=True, exist_ok=True)
     headers = {"User-Agent": settings.sec_user_agent, "Accept-Encoding": "identity"}
     async with httpx.AsyncClient(timeout=120, headers=headers, follow_redirects=True) as client:
-        head = await client.head(URL)
+        head = await client.head(url)
         head.raise_for_status()
         total = int(head.headers["Content-Length"])
         semaphore = asyncio.Semaphore(8)
@@ -35,7 +35,7 @@ async def download() -> Path:
             async with semaphore:
                 for attempt in range(4):
                     try:
-                        response = await client.get(URL, headers={**headers, "Range": f"bytes={start}-{end}"})
+                        response = await client.get(url, headers={**headers, "Range": f"bytes={start}-{end}"})
                         response.raise_for_status()
                         if len(response.content) != expected:
                             raise ValueError("SEC range response length mismatch")
@@ -49,7 +49,7 @@ async def download() -> Path:
 
         ranges = [(index, start, min(start + CHUNK_BYTES - 1, total - 1)) for index, start in enumerate(range(0, total, CHUNK_BYTES))]
         parts = await asyncio.gather(*(fetch(*item) for item in ranges))
-    temporary = destination.with_suffix(".zip.tmp")
+    temporary = destination.with_suffix(destination.suffix + ".tmp")
     with temporary.open("wb") as target:
         for part in sorted(parts):
             with part.open("rb") as source:
@@ -64,8 +64,25 @@ async def download() -> Path:
     return destination
 
 
+async def download() -> Path:
+    """Backward-compatible companyfacts downloader."""
+    return await _download_archive(COMPANYFACTS_URL, get_settings().sec_companyfacts_zip_path)
+
+
+async def download_submissions() -> Path:
+    return await _download_archive(SUBMISSIONS_URL, get_settings().sec_submissions_zip_path)
+
+
+async def download_all() -> tuple[Path, Path]:
+    companyfacts = await download()
+    submissions = await download_submissions()
+    return companyfacts, submissions
+
+
 def main() -> None:
-    print(asyncio.run(download()))
+    companyfacts, submissions = asyncio.run(download_all())
+    print(f"companyfacts={companyfacts}")
+    print(f"submissions={submissions}")
 
 
 if __name__ == "__main__":
