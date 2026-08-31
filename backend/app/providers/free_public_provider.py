@@ -154,10 +154,17 @@ class FreePublicProvider:
             ownership = None
         fundamental = merge_ownership_into_fundamentals(fundamental, ownership)
 
+        # Valuation requires instrument classification so the adapter can avoid
+        # generic historical-multiple treatment for biotech, ADRs and REIT-like
+        # real-estate names. Direct unit tests that bypass list_instruments()
+        # therefore retain the valid SEC/ownership record without enrichment.
         instrument = self._instruments.get(ticker)
-        is_biotech = bool(instrument and instrument.is_biotech)
-        is_adr = bool(instrument and instrument.asset_type == AssetType.ADR)
-        sector = (instrument.sector or "").strip().lower() if instrument else ""
+        if instrument is None:
+            return fundamental
+
+        is_biotech = instrument.is_biotech
+        is_adr = instrument.asset_type == AssetType.ADR
+        sector = (instrument.sector or "").strip().lower()
         is_real_estate = sector == "real estate"
         is_financial = sector in {"finance", "financials", "financial services"}
 
