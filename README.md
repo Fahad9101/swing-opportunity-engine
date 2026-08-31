@@ -11,12 +11,13 @@ The investment rules remain frozen in `config/soe_v1_0_rules.yaml` (SHA-256 `59c
 | Universe | Nasdaq Trader official symbol directories | Ticker, name, exchange, active status, ETF flag, provider symbol, deterministic asset-type exclusions |
 | Metadata | Nasdaq public stock screener endpoint | Market cap, country, sector, industry, company-name cross-check |
 | Fundamentals | SEC EDGAR nightly `companyfacts.zip` | Historical revenue/growth, EPS/growth, margins, operating income, CFO-capex FCF, operating-income-plus-D&A EBITDA input, cash, debt, net debt, interest coverage, shares, cash runway where derivable |
+| Analyst estimates | Nasdaq public analyst forecast endpoint | Prototype-only annual consensus EPS forecasts; derives forward EPS growth and analyst count without inventing revision history |
 | Daily OHLCV | Yahoo Finance chart endpoint | Replaceable prototype-only adapter; completed EOD sessions; derives all SOE technicals |
 | Earnings | Nasdaq public earnings calendar | Date and timing when supplied; event only, not a scored catalyst |
 | Trials | ClinicalTrials.gov API v2 | On-demand primary/completion milestones; event only, never fabricated into an FDA/PDUFA date or scored A/B catalyst |
 | Regime | Completed EOD SPY/QQQ/IWM plus Cboe VIX history | Deterministic regime inputs; breadth explicitly unavailable |
 
-Yahoo and Nasdaq web endpoints are suitable for this prototype validation but have no contractual SLA or explicit commercial redistribution grant in this project. Replace or separately license them before commercial production. SEC, Cboe, and ClinicalTrials adapters are isolated so provider-native payloads never reach scanner or scoring code.
+Yahoo and Nasdaq web endpoints are suitable for prototype validation but have no contractual SLA or explicit commercial redistribution grant in this project. Replace or separately license them before commercial production. SEC, Cboe, and ClinicalTrials adapters are isolated so provider-native payloads never reach scanner or scoring code.
 
 No paid provider or Financial Datasets credential is required. Production mode never falls back to fixtures. The `fixture` provider remains available only when explicitly selected for tests/local demonstration.
 
@@ -26,7 +27,8 @@ No paid provider or Financial Datasets credential is required. Production mode n
 - Each scanner condition is `true`, `false`, or `null`.
 - If missing required data could change the outcome, the scanner reports `DATA_INCOMPLETE` and does not qualify the security.
 - Historical SEC results are not relabeled as forward estimates.
-- Analyst revisions, consensus forward estimates, short float, scored catalysts, breadth, guidance deterioration, and valuation support remain unavailable in the free stack.
+- Forward EPS growth and analyst count may be populated from the Nasdaq public analyst forecast endpoint when available.
+- Analyst revision history, forward revenue/EBITDA, short float, scored catalysts, breadth, guidance deterioration, and valuation support remain unavailable in the free stack unless a later adapter explicitly supplies them.
 - Every normalized production record retains source, `as_of`, `fetched_at`, and `stale`; field-level provenance is retained for derived values.
 
 ## Install and configure
@@ -77,7 +79,7 @@ Endpoints: `GET /api/v1/health`, `POST /api/v1/scans`, `GET /api/v1/scans/{id}`,
 
 Automatic checks cover impossible percentages, EOD staleness, price/share market-cap inconsistencies, invalid negative fields, SMA mismatches, RSI range, null-to-zero conversion, duplicate tickers, provider symbol mismatches, ADR/common-stock confusion, and possible split discontinuities. Provider and validation errors persist against the scan run.
 
-See `MILESTONE_2_5_REPORT.md` for the real 5,156-security run. The absence of qualifying candidates is an evidence-based free-data limitation, not a lowered or failed scanner threshold.
+See `MILESTONE_2_5_REPORT.md` for the original real 5,156-security free-data run. Milestone 2.5B adds forward-EPS enrichment without changing the frozen SOE investment model; a new validation run is required before its effect on candidate qualification is accepted.
 
 ## Explicitly deferred
 
