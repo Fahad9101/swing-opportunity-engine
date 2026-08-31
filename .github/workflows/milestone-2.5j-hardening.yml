@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   validate-2-5j:
-    runs-on: ubuntu-24.04
+    runs-on: macos-15
     timeout-minutes: 330
     env:
       DATABASE_URL: sqlite+pysqlite:///./soe_milestone_2_5j.db
