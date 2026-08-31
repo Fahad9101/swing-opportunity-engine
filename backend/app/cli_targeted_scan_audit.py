@@ -13,6 +13,7 @@ from app.scoring.catalyst_score import score_catalyst
 from app.scoring.fundamental_score import score_fundamentals
 from app.scoring.liquidity_score import score_liquidity
 from app.scoring.opportunity_score import calculate_opportunity_score
+from app.scoring.penalties import build_penalties
 from app.scoring.revision_score import score_revisions
 from app.scoring.technical_score import score_technical
 from app.scoring.valuation_score import score_valuation
@@ -62,6 +63,8 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
             ] if gate.passed else []
             qualified = [match for match in matches if match.qualified]
 
+            penalties = build_penalties(fundamental.raw.get("penalty_flags", []), rules) if fundamental else []
+            penalty_points = sum(item.points for item in penalties)
             scores: dict[str, Any] | None = None
             if qualified:
                 fundamental_component = (
@@ -78,9 +81,11 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
                     "balance_sheet": score_balance_sheet(instrument, fundamental),
                     "liquidity": score_liquidity(market, fundamental),
                 }
-                total = calculate_opportunity_score(components, 0, len(qualified))
+                total = calculate_opportunity_score(components, penalty_points, len(qualified))
                 scores = {
                     "components": {name: _score_dump(component) for name, component in components.items()},
+                    "penalty_points": penalty_points,
+                    "penalties": [penalty.model_dump(mode="json") for penalty in penalties],
                     "base_opportunity_score": total.base_opportunity_score,
                     "multi_scanner_bonus": total.multi_scanner_bonus,
                     "opportunity_score": total.opportunity_score,
@@ -110,6 +115,9 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
                         "operating_margin_expansion_bps": fundamental.operating_margin_expansion_bps,
                         "fcf_growth": fundamental.fcf_growth,
                         "cash_runway_months": fundamental.cash_runway_months,
+                        "institutional_ownership": fundamental.institutional_ownership,
+                        "short_float": fundamental.short_float,
+                        "penalty_flags": fundamental.raw.get("penalty_flags", []),
                     },
                     "estimates": None if estimates is None else {
                         "forward_eps_growth": estimates.forward_eps_growth,
@@ -138,6 +146,8 @@ def main() -> None:
     usable = [row for row in results if row.get("status") == "OK" and row.get("gate", {}).get("passed")]
     if len(usable) < 3:
         raise SystemExit("Targeted live scanner audit failed: fewer than three sample tickers passed the universal gate with usable real data.")
+    if not all(row.get("fundamental", {}).get("institutional_ownership") is not None for row in usable):
+        raise SystemExit("Targeted live scanner audit failed: ownership enrichment did not reach every usable sample fundamental record.")
 
 
 if __name__ == "__main__":
