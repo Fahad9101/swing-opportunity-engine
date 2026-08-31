@@ -1,0 +1,71 @@
+name: Milestone 2.5 Final Full-Market Validation
+
+on:
+  push:
+    branches:
+      - milestone-2.5-final-full-market
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-full-market:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./soe_final_full_market.db
+      PROVIDER_NAME: free_public
+      SEC_USER_AGENT: SwingOpportunityEngine-FinalValidation/1.0 (contact: GitHub/Fahad9101)
+      SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/companyfacts.zip
+      SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/submissions.zip
+      CACHE_DIR: .cache/soe
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Verify frozen rules against main
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+          echo "rules_blob_sha=$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)"
+
+      - name: Run deterministic test suite
+        env:
+          PROVIDER_NAME: fixture
+        run: python -m pytest
+
+      - name: Download and validate SEC public bulk archives
+        run: PYTHONPATH=backend python -m app.cli_sec_bulk
+
+      - name: Run final free/public full-market validation
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=backend python -m app.cli_final_full_market_validation \
+            --json-out final_full_market_validation.json \
+            --markdown-out MILESTONE_2_5_FINAL_FULL_MARKET_REPORT.md \
+            2>&1 | tee final_full_market_validation.log
+
+      - name: Upload final validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: milestone-2.5-final-full-market-validation
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            final_full_market_validation.json
+            MILESTONE_2_5_FINAL_FULL_MARKET_REPORT.md
+            final_full_market_validation.log
