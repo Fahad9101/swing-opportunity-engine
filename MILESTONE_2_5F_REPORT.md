@@ -13,7 +13,7 @@ The free-public provider now includes an isolated Yahoo Finance `quoteSummary` o
 
 Both fields are normalized as fractions. Missing values stay `null`; values outside broad plausible ranges are rejected rather than clipped or silently re-scaled. Field-level provenance, fetch time and staleness are retained.
 
-Ownership enrichment is optional. If Yahoo ownership data fails for one ticker, the error is recorded and valid SEC EDGAR fundamentals are retained rather than discarded.
+Ownership enrichment is optional. If Yahoo ownership data fails for one ticker, the error is recorded and valid SEC EDGAR fundamentals are retained rather than discarded. Deterministic integration tests cover both the successful merge path and the ownership-provider failure path.
 
 ## Frozen-rule integration
 
@@ -35,6 +35,7 @@ Deterministic tests verify:
 - exactly 25% produces no penalty.
 - implausible ownership/short-float ranges are rejected.
 - Yahoo cookie/crumb bootstrap and caching work without credentials.
+- optional ownership enrichment does not discard valid SEC fundamentals when the ownership provider fails.
 
 ## Live ownership smoke
 
