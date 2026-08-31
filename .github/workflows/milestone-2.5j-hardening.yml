@@ -16,7 +16,7 @@ jobs:
     env:
       DATABASE_URL: sqlite+pysqlite:///./soe_milestone_2_5j.db
       PROVIDER_NAME: free_public
-      SEC_USER_AGENT: "SwingOpportunityEngine/1.0 contact fhdmaalki@users.noreply.github.com"
+      SEC_USER_AGENT: "SwingOpportunityEngine-FinalValidation/1.0 (contact: GitHub/Fahad9101)"
       SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/companyfacts.zip
       SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/submissions.zip
       CACHE_DIR: .cache/soe
