@@ -1,8 +1,6 @@
 name: Live Yahoo Estimate Smoke
 
 on:
-  push:
-    branches: [milestone-2.5d-yahoo-estimates]
   workflow_dispatch:
 
 permissions:
