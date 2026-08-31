@@ -19,6 +19,7 @@ COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
 CONCEPTS = {
     "revenue": ("RevenueFromContractWithCustomerExcludingAssessedTax", "Revenues", "SalesRevenueNet"),
     "eps": ("EarningsPerShareDiluted", "EarningsPerShareBasicAndDiluted", "EarningsPerShareBasic"),
+    "net_income": ("NetIncomeLossAvailableToCommonStockholdersBasic", "NetIncomeLoss", "ProfitLoss"),
     "operating_income": ("OperatingIncomeLoss",),
     "gross_profit": ("GrossProfit",),
     "cfo": ("NetCashProvidedByUsedInOperatingActivities",),
@@ -46,29 +47,136 @@ def _unit_rows(payload: dict[str, Any], concepts: tuple[str, ...], units: tuple[
     return [], None
 
 
-def _quarterly(payload: dict[str, Any], key: str, units: tuple[str, ...] = ("USD",)) -> tuple[list[dict[str, Any]], str | None]:
-    rows, concept = _unit_rows(payload, CONCEPTS[key], units)
+def _duration_days(row: dict[str, Any]) -> int | None:
+    if not row.get("start") or not row.get("end"):
+        return None
+    try:
+        return (datetime.fromisoformat(row["end"]) - datetime.fromisoformat(row["start"])).days
+    except ValueError:
+        return None
+
+
+def _latest_by_end(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     usable: dict[str, dict[str, Any]] = {}
     for row in rows:
-        if not row.get("start") or not row.get("end") or row.get("form") not in {"10-Q", "10-Q/A", "10-K", "10-K/A"}:
+        end = row.get("end")
+        if not end:
             continue
-        try:
-            days = (datetime.fromisoformat(row["end"]) - datetime.fromisoformat(row["start"])).days
-        except ValueError:
+        existing = usable.get(end)
+        if existing is None or str(row.get("filed") or "") > str(existing.get("filed") or ""):
+            usable[end] = row
+    return sorted(usable.values(), key=lambda item: item["end"])
+
+
+def _quarterly(payload: dict[str, Any], key: str, units: tuple[str, ...] = ("USD",)) -> tuple[list[dict[str, Any]], str | None]:
+    rows, concept = _unit_rows(payload, CONCEPTS[key], units)
+    candidates: list[dict[str, Any]] = []
+    for row in rows:
+        days = _duration_days(row)
+        if days is None or row.get("form") not in {"10-Q", "10-Q/A", "10-K", "10-K/A"}:
             continue
         frame = str(row.get("frame") or "")
         if not (60 <= days <= 120) or (frame and "Q" not in frame):
             continue
-        existing = usable.get(row["end"])
-        if existing is None or str(row.get("filed") or "") > str(existing.get("filed") or ""):
-            usable[row["end"]] = row
-    return sorted(usable.values(), key=lambda item: item["end"]), concept
+        candidates.append(row)
+    return _latest_by_end(candidates), concept
+
+
+def _annual(payload: dict[str, Any], key: str, units: tuple[str, ...] = ("USD",)) -> tuple[list[dict[str, Any]], str | None]:
+    rows, concept = _unit_rows(payload, CONCEPTS[key], units)
+    candidates = [
+        row
+        for row in rows
+        if row.get("form") in {"10-K", "10-K/A"}
+        and (days := _duration_days(row)) is not None
+        and 300 <= days <= 400
+    ]
+    return _latest_by_end(candidates), concept
+
+
+def _complete_additive_quarters(payload: dict[str, Any], key: str) -> tuple[list[dict[str, Any]], str | None]:
+    """Return direct fiscal quarters plus deterministically derived Q4 values.
+
+    Revenue and net income are additive over a fiscal year. SEC companyfacts
+    commonly reports Q1-Q3 as quarterly durations but the 10-K as a full-year
+    duration, so Q4 is not always present as a standalone fact. For valuation
+    history only, Q4 is derived as FY minus the three direct quarters when the
+    periods are non-overlapping and clearly contained in the same fiscal year.
+    The main SOE fundamental fields are intentionally left unchanged.
+    """
+    quarters, concept = _quarterly(payload, key)
+    annuals, annual_concept = _annual(payload, key)
+    merged = {row["end"]: dict(row) for row in quarters}
+
+    for annual in annuals:
+        if annual["end"] in merged:
+            continue
+        try:
+            annual_start = datetime.fromisoformat(annual["start"]).date()
+            annual_end = datetime.fromisoformat(annual["end"]).date()
+        except (TypeError, ValueError):
+            continue
+        inside: list[dict[str, Any]] = []
+        for row in quarters:
+            try:
+                start = datetime.fromisoformat(row["start"]).date()
+                end = datetime.fromisoformat(row["end"]).date()
+            except (TypeError, ValueError):
+                continue
+            if annual_start <= start <= end < annual_end:
+                inside.append(row)
+        inside = sorted(inside, key=lambda item: item["end"])
+        if len(inside) < 3:
+            continue
+        first_three = inside[:3]
+        try:
+            quarter_sum = sum(float(row["val"]) for row in first_three)
+            annual_value = float(annual["val"])
+        except (TypeError, ValueError):
+            continue
+        derived = {
+            "start": first_three[-1]["end"],
+            "end": annual["end"],
+            "filed": annual.get("filed"),
+            "form": annual.get("form"),
+            "frame": f"DERIVED_Q4:{annual.get('fy') or annual['end']}",
+            "val": annual_value - quarter_sum,
+            "derived": True,
+        }
+        merged[derived["end"]] = derived
+
+    return sorted(merged.values(), key=lambda item: item["end"]), concept or annual_concept
 
 
 def _instant(payload: dict[str, Any], key: str, units: tuple[str, ...] = ("USD",)) -> tuple[dict[str, Any] | None, str | None]:
     rows, concept = _unit_rows(payload, CONCEPTS[key], units)
     usable = [row for row in rows if row.get("end") and row.get("form") in {"10-Q", "10-Q/A", "10-K", "10-K/A"}]
     return (max(usable, key=lambda item: (item.get("end", ""), item.get("filed", ""))) if usable else None), concept
+
+
+def _instant_history(payload: dict[str, Any], key: str, units: tuple[str, ...]) -> tuple[list[dict[str, Any]], str | None]:
+    rows, concept = _unit_rows(payload, CONCEPTS[key], units)
+    usable = [row for row in rows if row.get("end") and row.get("form") in {"10-Q", "10-Q/A", "10-K", "10-K/A"}]
+    return _latest_by_end(usable), concept
+
+
+def _compact_history(rows: list[dict[str, Any]], limit: int = 16) -> list[dict[str, Any]]:
+    compact: list[dict[str, Any]] = []
+    for row in rows[-limit:]:
+        try:
+            value = float(row["val"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        compact.append(
+            {
+                "start": row.get("start"),
+                "end": row.get("end"),
+                "filed": row.get("filed"),
+                "val": value,
+                "derived": bool(row.get("derived", False)),
+            }
+        )
+    return compact
 
 
 def _growth(latest: dict[str, Any] | None, comparison: dict[str, Any] | None) -> float | None:
@@ -93,6 +201,10 @@ def normalize_companyfacts(ticker: str, payload: dict[str, Any], *, fetched_at: 
     capex, capex_concept = _quarterly(payload, "capex")
     depreciation, depreciation_concept = _quarterly(payload, "depreciation")
     interest, interest_concept = _quarterly(payload, "interest")
+    valuation_revenue, valuation_revenue_concept = _complete_additive_quarters(payload, "revenue")
+    valuation_net_income, valuation_net_income_concept = _complete_additive_quarters(payload, "net_income")
+    valuation_shares, valuation_shares_concept = _instant_history(payload, "shares", ("shares",))
+
     latest = revenue[-1] if revenue else (op_income[-1] if op_income else None)
     if latest is None:
         return None
@@ -156,9 +268,19 @@ def normalize_companyfacts(ticker: str, payload: dict[str, Any], *, fetched_at: 
         "interest_coverage": f"{op_concept} / {interest_concept}",
     }
     provenance = {field: FieldProvenance(source="SEC EDGAR companyfacts", as_of=latest_date, fetched_at=fetched_at, stale=stale, raw_field=concepts.get(field)) for field, value in values.items() if value is not None}
+    valuation_history = {
+        "revenue_quarters": _compact_history(valuation_revenue),
+        "net_income_quarters": _compact_history(valuation_net_income),
+        "shares_instants": _compact_history(valuation_shares),
+        "concepts": {
+            "revenue": valuation_revenue_concept,
+            "net_income": valuation_net_income_concept,
+            "shares": valuation_shares_concept,
+        },
+    }
     return FundamentalSnapshot(
         ticker=ticker, **values, source="SEC EDGAR companyfacts", as_of=latest_date, fetched_at=fetched_at, stale=stale,
-        raw={"cik": payload.get("cik"), "entity_name": payload.get("entityName"), "period_end": latest_end, "concepts": concepts},
+        raw={"cik": payload.get("cik"), "entity_name": payload.get("entityName"), "period_end": latest_end, "concepts": concepts, "valuation_history": valuation_history},
         field_provenance=provenance,
     )
 
