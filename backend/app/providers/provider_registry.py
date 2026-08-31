@@ -10,7 +10,7 @@ from app.providers.cboe_vix import CboeVixProvider
 from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.public_market_data import PublicMarketDataProvider
 from app.providers.sec_biotech_validated import SecBiotechValidatedProvider
-from app.providers.sec_edgar import SecEdgarProvider
+from app.providers.sec_edgar_resilient import ResilientSecEdgarProvider
 from app.providers.yahoo_combined import YahooCombinedEnrichmentProvider
 from app.services.cache_service import JsonFileCache
 
@@ -36,7 +36,10 @@ def get_provider(name: str | None = None) -> object:
         # unchanged and Yahoo remains prototype-validation data.
         yahoo = YahooCombinedEnrichmentProvider(cache=cache, rules=rules)
 
-        sec = SecEdgarProvider(
+        # Prefer the official nightly SEC companyfacts archive. If GitHub-hosted
+        # egress is denied access to that large ZIP, use rate-limited/cached
+        # official SEC JSON endpoints for universal-gate survivors instead.
+        sec = ResilientSecEdgarProvider(
             cache=cache,
             zip_path=settings.sec_companyfacts_zip_path,
             user_agent=settings.sec_user_agent,
