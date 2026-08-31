@@ -11,7 +11,7 @@ The investment rules remain frozen in `config/soe_v1_0_rules.yaml` (SHA-256 `59c
 | Universe | Nasdaq Trader official symbol directories | Ticker, name, exchange, active status, ETF flag, provider symbol, deterministic asset-type exclusions |
 | Metadata | Nasdaq public stock screener endpoint | Market cap, country, sector, industry, company-name cross-check |
 | Fundamentals | SEC EDGAR nightly `companyfacts.zip` | Historical revenue/growth, EPS/growth, margins, operating income, CFO-capex FCF, operating-income-plus-D&A EBITDA input, cash, debt, net debt, interest coverage, shares, cash runway where derivable |
-| Analyst estimates | Nasdaq public analyst forecast endpoint | Prototype-only annual consensus EPS forecasts; derives forward EPS growth and analyst count without inventing revision history |
+| Analyst estimates | Yahoo Finance `quoteSummary` / `earningsTrend` | Prototype-only forward EPS growth, 30-day EPS up/down revision counts, 30/90-day EPS consensus change, forward revenue, analyst count |
 | Daily OHLCV | Yahoo Finance chart endpoint | Replaceable prototype-only adapter; completed EOD sessions; derives all SOE technicals |
 | Earnings | Nasdaq public earnings calendar | Date and timing when supplied; event only, not a scored catalyst |
 | Trials | ClinicalTrials.gov API v2 | On-demand primary/completion milestones; event only, never fabricated into an FDA/PDUFA date or scored A/B catalyst |
@@ -27,9 +27,11 @@ No paid provider or Financial Datasets credential is required. Production mode n
 - Each scanner condition is `true`, `false`, or `null`.
 - If missing required data could change the outcome, the scanner reports `DATA_INCOMPLETE` and does not qualify the security.
 - Historical SEC results are not relabeled as forward estimates.
-- Forward EPS growth and analyst count may be populated from the Nasdaq public analyst forecast endpoint when available.
-- Analyst revision history, forward revenue/EBITDA, short float, scored catalysts, breadth, guidance deterioration, and valuation support remain unavailable in the free stack unless a later adapter explicitly supplies them.
+- Forward EPS growth, EPS revision breadth inputs, 30/90-day EPS consensus changes, forward revenue, and analyst count may be populated from Yahoo's `earningsTrend` module when available.
+- Revenue/EBITDA revision counts, short float, scored catalysts, breadth, guidance deterioration, and valuation support remain unavailable in the free stack unless a later adapter explicitly supplies them.
 - Every normalized production record retains source, `as_of`, `fetched_at`, and `stale`; field-level provenance is retained for derived values.
+
+The previously tested Nasdaq `/api/analyst/{symbol}/forecast` path was retired after a live smoke run returned `PROVIDER_SYMBOL_NOT_FOUND` across DELL, AVGO, FAST, LUV, and ARWR. It is not used by the active free provider.
 
 ## Install and configure
 
@@ -58,7 +60,7 @@ The archive and all API caches live under `.cache/soe` and are excluded from the
 
 ## Cache and resilience
 
-Configured lifetimes are: universe 24h, OHLCV 6h, price 15m, fundamentals 24h, estimates 12h, calendar 6h, and regime 15m. The SEC bulk archive is a nightly operator refresh. Calls use bounded concurrency, retry/backoff, rate-limit handling, timeouts, atomic cache writes, and structured errors. One provider or ticker failure cannot terminate the scan.
+Configured lifetimes are: universe 24h, OHLCV 6h, price 15m, fundamentals 24h, estimates 12h, calendar 6h, and regime 15m. The SEC bulk archive is a nightly operator refresh. Calls use caching, retry/backoff, rate-limit handling, timeouts, atomic cache writes, and structured errors. One provider or ticker failure cannot terminate the scan.
 
 ## Run
 
@@ -79,7 +81,7 @@ Endpoints: `GET /api/v1/health`, `POST /api/v1/scans`, `GET /api/v1/scans/{id}`,
 
 Automatic checks cover impossible percentages, EOD staleness, price/share market-cap inconsistencies, invalid negative fields, SMA mismatches, RSI range, null-to-zero conversion, duplicate tickers, provider symbol mismatches, ADR/common-stock confusion, and possible split discontinuities. Provider and validation errors persist against the scan run.
 
-See `MILESTONE_2_5_REPORT.md` for the original real 5,156-security free-data run. Milestone 2.5B adds forward-EPS enrichment without changing the frozen SOE investment model; a new validation run is required before its effect on candidate qualification is accepted.
+See `MILESTONE_2_5_REPORT.md` for the original real 5,156-security free-data run. The estimate-enrichment layer has since been live-smoke-tested on DELL, AVGO, FAST, LUV, and ARWR and returned usable estimate records for all five, including 30-day EPS revision counts. A new full-market scan is still required before the effect on scanner qualification is accepted.
 
 ## Explicitly deferred
 
