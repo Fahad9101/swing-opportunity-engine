@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
+from pydantic import BaseModel, Field
 
 from app.domain.schemas import EstimateSnapshot, FieldProvenance
 from app.providers.errors import ProviderError
@@ -14,6 +15,20 @@ from app.services.cache_service import JsonFileCache
 YAHOO_QUOTE_SUMMARY = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/{symbol}"
 YAHOO_COOKIE_BOOTSTRAP = "https://fc.yahoo.com"
 YAHOO_CRUMB = "https://query2.finance.yahoo.com/v1/test/getcrumb"
+YAHOO_ANALYST_MODULES = "earningsTrend,financialData"
+
+
+class AnalystValuationReference(BaseModel):
+    ticker: str
+    target_mean_price: float | None = None
+    target_low_price: float | None = None
+    target_high_price: float | None = None
+    analyst_opinions: int | None = None
+    source: str
+    as_of: datetime
+    fetched_at: datetime
+    stale: bool = False
+    field_provenance: dict[str, FieldProvenance] = Field(default_factory=dict)
 
 
 def _raw(value: Any) -> Any:
@@ -27,9 +42,15 @@ def _float(value: Any) -> float | None:
     if value is None:
         return None
     try:
-        return float(value)
+        parsed = float(value)
     except (TypeError, ValueError):
         return None
+    return parsed
+
+
+def _positive_float(value: Any) -> float | None:
+    parsed = _float(value)
+    return parsed if parsed is not None and parsed > 0 else None
 
 
 def _int(value: Any) -> int | None:
@@ -52,6 +73,16 @@ def _period(trend: list[dict[str, Any]], name: str) -> dict[str, Any] | None:
     return next((row for row in trend if row.get("period") == name), None)
 
 
+def _quote_result(payload: dict[str, Any]) -> dict[str, Any] | None:
+    quote_summary = payload.get("quoteSummary")
+    if not isinstance(quote_summary, dict):
+        return None
+    results = quote_summary.get("result")
+    if not isinstance(results, list) or not results or not isinstance(results[0], dict):
+        return None
+    return results[0]
+
+
 def normalize_yahoo_earnings_trend(
     ticker: str,
     payload: dict[str, Any],
@@ -59,13 +90,10 @@ def normalize_yahoo_earnings_trend(
     fetched_at: datetime,
     max_age_hours: int = 48,
 ) -> EstimateSnapshot | None:
-    quote_summary = payload.get("quoteSummary")
-    if not isinstance(quote_summary, dict):
+    result = _quote_result(payload)
+    if result is None:
         return None
-    results = quote_summary.get("result")
-    if not isinstance(results, list) or not results or not isinstance(results[0], dict):
-        return None
-    earnings_trend = results[0].get("earningsTrend")
+    earnings_trend = result.get("earningsTrend")
     if not isinstance(earnings_trend, dict):
         return None
     trend = earnings_trend.get("trend")
@@ -144,13 +172,69 @@ def normalize_yahoo_earnings_trend(
     )
 
 
-class YahooAnalystEstimateProvider:
-    """Key-free prototype adapter for Yahoo Finance analyst estimate data.
+def normalize_yahoo_valuation_reference(
+    ticker: str,
+    payload: dict[str, Any],
+    *,
+    fetched_at: datetime,
+    max_age_hours: int = 48,
+) -> AnalystValuationReference | None:
+    result = _quote_result(payload)
+    if result is None:
+        return None
+    financial_data = result.get("financialData")
+    if not isinstance(financial_data, dict):
+        return None
 
-    Yahoo's public web endpoints are undocumented and provide no production SLA
-    or redistribution grant to this project.  The adapter is isolated and is
-    intended only for SOE prototype validation.  Commercial production must
-    replace or separately license this source.
+    target_mean = _positive_float(financial_data.get("targetMeanPrice"))
+    target_low = _positive_float(financial_data.get("targetLowPrice"))
+    target_high = _positive_float(financial_data.get("targetHighPrice"))
+    analyst_opinions = _int(financial_data.get("numberOfAnalystOpinions"))
+    if analyst_opinions is not None and analyst_opinions < 0:
+        analyst_opinions = None
+    if all(value is None for value in (target_mean, target_low, target_high, analyst_opinions)):
+        return None
+
+    stale = datetime.now(UTC) - fetched_at > timedelta(hours=max_age_hours)
+    source = "Yahoo Finance quoteSummary financialData analyst targets (prototype-only)"
+    provenance: dict[str, FieldProvenance] = {}
+    mapping = {
+        "target_mean_price": (target_mean, "financialData.targetMeanPrice"),
+        "target_low_price": (target_low, "financialData.targetLowPrice"),
+        "target_high_price": (target_high, "financialData.targetHighPrice"),
+        "analyst_opinions": (analyst_opinions, "financialData.numberOfAnalystOpinions"),
+    }
+    for field, (value, raw_field) in mapping.items():
+        if value is not None:
+            provenance[field] = FieldProvenance(
+                source=source,
+                as_of=fetched_at,
+                fetched_at=fetched_at,
+                stale=stale,
+                raw_field=raw_field,
+            )
+
+    return AnalystValuationReference(
+        ticker=ticker,
+        target_mean_price=target_mean,
+        target_low_price=target_low,
+        target_high_price=target_high,
+        analyst_opinions=analyst_opinions,
+        source=source,
+        as_of=fetched_at,
+        fetched_at=fetched_at,
+        stale=stale,
+        field_provenance=provenance,
+    )
+
+
+class YahooAnalystEstimateProvider:
+    """Key-free prototype adapter for Yahoo Finance analyst data.
+
+    The same cached quoteSummary payload supplies estimate/revision data and a
+    separate valuation reference. Yahoo's public web endpoints are undocumented
+    and provide no production SLA or redistribution grant to this project.
+    Commercial production must replace or separately license this source.
     """
 
     name = "yahoo_analyst_prototype"
@@ -187,8 +271,6 @@ class YahooAnalystEstimateProvider:
                 transport=self.transport,
                 follow_redirects=True,
             ) as client:
-                # Yahoo commonly returns a 404 from fc.yahoo.com while setting
-                # the session cookie; the body/status are intentionally ignored.
                 try:
                     await client.get(YAHOO_COOKIE_BOOTSTRAP)
                 except httpx.HTTPError:
@@ -212,7 +294,7 @@ class YahooAnalystEstimateProvider:
         endpoint = YAHOO_QUOTE_SUMMARY.format(symbol=ticker)
         for attempt in range(self.retries + 1):
             params = {
-                "modules": "earningsTrend",
+                "modules": YAHOO_ANALYST_MODULES,
                 "formatted": "false",
                 "lang": "en-US",
                 "region": "US",
@@ -259,16 +341,28 @@ class YahooAnalystEstimateProvider:
                 raise ProviderError(self.name, "PUBLIC_ESTIMATE_DATA_UNAVAILABLE", "Yahoo analyst estimate request failed.", retryable=True, ticker=ticker, endpoint=endpoint) from exc
         raise AssertionError("unreachable")
 
-    async def get_estimates(self, ticker: str) -> EstimateSnapshot | None:
+    async def _payload(self, ticker: str) -> tuple[dict[str, Any], datetime]:
         ttl = self.rules["data_quality"]["cache_ttl_seconds"]["estimates"]
-        cache_key = f"yahoo-analyst:{ticker}"
+        cache_key = f"yahoo-analyst-v2:{ticker}"
         cached = self.cache.get_entry(cache_key)
         if cached is not None:
-            payload, fetched_at = cached.data, cached.created_at
-        else:
-            payload, fetched_at = await self._request(ticker)
-            self.cache.set(cache_key, payload, ttl, created_at=fetched_at)
+            return cached.data, cached.created_at
+        payload, fetched_at = await self._request(ticker)
+        self.cache.set(cache_key, payload, ttl, created_at=fetched_at)
+        return payload, fetched_at
+
+    async def get_estimates(self, ticker: str) -> EstimateSnapshot | None:
+        payload, fetched_at = await self._payload(ticker)
         return normalize_yahoo_earnings_trend(
+            ticker,
+            payload,
+            fetched_at=fetched_at,
+            max_age_hours=self.rules["data_quality"]["staleness_hours"]["estimates"],
+        )
+
+    async def get_valuation_reference(self, ticker: str) -> AnalystValuationReference | None:
+        payload, fetched_at = await self._payload(ticker)
+        return normalize_yahoo_valuation_reference(
             ticker,
             payload,
             fetched_at=fetched_at,

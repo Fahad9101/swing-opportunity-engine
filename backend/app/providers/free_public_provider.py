@@ -14,6 +14,7 @@ from app.providers.sec_edgar import SecEdgarProvider
 from app.providers.symbol_directory import NasdaqSymbolDirectory
 from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
 from app.providers.yahoo_ownership import OwnershipSnapshot, YahooOwnershipProvider
+from app.services.valuation_service import enrich_fundamental_valuation
 
 
 def _is_biotech(sector: str | None, industry: str | None) -> bool:
@@ -130,7 +131,11 @@ class FreePublicProvider:
         return list(deduplicated.values())
 
     async def prefetch_market_data(self, instruments: list[Instrument]) -> None:
-        await self.market.prefetch(["SPY", "QQQ", "IWM", *[item.ticker for item in instruments]])
+        # Yahoo chart uses the same 2-year response range for technical history.
+        # Keep 520 sessions in cache so Milestone 2.5G can reuse the same request
+        # for historical self-relative valuation rather than making a second
+        # per-ticker market-data call.
+        await self.market.prefetch(["SPY", "QQQ", "IWM", *[item.ticker for item in instruments]], sessions=520)
         self.provider_errors.extend(self.market.errors)
         self.market.errors.clear()
 
@@ -141,12 +146,57 @@ class FreePublicProvider:
         fundamental = await self.sec.get_fundamentals(ticker)
         if fundamental is None:
             return None
+
         try:
             ownership = await self.ownership.get_ownership(ticker)
         except ProviderError as exc:
             self._record(exc)
             ownership = None
-        return merge_ownership_into_fundamentals(fundamental, ownership)
+        fundamental = merge_ownership_into_fundamentals(fundamental, ownership)
+
+        # Valuation requires instrument classification so the adapter can avoid
+        # generic historical-multiple treatment for biotech, ADRs and REIT-like
+        # real-estate names. Direct unit tests that bypass list_instruments()
+        # therefore retain the valid SEC/ownership record without enrichment.
+        instrument = self._instruments.get(ticker)
+        if instrument is None:
+            return fundamental
+
+        is_biotech = instrument.is_biotech
+        is_adr = instrument.asset_type == AssetType.ADR
+        sector = (instrument.sector or "").strip().lower()
+        is_real_estate = sector == "real estate"
+        is_financial = sector in {"finance", "financials", "financial services"}
+
+        # Biotech remains outside conventional Buffett-style historical multiple
+        # valuation; ADR share-ratio ambiguity and REIT/real-estate FFO gaps are
+        # also left unavailable rather than forcing a misleading generic metric.
+        allow_historical = not is_biotech and not is_adr and not is_real_estate
+        allow_sales_fallback = allow_historical and not is_financial
+
+        reference = None
+        if not is_biotech:
+            try:
+                reference = await self.analyst.get_valuation_reference(ticker)
+            except ProviderError as exc:
+                self._record(exc)
+
+        valuation_bars: list[OHLCVBar] = []
+        if allow_historical or reference is not None:
+            try:
+                valuation_bars = await self.market.get_ohlcv(ticker, 520)
+            except ProviderError as exc:
+                self._record(exc)
+
+        if valuation_bars:
+            fundamental = enrich_fundamental_valuation(
+                fundamental,
+                valuation_bars,
+                reference,
+                allow_historical=allow_historical,
+                allow_sales_fallback=allow_sales_fallback,
+            )
+        return fundamental
 
     async def get_estimates(self, ticker: str) -> EstimateSnapshot | None:
         return await self.analyst.get_estimates(ticker)

@@ -66,6 +66,7 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
             penalties = build_penalties(fundamental.raw.get("penalty_flags", []), rules) if fundamental else []
             penalty_points = sum(item.points for item in penalties)
             scores: dict[str, Any] | None = None
+            valuation_component = score_valuation(fundamental) if fundamental else None
             if qualified:
                 fundamental_component = (
                     score_biotech_fundamentals(fundamental)
@@ -75,7 +76,7 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
                 components = {
                     "catalyst": score_catalyst(catalysts or []),
                     "fundamental": fundamental_component,
-                    "valuation": score_valuation(fundamental),
+                    "valuation": valuation_component,
                     "technical": score_technical(market, rules),
                     "revisions": score_revisions(estimates),
                     "balance_sheet": score_balance_sheet(instrument, fundamental),
@@ -98,6 +99,8 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
                     "company": instrument.company_name,
                     "market_cap": instrument.market_cap,
                     "is_biotech": instrument.is_biotech,
+                    "asset_type": instrument.asset_type.value,
+                    "sector": instrument.sector,
                     "gate": {"passed": gate.passed, "rejection_codes": gate.rejection_codes},
                     "market": {
                         "price": market.price,
@@ -117,8 +120,13 @@ async def audit(tickers: tuple[str, ...] = DEFAULT_TICKERS) -> list[dict[str, An
                         "cash_runway_months": fundamental.cash_runway_months,
                         "institutional_ownership": fundamental.institutional_ownership,
                         "short_float": fundamental.short_float,
+                        "valuation_discount": fundamental.valuation_discount,
+                        "fundamental_undervaluation": fundamental.fundamental_undervaluation,
+                        "expected_swing_upside": fundamental.expected_swing_upside,
+                        "valuation_diagnostics": fundamental.raw.get("valuation"),
                         "penalty_flags": fundamental.raw.get("penalty_flags", []),
                     },
+                    "valuation_score": _score_dump(valuation_component) if valuation_component else None,
                     "estimates": None if estimates is None else {
                         "forward_eps_growth": estimates.forward_eps_growth,
                         "eps_up_revisions": estimates.eps_up_revisions,
@@ -148,6 +156,9 @@ def main() -> None:
         raise SystemExit("Targeted live scanner audit failed: fewer than three sample tickers passed the universal gate with usable real data.")
     if not all(row.get("fundamental", {}).get("institutional_ownership") is not None for row in usable):
         raise SystemExit("Targeted live scanner audit failed: ownership enrichment did not reach every usable sample fundamental record.")
+    conventional = [row for row in usable if not row.get("is_biotech") and row.get("asset_type") == "COMMON_STOCK"]
+    if not any(row.get("fundamental", {}).get("expected_swing_upside") is not None for row in conventional):
+        raise SystemExit("Targeted live scanner audit failed: no conventional sample received a free/public expected-upside proxy.")
 
 
 if __name__ == "__main__":
