@@ -120,6 +120,9 @@ def classify_guidance(
             rule_path="guidance_v1_1.unverified_evidence_only",
         )
 
+    # Explicit negative management actions are sufficient on their own. The
+    # extractor is responsible for verifying that LOWER/WITHDRAW is guidance-
+    # local rather than ordinary prose such as "lower costs".
     explicit_negative = [
         item
         for item in current_verified
@@ -155,8 +158,14 @@ def classify_guidance(
             sources=_unique_sources([], policy),
         )
 
-    current_map = _latest_by_key(current_verified)
-    prior_map = _latest_by_key(prior_verified)
+    # Qualitative RAISE/REAFFIRM facts with no numeric midpoint are useful
+    # corroboration, but they are not an additional quantitative metric that
+    # must have its own prior midpoint. Completeness is judged on the current
+    # quantitative guidance set only.
+    current_quantitative = [item for item in current_verified if item.midpoint is not None]
+    prior_quantitative = [item for item in prior_verified if item.midpoint is not None]
+    current_map = _latest_by_key(current_quantitative)
+    prior_map = _latest_by_key(prior_quantitative)
     current_records = list(current_map.values())
     prior_records = list(prior_map.values())
 
@@ -278,10 +287,20 @@ def classify_guidance(
             small_cuts.append(result)
 
     enough_small_cuts = len({item.metric for item in small_cuts}) >= int(small["minimum_cut_metrics"])
-    positive_action_conflict = any(
-        item.explicit_action in {GuidanceAction.RAISE, GuidanceAction.REAFFIRM}
+
+    # A narrative raise/reaffirm only conflicts with a numeric cut when both
+    # refer to the same primary metric and fiscal period. A revenue raise must
+    # not neutralize or conflict with an EPS cut, and a quarterly action must
+    # not conflict with a full-year comparison.
+    positive_scopes = {
+        (item.metric, item.fiscal_period)
         for item in current_verified
-    ) and (bool(material_cuts) or enough_small_cuts)
+        if item.explicit_action in {GuidanceAction.RAISE, GuidanceAction.REAFFIRM}
+    }
+    cut_scopes = {(item.metric, item.fiscal_period) for item in material_cuts}
+    if enough_small_cuts:
+        cut_scopes.update((item.metric, item.fiscal_period) for item in small_cuts)
+    positive_action_conflict = bool(positive_scopes & cut_scopes)
     if positive_action_conflict:
         return _unknown(
             ticker,
@@ -289,7 +308,7 @@ def classify_guidance(
             current_records,
             prior_records,
             as_of=as_of,
-            reasons=["Primary-source action language conflicts with the comparable numeric guidance table."],
+            reasons=["Primary-source action language conflicts with the comparable numeric guidance table for the same metric/period."],
             metric_deltas=deltas,
             policy=policy,
             rule_path="guidance_v1_1.conflicting_primary_evidence",
@@ -340,7 +359,7 @@ def classify_guidance(
             prior_records,
             as_of=as_of,
             reasons=[
-                "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+                "At least one current quantitative non-initiated guidance metric lacks a verified comparable prior record."
             ],
             metric_deltas=deltas,
             policy=policy,
@@ -353,7 +372,7 @@ def classify_guidance(
             current_records,
             prior_records,
             as_of=as_of,
-            reasons=["No comparable prior/current guidance metric pair is available."],
+            reasons=["No comparable prior/current quantitative guidance metric pair is available."],
             metric_deltas=deltas,
             policy=policy,
             rule_path="guidance_v1_1.no_comparable_prior",
@@ -371,7 +390,7 @@ def classify_guidance(
         guidance_deterioration=False,
         rule_path="guidance_v1_1.comparable_set_within_tolerance",
         reasons=[
-            "All verified comparable current guidance metrics remain within frozen non-deterioration tolerances or are higher."
+            "All verified comparable current quantitative guidance metrics remain within frozen non-deterioration tolerances or are higher."
         ],
         sources=_unique_sources(current_records + prior_records, policy),
     )
