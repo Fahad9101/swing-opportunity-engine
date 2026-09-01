@@ -49,7 +49,7 @@ _METRIC_ALIASES: list[tuple[GuidanceMetric, tuple[str, ...]]] = [
             "eps",
         ),
     ),
-    (GuidanceMetric.REVENUE, ("consolidated revenue", "net sales", "revenue", "sales")),
+    (GuidanceMetric.REVENUE, ("total revenue", "consolidated revenue", "net sales", "revenue", "sales")),
 ]
 
 _GUIDANCE_NOUN = r"(?:guidance|outlook|forecast|financial\s+targets?|targets?)"
@@ -57,6 +57,18 @@ _GUIDANCE_HINT = re.compile(
     rf"\b(?:guidance|outlook|forecast|financial\s+targets?|reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|"
     rf"rais(?:e|es|ed|ing)|lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?|"
     rf"expects?|anticipat(?:e|es|ed|ing)|project(?:s|ed|ing)|target(?:s|ed|ing)?)\b",
+    re.I,
+)
+_FORWARD_CONTEXT = re.compile(
+    rf"\b(?:{_GUIDANCE_NOUN}|expects?|anticipat(?:e|es|ed|ing)|project(?:s|ed|ing)|estimat(?:e|es|ed|ing))\b",
+    re.I,
+)
+_ACTUAL_MARKER = re.compile(
+    r"\b(?:reported|achieved|was|were|grew|increased|decreased|compared\s+(?:with|to)|results?)\b",
+    re.I,
+)
+_UNSUPPORTED_REVENUE = re.compile(
+    r"\b(?:annual\s+recurring|subscription|segment|product|service|services)\s+revenue\b",
     re.I,
 )
 
@@ -123,7 +135,7 @@ def html_to_text(content: str) -> str:
 
 
 def _segments(text: str) -> Iterable[str]:
-    """Yield sentence/line segments plus short sliding windows for HTML tables."""
+    """Yield sentence/line segments plus bounded sliding windows for HTML tables."""
     normalized = text.replace("\xa0", " ")
     raw_lines = [re.sub(r"[ \t]+", " ", line).strip() for line in re.split(r"[\r\n]+", normalized)]
     lines = [line for line in raw_lines if line]
@@ -151,11 +163,20 @@ def _segments(text: str) -> Iterable[str]:
                 yield joined
 
 
+def _unsupported_revenue_mention(segment: str, start: int, end: int) -> bool:
+    window = segment[max(0, start - 48) : min(len(segment), end + 12)]
+    if _UNSUPPORTED_REVENUE.search(window):
+        return True
+    return bool(re.search(r"\bARR\s+(?:growth\s+)?(?:guidance|outlook|target)", window, re.I))
+
+
 def _metric_mentions(segment: str) -> list[_MetricMention]:
     raw: list[_MetricMention] = []
     for metric, aliases in _METRIC_ALIASES:
         for alias in sorted(aliases, key=len, reverse=True):
             for match in re.finditer(rf"\b{re.escape(alias)}\b", segment, re.I):
+                if metric is GuidanceMetric.REVENUE and _unsupported_revenue_mention(segment, match.start(), match.end()):
+                    continue
                 raw.append(_MetricMention(metric, alias, match.start(), match.end()))
     raw.sort(key=lambda item: (item.start, -(item.end - item.start)))
     non_overlapping: list[_MetricMention] = []
@@ -175,19 +196,11 @@ def _metric_mentions(segment: str) -> list[_MetricMention]:
     return result
 
 
-def _guidance_context(segment: str) -> bool:
-    if re.search(rf"\b{_GUIDANCE_NOUN}\b", segment, re.I):
-        return True
-    return bool(
-        re.search(
-            r"\b(?:expects?|anticipat(?:e|es|ed|ing)|project(?:s|ed|ing)|estimat(?:e|es|ed|ing))\b",
-            segment,
-            re.I,
-        )
-    )
+def _guidance_context(text: str) -> bool:
+    return bool(_FORWARD_CONTEXT.search(text))
 
 
-def _action(segment: str) -> GuidanceAction:
+def _action(text: str) -> GuidanceAction:
     """Return an explicit management guidance action, not ordinary growth language."""
     action_specs: list[tuple[GuidanceAction, str]] = [
         (GuidanceAction.WITHDRAW, r"(?:withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?)"),
@@ -197,13 +210,13 @@ def _action(segment: str) -> GuidanceAction:
         (GuidanceAction.INITIATE, r"(?:initiat(?:e|es|ed|ing)|provid(?:e|es|ed|ing)|issu(?:e|es|ed|ing))"),
     ]
     for action, verb in action_specs:
-        if re.search(rf"\b{verb}\b.{{0,140}}\b{_GUIDANCE_NOUN}\b", segment, re.I | re.S) or re.search(
-            rf"\b{_GUIDANCE_NOUN}\b.{{0,140}}\b{verb}\b", segment, re.I | re.S
+        if re.search(rf"\b{verb}\b.{{0,140}}\b{_GUIDANCE_NOUN}\b", text, re.I | re.S) or re.search(
+            rf"\b{_GUIDANCE_NOUN}\b.{{0,140}}\b{verb}\b", text, re.I | re.S
         ):
             return action
-    if re.search(r"\b(?:we|company|management|[A-Z][A-Za-z&'.-]+)\s+expects?\b", segment, re.I) or re.search(
+    if re.search(r"\b(?:we|company|management)\s+expects?\b", text, re.I) or re.search(
         r"\bexpects?\s+(?:revenue|net\s+sales|adjusted|gaap|ebitda|free\s+cash\s+flow|operating\s+margin|gross\s+margin)",
-        segment,
+        text,
         re.I,
     ):
         return GuidanceAction.INITIATE
@@ -253,7 +266,7 @@ def _period_for_metric(segment: str, metric_start: int) -> str | None:
     mentions = _period_mentions(segment)
     if not mentions:
         return None
-    preceding = [item for item in mentions if item.start <= metric_start and metric_start - item.end <= 320]
+    preceding = [item for item in mentions if item.start <= metric_start and metric_start - item.end <= 600]
     if preceding:
         return max(preceding, key=lambda item: item.end).label
     following = [item for item in mentions if item.start >= metric_start and item.start - metric_start <= 240]
@@ -262,10 +275,10 @@ def _period_for_metric(segment: str, metric_start: int) -> str | None:
     return None
 
 
-def _accounting_basis(segment: str, mention: _MetricMention) -> str:
+def _accounting_basis(text: str, mention: _MetricMention) -> str:
     if mention.metric == GuidanceMetric.REVENUE:
         return "UNSPECIFIED"
-    window = segment[max(0, mention.start - 55) : min(len(segment), mention.end + 35)].lower()
+    window = text[max(0, mention.start - 55) : min(len(text), mention.end + 45)].lower()
     alias = mention.alias.lower()
     if "adjusted" in alias or "non-gaap" in window or "non gaap" in window or "adjusted" in window:
         return "ADJUSTED"
@@ -381,19 +394,29 @@ def _metric_clause(segment: str, mentions: list[_MetricMention], index: int) -> 
     mention = mentions[index]
     previous_end = mentions[index - 1].end if index > 0 else 0
     next_start = mentions[index + 1].start if index + 1 < len(mentions) else len(segment)
-    left = max(previous_end, mention.start - 100)
+    left = max(previous_end, mention.start - 180)
     right = min(next_start, mention.end + 260) if index + 1 < len(mentions) else min(len(segment), mention.end + 260)
     if right <= mention.end:
-        right = min(len(segment), mention.end + 120)
+        right = min(len(segment), mention.end + 140)
     clause = segment[left:right]
     return clause, mention.start - left
+
+
+def _table_header_guidance_context(segment: str, mention: _MetricMention) -> bool:
+    prefix = segment[max(0, mention.start - 500) : mention.start]
+    return bool(re.search(rf"\b{_GUIDANCE_NOUN}\b", prefix, re.I))
+
+
+def _actual_only_clause(clause: str) -> bool:
+    return bool(_ACTUAL_MARKER.search(clause)) and not _guidance_context(clause)
 
 
 def extract_guidance_facts(document: SourceDocument, *, rules_hash: str) -> GuidanceExtractionResult:
     """Conservative deterministic primary-source text-to-fact extraction.
 
-    The extractor may structure facts, but it never decides whether guidance is
-    deteriorated and never assigns an SOE score. Ambiguous facts are rejected.
+    The extractor structures primary-source facts only. It never decides whether
+    guidance deteriorated and never assigns an SOE score. Ambiguous facts are
+    rejected rather than converted into favorable values.
     """
     text = html_to_text(document.content or "")
     records: list[GuidanceMetricRecord] = []
@@ -423,41 +446,47 @@ def extract_guidance_facts(document: SourceDocument, *, rules_hash: str) -> Guid
         mentions = _metric_mentions(segment)
         if not mentions:
             continue
-        action = _action(segment)
-        if not _guidance_context(segment) and action == GuidanceAction.NONE:
-            continue
 
         for index, mention in enumerate(mentions):
+            clause, anchor = _metric_clause(segment, mentions, index)
+            local_action = _action(clause)
+            local_context = _guidance_context(clause) or _table_header_guidance_context(segment, mention)
+            if not local_context and local_action == GuidanceAction.NONE:
+                continue
+            if _actual_only_clause(clause) and local_action == GuidanceAction.NONE:
+                continue
+
             period = _period_for_metric(segment, mention.start)
             if period is None:
                 rejected.append(
-                    {"reason": "missing_fiscal_period", "metric": mention.metric.value, "segment": segment[:400]}
+                    {"reason": "missing_fiscal_period", "metric": mention.metric.value, "segment": clause[:400]}
                 )
                 continue
-            clause, anchor = _metric_clause(segment, mentions, index)
+
             numeric = _numeric_range(clause, mention.metric, anchor=anchor)
-            if numeric is None and action not in {
+            if numeric is None and local_action not in {
                 GuidanceAction.WITHDRAW,
                 GuidanceAction.REAFFIRM,
                 GuidanceAction.LOWER,
                 GuidanceAction.RAISE,
             }:
                 rejected.append(
-                    {"reason": "missing_numeric_guidance", "metric": mention.metric.value, "segment": segment[:400]}
+                    {"reason": "missing_numeric_guidance", "metric": mention.metric.value, "segment": clause[:400]}
                 )
                 continue
+
             low = high = None
             unit = "UNKNOWN"
             if numeric is not None:
                 low, high, unit = numeric
-            basis = _accounting_basis(segment, mention)
+            basis = _accounting_basis(clause, _MetricMention(mention.metric, mention.alias, anchor, anchor + len(mention.alias)))
             key = (
                 mention.metric.value,
                 period,
                 basis,
                 low,
                 high,
-                action.value,
+                local_action.value,
                 document.source_timestamp.isoformat(),
             )
             if key in seen:
@@ -477,10 +506,10 @@ def extract_guidance_facts(document: SourceDocument, *, rules_hash: str) -> Guid
                     source_url=document.source_url,
                     source_accession=document.accession,
                     source_timestamp=document.source_timestamp,
-                    explicit_action=action,
+                    explicit_action=local_action,
                     verified=True,
                     extraction_method=ExtractionMethod.DETERMINISTIC_TEXT,
-                    evidence_span=segment[:1000],
+                    evidence_span=clause[:1000],
                     source_document_hash=document.content_hash,
                     as_of=document.source_timestamp,
                     fetched_at=now,
