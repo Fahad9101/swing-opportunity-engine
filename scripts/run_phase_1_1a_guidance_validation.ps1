@@ -2,6 +2,7 @@ param(
     [string]$SecUserAgent = "",
     [string]$SecContactEmail = "",
     [string]$Tickers = "",
+    [ValidateRange(14, 48)][int]$MaxFilings = 32,
     [switch]$SkipInstall,
     [switch]$SkipTests
 )
@@ -85,12 +86,13 @@ foreach ($Output in @($JsonOut, $MarkdownOut, $LogOut)) {
 }
 
 Write-Host "`n=== Run Phase 1.1A targeted SEC guidance validation ==="
+Write-Host "Historical SEC filing depth per ticker: $MaxFilings (validation backfill only; SOE rules unchanged)"
 $RunnerBat = Join-Path $env:TEMP "soe_phase_1_1a_guidance_validation.cmd"
 $TickerArg = ""
 if (-not [string]::IsNullOrWhiteSpace($Tickers)) { $TickerArg = " --tickers `"$Tickers`"" }
 @"
 @echo off
-"$Python" -m app.cli_guidance_validation --output-dir "$ResultsDir"$TickerArg 2>&1
+"$Python" -m app.cli_guidance_validation --output-dir "$ResultsDir" --max-filings $MaxFilings$TickerArg 2>&1
 exit /b %ERRORLEVEL%
 "@ | Set-Content -Path $RunnerBat -Encoding ASCII
 
