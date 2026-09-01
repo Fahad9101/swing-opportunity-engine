@@ -122,13 +122,7 @@ def html_to_text(content: str) -> str:
 
 
 def _segments(text: str) -> Iterable[str]:
-    """Yield sentence/line segments plus short sliding windows for HTML tables.
-
-    Earnings releases frequently encode a guidance table as many individual HTML
-    cells. The old line-only parser lost the relationship between a table header,
-    metric and value. Short windows rebuild that local context without treating
-    an entire filing as one sentence.
-    """
+    """Yield sentence/line segments plus short sliding windows for HTML tables."""
     normalized = text.replace("\xa0", " ")
     raw_lines = [re.sub(r"[ \t]+", " ", line).strip() for line in re.split(r"[\r\n]+", normalized)]
     lines = [line for line in raw_lines if line]
@@ -141,8 +135,6 @@ def _segments(text: str) -> Iterable[str]:
                 yielded.add(cleaned)
                 yield cleaned
 
-    # Up to six adjacent HTML text nodes is enough to reconstruct ordinary
-    # earnings-release guidance tables while bounding false context carry-over.
     for index in range(len(lines)):
         parts: list[str] = []
         for offset in range(6):
@@ -164,14 +156,24 @@ def _metric_mentions(segment: str) -> list[_MetricMention]:
         for alias in sorted(aliases, key=len, reverse=True):
             for match in re.finditer(rf"\b{re.escape(alias)}\b", segment, re.I):
                 raw.append(_MetricMention(metric, alias, match.start(), match.end()))
-    # Prefer the longest alias when aliases overlap (e.g. "adjusted EPS" vs "EPS").
     raw.sort(key=lambda item: (item.start, -(item.end - item.start)))
-    result: list[_MetricMention] = []
+    non_overlapping: list[_MetricMention] = []
     for item in raw:
-        if any(not (item.end <= chosen.start or item.start >= chosen.end) for chosen in result):
+        if any(not (item.end <= chosen.start or item.start >= chosen.end) for chosen in non_overlapping):
             continue
+        non_overlapping.append(item)
+    non_overlapping.sort(key=lambda item: item.start)
+
+    # SEC prose often spells out a metric and immediately repeats its acronym,
+    # e.g. "diluted earnings per common share (EPS)". Treat that as one mention.
+    result: list[_MetricMention] = []
+    for item in non_overlapping:
+        if result and result[-1].metric == item.metric:
+            connector = segment[result[-1].end : item.start]
+            if len(connector) <= 14 and re.fullmatch(r"[\s()\[\]“”\"'.,:/-]*", connector):
+                continue
         result.append(item)
-    return sorted(result, key=lambda item: item.start)
+    return result
 
 
 def _guidance_context(segment: str) -> bool:
@@ -200,8 +202,6 @@ def _action(segment: str) -> GuidanceAction:
             rf"\b{_GUIDANCE_NOUN}\b.{{0,140}}\b{verb}\b", segment, re.I | re.S
         ):
             return action
-    # "expects" is a legitimate initiation/continuation fact, but unlike
-    # "increased" it is intrinsically forward-looking.
     if re.search(r"\b(?:we|company|management|[A-Z][A-Za-z&'.-]+)\s+expects?\b", segment, re.I) or re.search(
         r"\bexpects?\s+(?:revenue|net\s+sales|adjusted|gaap|ebitda|free\s+cash\s+flow|operating\s+margin|gross\s+margin)",
         segment,
@@ -242,7 +242,6 @@ def _period_mentions(segment: str) -> list[_PeriodMention]:
     for pattern in _PERIOD_PATTERNS:
         for match in pattern.finditer(segment):
             mentions.append(_PeriodMention(f"FY{int(match.group(1))}", match.start(), match.end(), False))
-    # Deduplicate overlapping full-year mentions swallowed by quarter phrases.
     result: list[_PeriodMention] = []
     for item in sorted(mentions, key=lambda value: (value.start, not value.quarterly, value.end)):
         if any(item.start >= existing.start and item.end <= existing.end and existing.quarterly for existing in result):
@@ -257,8 +256,6 @@ def _period_for_metric(segment: str, metric_start: int) -> str | None:
         return None
     preceding = [item for item in mentions if item.start <= metric_start and metric_start - item.end <= 320]
     if preceding:
-        # The nearest preceding header governs a table metric. This deliberately
-        # chooses Q3 FY27 over a later full-year section in the same table row.
         return max(preceding, key=lambda item: item.end).label
     following = [item for item in mentions if item.start >= metric_start and item.start - metric_start <= 240]
     if following:
@@ -292,14 +289,17 @@ def _distance(candidate: _NumericCandidate, anchor: int) -> int:
 
 
 def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[float, float, str] | None:
-    candidates: list[_NumericCandidate] = []
+    ranges: list[_NumericCandidate] = []
+    singles: list[_NumericCandidate] = []
+    qualifier = r"(?:approximately|about|around|at\s+least|greater\s+than|more\s+than|of(?:\s+approximately)?|at|to(?:\s+approximately)?|is(?:\s+approximately)?)"
+
     if metric in {GuidanceMetric.GROSS_MARGIN, GuidanceMetric.OPERATING_MARGIN}:
         for match in re.finditer(
             r"(?P<low>\d{1,3}(?:\.\d+)?)\s*%\s*(?:to|through|-|–|—)\s*(?P<high>\d{1,3}(?:\.\d+)?)\s*%",
             text,
             re.I,
         ):
-            candidates.append(
+            ranges.append(
                 _NumericCandidate(
                     float(match.group("low")) / 100,
                     float(match.group("high")) / 100,
@@ -308,13 +308,9 @@ def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[f
                     match.end(),
                 )
             )
-        for match in re.finditer(
-            r"(?:approximately|about|around|at\s+least|greater\s+than|more\s+than|of|at|to|is)\s*(?P<value>\d{1,3}(?:\.\d+)?)\s*%",
-            text,
-            re.I,
-        ):
+        for match in re.finditer(rf"{qualifier}\s*(?P<value>\d{{1,3}}(?:\.\d+)?)\s*%", text, re.I):
             value = float(match.group("value")) / 100
-            candidates.append(_NumericCandidate(value, value, "fraction", match.start(), match.end()))
+            singles.append(_NumericCandidate(value, value, "fraction", match.start(), match.end()))
     elif metric == GuidanceMetric.EPS:
         for match in re.finditer(
             r"\$?\s*(?P<low>-?\d+(?:\.\d+)?)\s*(?:to|through|-|–|—)\s*\$?\s*(?P<high>-?\d+(?:\.\d+)?)(?!\s*%)",
@@ -323,19 +319,13 @@ def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[f
         ):
             if "%" in match.group(0):
                 continue
-            candidates.append(
+            ranges.append(
                 _NumericCandidate(float(match.group("low")), float(match.group("high")), "USD/share", match.start(), match.end())
             )
-        for match in re.finditer(
-            r"(?:approximately|about|around|at\s+least|greater\s+than|more\s+than|of|at|to|is)\s*\$\s*(?P<value>-?\d+(?:\.\d+)?)(?!\s*%)",
-            text,
-            re.I,
-        ):
+        for match in re.finditer(rf"{qualifier}\s*\$\s*(?P<value>-?\d+(?:\.\d+)?)(?!\s*%)", text, re.I):
             value = float(match.group("value"))
-            candidates.append(_NumericCandidate(value, value, "USD/share", match.start(), match.end()))
+            singles.append(_NumericCandidate(value, value, "USD/share", match.start(), match.end()))
     else:
-        # Revenue/EBITDA/FCF are monetary metrics. Require an explicit dollar
-        # sign or magnitude word; plain percentages/headcounts are not dollars.
         for match in re.finditer(
             r"(?P<d1>\$)?\s*(?P<low>\d[\d,]*(?:\.\d+)?)\s*(?P<scale1>billion|million|thousand|bn|mm|[bmk])?"
             r"\s*(?:to|through|-|–|—)\s*(?P<d2>\$)?\s*(?P<high>\d[\d,]*(?:\.\d+)?)\s*(?P<scale2>billion|million|thousand|bn|mm|[bmk])?",
@@ -352,10 +342,9 @@ def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[f
             low = _amount(match.group("low"), scale1 or shared_scale)
             high = _amount(match.group("high"), scale2 or shared_scale)
             if low <= high:
-                candidates.append(_NumericCandidate(low, high, "USD", match.start(), match.end()))
+                ranges.append(_NumericCandidate(low, high, "USD", match.start(), match.end()))
         for match in re.finditer(
-            r"(?:approximately|about|around|at\s+least|greater\s+than|more\s+than|of|at|to|is)\s*(?P<d>\$)?\s*"
-            r"(?P<value>\d[\d,]*(?:\.\d+)?)\s*(?P<scale>billion|million|thousand|bn|mm|[bmk])?",
+            rf"{qualifier}\s*(?P<d>\$)?\s*(?P<value>\d[\d,]*(?:\.\d+)?)\s*(?P<scale>billion|million|thousand|bn|mm|[bmk])?",
             text,
             re.I,
         ):
@@ -364,11 +353,12 @@ def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[f
             if "%" in match.group(0):
                 continue
             value = _amount(match.group("value"), match.group("scale"))
-            candidates.append(_NumericCandidate(value, value, "USD", match.start(), match.end()))
+            singles.append(_NumericCandidate(value, value, "USD", match.start(), match.end()))
 
-    if not candidates:
+    pool = ranges if ranges else singles
+    if not pool:
         return None
-    chosen = min(candidates, key=lambda item: (_distance(item, anchor), item.start))
+    chosen = min(pool, key=lambda item: (_distance(item, anchor), item.start))
     return chosen.low, chosen.high, chosen.unit
 
 
