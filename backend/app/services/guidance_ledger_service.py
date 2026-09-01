@@ -1,11 +1,73 @@
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Iterable
 
-from app.domain.soe_v1_1 import GuidanceAssessment, GuidanceMetricRecord, GuidancePolicyEvidence
+from app.domain.soe_v1_1 import (
+    GuidanceAction,
+    GuidanceAssessment,
+    GuidanceMetric,
+    GuidanceMetricRecord,
+    GuidancePolicyEvidence,
+)
 from app.services.guidance_classifier import classify_guidance
+
+
+_GUIDANCE_CONTEXT = re.compile(
+    r"\b(?:guidance|outlook|forecast|financial\s+targets?|targets?|expects?|anticipates?|projects?)\b",
+    re.I,
+)
+_ACTUAL_MARKER = re.compile(
+    r"\b(?:reported|achieved|was|were|grew|increased|decreased|compared\s+(?:with|to)|results?)\b",
+    re.I,
+)
+_UNSUPPORTED_REVENUE = re.compile(
+    r"\b(?:annual\s+recurring|subscription|segment|product|service|services)\s+revenue\b",
+    re.I,
+)
+_FORWARD_VERB = re.compile(r"\b(?:expects?|anticipates?|projects?|forecast(?:s|ed|ing)?)\b", re.I)
+
+
+def _assessment_eligible(record: GuidanceMetricRecord) -> bool:
+    """Return whether an extracted fact may participate in guidance assessment.
+
+    Structured/manual records without an evidence span are accepted unchanged.
+    Deterministic text records are screened for primary-metric scope and obvious
+    reported-actual contamination before they can create current/prior pairs.
+    """
+    if not record.verified:
+        return False
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return True
+
+    if record.metric is GuidanceMetric.REVENUE and _UNSUPPORTED_REVENUE.search(text):
+        # SOE-1.1 primary revenue means company-level revenue/net sales, not ARR,
+        # subscription, product, service, or segment revenue.
+        if not re.search(r"\b(?:total|consolidated)\s+revenue\b|\bnet\s+sales\b", text, re.I):
+            return False
+
+    if record.midpoint is None:
+        # Qualitative guidance facts are useful only when an explicit management
+        # action is present in genuine forward-guidance context.
+        return (
+            record.explicit_action
+            in {GuidanceAction.RAISE, GuidanceAction.REAFFIRM, GuidanceAction.LOWER, GuidanceAction.WITHDRAW}
+            and bool(_GUIDANCE_CONTEXT.search(text))
+        )
+
+    if not _GUIDANCE_CONTEXT.search(text):
+        return False
+
+    # A single reported/achieved historical value embedded near a guidance
+    # headline must not become a guidance midpoint. Explicit forward verbs are
+    # the narrow exception for true point guidance such as "expects revenue of".
+    if record.low == record.high and _ACTUAL_MARKER.search(text) and not _FORWARD_VERB.search(text):
+        return False
+
+    return True
 
 
 class GuidanceLedger:
@@ -54,17 +116,17 @@ class GuidanceLedger:
         *,
         as_of: datetime | None = None,
     ) -> tuple[list[GuidanceMetricRecord], list[GuidanceMetricRecord]]:
-        """Return all facts from the latest and prior source timestamps per key.
+        """Return latest and prior assessment-eligible facts per comparison key.
 
-        Multiple same-date facts are intentionally preserved. If they disagree,
-        the deterministic classifier can resolve the evidence to UNKNOWN rather
-        than an arbitrary UUID/order winning the comparison.
+        Raw extracted records remain immutable in the ledger. Evidence-quality
+        filtering occurs only when constructing the assessment view, so rejected
+        facts remain auditable rather than silently deleted.
         """
         as_of = as_of or datetime.now(UTC)
         eligible = [
             item
             for item in self._records
-            if item.ticker == ticker and item.verified and item.source_timestamp <= as_of
+            if item.ticker == ticker and item.source_timestamp <= as_of and _assessment_eligible(item)
         ]
         by_key: dict[tuple[str, str, str], list[GuidanceMetricRecord]] = defaultdict(list)
         for item in eligible:
