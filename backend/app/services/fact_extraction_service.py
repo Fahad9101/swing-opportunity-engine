@@ -89,6 +89,7 @@ _SCALE = {
     "bn": 1_000_000_000.0,
     "billion": 1_000_000_000.0,
 }
+_SCALE_WORD = re.compile(r"\b(?:billion|million|thousand|bn|mm)\b", re.I)
 
 
 class _MetricMention(NamedTuple):
@@ -164,8 +165,6 @@ def _metric_mentions(segment: str) -> list[_MetricMention]:
         non_overlapping.append(item)
     non_overlapping.sort(key=lambda item: item.start)
 
-    # SEC prose often spells out a metric and immediately repeats its acronym,
-    # e.g. "diluted earnings per common share (EPS)". Treat that as one mention.
     result: list[_MetricMention] = []
     for item in non_overlapping:
         if result and result[-1].metric == item.metric:
@@ -288,6 +287,15 @@ def _distance(candidate: _NumericCandidate, anchor: int) -> int:
     return min(abs(candidate.start - anchor), abs(candidate.end - anchor))
 
 
+def _bound_preceding_candidate(text: str, candidate: _NumericCandidate, anchor: int) -> bool:
+    if candidate.end > anchor or anchor - candidate.end > 70:
+        return False
+    connector = text[candidate.end:anchor]
+    if _SCALE_WORD.search(connector):
+        return False
+    return bool(re.search(r"\b(?:in|per|for|as)\b", connector, re.I)) or len(connector.strip()) <= 28
+
+
 def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[float, float, str] | None:
     ranges: list[_NumericCandidate] = []
     singles: list[_NumericCandidate] = []
@@ -358,7 +366,14 @@ def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[f
     pool = ranges if ranges else singles
     if not pool:
         return None
-    chosen = min(pool, key=lambda item: (_distance(item, anchor), item.start))
+    bound_preceding = [item for item in pool if _bound_preceding_candidate(text, item, anchor)]
+    if bound_preceding:
+        chosen = min(bound_preceding, key=lambda item: (_distance(item, anchor), item.start))
+        return chosen.low, chosen.high, chosen.unit
+    forward = [item for item in pool if item.end >= anchor]
+    if not forward:
+        return None
+    chosen = min(forward, key=lambda item: (_distance(item, anchor), item.start))
     return chosen.low, chosen.high, chosen.unit
 
 
