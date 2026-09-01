@@ -13,6 +13,7 @@ from app.domain.soe_v1_1 import SecDocumentReference, SourceDocument
 
 
 SEC_ARCHIVE_ROOT = "https://www.sec.gov/Archives/edgar/data"
+_EXHIBIT_HINT = re.compile(r"(?:^|[-_])(ex(?:hibit)?[-_]?99|ex99|99[._-]?1|earn|release|press)", re.I)
 
 
 def normalize_cik(cik: str | int) -> str:
@@ -29,6 +30,10 @@ def sec_archive_url(cik: str | int, accession: str, document: str) -> str:
     if not accession_compact.isdigit() or not safe_document:
         raise ValueError("Invalid SEC accession or document")
     return f"{SEC_ARCHIVE_ROOT}/{cik_digits}/{accession_compact}/{safe_document}"
+
+
+def filing_index_json_url(cik: str | int, accession: str) -> str:
+    return sec_archive_url(cik, accession, "index.json")
 
 
 def index_submissions_payload(
@@ -110,6 +115,59 @@ class SourceDocumentService:
     def _paths(self, url: str) -> tuple[Path, Path]:
         key = hashlib.sha256(url.encode("utf-8")).hexdigest()
         return self.cache_dir / f"{key}.txt", self.cache_dir / f"{key}.json"
+
+    def _cached_json(self, url: str, *, force: bool = False) -> dict:
+        self._validate_url(url)
+        key = hashlib.sha256(("json|" + url).encode("utf-8")).hexdigest()
+        path = self.cache_dir / f"{key}.json"
+        if not force and path.exists():
+            return json.loads(path.read_text(encoding="utf-8"))
+        response = self.client.get(url)
+        response.raise_for_status()
+        payload = response.json()
+        path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        return payload
+
+    def filing_documents(
+        self,
+        filing: SecDocumentReference,
+        *,
+        max_exhibits: int = 4,
+        force: bool = False,
+    ) -> list[SecDocumentReference]:
+        """Return primary filing plus likely earnings/guidance HTML exhibits.
+
+        SEC directory metadata does not reliably carry exhibit type. To avoid
+        downloading every XBRL rendering, only HTML files with strong exhibit /
+        press-release filename hints are added. The primary document is always
+        retained. No file is treated as guidance merely because it is returned.
+        """
+        payload = self._cached_json(filing_index_json_url(filing.cik, filing.accession), force=force)
+        items = ((payload.get("directory") or {}).get("item") or [])
+        primary_name = filing.primary_document.lower()
+        candidates: list[str] = []
+        for item in items:
+            name = str(item.get("name") or "").strip()
+            lower = name.lower()
+            if not lower.endswith((".htm", ".html")) or lower == primary_name:
+                continue
+            if _EXHIBIT_HINT.search(lower):
+                candidates.append(name)
+        candidates = sorted(dict.fromkeys(candidates))[:max_exhibits]
+        refs = [filing]
+        for name in candidates:
+            refs.append(
+                SecDocumentReference(
+                    ticker=filing.ticker,
+                    cik=filing.cik,
+                    accession=filing.accession,
+                    form=filing.form,
+                    filing_date=filing.filing_date,
+                    primary_document=name,
+                    source_url=sec_archive_url(filing.cik, filing.accession, name),
+                )
+            )
+        return refs
 
     def fetch(self, ref: SecDocumentReference, *, rules_hash: str, force: bool = False) -> SourceDocument:
         self._validate_url(ref.source_url)
