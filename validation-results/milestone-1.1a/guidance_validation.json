@@ -1,13 +1,13 @@
 {
   "default_runtime_model_unchanged": true,
-  "generated_at": "2026-09-01T16:54:37.002417+00:00",
+  "generated_at": "2026-09-01T17:13:09.303340+00:00",
   "model_version": "SOE-1.1.0",
   "phase": "1.1A",
   "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
   "summary": {
-    "classification_coverage_pct": 85.71428571428571,
+    "classification_coverage_pct": 75.0,
     "classified_comparable_names": 6,
-    "error_count": 0,
+    "error_count": 1,
     "exit_gate": "INSUFFICIENT_SAMPLE",
     "non_null_assessments": 6,
     "provenance_complete_pct": 100.0,
@@ -16,13 +16,13 @@
       "At least one current quantitative non-initiated guidance metric lacks a verified comparable prior record.": 1,
       "Comparable guidance reached the frozen material-cut threshold for: eps.": 1,
       "No comparable prior/current quantitative guidance metric pair is available.": 13,
-      "No supported primary-source guidance fact was extracted in the validation window.": 3,
-      "Primary-source action language conflicts with the comparable numeric guidance table for the same metric/period.": 1,
+      "No supported primary-source guidance fact was extracted in the validation window.": 2,
+      "Primary-source action language conflicts with the comparable numeric guidance table for the same metric/period.": 2,
       "Verified explicit management action: LOWER.": 1
     },
     "tickers_attempted": 24,
-    "tickers_with_comparable_guidance": 7,
-    "tickers_with_guidance_records": 21
+    "tickers_with_comparable_guidance": 8,
+    "tickers_with_guidance_records": 22
   },
   "tickers": [
     {
@@ -83,12 +83,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 29,
+      "documents_fetched": 45,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 20,
       "guidance_deterioration": false,
-      "guidance_records": 22,
+      "guidance_records": 30,
       "prior": [
         {
           "action": "NONE",
@@ -172,12 +172,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 25,
+      "documents_fetched": 59,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 31,
       "guidance_deterioration": null,
-      "guidance_records": 6,
+      "guidance_records": 14,
       "prior": [
         {
           "action": "NONE",
@@ -205,8 +205,8 @@
     },
     {
       "cik": "0001327567",
-      "classification": "UNKNOWN",
-      "comparable_pairs": 0,
+      "classification": "NOT_DETERIORATED",
+      "comparable_pairs": 1,
       "current": [
         {
           "action": "INITIATE",
@@ -222,18 +222,33 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 28,
-      "duplicates_removed": 1,
+      "documents_fetched": 57,
+      "duplicates_removed": 4,
       "errors": [],
-      "filings_considered": 14,
-      "guidance_deterioration": null,
-      "guidance_records": 2,
-      "prior": [],
-      "reasons": [
-        "No comparable prior/current quantitative guidance metric pair is available."
+      "filings_considered": 29,
+      "guidance_deterioration": false,
+      "guidance_records": 6,
+      "prior": [
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Remaining performance obligation of $15.4 billion to $15.5 billion, representing year-over-year growth of 23%. \u2022 Total revenue in the range of $2.45 billion to $2.47 billion, representing year-over-year growth of 15%. \u2022 Diluted non-GAAP net income per share in the range of $0.88 to $0.90, using 709 million to 712 million shares outstanding. For the fiscal year 2026, we expect:",
+          "high": 2470000000.0,
+          "low": 2450000000.0,
+          "metric": "revenue",
+          "midpoint": 2460000000.0,
+          "period": "FY2026",
+          "source_timestamp": "2025-08-18T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000024/ex991q425earningsrelease.htm",
+          "unit": "USD"
+        }
       ],
-      "rule_path": "guidance_v1_1.no_comparable_prior",
+      "reasons": [
+        "All verified comparable current quantitative guidance metrics remain within frozen non-deterioration tolerances or are higher."
+      ],
+      "rule_path": "guidance_v1_1.comparable_set_within_tolerance",
       "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1327567/000132756725000024/ex991q425earningsrelease.htm",
         "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000012/ex991q326earningsrelease.htm"
       ],
       "ticker": "PANW"
@@ -257,12 +272,12 @@
           "unit": "UNKNOWN"
         }
       ],
-      "documents_fetched": 23,
+      "documents_fetched": 40,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 26,
       "guidance_deterioration": null,
-      "guidance_records": 6,
+      "guidance_records": 9,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -290,12 +305,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 29,
+      "documents_fetched": 61,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 32,
       "guidance_deterioration": null,
-      "guidance_records": 9,
+      "guidance_records": 12,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -338,12 +353,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 24,
-      "duplicates_removed": 0,
+      "documents_fetched": 56,
+      "duplicates_removed": 17,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 32,
       "guidance_deterioration": null,
-      "guidance_records": 14,
+      "guidance_records": 45,
       "prior": [
         {
           "action": "RAISE",
@@ -372,19 +387,61 @@
       "cik": "0000723125",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
-      "current": [],
-      "documents_fetched": 25,
-      "duplicates_removed": 0,
+      "current": [
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": " guidance for the fourth quarter of fiscal 2025, which ends August 28, 2025. The Company previously provided guidance for revenue of $10.7",
+          "high": 10.7,
+          "low": 10.7,
+          "metric": "revenue",
+          "midpoint": 10.7,
+          "period": "Q4FY2025",
+          "source_timestamp": "2025-08-11T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": " of $2.50 \u00b1 $0.15 for the fourth quarter of fiscal 2025. The Company today updated its guidance for fourth quarter of fiscal 2025 revenue to $11.2 billion \u00b1 $100 million, non-GAAP gross margins to 44.5% \u00b1 0.5%, and non-GAAP ",
+          "high": 11200000000.0,
+          "low": 11200000000.0,
+          "metric": "revenue",
+          "midpoint": 11200000000.0,
+          "period": "Q4FY2025",
+          "source_timestamp": "2025-08-11T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": " guidance for the fourth quarter of fiscal 2025, which ends August 28, 2025. The Company previously provided guidance for revenue of $10.7 billion \u00b1 $300 million, non-GAAP gross margins of 42.0% \u00b1 1.0%, and non-GAAP ",
+          "high": 10700000000.0,
+          "low": 10700000000.0,
+          "metric": "revenue",
+          "midpoint": 10700000000.0,
+          "period": "Q4FY2025",
+          "source_timestamp": "2025-08-11T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm",
+          "unit": "USD"
+        }
+      ],
+      "documents_fetched": 52,
+      "duplicates_removed": 3,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 29,
       "guidance_deterioration": null,
-      "guidance_records": 0,
+      "guidance_records": 5,
       "prior": [],
       "reasons": [
-        "No supported primary-source guidance fact was extracted in the validation window."
+        "No comparable prior/current quantitative guidance metric pair is available."
       ],
-      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
-      "sources": [],
+      "rule_path": "guidance_v1_1.no_comparable_prior",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm"
+      ],
       "ticker": "MU"
     },
     {
@@ -406,12 +463,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 21,
+      "documents_fetched": 41,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 27,
       "guidance_deterioration": null,
-      "guidance_records": 5,
+      "guidance_records": 7,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -467,12 +524,12 @@
           "unit": "UNKNOWN"
         }
       ],
-      "documents_fetched": 29,
-      "duplicates_removed": 0,
+      "documents_fetched": 62,
+      "duplicates_removed": 3,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 32,
       "guidance_deterioration": true,
-      "guidance_records": 8,
+      "guidance_records": 21,
       "prior": [
         {
           "action": "NONE",
@@ -557,12 +614,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 21,
-      "duplicates_removed": 1,
+      "documents_fetched": 50,
+      "duplicates_removed": 3,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 30,
       "guidance_deterioration": false,
-      "guidance_records": 22,
+      "guidance_records": 42,
       "prior": [
         {
           "action": "NONE",
@@ -593,11 +650,11 @@
         {
           "action": "NONE",
           "basis": "UNSPECIFIED",
-          "evidence": " growth in a range around 4 percent compared with 2025 - two percentage points higher than the prior range. The Company continues to expect to grow net sales in every quarter of the year. \u2022 Full-year 2026 operating income margin rate more than 20 basis points higher than the 4.6 percent Adjusted operating income margin rate in 2025.",
-          "high": 20000000000.0,
-          "low": 20000000000.0,
+          "evidence": " near the high end of the prior guidance range of $7.50 to $8.50. Operating Results Net Sales of $25.4 billion in the first quarter were 6.7 percent higher than last year, reflecting a 6.4 percent increase in merchandise ",
+          "high": 8.5,
+          "low": 7.5,
           "metric": "revenue",
-          "midpoint": 20000000000.0,
+          "midpoint": 8.0,
           "period": "FY2026",
           "source_timestamp": "2026-05-20T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/27419/000002741926000020/a2026q1ex-99.htm",
@@ -606,11 +663,11 @@
         {
           "action": "NONE",
           "basis": "UNSPECIFIED",
-          "evidence": " near the high end of the prior guidance range of $7.50 to $8.50. Operating Results Net Sales of $25.4 billion in the first quarter were 6.7 percent higher than last year, reflecting a 6.4 percent increase in merchandise ",
-          "high": 8.5,
-          "low": 7.5,
+          "evidence": " growth in a range around 4 percent compared with 2025 - two percentage points higher than the prior range. The Company continues to expect to grow net sales in every quarter of the year. \u2022 Full-year 2026 operating income margin rate more than 20 basis points higher than the 4.6 percent Adjusted operating income margin rate in 2025.",
+          "high": 20000000000.0,
+          "low": 20000000000.0,
           "metric": "revenue",
-          "midpoint": 8.0,
+          "midpoint": 20000000000.0,
           "period": "FY2026",
           "source_timestamp": "2026-05-20T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/27419/000002741926000020/a2026q1ex-99.htm",
@@ -646,12 +703,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 34,
+      "documents_fetched": 51,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 22,
       "guidance_deterioration": null,
-      "guidance_records": 21,
+      "guidance_records": 36,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -670,19 +727,6 @@
         {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
-          "evidence": " by approximately 25 basis points for the second quarter of fiscal 2026. Our comparable sales results reflect customer engagement with smaller repair and maintenance projects, despite the impact of consumer uncertainty and housing affordability pressure on home improvement demand.",
-          "high": 25000000000.0,
-          "low": 25000000000.0,
-          "metric": "revenue",
-          "midpoint": 25000000000.0,
-          "period": "Q2FY2026",
-          "source_timestamp": "2026-08-25T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/354950/000162828026058715/hd-20260802.htm",
-          "unit": "USD"
-        },
-        {
-          "action": "INITIATE",
-          "basis": "UNSPECIFIED",
           "evidence": " by approximately 40 basis points for the first six months of fiscal 2026. Our comparable sales Fiscal Q2 2026 Form 10-Q 18 Table of Contents results reflect customer engagement with smaller repair and maintenance projects, despite the impact of consumer uncertainty and housing affordability pressure on home improvement demand.",
           "high": 40000000000.0,
           "low": 40000000000.0,
@@ -692,14 +736,27 @@
           "source_timestamp": "2026-08-25T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/354950/000162828026058715/hd-20260802.htm",
           "unit": "USD"
+        },
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": " by approximately 25 basis points for the second quarter of fiscal 2026. Our comparable sales results reflect customer engagement with smaller repair and maintenance projects, despite the impact of consumer uncertainty and housing affordability pressure on home improvement demand.",
+          "high": 25000000000.0,
+          "low": 25000000000.0,
+          "metric": "revenue",
+          "midpoint": 25000000000.0,
+          "period": "Q2FY2026",
+          "source_timestamp": "2026-08-25T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/354950/000162828026058715/hd-20260802.htm",
+          "unit": "USD"
         }
       ],
-      "documents_fetched": 24,
+      "documents_fetched": 38,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 24,
       "guidance_deterioration": null,
-      "guidance_records": 9,
+      "guidance_records": 14,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -715,10 +772,10 @@
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
       "current": [],
-      "documents_fetched": 24,
+      "documents_fetched": 44,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 26,
       "guidance_deterioration": null,
       "guidance_records": 0,
       "prior": [],
@@ -748,12 +805,12 @@
           "unit": "UNKNOWN"
         }
       ],
-      "documents_fetched": 24,
+      "documents_fetched": 46,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 28,
       "guidance_deterioration": null,
-      "guidance_records": 2,
+      "guidance_records": 4,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -781,12 +838,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 30,
+      "documents_fetched": 62,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 32,
       "guidance_deterioration": null,
-      "guidance_records": 1,
+      "guidance_records": 2,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -829,12 +886,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 28,
+      "documents_fetched": 55,
       "duplicates_removed": 4,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 26,
       "guidance_deterioration": null,
-      "guidance_records": 14,
+      "guidance_records": 17,
       "prior": [
         {
           "action": "REAFFIRM",
@@ -892,12 +949,12 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 21,
+      "documents_fetched": 50,
       "duplicates_removed": 2,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 32,
       "guidance_deterioration": null,
-      "guidance_records": 3,
+      "guidance_records": 4,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
@@ -966,12 +1023,12 @@
           "unit": "UNKNOWN"
         }
       ],
-      "documents_fetched": 34,
-      "duplicates_removed": 27,
+      "documents_fetched": 71,
+      "duplicates_removed": 78,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 32,
       "guidance_deterioration": true,
-      "guidance_records": 28,
+      "guidance_records": 82,
       "prior": [
         {
           "action": "REAFFIRM",
@@ -1057,12 +1114,12 @@
           "unit": "USD/share"
         }
       ],
-      "documents_fetched": 19,
+      "documents_fetched": 42,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 28,
       "guidance_deterioration": null,
-      "guidance_records": 19,
+      "guidance_records": 30,
       "prior": [],
       "reasons": [
         "At least one current quantitative non-initiated guidance metric lacks a verified comparable prior record."
@@ -1075,7 +1132,7 @@
     },
     {
       "cik": "0000064803",
-      "classification": "NOT_DETERIORATED",
+      "classification": "UNKNOWN",
       "comparable_pairs": 3,
       "current": [
         {
@@ -1131,26 +1188,13 @@
           "unit": "USD/share"
         }
       ],
-      "documents_fetched": 22,
-      "duplicates_removed": 4,
+      "documents_fetched": 55,
+      "duplicates_removed": 9,
       "errors": [],
-      "filings_considered": 14,
-      "guidance_deterioration": false,
-      "guidance_records": 15,
+      "filings_considered": 29,
+      "guidance_deterioration": null,
+      "guidance_records": 29,
       "prior": [
-        {
-          "action": "RAISE",
-          "basis": "ADJUSTED",
-          "evidence": " guidance range to $6.24 to $6.44 from $5.94 to $6.14 \u25e6 Adjusted EPS guidance range to $7.30 to $7.50 from $7.00 to $7.20",
-          "high": 6.14,
-          "low": 5.94,
-          "metric": "eps",
-          "midpoint": 6.04,
-          "period": "FY2026",
-          "source_timestamp": "2026-05-06T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
-          "unit": "USD/share"
-        },
         {
           "action": "RAISE",
           "basis": "ADJUSTED",
@@ -1179,6 +1223,19 @@
         },
         {
           "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": " guidance range to $6.24 to $6.44 from $5.94 to $6.14 \u25e6 Adjusted EPS guidance range to $7.30 to $7.50 from $7.00 to $7.20",
+          "high": 6.14,
+          "low": 5.94,
+          "metric": "eps",
+          "midpoint": 6.04,
+          "period": "FY2026",
+          "source_timestamp": "2026-05-06T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
+          "unit": "USD/share"
+        },
+        {
+          "action": "RAISE",
           "basis": "GAAP",
           "evidence": " of $2.57 \u2022 Raising full-year 2026 guidance: \u25e6 GAAP diluted EPS guidance range to $6.24 to $6.44 from $5.94 to $6.14",
           "high": 6.44,
@@ -1192,9 +1249,9 @@
         }
       ],
       "reasons": [
-        "All verified comparable current quantitative guidance metrics remain within frozen non-deterioration tolerances or are higher."
+        "Primary-source action language conflicts with the comparable numeric guidance table for the same metric/period."
       ],
-      "rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "rule_path": "guidance_v1_1.conflicting_primary_evidence",
       "sources": [
         "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
         "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm"
@@ -1220,10 +1277,10 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 24,
+      "documents_fetched": 40,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 23,
       "guidance_deterioration": null,
       "guidance_records": 11,
       "prior": [],
@@ -1255,26 +1312,15 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 25,
-      "duplicates_removed": 0,
-      "errors": [],
-      "filings_considered": 14,
+      "documents_fetched": 49,
+      "duplicates_removed": 1,
+      "errors": [
+        "INDEX:0001193125-25-023587:HTTPStatusError"
+      ],
+      "filings_considered": 28,
       "guidance_deterioration": false,
-      "guidance_records": 3,
+      "guidance_records": 10,
       "prior": [
-        {
-          "action": "REAFFIRM",
-          "basis": "UNSPECIFIED",
-          "evidence": "We are maintaining our full year 2026 guidance of organic net sales growth",
-          "high": null,
-          "low": null,
-          "metric": "revenue",
-          "midpoint": null,
-          "period": "FY2026",
-          "source_timestamp": "2026-04-30T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/310764/000031076426000025/sykex991earningsq12026.htm",
-          "unit": "UNKNOWN"
-        },
         {
           "action": "REAFFIRM",
           "basis": "UNSPECIFIED",
@@ -1287,6 +1333,19 @@
           "source_timestamp": "2026-04-30T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/310764/000031076426000025/sykex991earningsq12026.htm",
           "unit": "USD"
+        },
+        {
+          "action": "REAFFIRM",
+          "basis": "UNSPECIFIED",
+          "evidence": "We are maintaining our full year 2026 guidance of organic net sales growth",
+          "high": null,
+          "low": null,
+          "metric": "revenue",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-04-30T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/310764/000031076426000025/sykex991earningsq12026.htm",
+          "unit": "UNKNOWN"
         }
       ],
       "reasons": [
@@ -1304,10 +1363,10 @@
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
       "current": [],
-      "documents_fetched": 25,
+      "documents_fetched": 35,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 20,
       "guidance_deterioration": null,
       "guidance_records": 0,
       "prior": [],
@@ -1337,12 +1396,12 @@
           "unit": "fraction"
         }
       ],
-      "documents_fetched": 25,
+      "documents_fetched": 44,
       "duplicates_removed": 0,
       "errors": [],
-      "filings_considered": 14,
+      "filings_considered": 26,
       "guidance_deterioration": null,
-      "guidance_records": 4,
+      "guidance_records": 7,
       "prior": [],
       "reasons": [
         "No comparable prior/current quantitative guidance metric pair is available."
