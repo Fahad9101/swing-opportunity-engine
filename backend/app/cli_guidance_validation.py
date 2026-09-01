@@ -13,14 +13,21 @@ from typing import Any
 import httpx
 
 from app.core.config import SOE_1_1_RULES_PATH, get_settings, load_rules_for_version, rules_hash
-from app.domain.soe_v1_1 import GuidanceAction, GuidanceClassification, GuidanceMetricRecord
+from app.domain.soe_v1_1 import (
+    GuidanceAction,
+    GuidanceClassification,
+    GuidanceMetricRecord,
+    SecDocumentReference,
+)
 from app.providers.sec_edgar import TICKER_MAP_URL
 from app.services.fact_extraction_service import extract_guidance_facts
 from app.services.guidance_ledger_service import GuidanceLedger
-from app.services.source_document_service import SourceDocumentService, index_submissions_payload
+from app.services.source_document_service import SourceDocumentService, index_submissions_payload, sec_archive_url
 
 
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
+ARCHIVED_SUBMISSIONS_URL = "https://data.sec.gov/submissions/{name}"
+_ALLOWED_GUIDANCE_FORMS = {"10-K", "10-Q", "8-K", "6-K"}
 DEFAULT_TICKERS = [
     "ADBE", "CRM", "PANW", "CRWD", "DELL", "HPE", "MU", "QCOM",
     "WMT", "TGT", "LOW", "HD", "NKE", "ULTA", "FDX", "UPS",
@@ -40,7 +47,7 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="SOE-1.1A targeted primary-source guidance validation")
     parser.add_argument("--tickers", default=",".join(DEFAULT_TICKERS))
     parser.add_argument("--lookback-days", type=int, default=650)
-    parser.add_argument("--max-filings", type=int, default=14)
+    parser.add_argument("--max-filings", type=int, default=32)
     parser.add_argument("--max-exhibits", type=int, default=4)
     parser.add_argument("--output-dir", default="validation-results/milestone-1.1a")
     return parser.parse_args()
@@ -104,6 +111,139 @@ def _submissions_payload(
     payload = response.json()
     path.write_text(json.dumps(payload), encoding="utf-8")
     return payload
+
+
+def _parse_date(value: Any) -> date | None:
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(str(value))
+    except ValueError:
+        return None
+
+
+def _archive_file_overlaps_cutoff(metadata: dict[str, Any], cutoff: date) -> bool:
+    """Return whether an SEC archived-submissions file can contain in-window filings."""
+    filing_to = _parse_date(metadata.get("filingTo"))
+    filing_from = _parse_date(metadata.get("filingFrom"))
+    if filing_to is not None:
+        return filing_to >= cutoff
+    if filing_from is not None:
+        return filing_from >= cutoff
+    return True
+
+
+def _archived_submissions_payload(
+    name: str,
+    *,
+    client: httpx.Client,
+    cache_dir: Path,
+    state: dict[str, float],
+) -> dict:
+    safe_name = Path(name).name
+    if safe_name != name or not safe_name.lower().endswith(".json"):
+        raise ValueError("Invalid SEC archived-submissions filename")
+    path = cache_dir / f"archive-{safe_name}"
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    response = _throttled_get(client, ARCHIVED_SUBMISSIONS_URL.format(name=safe_name), state)
+    response.raise_for_status()
+    payload = response.json()
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return payload
+
+
+def _index_archived_submissions_payload(
+    ticker: str,
+    cik: str,
+    payload: dict[str, Any],
+    *,
+    limit: int = 200,
+) -> list[SecDocumentReference]:
+    """Index SEC `filings.files` archive payloads, whose arrays are top-level."""
+    forms = payload.get("form") or []
+    accessions = payload.get("accessionNumber") or []
+    primary_documents = payload.get("primaryDocument") or []
+    filing_dates = payload.get("filingDate") or []
+    refs: list[SecDocumentReference] = []
+    for idx, form in enumerate(forms):
+        if form not in _ALLOWED_GUIDANCE_FORMS or idx >= len(accessions) or idx >= len(primary_documents):
+            continue
+        accession = str(accessions[idx] or "").strip()
+        primary = str(primary_documents[idx] or "").strip()
+        if not accession or not primary:
+            continue
+        filing_date = _parse_date(filing_dates[idx]) if idx < len(filing_dates) else None
+        refs.append(
+            SecDocumentReference(
+                ticker=ticker.upper(),
+                cik=cik,
+                accession=accession,
+                form=form,
+                filing_date=filing_date,
+                primary_document=primary,
+                source_url=sec_archive_url(cik, accession, primary),
+            )
+        )
+        if len(refs) >= limit:
+            break
+    return refs
+
+
+def _combined_filing_history(
+    ticker: str,
+    cik: str,
+    submissions: dict[str, Any],
+    *,
+    cutoff: date,
+    max_filings: int,
+    client: httpx.Client,
+    cache_dir: Path,
+    state: dict[str, float],
+) -> tuple[list[SecDocumentReference], int, list[str]]:
+    """Merge `filings.recent` with true SEC `filings.files` history.
+
+    Archived submission files are fetched only when their SEC metadata overlaps the
+    validation lookback. Accessions are de-duplicated before chronological sorting.
+    This changes evidence coverage only; it does not modify SOE classification rules.
+    """
+    candidate_limit = max(max_filings * 4, 80)
+    refs = index_submissions_payload(ticker, cik, submissions, limit=candidate_limit)
+    archived_files_fetched = 0
+    errors: list[str] = []
+
+    metadata_rows = list(((submissions.get("filings") or {}).get("files") or []))
+    metadata_rows.sort(
+        key=lambda item: _parse_date(item.get("filingTo")) or _parse_date(item.get("filingFrom")) or date.min,
+        reverse=True,
+    )
+    for metadata in metadata_rows:
+        if not _archive_file_overlaps_cutoff(metadata, cutoff):
+            continue
+        name = str(metadata.get("name") or "").strip()
+        if not name:
+            continue
+        try:
+            payload = _archived_submissions_payload(name, client=client, cache_dir=cache_dir, state=state)
+            refs.extend(_index_archived_submissions_payload(ticker, cik, payload, limit=candidate_limit))
+            archived_files_fetched += 1
+        except (httpx.HTTPError, ValueError, OSError, json.JSONDecodeError) as exc:
+            errors.append(f"ARCHIVE:{name}:{type(exc).__name__}")
+
+    unique: dict[str, SecDocumentReference] = {}
+    for ref in refs:
+        if ref.filing_date is not None and ref.filing_date < cutoff:
+            continue
+        existing = unique.get(ref.accession)
+        if existing is None or (ref.filing_date or date.min) > (existing.filing_date or date.min):
+            unique[ref.accession] = ref
+
+    combined = sorted(
+        unique.values(),
+        key=lambda item: (item.filing_date or date.min, item.accession),
+        reverse=True,
+    )
+    return combined[:max_filings], archived_files_fetched, errors
 
 
 def _deduplicate(records: list[GuidanceMetricRecord]) -> tuple[list[GuidanceMetricRecord], int]:
@@ -170,17 +310,18 @@ def _markdown(report: dict[str, Any]) -> str:
         f"- Comparable-guidance coverage: {summary['classification_coverage_pct']:.1f}%",
         f"- Non-null assessments with complete provenance: {summary['provenance_complete_pct']:.1f}%",
         f"- SEC/provider errors: {summary['error_count']}",
+        f"- Archived SEC submissions files fetched: {summary['archived_submission_files_fetched']}",
         "",
         "Gate requires >=80% classification coverage among names with comparable primary-source guidance and 100% provenance on non-null classifications. A tiny denominator is reported as INSUFFICIENT_SAMPLE rather than treated as a pass.",
         "",
         "## Ticker audit",
         "",
-        "| Ticker | Records | Comparable pairs | Classification | Deterioration | Rule path | Errors |",
-        "| --- | ---: | ---: | --- | --- | --- | ---: |",
+        "| Ticker | Records | Comparable pairs | Archive files | Classification | Deterioration | Rule path | Errors |",
+        "| --- | ---: | ---: | ---: | --- | --- | --- | ---: |",
     ]
     for item in report["tickers"]:
         lines.append(
-            f"| {item['ticker']} | {item['guidance_records']} | {item['comparable_pairs']} | {item['classification']} | {item['guidance_deterioration']} | {item['rule_path']} | {len(item['errors'])} |"
+            f"| {item['ticker']} | {item['guidance_records']} | {item['comparable_pairs']} | {item['archived_submission_files_fetched']} | {item['classification']} | {item['guidance_deterioration']} | {item['rule_path']} | {len(item['errors'])} |"
         )
     lines += ["", "## Null / error reasons", "", "```json", json.dumps(summary["reason_counts"], indent=2, sort_keys=True), "```", ""]
     return "\n".join(lines)
@@ -217,6 +358,7 @@ def main() -> int:
     cutoff = date.today() - timedelta(days=args.lookback_days)
     ticker_results: list[dict[str, Any]] = []
     error_count = 0
+    archived_submission_files_total = 0
     try:
         mapping = _ticker_map(client, cache_dir, request_state)
         for ticker in tickers:
@@ -225,6 +367,7 @@ def main() -> int:
             policies = []
             documents_fetched = 0
             filings_considered = 0
+            archived_submission_files_fetched = 0
             cik = mapping.get(ticker)
             if not cik:
                 errors.append("CIK_NOT_FOUND")
@@ -238,8 +381,18 @@ def main() -> int:
                         cache_dir=cache_dir,
                         state=request_state,
                     )
-                    filings = index_submissions_payload(ticker, cik, submissions, limit=max(args.max_filings * 2, 20))
-                    filings = [item for item in filings if item.filing_date is None or item.filing_date >= cutoff][: args.max_filings]
+                    filings, archived_submission_files_fetched, history_errors = _combined_filing_history(
+                        ticker,
+                        cik,
+                        submissions,
+                        cutoff=cutoff,
+                        max_filings=args.max_filings,
+                        client=client,
+                        cache_dir=cache_dir,
+                        state=request_state,
+                    )
+                    errors.extend(history_errors)
+                    archived_submission_files_total += archived_submission_files_fetched
                     filings_considered = len(filings)
                     for filing in reversed(filings):
                         try:
@@ -275,7 +428,6 @@ def main() -> int:
                 current_summary = [_record_summary(item) for item in current]
                 prior_summary = [_record_summary(item) for item in prior]
             else:
-                assessment = None
                 classification = GuidanceClassification.UNKNOWN.value
                 deterioration = None
                 rule_path = "guidance_v1_1.no_extracted_primary_guidance"
@@ -290,6 +442,7 @@ def main() -> int:
                     "ticker": ticker,
                     "cik": cik,
                     "filings_considered": filings_considered,
+                    "archived_submission_files_fetched": archived_submission_files_fetched,
                     "documents_fetched": documents_fetched,
                     "guidance_records": len(records),
                     "duplicates_removed": duplicate_count,
@@ -340,6 +493,7 @@ def main() -> int:
             "non_null_assessments": len(non_null),
             "provenance_complete_pct": provenance_pct * 100,
             "error_count": error_count,
+            "archived_submission_files_fetched": archived_submission_files_total,
             "reason_counts": dict(reason_counts),
         },
         "tickers": ticker_results,
