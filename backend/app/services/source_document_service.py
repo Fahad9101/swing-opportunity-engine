@@ -15,6 +15,10 @@ from app.domain.soe_v1_1 import SecDocumentReference, SourceDocument
 
 SEC_ARCHIVE_ROOT = "https://www.sec.gov/Archives/edgar/data"
 _EXHIBIT_HINT = re.compile(r"(?:^|[-_])(ex(?:hibit)?[-_]?99|ex99|99[._-]?1|earn|release|press)", re.I)
+_XBRL_NOISE = re.compile(
+    r"^(?:r\d+\.htm|filingsummary|metalink|financial_report|calculation|definition|label|presentation|schema|instance)",
+    re.I,
+)
 
 
 def normalize_cik(cik: str | int) -> str:
@@ -143,6 +147,27 @@ class SourceDocumentService:
         path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
         return payload
 
+    @staticmethod
+    def _candidate_priority(item: dict, *, form: str, primary_name: str) -> tuple[int, int, str] | None:
+        name = str(item.get("name") or "").strip()
+        lower = name.lower()
+        if not lower.endswith((".htm", ".html")) or lower == primary_name:
+            return None
+        if _XBRL_NOISE.search(lower):
+            return None
+        try:
+            size = int(item.get("size") or 0)
+        except (TypeError, ValueError):
+            size = 0
+        if _EXHIBIT_HINT.search(lower):
+            return (0, -size, lower)
+        # 8-K/6-K exhibits are often named with issuer-specific abbreviations
+        # rather than ex99/earnings keywords. Strict guidance extraction makes
+        # a bounded generic HTML fallback safe; do not apply it to 10-K/10-Q.
+        if form in {"8-K", "6-K"} and 1_000 <= size <= 2_500_000:
+            return (1, -size, lower)
+        return None
+
     def filing_documents(
         self,
         filing: SecDocumentReference,
@@ -150,25 +175,33 @@ class SourceDocumentService:
         max_exhibits: int = 4,
         force: bool = False,
     ) -> list[SecDocumentReference]:
-        """Return primary filing plus likely earnings/guidance HTML exhibits.
+        """Return primary filing plus bounded likely earnings/guidance exhibits.
 
-        SEC directory metadata does not reliably carry exhibit type. To avoid
-        downloading every XBRL rendering, only HTML files with strong exhibit /
-        press-release filename hints are added. The primary document is always
-        retained. No file is treated as guidance merely because it is returned.
+        Strong filename hints rank first. For 8-K/6-K only, a small generic HTML
+        fallback catches issuer-specific exhibit filenames that omit ex99/earnings
+        tokens. XBRL rendering files are excluded. Returned files remain evidence
+        candidates only; they are not classified as guidance by discovery alone.
         """
         payload = self._cached_json(filing_index_json_url(filing.cik, filing.accession), force=force)
         items = ((payload.get("directory") or {}).get("item") or [])
         primary_name = filing.primary_document.lower()
-        candidates: list[str] = []
+        ranked: list[tuple[tuple[int, int, str], str]] = []
         for item in items:
-            name = str(item.get("name") or "").strip()
-            lower = name.lower()
-            if not lower.endswith((".htm", ".html")) or lower == primary_name:
+            priority = self._candidate_priority(item, form=filing.form, primary_name=primary_name)
+            if priority is None:
                 continue
-            if _EXHIBIT_HINT.search(lower):
-                candidates.append(name)
-        candidates = sorted(dict.fromkeys(candidates))[:max_exhibits]
+            ranked.append((priority, str(item.get("name") or "").strip()))
+        ranked.sort(key=lambda value: value[0])
+        candidates: list[str] = []
+        seen: set[str] = set()
+        for _, name in ranked:
+            if name.lower() in seen:
+                continue
+            seen.add(name.lower())
+            candidates.append(name)
+            if len(candidates) >= max_exhibits:
+                break
+
         refs = [filing]
         for name in candidates:
             refs.append(
