@@ -121,3 +121,40 @@ def test_same_metric_raise_and_material_cut_remains_unknown_conflict():
     result = classify_guidance(current, prior, RULES, rules_hash=RULES_HASH, as_of=NOW)
     assert result.guidance_deterioration is None
     assert result.rule_path.endswith("conflicting_primary_evidence")
+
+
+def test_ups_revenue_raise_does_not_bind_preceding_quarterly_eps_actual():
+    content = (
+        "Second Quarter 2026 Results diluted earnings per share of $1.76. "
+        "Raises Full-year 2026 Consolidated Revenue Outlook to Approximately $91.2B "
+        "and Non-GAAP Adj. Operating Profit Target to Approximately $8.65B."
+    )
+    result = extract_guidance_facts(_document(content), rules_hash=RULES_HASH)
+    revenue = [
+        record for record in result.records
+        if record.metric is GuidanceMetric.REVENUE and record.fiscal_period == "FY2026"
+    ]
+    assert revenue
+    assert any(record.midpoint == 91_200_000_000.0 for record in revenue)
+    assert not any(record.midpoint == 1.76 for record in revenue)
+
+
+def test_cvs_to_from_guidance_uses_new_range_and_ignores_nearby_actual_eps():
+    content = (
+        "Second Quarter 2026 Results: GAAP diluted EPS of $2.31 and Adjusted EPS of $2.58. "
+        "Generated year-to-date cash flow from operations of $10.6 billion. "
+        "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance. "
+        "Raising full-year 2026 guidance: GAAP diluted EPS guidance range to $6.84 to $7.04 from $6.24 to $6.44; "
+        "Adjusted EPS guidance range to $7.90 to $8.10 from $7.30 to $7.50."
+    )
+    result = extract_guidance_facts(_document(content), rules_hash=RULES_HASH)
+    fy_eps = [
+        record for record in result.records
+        if record.metric is GuidanceMetric.EPS and record.fiscal_period == "FY2026" and record.midpoint is not None
+    ]
+    assert any(record.accounting_basis == "GAAP" and abs(record.midpoint - 6.94) < 1e-9 for record in fy_eps)
+    assert any(record.accounting_basis == "ADJUSTED" and abs(record.midpoint - 8.0) < 1e-9 for record in fy_eps)
+    assert not any(abs(record.midpoint - 2.31) < 1e-9 for record in fy_eps)
+    assert not any(abs(record.midpoint - 2.58) < 1e-9 for record in fy_eps)
+    assert not any(abs(record.midpoint - 6.34) < 1e-9 for record in fy_eps)
+
