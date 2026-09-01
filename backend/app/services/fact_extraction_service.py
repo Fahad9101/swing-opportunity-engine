@@ -446,10 +446,18 @@ def extract_guidance_facts(document: SourceDocument, *, rules_hash: str) -> Guid
         mentions = _metric_mentions(segment)
         if not mentions:
             continue
+        segment_action = _action(segment)
+        segment_has_actuals = bool(_ACTUAL_MARKER.search(segment))
 
         for index, mention in enumerate(mentions):
             clause, anchor = _metric_clause(segment, mentions, index)
             local_action = _action(clause)
+            if (
+                local_action == GuidanceAction.NONE
+                and segment_action != GuidanceAction.NONE
+                and not segment_has_actuals
+            ):
+                local_action = segment_action
             local_context = _guidance_context(clause) or _table_header_guidance_context(segment, mention)
             if not local_context and local_action == GuidanceAction.NONE:
                 continue
