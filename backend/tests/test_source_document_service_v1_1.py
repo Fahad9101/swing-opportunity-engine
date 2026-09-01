@@ -6,6 +6,7 @@ import pytest
 from app.domain.soe_v1_1 import SecDocumentReference
 from app.services.source_document_service import (
     SourceDocumentService,
+    filing_index_json_url,
     index_submissions_payload,
     normalize_cik,
     sec_archive_url,
@@ -17,6 +18,7 @@ def test_normalize_cik_and_archive_url():
     assert sec_archive_url("0000320193", "0000320193-26-000001", "aapl.htm") == (
         "https://www.sec.gov/Archives/edgar/data/320193/000032019326000001/aapl.htm"
     )
+    assert filing_index_json_url(320193, "0000320193-26-000001").endswith("/index.json")
 
 
 def test_index_submissions_payload_filters_forms_and_preserves_dates():
@@ -34,6 +36,43 @@ def test_index_submissions_payload_filters_forms_and_preserves_dates():
     assert [ref.form for ref in refs] == ["8-K", "10-Q"]
     assert refs[0].filing_date == date(2026, 8, 1)
     assert refs[0].source_url.startswith("https://www.sec.gov/Archives/edgar/data/1/")
+
+
+def test_filing_documents_adds_likely_ex99_and_press_release_only(tmp_path):
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/index.json"):
+            return httpx.Response(
+                200,
+                json={
+                    "directory": {
+                        "item": [
+                            {"name": "primary8k.htm"},
+                            {"name": "ex991.htm"},
+                            {"name": "press-release.htm"},
+                            {"name": "R1.htm"},
+                            {"name": "Financial_Report.xlsx"},
+                        ]
+                    }
+                },
+            )
+        return httpx.Response(404)
+
+    service = SourceDocumentService(
+        cache_dir=tmp_path,
+        user_agent="SwingOpportunityEngine/1.1 test@example.com",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    filing = SecDocumentReference(
+        ticker="TEST",
+        cik="0000000001",
+        accession="0000000001-26-000001",
+        form="8-K",
+        filing_date=date(2026, 8, 1),
+        primary_document="primary8k.htm",
+        source_url=sec_archive_url(1, "0000000001-26-000001", "primary8k.htm"),
+    )
+    refs = service.filing_documents(filing)
+    assert [ref.primary_document for ref in refs] == ["primary8k.htm", "ex991.htm", "press-release.htm"]
 
 
 def test_sec_document_fetch_is_cached(tmp_path):
