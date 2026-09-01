@@ -14,6 +14,7 @@ from app.core.constants import MODEL_VERSION
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_RULES_PATH = PROJECT_ROOT / "config" / "soe_v1_0_rules.yaml"
+SOE_1_1_RULES_PATH = PROJECT_ROOT / "config" / "soe_v1_1_rules.yaml"
 
 
 class Settings(BaseSettings):
@@ -40,14 +41,24 @@ def get_settings() -> Settings:
     return Settings()
 
 
+def load_rules_for_version(path: str | Path, expected_model_version: str) -> dict[str, Any]:
+    """Load a specific versioned rules file without changing the active runtime model.
+
+    The default load_rules() path remains SOE-1.0.0 until the separate SOE-1.1
+    activation gate is approved.
+    """
+    rules_path = Path(path)
+    with rules_path.open("r", encoding="utf-8") as handle:
+        rules = yaml.safe_load(handle)
+    if rules.get("model_version") != expected_model_version:
+        raise ValueError("Rules model_version does not match the requested model version")
+    return rules
+
+
 @lru_cache
 def load_rules(path: str | Path | None = None) -> dict[str, Any]:
     rules_path = Path(path or get_settings().rules_path)
-    with rules_path.open("r", encoding="utf-8") as handle:
-        rules = yaml.safe_load(handle)
-    if rules.get("model_version") != MODEL_VERSION:
-        raise ValueError("Rules model_version does not match application model version")
-    return rules
+    return load_rules_for_version(rules_path, MODEL_VERSION)
 
 
 def rules_hash(rules: dict[str, Any] | None = None) -> str:
