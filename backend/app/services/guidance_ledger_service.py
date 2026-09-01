@@ -70,6 +70,19 @@ def _assessment_eligible(record: GuidanceMetricRecord) -> bool:
     return True
 
 
+def _snapshot_timestamp(records: list[GuidanceMetricRecord]) -> datetime | None:
+    """Return the latest timestamp that contains assessment-eligible guidance.
+
+    Guidance classification is about the latest management guidance update, not
+    the latest surviving record for every historical fiscal period. Old quarters
+    therefore cannot remain in the current set indefinitely and block a new
+    comparable annual guidance assessment.
+    """
+    if not records:
+        return None
+    return max(item.source_timestamp for item in records)
+
+
 class GuidanceLedger:
     """Append-only in-memory guidance ledger used by extraction and validation paths.
 
@@ -116,11 +129,20 @@ class GuidanceLedger:
         *,
         as_of: datetime | None = None,
     ) -> tuple[list[GuidanceMetricRecord], list[GuidanceMetricRecord]]:
-        """Return latest and prior assessment-eligible facts per comparison key.
+        """Return the latest guidance snapshot and its latest comparable priors.
 
-        Raw extracted records remain immutable in the ledger. Evidence-quality
-        filtering occurs only when constructing the assessment view, so rejected
-        facts remain auditable rather than silently deleted.
+        The current set is restricted to the newest assessment-eligible source
+        timestamp. For each current comparison key, the prior set contains the
+        latest older assessment-eligible version of that same key. Historical
+        fiscal periods not repeated in the latest guidance update are excluded
+        from the current set rather than lingering forever.
+
+        A current numeric NONE-action key with no historical version is treated
+        as an implicitly initiated metric/period *only in the assessment view*.
+        The immutable ledger record is not changed. This mirrors the existing
+        SOE-1.1 rule that an explicitly initiated new metric must not block other
+        genuinely comparable metrics. If no comparable prior exists for any key,
+        the classifier still returns UNKNOWN.
         """
         as_of = as_of or datetime.now(UTC)
         eligible = [
@@ -128,20 +150,40 @@ class GuidanceLedger:
             for item in self._records
             if item.ticker == ticker and item.source_timestamp <= as_of and _assessment_eligible(item)
         ]
-        by_key: dict[tuple[str, str, str], list[GuidanceMetricRecord]] = defaultdict(list)
-        for item in eligible:
-            by_key[item.comparison_key].append(item)
+        latest_ts = _snapshot_timestamp(eligible)
+        if latest_ts is None:
+            return [], []
+
+        current_raw = [item for item in eligible if item.source_timestamp == latest_ts]
+        current_by_key: dict[tuple[str, str, str], list[GuidanceMetricRecord]] = defaultdict(list)
+        for item in current_raw:
+            current_by_key[item.comparison_key].append(item)
 
         current: list[GuidanceMetricRecord] = []
         prior: list[GuidanceMetricRecord] = []
-        for rows in by_key.values():
-            rows = sorted(rows, key=lambda item: (item.source_timestamp, str(item.record_id)))
-            timestamps = sorted({item.source_timestamp for item in rows})
-            latest_ts = timestamps[-1]
-            current.extend(item for item in rows if item.source_timestamp == latest_ts)
-            if len(timestamps) >= 2:
-                prior_ts = timestamps[-2]
-                prior.extend(item for item in rows if item.source_timestamp == prior_ts)
+        for key, rows in current_by_key.items():
+            older = [
+                item
+                for item in eligible
+                if item.comparison_key == key and item.source_timestamp < latest_ts
+            ]
+            if older:
+                prior_ts = max(item.source_timestamp for item in older)
+                prior.extend(item for item in older if item.source_timestamp == prior_ts)
+                current.extend(rows)
+                continue
+
+            # New metric/period introduced in the latest snapshot. Do not mutate
+            # the ledger; mark NONE-action numeric facts as initiated in the
+            # assessment view so they cannot make a separate comparable set null.
+            for item in rows:
+                if item.midpoint is not None and item.explicit_action is GuidanceAction.NONE:
+                    current.append(item.model_copy(update={"explicit_action": GuidanceAction.INITIATE}))
+                else:
+                    current.append(item)
+
+        current.sort(key=lambda item: (item.metric.value, item.fiscal_period, item.accounting_basis, str(item.record_id)))
+        prior.sort(key=lambda item: (item.metric.value, item.fiscal_period, item.accounting_basis, str(item.record_id)))
         return current, prior
 
     def assess(
