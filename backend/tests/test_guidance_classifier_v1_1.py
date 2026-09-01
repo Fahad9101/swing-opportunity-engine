@@ -233,3 +233,42 @@ def test_ledger_sets_supersedes_and_selects_latest_two_versions():
     current, prior = ledger.current_and_prior("TEST", as_of=NOW)
     assert current[0].midpoint == 104.0
     assert prior[0].midpoint == 102.0
+
+
+def test_ledger_latest_snapshot_does_not_keep_stale_historical_periods_current():
+    ledger = GuidanceLedger(
+        [
+            record(GuidanceMetric.REVENUE, 80.0, when=NOW - timedelta(days=180), period="Q2FY2026"),
+            record(GuidanceMetric.REVENUE, 100.0, when=NOW - timedelta(days=90), period="FY2027"),
+            record(GuidanceMetric.REVENUE, 102.0, when=NOW, period="FY2027"),
+        ]
+    )
+    current, prior = ledger.current_and_prior("TEST", as_of=NOW)
+    assert {(item.fiscal_period, item.midpoint) for item in current} == {("FY2027", 102.0)}
+    assert {(item.fiscal_period, item.midpoint) for item in prior} == {("FY2027", 100.0)}
+
+
+def test_ledger_implicit_new_period_does_not_block_other_comparable_revision():
+    ledger = GuidanceLedger(
+        [
+            record(GuidanceMetric.REVENUE, 100.0, when=NOW - timedelta(days=90), period="FY2027"),
+            record(GuidanceMetric.REVENUE, 101.0, when=NOW, period="FY2027"),
+            record(GuidanceMetric.EPS, 2.0, when=NOW, period="Q3FY2027"),
+        ]
+    )
+    result = ledger.assess("TEST", RULES, rules_hash=RULES_HASH, as_of=NOW)
+    assert result.guidance_deterioration is False
+    assert result.classification is GuidanceClassification.NOT_DETERIORATED
+
+
+def test_ledger_all_new_latest_snapshot_still_unknown_without_any_comparable_prior():
+    ledger = GuidanceLedger(
+        [
+            record(GuidanceMetric.REVENUE, 101.0, when=NOW, period="FY2028"),
+            record(GuidanceMetric.EPS, 11.0, when=NOW, period="FY2028"),
+        ]
+    )
+    result = ledger.assess("TEST", RULES, rules_hash=RULES_HASH, as_of=NOW)
+    assert result.guidance_deterioration is None
+    assert result.classification is GuidanceClassification.UNKNOWN
+    assert result.rule_path.endswith("no_comparable_prior")
