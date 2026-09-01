@@ -91,18 +91,34 @@ def classify_guidance(
     from this function. Missing or incompatible evidence resolves to UNKNOWN.
     """
     config = _guidance_rules(rules)
+    input_records = current + prior
+    ticker = input_records[0].ticker if input_records else (policy.ticker if policy else "")
+    if not ticker:
+        raise ValueError("Ticker is required for guidance classification")
+    if any(item.ticker != ticker for item in input_records):
+        raise ValueError("Guidance records from different tickers cannot be compared")
+    if policy and policy.ticker != ticker:
+        raise ValueError("Guidance policy evidence must match the guidance-record ticker")
+
     current_verified = [item for item in current if item.verified]
     prior_verified = [item for item in prior if item.verified]
     all_records = current_verified + prior_verified
-    ticker = all_records[0].ticker if all_records else (policy.ticker if policy else "")
-    if not ticker:
-        raise ValueError("Ticker is required for guidance classification")
-    if any(item.ticker != ticker for item in all_records):
-        raise ValueError("Guidance records from different tickers cannot be compared")
-    timestamps = [item.source_timestamp for item in all_records]
+    timestamps = [item.source_timestamp for item in input_records]
     if policy and policy.verified:
         timestamps.append(policy.source_timestamp)
     as_of = as_of or (max(timestamps) if timestamps else datetime.now(UTC))
+
+    if not all_records and not (policy and policy.verified):
+        return _unknown(
+            ticker,
+            rules_hash,
+            current,
+            prior,
+            as_of=as_of,
+            reasons=["Only unverified guidance evidence is available."],
+            policy=policy,
+            rule_path="guidance_v1_1.unverified_evidence_only",
+        )
 
     explicit_negative = [
         item
