@@ -54,6 +54,12 @@ class GuidanceLedger:
         *,
         as_of: datetime | None = None,
     ) -> tuple[list[GuidanceMetricRecord], list[GuidanceMetricRecord]]:
+        """Return all facts from the latest and prior source timestamps per key.
+
+        Multiple same-date facts are intentionally preserved. If they disagree,
+        the deterministic classifier can resolve the evidence to UNKNOWN rather
+        than an arbitrary UUID/order winning the comparison.
+        """
         as_of = as_of or datetime.now(UTC)
         eligible = [
             item
@@ -68,9 +74,12 @@ class GuidanceLedger:
         prior: list[GuidanceMetricRecord] = []
         for rows in by_key.values():
             rows = sorted(rows, key=lambda item: (item.source_timestamp, str(item.record_id)))
-            current.append(rows[-1])
-            if len(rows) >= 2:
-                prior.append(rows[-2])
+            timestamps = sorted({item.source_timestamp for item in rows})
+            latest_ts = timestamps[-1]
+            current.extend(item for item in rows if item.source_timestamp == latest_ts)
+            if len(timestamps) >= 2:
+                prior_ts = timestamps[-2]
+                prior.extend(item for item in rows if item.source_timestamp == prior_ts)
         return current, prior
 
     def assess(
