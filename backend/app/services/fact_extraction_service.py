@@ -67,6 +67,10 @@ _ACTUAL_MARKER = re.compile(
     r"\b(?:reported|achieved|was|were|grew|increased|decreased|compared\s+(?:with|to)|results?)\b",
     re.I,
 )
+_LOCAL_ACTUAL_MARKER = re.compile(
+    r"\b(?:reported|results?|generated|achieved|delivered|quarter|year[-\s]?to[-\s]?date)\b",
+    re.I,
+)
 _UNSUPPORTED_REVENUE = re.compile(
     r"\b(?:annual\s+recurring|subscription|segment|product|service|services)\s+revenue\b",
     re.I,
@@ -205,7 +209,7 @@ def _action(text: str) -> GuidanceAction:
     action_specs: list[tuple[GuidanceAction, str]] = [
         (GuidanceAction.WITHDRAW, r"(?:withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?)"),
         (GuidanceAction.LOWER, r"(?:lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)"),
-        (GuidanceAction.RAISE, r"(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?)"),
+        (GuidanceAction.RAISE, r"(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?|increas(?:e|es|ed|ing))"),
         (GuidanceAction.REAFFIRM, r"(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)"),
         (GuidanceAction.INITIATE, r"(?:initiat(?:e|es|ed|ing)|provid(?:e|es|ed|ing)|issu(?:e|es|ed|ing))"),
     ]
@@ -306,7 +310,16 @@ def _bound_preceding_candidate(text: str, candidate: _NumericCandidate, anchor: 
     connector = text[candidate.end:anchor]
     if _SCALE_WORD.search(connector):
         return False
-    return bool(re.search(r"\b(?:in|per|for|as)\b", connector, re.I)) or len(connector.strip()) <= 28
+    normalized = re.sub(r"[\s•:;,()\[\]–—-]+", " ", connector).strip()
+    if not normalized:
+        return True
+    return bool(
+        re.fullmatch(
+            r"(?:of|in|for|at|per|approximately|about|around|value\s+of|range\s+of)",
+            normalized,
+            re.I,
+        )
+    )
 
 
 def _numeric_range(text: str, metric: GuidanceMetric, *, anchor: int) -> tuple[float, float, str] | None:
@@ -407,6 +420,16 @@ def _table_header_guidance_context(segment: str, mention: _MetricMention) -> boo
     return bool(re.search(rf"\b{_GUIDANCE_NOUN}\b", prefix, re.I))
 
 
+def _metric_local_guidance_context(clause: str, anchor: int, alias_len: int) -> bool:
+    window = clause[max(0, anchor - 60) : min(len(clause), anchor + alias_len + 70)]
+    return bool(_GUIDANCE_HINT.search(window) or _FORWARD_CONTEXT.search(window))
+
+
+def _metric_local_actual_context(clause: str, anchor: int, alias_len: int) -> bool:
+    window = clause[max(0, anchor - 90) : min(len(clause), anchor + alias_len + 90)]
+    return bool(_LOCAL_ACTUAL_MARKER.search(window))
+
+
 def _actual_only_clause(clause: str) -> bool:
     return bool(_ACTUAL_MARKER.search(clause)) and not _guidance_context(clause)
 
@@ -452,13 +475,20 @@ def extract_guidance_facts(document: SourceDocument, *, rules_hash: str) -> Guid
         for index, mention in enumerate(mentions):
             clause, anchor = _metric_clause(segment, mentions, index)
             local_action = _action(clause)
+            metric_local_context = _metric_local_guidance_context(clause, anchor, len(mention.alias))
+            metric_local_actual = _metric_local_actual_context(clause, anchor, len(mention.alias))
+            if metric_local_actual and not metric_local_context:
+                rejected.append(
+                    {"reason": "metric_local_actual_not_guidance", "metric": mention.metric.value, "segment": clause[:400]}
+                )
+                continue
             if (
                 local_action == GuidanceAction.NONE
                 and segment_action != GuidanceAction.NONE
                 and not segment_has_actuals
             ):
                 local_action = segment_action
-            local_context = _guidance_context(clause) or _table_header_guidance_context(segment, mention)
+            local_context = metric_local_context or _table_header_guidance_context(segment, mention)
             if not local_context and local_action == GuidanceAction.NONE:
                 continue
             if _actual_only_clause(clause) and local_action == GuidanceAction.NONE:
