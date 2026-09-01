@@ -22,10 +22,10 @@ SessionLocal = sessionmaker(bind=engine, class_=Session, expire_on_commit=False)
 
 def init_database() -> None:
     from app.persistence import orm_models  # noqa: F401
+    from app.persistence import soe_v1_1_orm  # noqa: F401
     Base.metadata.create_all(engine)
 
 
 def get_session():
     with SessionLocal() as session:
         yield session
-
