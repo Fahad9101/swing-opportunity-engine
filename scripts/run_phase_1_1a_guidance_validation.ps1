@@ -86,7 +86,7 @@ foreach ($Output in @($JsonOut, $MarkdownOut, $LogOut)) {
 }
 
 Write-Host "`n=== Run Phase 1.1A targeted SEC guidance validation ==="
-Write-Host "Historical SEC filing depth per ticker: $MaxFilings (validation backfill only; SOE rules unchanged)"
+Write-Host "Historical SEC filing depth per ticker: $MaxFilings (true filings.files archive backfill enabled; SOE rules unchanged)"
 $RunnerBat = Join-Path $env:TEMP "soe_phase_1_1a_guidance_validation.cmd"
 $TickerArg = ""
 if (-not [string]::IsNullOrWhiteSpace($Tickers)) { $TickerArg = " --tickers `"$Tickers`"" }
