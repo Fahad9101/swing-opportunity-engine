@@ -1,13 +1,14 @@
 {
   "default_runtime_model_unchanged": true,
-  "generated_at": "2026-09-01T17:13:09.303340+00:00",
+  "generated_at": "2026-09-01T18:05:14.600774+00:00",
   "model_version": "SOE-1.1.0",
   "phase": "1.1A",
   "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
   "summary": {
+    "archived_submission_files_fetched": 0,
     "classification_coverage_pct": 75.0,
     "classified_comparable_names": 6,
-    "error_count": 1,
+    "error_count": 0,
     "exit_gate": "INSUFFICIENT_SAMPLE",
     "non_null_assessments": 6,
     "provenance_complete_pct": 100.0,
@@ -26,6 +27,7 @@
   },
   "tickers": [
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000796343",
       "classification": "NOT_DETERIORATED",
       "comparable_pairs": 4,
@@ -59,11 +61,11 @@
         {
           "action": "NONE",
           "basis": "UNSPECIFIED",
-          "evidence": "AP tax rate of ~23.0%, non-GAAP tax rate of ~18.0% and diluted share count of ~395 million for third quarter FY2026. The following table summarizes Adobe\u2019s updated FY2026 targets: Total revenue $26.50 billion to $26.60 billion",
-          "high": 26600000000.0,
-          "low": 26500000000.0,
+          "evidence": "These targets factor in the acquisition of Semrush Holdings, Inc. and assume current macroeconomic conditions. The following table summarizes Adobe\u2019s third quarter FY2026 targets: Total revenue $6.67 billion to $6.72 billion",
+          "high": 6720000000.0,
+          "low": 6670000000.0,
           "metric": "revenue",
-          "midpoint": 26550000000.0,
+          "midpoint": 6695000000.0,
           "period": "FY2026",
           "source_timestamp": "2026-06-11T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
@@ -72,11 +74,11 @@
         {
           "action": "NONE",
           "basis": "UNSPECIFIED",
-          "evidence": "These targets factor in the acquisition of Semrush Holdings, Inc. and assume current macroeconomic conditions. The following table summarizes Adobe\u2019s third quarter FY2026 targets: Total revenue $6.67 billion to $6.72 billion",
-          "high": 6720000000.0,
-          "low": 6670000000.0,
+          "evidence": "AP tax rate of ~23.0%, non-GAAP tax rate of ~18.0% and diluted share count of ~395 million for third quarter FY2026. The following table summarizes Adobe\u2019s updated FY2026 targets: Total revenue $26.50 billion to $26.60 billion",
+          "high": 26600000000.0,
+          "low": 26500000000.0,
           "metric": "revenue",
-          "midpoint": 6695000000.0,
+          "midpoint": 26550000000.0,
           "period": "FY2026",
           "source_timestamp": "2026-06-11T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
@@ -128,6 +130,7 @@
       "ticker": "ADBE"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001108524",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -204,6 +207,7 @@
       "ticker": "CRM"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001327567",
       "classification": "NOT_DETERIORATED",
       "comparable_pairs": 1,
@@ -254,6 +258,7 @@
       "ticker": "PANW"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001535527",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -287,6 +292,7 @@
       "ticker": "CRWD"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001571996",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -322,6 +328,7 @@
       "ticker": "DELL"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001645590",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -384,6 +391,7 @@
       "ticker": "HPE"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000723125",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -404,11 +412,11 @@
         {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
-          "evidence": " of $2.50 \u00b1 $0.15 for the fourth quarter of fiscal 2025. The Company today updated its guidance for fourth quarter of fiscal 2025 revenue to $11.2 billion \u00b1 $100 million, non-GAAP gross margins to 44.5% \u00b1 0.5%, and non-GAAP ",
-          "high": 11200000000.0,
-          "low": 11200000000.0,
+          "evidence": " guidance for the fourth quarter of fiscal 2025, which ends August 28, 2025. The Company previously provided guidance for revenue of $10.7 billion \u00b1 $300 million, non-GAAP gross margins of 42.0% \u00b1 1.0%, and non-GAAP ",
+          "high": 10700000000.0,
+          "low": 10700000000.0,
           "metric": "revenue",
-          "midpoint": 11200000000.0,
+          "midpoint": 10700000000.0,
           "period": "Q4FY2025",
           "source_timestamp": "2025-08-11T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm",
@@ -417,11 +425,11 @@
         {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
-          "evidence": " guidance for the fourth quarter of fiscal 2025, which ends August 28, 2025. The Company previously provided guidance for revenue of $10.7 billion \u00b1 $300 million, non-GAAP gross margins of 42.0% \u00b1 1.0%, and non-GAAP ",
-          "high": 10700000000.0,
-          "low": 10700000000.0,
+          "evidence": " of $2.50 \u00b1 $0.15 for the fourth quarter of fiscal 2025. The Company today updated its guidance for fourth quarter of fiscal 2025 revenue to $11.2 billion \u00b1 $100 million, non-GAAP gross margins to 44.5% \u00b1 0.5%, and non-GAAP ",
+          "high": 11200000000.0,
+          "low": 11200000000.0,
           "metric": "revenue",
-          "midpoint": 10700000000.0,
+          "midpoint": 11200000000.0,
           "period": "Q4FY2025",
           "source_timestamp": "2025-08-11T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm",
@@ -445,6 +453,7 @@
       "ticker": "MU"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000804328",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -480,6 +489,7 @@
       "ticker": "QCOM"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000104169",
       "classification": "DETERIORATED",
       "comparable_pairs": 1,
@@ -557,6 +567,7 @@
       "ticker": "WMT"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000027419",
       "classification": "NOT_DETERIORATED",
       "comparable_pairs": 3,
@@ -685,6 +696,7 @@
       "ticker": "TGT"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000060667",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -720,6 +732,7 @@
       "ticker": "LOW"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000354950",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -768,6 +781,7 @@
       "ticker": "HD"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000320187",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -787,6 +801,7 @@
       "ticker": "NKE"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001403568",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -820,6 +835,7 @@
       "ticker": "ULTA"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001048911",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -855,6 +871,7 @@
       "ticker": "FDX"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001090727",
       "classification": "UNKNOWN",
       "comparable_pairs": 2,
@@ -918,6 +935,7 @@
       "ticker": "UPS"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000731766",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -966,6 +984,7 @@
       "ticker": "UNH"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000049071",
       "classification": "DETERIORATED",
       "comparable_pairs": 3,
@@ -1083,6 +1102,7 @@
       "ticker": "HUM"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001156039",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -1131,10 +1151,24 @@
       "ticker": "ELV"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000064803",
       "classification": "UNKNOWN",
       "comparable_pairs": 3,
       "current": [
+        {
+          "action": "REAFFIRM",
+          "basis": "ADJUSTED",
+          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-08-05T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
+          "unit": "UNKNOWN"
+        },
         {
           "action": "RAISE",
           "basis": "ADJUSTED",
@@ -1160,19 +1194,6 @@
           "source_timestamp": "2026-08-05T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
           "unit": "USD/share"
-        },
-        {
-          "action": "REAFFIRM",
-          "basis": "ADJUSTED",
-          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the",
-          "high": null,
-          "low": null,
-          "metric": "eps",
-          "midpoint": null,
-          "period": "FY2026",
-          "source_timestamp": "2026-08-05T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
-          "unit": "UNKNOWN"
         },
         {
           "action": "RAISE",
@@ -1209,19 +1230,6 @@
           "unit": "USD/share"
         },
         {
-          "action": "REAFFIRM",
-          "basis": "ADJUSTED",
-          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the",
-          "high": null,
-          "low": null,
-          "metric": "eps",
-          "midpoint": null,
-          "period": "FY2026",
-          "source_timestamp": "2026-05-06T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
-          "unit": "UNKNOWN"
-        },
-        {
           "action": "RAISE",
           "basis": "ADJUSTED",
           "evidence": " guidance range to $6.24 to $6.44 from $5.94 to $6.14 \u25e6 Adjusted EPS guidance range to $7.30 to $7.50 from $7.00 to $7.20",
@@ -1233,6 +1241,19 @@
           "source_timestamp": "2026-05-06T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
           "unit": "USD/share"
+        },
+        {
+          "action": "REAFFIRM",
+          "basis": "ADJUSTED",
+          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-05-06T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
+          "unit": "UNKNOWN"
         },
         {
           "action": "RAISE",
@@ -1259,6 +1280,7 @@
       "ticker": "CVS"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0001613103",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -1294,6 +1316,7 @@
       "ticker": "MDT"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000310764",
       "classification": "NOT_DETERIORATED",
       "comparable_pairs": 1,
@@ -1312,11 +1335,9 @@
           "unit": "USD"
         }
       ],
-      "documents_fetched": 49,
+      "documents_fetched": 53,
       "duplicates_removed": 1,
-      "errors": [
-        "INDEX:0001193125-25-023587:HTTPStatusError"
-      ],
+      "errors": [],
       "filings_considered": 28,
       "guidance_deterioration": false,
       "guidance_records": 10,
@@ -1359,6 +1380,7 @@
       "ticker": "SYK"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000707549",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
@@ -1378,6 +1400,7 @@
       "ticker": "LRCX"
     },
     {
+      "archived_submission_files_fetched": 0,
       "cik": "0000319201",
       "classification": "UNKNOWN",
       "comparable_pairs": 0,
