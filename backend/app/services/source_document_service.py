@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -87,13 +88,18 @@ class SourceDocumentService:
         cache_dir: str | Path,
         user_agent: str,
         timeout_seconds: float = 20.0,
+        min_request_interval_seconds: float = 0.15,
         client: httpx.Client | None = None,
     ):
         if "@" not in user_agent and "mailto:" not in user_agent.lower():
             raise ValueError("SEC automated access requires a declared contact in the User-Agent")
+        if min_request_interval_seconds < 0.10:
+            raise ValueError("SEC request interval must remain at or above 0.10 seconds")
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.user_agent = user_agent
+        self.min_request_interval_seconds = min_request_interval_seconds
+        self._last_request_at = 0.0
         self._owns_client = client is None
         self.client = client or httpx.Client(
             timeout=timeout_seconds,
@@ -104,6 +110,15 @@ class SourceDocumentService:
     def close(self) -> None:
         if self._owns_client:
             self.client.close()
+
+    def _request(self, url: str) -> httpx.Response:
+        elapsed = time.monotonic() - self._last_request_at
+        wait = self.min_request_interval_seconds - elapsed
+        if wait > 0:
+            time.sleep(wait)
+        response = self.client.get(url)
+        self._last_request_at = time.monotonic()
+        return response
 
     def _validate_url(self, url: str) -> None:
         parsed = urlparse(url)
@@ -122,7 +137,7 @@ class SourceDocumentService:
         path = self.cache_dir / f"{key}.json"
         if not force and path.exists():
             return json.loads(path.read_text(encoding="utf-8"))
-        response = self.client.get(url)
+        response = self._request(url)
         response.raise_for_status()
         payload = response.json()
         path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
@@ -193,7 +208,7 @@ class SourceDocumentService:
                 content=content,
             )
 
-        response = self.client.get(ref.source_url)
+        response = self._request(ref.source_url)
         response.raise_for_status()
         content = response.text
         content_hash = hashlib.sha256(response.content).hexdigest()
