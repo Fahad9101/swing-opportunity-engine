@@ -1,0 +1,1062 @@
+{
+  "default_runtime_model_unchanged": true,
+  "generated_at": "2026-09-01T14:53:48.241749+00:00",
+  "model_version": "SOE-1.1.0",
+  "phase": "1.1A",
+  "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "summary": {
+    "classification_coverage_pct": 0.0,
+    "classified_comparable_names": 0,
+    "error_count": 0,
+    "exit_gate": "INSUFFICIENT_SAMPLE",
+    "non_null_assessments": 1,
+    "provenance_complete_pct": 100.0,
+    "reason_counts": {
+      "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint.": 10,
+      "No supported primary-source guidance fact was extracted in the validation window.": 12,
+      "Primary-source action language conflicts with the comparable numeric guidance table.": 1,
+      "Verified standing company policy of not issuing quantitative guidance; no withdrawal is present.": 1
+    },
+    "tickers_attempted": 24,
+    "tickers_with_comparable_guidance": 3,
+    "tickers_with_guidance_records": 11
+  },
+  "tickers": [
+    {
+      "cik": "0000796343",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 15,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "ADBE"
+    },
+    {
+      "cik": "0001108524",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 14,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "CRM"
+    },
+    {
+      "cik": "0001327567",
+      "classification": "NOT_DETERIORATED",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 16,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": false,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "Verified standing company policy of not issuing quantitative guidance; no withdrawal is present."
+      ],
+      "rule_path": "guidance_v1_1.explicit_standing_no_guidance_policy",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000012/ex991q326earningsrelease.htm"
+      ],
+      "ticker": "PANW"
+    },
+    {
+      "cik": "0001535527",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 14,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "CRWD"
+    },
+    {
+      "cik": "0001571996",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 17,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "DELL"
+    },
+    {
+      "cik": "0001645590",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Sales outside the United States constituted approximately 61% of our net revenue in fiscal year 2025.",
+          "high": 61.0,
+          "low": 61.0,
+          "metric": "revenue",
+          "midpoint": 61.0,
+          "period": "FY2025",
+          "source_timestamp": "2025-12-18T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1645590/000164559025000130/hpe-20251031.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "NONE",
+          "basis": "ADJUSTED",
+          "evidence": "Fiscal 2026 full year non-GAAP diluted net EPS estimate excludes net after-tax adjustments\u202fof approximately $1.28 per diluted share, primarily related to amortization of intangible assets, stock-based compensation expense, acquisition, disposition and other",
+          "high": 1.28,
+          "low": 1.28,
+          "metric": "eps",
+          "midpoint": 1.28,
+          "period": "FY2026",
+          "source_timestamp": "2026-03-09T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1645590/000164559026000028/ex-991x392026x8k.htm",
+          "unit": "USD/share"
+        }
+      ],
+      "documents_fetched": 18,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 2,
+      "prior": [],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1645590/000164559025000130/hpe-20251031.htm",
+        "https://www.sec.gov/Archives/edgar/data/1645590/000164559026000028/ex-991x392026x8k.htm"
+      ],
+      "ticker": "HPE"
+    },
+    {
+      "cik": "0000723125",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 24,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "MU"
+    },
+    {
+      "cik": "0000804328",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 14,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "QCOM"
+    },
+    {
+      "cik": "0000104169",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 3,
+      "current": [
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "With fiscal year 2025 revenue of $681 billion, Walmart employs approximately 2.1 million associates worldwide.",
+          "high": 681000000000.0,
+          "low": 681000000000.0,
+          "metric": "revenue",
+          "midpoint": 681000000000.0,
+          "period": "FY2025",
+          "source_timestamp": "2026-01-16T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000023/pressrelease-11626.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "With fiscal year 2026 revenue of $713 billion, Walmart employs approximately 2.1 million associates worldwide.",
+          "high": 713000000000.0,
+          "low": 713000000000.0,
+          "metric": "revenue",
+          "midpoint": 713000000000.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-08-20T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningsreleasefy27q2.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": "Consolidated metric Q3 FY27 Net sales (cc) Increase 3.0% to 3.75% Operating income (cc) Increase 2.0% to 4.0% Adjusted EPS $0.62 to $0.64 Fiscal year 2027 The Company\u2019s fiscal year guidance is based on the following FY26 figures: Net sales: $706.4 billion, adjusted operating income1: $31.0 billion, and adjusted EPS1: $2.64.",
+          "high": 0.64,
+          "low": 0.62,
+          "metric": "eps",
+          "midpoint": 0.63,
+          "period": "FY2027",
+          "source_timestamp": "2026-08-20T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningspresentationfy27.htm",
+          "unit": "USD/share"
+        }
+      ],
+      "documents_fetched": 23,
+      "duplicates_removed": 1,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 8,
+      "prior": [
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "With fiscal year 2025 revenue of $681 billion, Walmart employs approximately 2.1 million associates worldwide.",
+          "high": 681000000000.0,
+          "low": 681000000000.0,
+          "metric": "revenue",
+          "midpoint": 681000000000.0,
+          "period": "FY2025",
+          "source_timestamp": "2026-01-08T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000008/pressrelease1826.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "With fiscal year 2026 revenue of $713 billion, Walmart employs approximately 2.1 million associates worldwide.",
+          "high": 713000000000.0,
+          "low": 713000000000.0,
+          "metric": "revenue",
+          "midpoint": 713000000000.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-05-21T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000095/earningsreleasefy27q1.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": "Consolidated metric Q2 FY27 Net sales (cc) Increase 4.0% to 5.0% Operating income (cc) Increase 7.0% to 10.0% Adjusted EPS $0.72 to $0.74 Fiscal year 2027 The Company\u2019s fiscal year guidance is based on the following FY26 figures: Net sales: $706.4 billion, adjusted operating income1: $31.0 billion, and adjusted EPS1: $2.64.",
+          "high": 0.74,
+          "low": 0.72,
+          "metric": "eps",
+          "midpoint": 0.73,
+          "period": "FY2027",
+          "source_timestamp": "2026-05-21T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000095/earningspresentationfy27.htm",
+          "unit": "USD/share"
+        }
+      ],
+      "reasons": [
+        "Primary-source action language conflicts with the comparable numeric guidance table."
+      ],
+      "rule_path": "guidance_v1_1.conflicting_primary_evidence",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000008/pressrelease1826.htm",
+        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000023/pressrelease-11626.htm",
+        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000095/earningspresentationfy27.htm",
+        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000095/earningsreleasefy27q1.htm",
+        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningspresentationfy27.htm",
+        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningsreleasefy27q2.htm"
+      ],
+      "ticker": "WMT"
+    },
+    {
+      "cik": "0000027419",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 14,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "TGT"
+    },
+    {
+      "cik": "0000060667",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 1,
+      "current": [
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "EBITDA of $635M, which are unaudited for fiscal year 2024 and include full-year impact of recent REW Materials and Unified Door & Hardware Group acquisitions.",
+          "high": 635000000.0,
+          "low": 635000000.0,
+          "metric": "ebitda",
+          "midpoint": 635000000.0,
+          "period": "FY2024",
+          "source_timestamp": "2025-08-20T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066725000162/exhibit992-08202025.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Lowe's Companies, Inc. (NYSE: LOW) is a FORTUNE\u00ae 100 home improvement company serving approximately 16 million customer transactions a week, with total fiscal year 2024 sales of more than $83 billion.",
+          "high": 16000000.0,
+          "low": 16000000.0,
+          "metric": "revenue",
+          "midpoint": 16000000.0,
+          "period": "FY2024",
+          "source_timestamp": "2025-11-19T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066725000203/exhibit991-10312025.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Lowe\u2019s Companies, Inc. (NYSE: LOW) is a FORTUNE\u00ae 100 home improvement company serving approximately 16 million customer transactions a week, with total fiscal year 2025 sales of more than $86 billion.",
+          "high": 16000000.0,
+          "low": 16000000.0,
+          "metric": "revenue",
+          "midpoint": 16000000.0,
+          "period": "FY2025",
+          "source_timestamp": "2026-02-25T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066726000020/exhibit991-01302026.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Included in fiscal 2025 results are pre-tax expenses of $321 million consisting of transaction costs and intangible asset amortization related to the acquisition of ADG and FBM, which decreased diluted earnings per share by $0.43 in fiscal year 2025.",
+          "high": 321.0,
+          "low": 321.0,
+          "metric": "eps",
+          "midpoint": 321.0,
+          "period": "FY2025",
+          "source_timestamp": "2026-03-23T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066726000029/low-20260130.htm",
+          "unit": "USD/share"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Included in the fiscal 2024 results is $177 million of pre-tax income associated with the fiscal 2022 sale of the Canadian retail business, which increased diluted earnings per share by $0.24 in fiscal year 2024.",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2024",
+          "source_timestamp": "2026-03-23T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066726000029/low-20260130.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "documents_fetched": 25,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 7,
+      "prior": [
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": "With total fiscal year 2024 sales of more than $83 billion, Lowe\u2019s operates over 1,700 home improvement stores and employs approximately 300,000 associates.",
+          "high": 300000.0,
+          "low": 300000.0,
+          "metric": "revenue",
+          "midpoint": 300000.0,
+          "period": "FY2024",
+          "source_timestamp": "2025-10-09T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066725000199/exhibit991-10092025.htm",
+          "unit": "USD"
+        }
+      ],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/60667/000006066725000162/exhibit992-08202025.htm",
+        "https://www.sec.gov/Archives/edgar/data/60667/000006066725000199/exhibit991-10092025.htm",
+        "https://www.sec.gov/Archives/edgar/data/60667/000006066725000203/exhibit991-10312025.htm",
+        "https://www.sec.gov/Archives/edgar/data/60667/000006066726000020/exhibit991-01302026.htm",
+        "https://www.sec.gov/Archives/edgar/data/60667/000006066726000029/low-20260130.htm"
+      ],
+      "ticker": "LOW"
+    },
+    {
+      "cik": "0000354950",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 19,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "HD"
+    },
+    {
+      "cik": "0000320187",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 15,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "NKE"
+    },
+    {
+      "cik": "0001403568",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 15,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "ULTA"
+    },
+    {
+      "cik": "0001048911",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Smith began his first stint as the Chief Executive Officer of FedEx Freight in 2018, our management team has successfully executed on a strong operational efficiency plan that has optimized our footprint and increased yields, resulting in an operating ratio of 84.2% in fiscal year 2025 and approximately 860 basis points of operating margin expansion over the course of his tenure.",
+          "high": 0.8420000000000001,
+          "low": 0.8420000000000001,
+          "metric": "operating_margin",
+          "midpoint": 0.8420000000000001,
+          "period": "FY2025",
+          "source_timestamp": "2026-05-13T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1048911/000110465926060233/tm2520565d15_ex99-1.htm",
+          "unit": "fraction"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Leading LTL companies have accordingly adapted their business models and increased technology integration to increase yield, as defined by revenue per shipment, with FedEx Freight improving such yield more than its publicly listed peers from 2020 through the first quarter of fiscal year 2025.",
+          "high": null,
+          "low": null,
+          "metric": "revenue",
+          "midpoint": null,
+          "period": "FY2025",
+          "source_timestamp": "2026-05-13T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1048911/000110465926060233/tm2520565d15_ex99-1.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "documents_fetched": 25,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 2,
+      "prior": [],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1048911/000110465926060233/tm2520565d15_ex99-1.htm"
+      ],
+      "ticker": "FDX"
+    },
+    {
+      "cik": "0001090727",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 1,
+      "current": [
+        {
+          "action": "REAFFIRM",
+          "basis": "ADJUSTED",
+          "evidence": "For the full year 2026, the company reaffirms its consolidated financial targets of revenue of approximately $89.7 billion and non-GAAP adjusted operating margin of approximately 9.6%.",
+          "high": 0.096,
+          "low": 0.096,
+          "metric": "operating_margin",
+          "midpoint": 0.096,
+          "period": "FY2026",
+          "source_timestamp": "2026-04-28T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1090727/000162828026027717/exhibit991-earningspressre.htm",
+          "unit": "fraction"
+        },
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": "For the full year 2026, the company is raising its guidance for consolidated revenue to approximately $91.2 billion, consolidated non-GAAP adjusted operating profit to approximately $8.65 billion, and non-GAAP adjusted diluted EPS to approximately $7.22.",
+          "high": 91.2,
+          "low": 91.2,
+          "metric": "eps",
+          "midpoint": 91.2,
+          "period": "FY2026",
+          "source_timestamp": "2026-07-28T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1090727/000162828026049912/exhibit991-earningspressre.htm",
+          "unit": "USD/share"
+        },
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": "Raises Full-year 2026 Consolidated Revenue Outlook to Approximately $91.2B and Non-GAAP Adj.",
+          "high": 91200000000.0,
+          "low": 91200000000.0,
+          "metric": "revenue",
+          "midpoint": 91200000000.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-07-28T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1090727/000162828026049912/exhibit991-earningspressre.htm",
+          "unit": "USD"
+        }
+      ],
+      "documents_fetched": 22,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 4,
+      "prior": [
+        {
+          "action": "INITIATE",
+          "basis": "ADJUSTED",
+          "evidence": "For the full year 2026, on a consolidated basis, UPS expects revenue to be approximately $89.7 billion and non-GAAP adjusted operating margin to be approximately 9.6%.",
+          "high": 0.096,
+          "low": 0.096,
+          "metric": "operating_margin",
+          "midpoint": 0.096,
+          "period": "FY2026",
+          "source_timestamp": "2026-01-27T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1090727/000162828026003510/exhibit991-earningspressre.htm",
+          "unit": "fraction"
+        }
+      ],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1090727/000162828026003510/exhibit991-earningspressre.htm",
+        "https://www.sec.gov/Archives/edgar/data/1090727/000162828026027717/exhibit991-earningspressre.htm",
+        "https://www.sec.gov/Archives/edgar/data/1090727/000162828026049912/exhibit991-earningspressre.htm"
+      ],
+      "ticker": "UPS"
+    },
+    {
+      "cik": "0000731766",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "NONE",
+          "basis": "ADJUSTED",
+          "evidence": "UnitedHealth Group Updated 2026 Full Year Guidance ($ in millions, except per share data) Reported Operating Earnings Adjusted Operating Earnings UnitedHealthcare > $12,000 > $12,000 Optum Health > $2,275 > $2,215 Optum Insight > $4,925 > $4,750 Optum Rx > $6,250 > $6,250 Optum (a) > $13,450 > $13,215 UnitedHealth Group > $25,450 > $25,215 Medical Care Ratio 88.1% \u00b1 25 bps Tax Rate ~18.5% Cash Flows from Operations ~$24,000 Share Repurchase At Least $5,000 Net Earnings to UNH Shareholders > $16,750 Diluted Adjusted (b) Net Earnings per Share $18.45 - $18.95 $19.50 - $20.00 (a) Refer to page 7 of this release for a bridge of Optum Reported to Adjusted Operating Earnings. (b) Refer to page 16 of this release for a reconciliation of the non-GAAP measure.",
+          "high": 18.95,
+          "low": 18.45,
+          "metric": "eps",
+          "midpoint": 18.7,
+          "period": "FY2026",
+          "source_timestamp": "2026-07-16T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/731766/000073176626000191/earningsrelease2q26_7152.htm",
+          "unit": "USD/share"
+        }
+      ],
+      "documents_fetched": 16,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 1,
+      "prior": [],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/731766/000073176626000191/earningsrelease2q26_7152.htm"
+      ],
+      "ticker": "UNH"
+    },
+    {
+      "cik": "0000049071",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "REAFFIRM",
+          "basis": "ADJUSTED",
+          "evidence": "The Company reaffirms its guidance of approximately $12.26 in diluted earnings per common share (\u201cEPS\u201d) or approximately $17.00 in adjusted earnings per common share (\u201cAdjusted EPS\u201d), in each case for the year ending December 31, 2025 (\u201cFY 2025\u201d).",
+          "high": 12.26,
+          "low": 12.26,
+          "metric": "eps",
+          "midpoint": 12.26,
+          "period": "FY2025",
+          "source_timestamp": "2025-12-16T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/49071/000004907125000061/hum-20251216.htm",
+          "unit": "USD/share"
+        },
+        {
+          "action": "REAFFIRM",
+          "basis": "ADJUSTED",
+          "evidence": "During these meetings, the Company intends to reaffirm its guidance of at least $8.36 in diluted earnings per common share (\u201cEPS\u201d) or at least $9.00 in adjusted earnings per common share (\u201cAdjusted EPS\u201d), in each case for the year ending December 31, 2026 (\u201cFY 2026\u201d).",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-06-01T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000027/hum-20260601.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "documents_fetched": 19,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 3,
+      "prior": [
+        {
+          "action": "REAFFIRM",
+          "basis": "ADJUSTED",
+          "evidence": "During these meetings, the Company intends to reaffirm its guidance of at least $8.89 in diluted earnings per common share (\u201cEPS\u201d) or at least $9.00 in adjusted earnings per common share (\u201cAdjusted EPS\u201d), in each case for the year ending December 31, 2026 (\u201cFY 2026\u201d).",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-03-02T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000011/hum-20260302.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/49071/000004907125000061/hum-20251216.htm",
+        "https://www.sec.gov/Archives/edgar/data/49071/000004907126000011/hum-20260302.htm",
+        "https://www.sec.gov/Archives/edgar/data/49071/000004907126000027/hum-20260601.htm"
+      ],
+      "ticker": "HUM"
+    },
+    {
+      "cik": "0001156039",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 14,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "ELV"
+    },
+    {
+      "cik": "0000064803",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the potential for macro headwinds.",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-08-05T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "documents_fetched": 19,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 2,
+      "prior": [
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the potential for macro headwinds.",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-05-06T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
+        "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm"
+      ],
+      "ticker": "CVS"
+    },
+    {
+      "cik": "0001613103",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "INITIATE",
+          "basis": "ADJUSTED",
+          "evidence": "As a result of the foregoing factors related to MiniMed that are expected to have an impact in the fourth quarter of fiscal year 2026, on March 24, 2026, Medtronic announced that it now expects non-GAAP earnings per share (EPS) for fiscal year 2026 to be in the range of $5.50 to $5.54, a revision from the Q3 earnings call EPS guidance of $5.62 to $5.66.",
+          "high": 5.54,
+          "low": 5.5,
+          "metric": "eps",
+          "midpoint": 5.52,
+          "period": "FY2026",
+          "source_timestamp": "2026-03-24T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1613103/000161310326000005/mdt-20260324.htm",
+          "unit": "USD/share"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "The increase in net sales for fiscal year 2026 was driven primarily by growth in most businesses, as further described in the business sections below.",
+          "high": null,
+          "low": null,
+          "metric": "revenue",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-06-18T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "unit": "UNKNOWN"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Medical Surgical\u2019s net sales for fiscal year 2026 were $8.8 billion, an increase of 5 percent as compared to fiscal year 2025, resulting from growth across most businesses and the impacts of foreign currency fluctuations.",
+          "high": 5.0,
+          "low": 5.0,
+          "metric": "revenue",
+          "midpoint": 5.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-06-18T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "For fiscal year 2026, the impact of the Italian payback adjustment was an increase to net sales of $39 million as compared to a decrease in net sales of $90 million in fiscal year 2025.",
+          "high": 39000000.0,
+          "low": 39000000.0,
+          "metric": "revenue",
+          "midpoint": 39000000.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-06-18T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Neuroscience\u2019s net sales for fiscal year 2026 were $10.3 billion, an increase of 4 percent as compared to fiscal year 2025, resulting from growth in Cranial and Spinal Technologies, Neuromodulation, ENT, and the impacts of foreign currency fluctuations.",
+          "high": 4.0,
+          "low": 4.0,
+          "metric": "revenue",
+          "midpoint": 4.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-06-18T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Diabetes' net sales for fiscal year 2026 were $3.1 billion, an increase of 13 percent as compared to fiscal year 2025.",
+          "high": 13.0,
+          "low": 13.0,
+          "metric": "revenue",
+          "midpoint": 13.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-06-18T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm",
+          "unit": "USD"
+        }
+      ],
+      "documents_fetched": 18,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 7,
+      "prior": [
+        {
+          "action": "REAFFIRM",
+          "basis": "ADJUSTED",
+          "evidence": "The financial impact from the Offering and the expected use of proceeds was reflected in Medtronic plc\u2019s fiscal year 2026 adjusted earnings per share guidance that Medtronic plc reiterated on August 19, 2025.",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2025-09-16T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1613103/000119312525205061/d34781d8k.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/1613103/000119312525205061/d34781d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1613103/000161310326000005/mdt-20260324.htm",
+        "https://www.sec.gov/Archives/edgar/data/1613103/000162828026044354/mdt-20260424.htm"
+      ],
+      "ticker": "MDT"
+    },
+    {
+      "cik": "0000310764",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [],
+      "documents_fetched": 14,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 0,
+      "prior": [],
+      "reasons": [
+        "No supported primary-source guidance fact was extracted in the validation window."
+      ],
+      "rule_path": "guidance_v1_1.no_extracted_primary_guidance",
+      "sources": [],
+      "ticker": "SYK"
+    },
+    {
+      "cik": "0000707549",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Gross margin as a percentage of revenue increased in fiscal year 2025 compared to fiscal year 2024 largely due to improved factory efficiencies and favorable product mix, partially offset by increased transformational charges.",
+          "high": null,
+          "low": null,
+          "metric": "gross_margin",
+          "midpoint": null,
+          "period": "FY2025",
+          "source_timestamp": "2025-08-11T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm",
+          "unit": "UNKNOWN"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Fiscal year 2025 revenue increased 23.7% compared to fiscal year 2024, driven by strong customer demand for semiconductor equipment systems as well as customer support-related revenues from customer investments across memory and non-memory markets.",
+          "high": null,
+          "low": null,
+          "metric": "revenue",
+          "midpoint": null,
+          "period": "FY2025",
+          "source_timestamp": "2025-08-11T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm",
+          "unit": "UNKNOWN"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "The increase in gross margin as a percentage of revenue for fiscal year 2024 compared to fiscal year 2023",
+          "high": null,
+          "low": null,
+          "metric": "gross_margin",
+          "midpoint": null,
+          "period": "FY2024",
+          "source_timestamp": "2025-08-11T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm",
+          "unit": "UNKNOWN"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "The percentage of revenue from the Foundry market segment increased by 900 basis points in fiscal year 2026 compared to fiscal year 2025 due to mature node spending as well as investments in leading-edge equipment.",
+          "high": null,
+          "low": null,
+          "metric": "revenue",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-08-07T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/lrcx-20260628.htm",
+          "unit": "UNKNOWN"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Gross margin as a percentage of revenue increased in fiscal year 2026 compared to fiscal year 2025 largely due to favorable customer mix, partially offset by aluminum and steel tariff-related spend.",
+          "high": null,
+          "low": null,
+          "metric": "gross_margin",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-08-07T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/lrcx-20260628.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "documents_fetched": 14,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 5,
+      "prior": [],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm",
+        "https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/lrcx-20260628.htm"
+      ],
+      "ticker": "LRCX"
+    },
+    {
+      "cik": "0000319201",
+      "classification": "UNKNOWN",
+      "comparable_pairs": 0,
+      "current": [
+        {
+          "action": "NONE",
+          "basis": "GAAP",
+          "evidence": "KLA reported GAAP net income of $1.36 billion and GAAP diluted earnings per share (\u201cEPS\u201d) of $1.04 on total revenues of $3.66 billion for the fourth quarter of fiscal year 2026.",
+          "high": 1.36,
+          "low": 1.36,
+          "metric": "eps",
+          "midpoint": 1.36,
+          "period": "FY2026",
+          "source_timestamp": "2026-07-28T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/319201/000031920126000024/exhibit991earningsrelease7.htm",
+          "unit": "USD/share"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "Despite these dynamics, we delivered higher revenue and net income in fiscal year 2026 compared to fiscal year 2025, driven by increased sales volume and disciplined cost management.",
+          "high": null,
+          "low": null,
+          "metric": "revenue",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-08-06T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/319201/000031920126000027/klac-20260630.htm",
+          "unit": "UNKNOWN"
+        }
+      ],
+      "documents_fetched": 18,
+      "duplicates_removed": 0,
+      "errors": [],
+      "filings_considered": 14,
+      "guidance_deterioration": null,
+      "guidance_records": 2,
+      "prior": [],
+      "reasons": [
+        "At least one current non-initiated guidance metric lacks a verified comparable prior record or valid midpoint."
+      ],
+      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "sources": [
+        "https://www.sec.gov/Archives/edgar/data/319201/000031920126000024/exhibit991earningsrelease7.htm",
+        "https://www.sec.gov/Archives/edgar/data/319201/000031920126000027/klac-20260630.htm"
+      ],
+      "ticker": "KLAC"
+    }
+  ]
+}
