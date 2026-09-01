@@ -130,10 +130,38 @@ Write-Host "submissions.zip: $([math]::Round((Get-Item $Submissions).Length / 1M
 $JsonOut = Join-Path $ResultsDir "milestone_2_5j_validation.json"
 $MarkdownOut = Join-Path $ResultsDir "MILESTONE_2_5J_REPORT.md"
 $LogOut = Join-Path $ResultsDir "milestone_2_5j_validation.log"
+$LocalDb = Join-Path $RepoRoot "soe_milestone_2_5j_local.db"
+
+# A prior interrupted local run may have a partially populated validation DB.
+# It is disposable validation state only, so start the final run clean while
+# keeping the downloaded SEC/Yahoo caches for speed and reproducibility.
+if (Test-Path $LocalDb) { Remove-Item -Force $LocalDb }
+foreach ($Output in @($JsonOut, $MarkdownOut, $LogOut)) {
+    if (Test-Path $Output) { Remove-Item -Force $Output }
+}
 
 Write-Host "`n=== Run final Milestone 2.5J full-market validation ==="
-& $Python -m app.cli_milestone_2_5j_validation --json-out $JsonOut --markdown-out $MarkdownOut 2>&1 | Tee-Object -FilePath $LogOut
-$ValidationExit = $LASTEXITCODE
+
+# Python logging intentionally writes per-ticker recoverable exceptions to
+# stderr. Windows PowerShell 5.1 converts native stderr into ErrorRecord objects;
+# with ErrorActionPreference=Stop that incorrectly aborts the scan on the first
+# recoverable ticker failure. Merge stderr inside cmd.exe before PowerShell sees
+# it so the SOE pipeline can record that ticker failure and continue as designed.
+$RunnerBat = Join-Path $env:TEMP "soe_milestone_2_5j_validation.cmd"
+@"
+@echo off
+"$Python" -m app.cli_milestone_2_5j_validation --json-out "$JsonOut" --markdown-out "$MarkdownOut" 2>&1
+exit /b %ERRORLEVEL%
+"@ | Set-Content -Path $RunnerBat -Encoding ASCII
+
+try {
+    & $env:ComSpec /d /c $RunnerBat | Tee-Object -FilePath $LogOut
+    $ValidationExit = $LASTEXITCODE
+}
+finally {
+    Remove-Item $RunnerBat -Force -ErrorAction SilentlyContinue
+}
+
 if ($ValidationExit -ne 0) {
     throw "Milestone 2.5J validation failed with exit code $ValidationExit. Review $LogOut"
 }
