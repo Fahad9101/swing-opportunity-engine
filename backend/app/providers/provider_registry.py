@@ -10,9 +10,8 @@ from app.providers.cboe_vix import CboeVixProvider
 from app.providers.clinical_trials import ClinicalTrialsProvider
 from app.providers.public_market_data import PublicMarketDataProvider
 from app.providers.sec_biotech_validated import SecBiotechValidatedProvider
-from app.providers.sec_edgar import SecEdgarProvider
-from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
-from app.providers.yahoo_ownership import YahooOwnershipProvider
+from app.providers.sec_edgar_resilient import ResilientSecEdgarProvider
+from app.providers.yahoo_combined import YahooCombinedEnrichmentProvider
 from app.services.cache_service import JsonFileCache
 
 
@@ -30,9 +29,17 @@ def get_provider(name: str | None = None) -> object:
         rules = load_rules()
         cache = JsonFileCache(settings.cache_dir)
         market = PublicMarketDataProvider(cache=cache, rules=rules)
-        analyst = YahooAnalystEstimateProvider(cache=cache, rules=rules)
-        ownership = YahooOwnershipProvider(cache=cache, rules=rules)
-        sec = SecEdgarProvider(
+
+        # Milestone 2.5J: one authenticated, throttled Yahoo quoteSummary client
+        # supplies both analyst/valuation and ownership/short-float enrichment.
+        # This changes transport efficiency only; SOE-1.0.0 investment logic is
+        # unchanged and Yahoo remains prototype-validation data.
+        yahoo = YahooCombinedEnrichmentProvider(cache=cache, rules=rules)
+
+        # Prefer the official nightly SEC companyfacts archive. If GitHub-hosted
+        # egress is denied access to that large ZIP, use rate-limited/cached
+        # official SEC JSON endpoints for universal-gate survivors instead.
+        sec = ResilientSecEdgarProvider(
             cache=cache,
             zip_path=settings.sec_companyfacts_zip_path,
             user_agent=settings.sec_user_agent,
@@ -48,8 +55,8 @@ def get_provider(name: str | None = None) -> object:
         provider = FreePublicProvider(
             symbol_directory=NasdaqSymbolDirectory(cache=cache), market=market,
             sec=sec,
-            analyst=analyst,
-            ownership=ownership,
+            analyst=yahoo,
+            ownership=yahoo,
             calendar=NasdaqEarningsCalendar(cache=cache, rules=rules),
             clinical_trials=ClinicalTrialsProvider(timeout_seconds=rules["data_quality"]["provider"]["timeout_seconds"]),
             vix=CboeVixProvider(cache=cache), rules=rules,

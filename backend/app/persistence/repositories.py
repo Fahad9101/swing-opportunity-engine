@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID
 
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -43,7 +44,12 @@ class ScanRepository:
         self.session.add(MarketSnapshotORM(scan_run_id=str(run_id), ticker=item.ticker, normalized_data=_json(item), source=item.source, as_of=item.as_of, fetched_at=item.fetched_at, stale=item.stale))
 
     def save_fundamental(self, run_id: UUID, item: FundamentalSnapshot) -> None:
-        self.session.add(FundamentalSnapshotORM(scan_run_id=str(run_id), ticker=item.ticker, normalized_data=_json(item), raw_source_json=item.raw, source=item.source, as_of=item.as_of, fetched_at=item.fetched_at, stale=item.stale))
+        # raw can contain nested provider metadata with datetime/date/enum values.
+        # SQLAlchemy's generic JSON serializer cannot encode those Python objects
+        # directly, while Pydantic/FastAPI's encoder preserves the same values in
+        # JSON-safe ISO/string form. This is persistence-only and does not change
+        # any SOE investment input, score, scanner, threshold, or classification.
+        self.session.add(FundamentalSnapshotORM(scan_run_id=str(run_id), ticker=item.ticker, normalized_data=_json(item), raw_source_json=jsonable_encoder(item.raw), source=item.source, as_of=item.as_of, fetched_at=item.fetched_at, stale=item.stale))
 
     def save_estimates(self, run_id: UUID, item: EstimateSnapshot) -> None:
         self.session.add(EstimateSnapshotORM(scan_run_id=str(run_id), ticker=item.ticker, normalized_data=_json(item), source=item.source, as_of=item.as_of, fetched_at=item.fetched_at, stale=item.stale))
