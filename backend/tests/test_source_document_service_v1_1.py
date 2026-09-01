@@ -38,6 +38,18 @@ def test_index_submissions_payload_filters_forms_and_preserves_dates():
     assert refs[0].source_url.startswith("https://www.sec.gov/Archives/edgar/data/1/")
 
 
+def _filing(form: str = "8-K") -> SecDocumentReference:
+    return SecDocumentReference(
+        ticker="TEST",
+        cik="0000000001",
+        accession="0000000001-26-000001",
+        form=form,
+        filing_date=date(2026, 8, 1),
+        primary_document="primary8k.htm",
+        source_url=sec_archive_url(1, "0000000001-26-000001", "primary8k.htm"),
+    )
+
+
 def test_filing_documents_adds_likely_ex99_and_press_release_only(tmp_path):
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path.endswith("/index.json"):
@@ -62,17 +74,55 @@ def test_filing_documents_adds_likely_ex99_and_press_release_only(tmp_path):
         user_agent="SwingOpportunityEngine/1.1 test@example.com",
         client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
-    filing = SecDocumentReference(
-        ticker="TEST",
-        cik="0000000001",
-        accession="0000000001-26-000001",
-        form="8-K",
-        filing_date=date(2026, 8, 1),
-        primary_document="primary8k.htm",
-        source_url=sec_archive_url(1, "0000000001-26-000001", "primary8k.htm"),
-    )
-    refs = service.filing_documents(filing)
+    refs = service.filing_documents(_filing())
     assert [ref.primary_document for ref in refs] == ["primary8k.htm", "ex991.htm", "press-release.htm"]
+
+
+def test_8k_uses_bounded_generic_html_fallback_for_issuer_named_exhibit(tmp_path):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "directory": {
+                    "item": [
+                        {"name": "primary8k.htm", "size": "15000"},
+                        {"name": "issuer-q2-results.htm", "size": "85000"},
+                        {"name": "R1.htm", "size": "12000"},
+                    ]
+                }
+            },
+        )
+
+    service = SourceDocumentService(
+        cache_dir=tmp_path,
+        user_agent="SwingOpportunityEngine/1.1 test@example.com",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    refs = service.filing_documents(_filing())
+    assert [ref.primary_document for ref in refs] == ["primary8k.htm", "issuer-q2-results.htm"]
+
+
+def test_10q_does_not_use_generic_html_fallback(tmp_path):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "directory": {
+                    "item": [
+                        {"name": "primary8k.htm", "size": "15000"},
+                        {"name": "issuer-q2-results.htm", "size": "85000"},
+                    ]
+                }
+            },
+        )
+
+    service = SourceDocumentService(
+        cache_dir=tmp_path,
+        user_agent="SwingOpportunityEngine/1.1 test@example.com",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    refs = service.filing_documents(_filing("10-Q"))
+    assert [ref.primary_document for ref in refs] == ["primary8k.htm"]
 
 
 def test_sec_document_fetch_is_cached(tmp_path):
