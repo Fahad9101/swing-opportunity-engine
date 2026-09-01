@@ -204,15 +204,25 @@ def _guidance_context(text: str) -> bool:
     return bool(_FORWARD_CONTEXT.search(text))
 
 
+def _increase_guidance_action(text: str) -> bool:
+    for match in re.finditer(rf"\bincreas(?:e|es|ed|ing)\b(?P<body>.{{0,140}}?)\b{_GUIDANCE_NOUN}\b", text, re.I | re.S):
+        body = match.group("body")
+        if "%" not in body:
+            return True
+    return False
+
+
 def _action(text: str) -> GuidanceAction:
     """Return an explicit management guidance action, not ordinary growth language."""
     action_specs: list[tuple[GuidanceAction, str]] = [
         (GuidanceAction.WITHDRAW, r"(?:withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?)"),
         (GuidanceAction.LOWER, r"(?:lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)"),
-        (GuidanceAction.RAISE, r"(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?|increas(?:e|es|ed|ing))"),
+        (GuidanceAction.RAISE, r"(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?)"),
         (GuidanceAction.REAFFIRM, r"(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)"),
         (GuidanceAction.INITIATE, r"(?:initiat(?:e|es|ed|ing)|provid(?:e|es|ed|ing)|issu(?:e|es|ed|ing))"),
     ]
+    if _increase_guidance_action(text):
+        return GuidanceAction.RAISE
     for action, verb in action_specs:
         if re.search(rf"\b{verb}\b.{{0,140}}\b{_GUIDANCE_NOUN}\b", text, re.I | re.S) or re.search(
             rf"\b{_GUIDANCE_NOUN}\b.{{0,140}}\b{verb}\b", text, re.I | re.S
@@ -308,9 +318,9 @@ def _bound_preceding_candidate(text: str, candidate: _NumericCandidate, anchor: 
     if candidate.end > anchor or anchor - candidate.end > 70:
         return False
     connector = text[candidate.end:anchor]
-    if _SCALE_WORD.search(connector):
+    if _SCALE_WORD.search(connector) or re.search(r"[;•]", connector):
         return False
-    normalized = re.sub(r"[\s•:;,()\[\]–—-]+", " ", connector).strip()
+    normalized = re.sub(r"[\s:,.()\[\]–—-]+", " ", connector).strip()
     if not normalized:
         return True
     return bool(
