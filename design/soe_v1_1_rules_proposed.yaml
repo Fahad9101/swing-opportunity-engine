@@ -1,0 +1,146 @@
+# DESIGN ONLY — NOT RUNTIME CONFIG
+# Proposed delta rules for SOE-1.1.0. All unspecified SOE-1.0.0 rules remain unchanged.
+
+model_version: "SOE-1.1.0"
+
+catalyst_v1_1:
+  materiality:
+    event_class_base:
+      regulatory_decision: 5
+      pivotal_phase3_readout: 5
+      merger_approval_or_close: 5
+      final_core_legal_regulatory_ruling: 5
+      quarterly_earnings: 4
+      formal_full_year_guidance_update: 4
+      phase2_poc_readout: 4
+      major_reimbursement_decision: 4
+      investor_day_new_multiyear_targets: 4
+      phase1_2_efficacy_update: 3
+      major_contract_customer_award: 3
+      product_launch_with_disclosed_economics: 3
+      material_refinancing_covenant_event: 3
+      strategic_review_outcome: 3
+      non_pivotal_study_update: 2
+      conference_new_data: 2
+      ordinary_measurable_noncore_update: 2
+      routine_presentation_no_new_data_expected: 1
+      administrative_or_unverifiable: 0
+    economic_exposure:
+      score_3_min_fraction: 0.20
+      score_2_min_fraction: 0.10
+      score_1_min_fraction: 0.05
+      biotech_score_3_min_pipeline_value_fraction: 0.50
+      biotech_score_2_min_pipeline_value_fraction: 0.25
+      biotech_score_1_min_pipeline_value_fraction: 0.10
+      company_wide_earnings_default: 3
+      company_wide_guidance_default: 3
+    consequence_severity:
+      binary_permission_viability: 2
+      material_estimate_or_execution_change: 1
+      informational: 0
+      quarterly_earnings_default: 1
+      earnings_with_formal_guidance_action: 2
+    maximum: 10
+
+  surprise_re_rating:
+    outcome_binaryity:
+      hard_binary: 2
+      estimate_reset_event: 1
+      informational: 0
+    earnings_expectation_uncertainty:
+      dispersion_score_2_min: 0.20
+      dispersion_score_1_min: 0.10
+      consensus_instability_score_2_min: 0.10
+      consensus_instability_score_1_min: 0.05
+    clinical_regulatory_expectation_uncertainty:
+      unresolved_pivotal_or_regulatory: 2
+      phase2_or_derisked_label_expansion: 1
+      confirmatory_administrative: 0
+    transaction_legal_financing_expectation_uncertainty:
+      unresolved_material_binary_contingency: 2
+      multiple_plausible_economic_outcomes: 1
+      administrative: 0
+    valuation_concentration:
+      score_1_when_exposure_score: 3
+    maximum: 5
+
+guidance_v1_1:
+  supported_metrics:
+    - revenue
+    - eps
+    - ebitda
+    - fcf
+    - gross_margin
+    - operating_margin
+  material_cut_thresholds:
+    revenue_pct: 0.02
+    eps_pct: 0.05
+    ebitda_pct: 0.05
+    fcf_pct: 0.05
+    margin_bps: 100
+  multi_metric_small_cut:
+    minimum_cut_metrics: 2
+    revenue_eps_ebitda_fcf_min_pct: 0.01
+    margin_min_bps: 50
+  explicit_lower_or_withdrawal_always_deteriorated: true
+  missing_prior_comparable_guidance: null
+  one_off_no_guidance_without_policy: null
+  explicit_standing_no_guidance_policy_without_withdrawal: false
+
+balance_sheet_distress_v1_1:
+  universal_hard_overrides:
+    going_concern: true
+    bankruptcy_or_restructuring: true
+    payment_default: true
+    unresolved_covenant_breach: true
+    unresolved_solvency_reliability_issue: true
+    explicit_12m_obligation_shortfall_without_committed_financing: true
+
+  corporate:
+    distressed:
+      net_debt_to_ebitda_gt: 5.0
+      paired_interest_coverage_lt: 2.0
+      interest_coverage_absolute_lt: 1.0
+      liquidity_coverage_lt: 1.0
+      negative_fcf_runway_months_lt: 12
+    safe:
+      net_cash: true
+      net_debt_to_ebitda_lte: 3.0
+      paired_interest_coverage_gte: 3.0
+      liquidity_coverage_gte: 1.5
+      require_positive_fcf_for_liquidity_path: true
+      negative_fcf_runway_months_gte: 18
+
+  utilities:
+    distressed:
+      net_debt_to_ebitda_gt: 7.0
+      paired_interest_coverage_lt: 1.5
+      liquidity_coverage_lt: 1.0
+    safe:
+      net_debt_to_ebitda_lte: 5.5
+      paired_interest_coverage_gte: 2.0
+
+  reits:
+    distressed:
+      debt_to_ebitdare_gt: 8.0
+      paired_fixed_charge_coverage_lt: 1.5
+      liquidity_coverage_lt: 1.0
+    safe:
+      debt_to_ebitdare_lte: 6.5
+      paired_fixed_charge_coverage_gte: 2.0
+
+  banks:
+    distressed_if_regulatory_capital_breach: true
+    safe_cet1_excess_over_requirement_and_buffer_bps_gte: 250
+
+  insurers:
+    distressed_below_regulatory_action_threshold: true
+    safe_ratio_to_regulatory_action_threshold_gte: 1.5
+
+validation_v1_1:
+  minimum_materiality_coverage_with_sufficient_evidence: 0.90
+  minimum_surprise_coverage_with_sufficient_evidence: 0.80
+  minimum_guidance_classification_coverage_with_comparable_guidance: 0.80
+  minimum_nonfinancial_distress_coverage_with_sufficient_inputs: 0.90
+  manual_audit_minimum_sample: 100
+  manual_audit_minimum_rule_concordance: 0.95
