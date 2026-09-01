@@ -2,6 +2,7 @@ param(
     [string]$SecUserAgent = "",
     [string]$SecContactEmail = "",
     [string]$Tickers = "",
+    [string]$TickerFile = "validation/phase_1_1a_preregistered_basket_v1.json",
     [ValidateRange(14, 48)][int]$MaxFilings = 32,
     [switch]$SkipInstall,
     [switch]$SkipTests
@@ -25,6 +26,22 @@ function Invoke-Checked {
     Write-Host "`n=== $Label ==="
     & $Command
     if ($LASTEXITCODE -ne 0) { throw "$Label failed with exit code $LASTEXITCODE" }
+}
+
+$BasketId = "CUSTOM"
+$BasketHash = "CUSTOM"
+if ([string]::IsNullOrWhiteSpace($Tickers)) {
+    $BasketPath = Join-Path $RepoRoot $TickerFile
+    if (-not (Test-Path $BasketPath)) {
+        throw "Preregistered validation basket was not found: $BasketPath"
+    }
+    $Basket = Get-Content -Raw -Path $BasketPath | ConvertFrom-Json
+    if (-not $Basket.tickers -or $Basket.tickers.Count -lt 10) {
+        throw "Preregistered validation basket is invalid or too small."
+    }
+    $Tickers = (($Basket.tickers | ForEach-Object { $_.ticker }) -join ",")
+    $BasketId = [string]$Basket.basket_id
+    $BasketHash = (Get-FileHash -Algorithm SHA256 -Path $BasketPath).Hash.ToLowerInvariant()
 }
 
 if (-not (Test-Path $Python)) {
@@ -86,10 +103,12 @@ foreach ($Output in @($JsonOut, $MarkdownOut, $LogOut)) {
 }
 
 Write-Host "`n=== Run Phase 1.1A targeted SEC guidance validation ==="
+Write-Host "Validation basket: $BasketId"
+Write-Host "Validation basket SHA-256: $BasketHash"
+Write-Host "Validation ticker count: $(($Tickers -split ',').Count)"
 Write-Host "Historical SEC filing depth per ticker: $MaxFilings (true filings.files archive backfill enabled; SOE rules unchanged)"
 $RunnerBat = Join-Path $env:TEMP "soe_phase_1_1a_guidance_validation.cmd"
-$TickerArg = ""
-if (-not [string]::IsNullOrWhiteSpace($Tickers)) { $TickerArg = " --tickers `"$Tickers`"" }
+$TickerArg = " --tickers `"$Tickers`""
 @"
 @echo off
 "$Python" -m app.cli_guidance_validation --output-dir "$ResultsDir" --max-filings $MaxFilings$TickerArg 2>&1
