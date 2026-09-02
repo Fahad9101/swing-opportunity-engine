@@ -1,25 +1,26 @@
 {
   "default_runtime_model_unchanged": true,
-  "generated_at": "2026-09-02T10:58:42.644460+00:00",
+  "generated_at": "2026-09-02T15:24:23.111140+00:00",
   "model_version": "SOE-1.1.0",
   "phase": "1.1A",
   "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
   "summary": {
     "archived_submission_files_fetched": 0,
-    "classification_coverage_pct": 92.3076923076923,
-    "classified_comparable_names": 12,
+    "classification_coverage_pct": 84.61538461538461,
+    "classified_comparable_names": 11,
     "error_count": 0,
     "exit_gate": "PASS",
-    "non_null_assessments": 12,
+    "non_null_assessments": 11,
     "provenance_complete_pct": 100.0,
     "reason_counts": {
-      "All verified comparable current quantitative guidance metrics remain within frozen non-deterioration tolerances or are higher.": 9,
-      "At least one current quantitative non-initiated guidance metric lacks a verified comparable prior record.": 4,
+      "All verified comparable current quantitative guidance metrics remain within frozen non-deterioration tolerances or are higher.": 8,
+      "At least one current quantitative non-initiated guidance metric lacks a verified comparable prior record.": 3,
       "Comparable guidance reached the frozen material-cut threshold for: eps.": 1,
       "Comparable guidance reached the frozen material-cut threshold for: revenue.": 1,
       "Extracted primary-source records exist, but none are eligible for deterministic guidance assessment.": 2,
-      "No comparable prior/current quantitative guidance metric pair is available.": 26,
+      "No comparable prior/current quantitative guidance metric pair is available.": 27,
       "No supported primary-source guidance fact was extracted in the validation window.": 4,
+      "Primary-source action language conflicts with the comparable numeric guidance table for the same metric/period.": 1,
       "Verified explicit management action: LOWER.": 1
     },
     "tickers_attempted": 48,
@@ -31,34 +32,8 @@
       "archived_submission_files_fetched": 0,
       "cik": "0000796343",
       "classification": "NOT_DETERIORATED",
-      "comparable_pairs": 4,
+      "comparable_pairs": 1,
       "current": [
-        {
-          "action": "NONE",
-          "basis": "ADJUSTED",
-          "evidence": "Earnings per share 2 GAAP: $17.90 to $18.00 Non-GAAP: $24.35 to $24.45 2 Targets assume non-GAAP ",
-          "high": 18.0,
-          "low": 17.9,
-          "metric": "eps",
-          "midpoint": 17.95,
-          "period": "FY2026",
-          "source_timestamp": "2026-06-11T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
-          "unit": "USD/share"
-        },
-        {
-          "action": "NONE",
-          "basis": "ADJUSTED",
-          "evidence": "Earnings per share 1 GAAP: $4.40 to $4.45 Non-GAAP: $6.05 to $6.10 1 Targets assume non-GAAP ",
-          "high": 4.45,
-          "low": 4.4,
-          "metric": "eps",
-          "midpoint": 4.425000000000001,
-          "period": "FY2026",
-          "source_timestamp": "2026-06-11T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
-          "unit": "USD/share"
-        },
         {
           "action": "NONE",
           "basis": "UNSPECIFIED",
@@ -67,19 +42,6 @@
           "low": 26500000000.0,
           "metric": "revenue",
           "midpoint": 26550000000.0,
-          "period": "FY2026",
-          "source_timestamp": "2026-06-11T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
-          "unit": "USD"
-        },
-        {
-          "action": "NONE",
-          "basis": "UNSPECIFIED",
-          "evidence": "These targets factor in the acquisition of Semrush Holdings, Inc. and assume current macroeconomic conditions. The following table summarizes Adobe\u2019s third quarter FY2026 targets: Total revenue $6.67 billion to $6.72 billion",
-          "high": 6720000000.0,
-          "low": 6670000000.0,
-          "metric": "revenue",
-          "midpoint": 6695000000.0,
           "period": "FY2026",
           "source_timestamp": "2026-06-11T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
@@ -95,28 +57,15 @@
       "prior": [
         {
           "action": "NONE",
-          "basis": "ADJUSTED",
-          "evidence": "Earnings per share 1 GAAP: $4.35 to $4.40 Non-GAAP: $5.80 to $5.85 1 Targets assume non-GAAP ",
-          "high": 4.4,
-          "low": 4.35,
-          "metric": "eps",
-          "midpoint": 4.375,
-          "period": "FY2026",
-          "source_timestamp": "2026-03-12T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000048/adbeex991q126.htm",
-          "unit": "USD/share"
-        },
-        {
-          "action": "NONE",
           "basis": "UNSPECIFIED",
-          "evidence": "cquisition of Semrush Holdings, Inc., subject to regulatory approvals and other customary closing conditions. The following table summarizes Adobe\u2019s second quarter FY2026 targets: Total revenue $6.43 billion to $6.48 billion",
-          "high": 6480000000.0,
-          "low": 6430000000.0,
+          "evidence": "de any contributions from Semrush Holdings, Inc., subject to regulatory approvals and other customary closing conditions. The following table summarizes Adobe\u2019s FY2026 targets 1 : Total revenue $25.90 billion to $26.10 billion",
+          "high": 26100000000.0,
+          "low": 25900000000.0,
           "metric": "revenue",
-          "midpoint": 6455000000.0,
+          "midpoint": 26000000000.0,
           "period": "FY2026",
-          "source_timestamp": "2026-03-12T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000048/adbeex991q126.htm",
+          "source_timestamp": "2025-12-10T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634325000135/adbeex991q425.htm",
           "unit": "USD"
         }
       ],
@@ -125,7 +74,7 @@
       ],
       "rule_path": "guidance_v1_1.comparable_set_within_tolerance",
       "sources": [
-        "https://www.sec.gov/Archives/edgar/data/796343/000079634326000048/adbeex991q126.htm",
+        "https://www.sec.gov/Archives/edgar/data/796343/000079634325000135/adbeex991q425.htm",
         "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm"
       ],
       "ticker": "ADBE"
@@ -400,11 +349,11 @@
         {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
-          "evidence": " of $2.50 \u00b1 $0.15 for the fourth quarter of fiscal 2025. The Company today updated its guidance for fourth quarter of fiscal 2025 revenue to $11.2 billion \u00b1 $100 million, non-GAAP gross margins to 44.5% \u00b1 0.5%, and non-GAAP ",
-          "high": 11200000000.0,
-          "low": 11200000000.0,
+          "evidence": " guidance for the fourth quarter of fiscal 2025, which ends August 28, 2025. The Company previously provided guidance for revenue of $10.7 billion \u00b1 $300 million, non-GAAP gross margins of 42.0% \u00b1 1.0%, and non-GAAP ",
+          "high": 10700000000.0,
+          "low": 10700000000.0,
           "metric": "revenue",
-          "midpoint": 11200000000.0,
+          "midpoint": 10700000000.0,
           "period": "Q4FY2025",
           "source_timestamp": "2025-08-11T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm",
@@ -413,11 +362,11 @@
         {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
-          "evidence": " guidance for the fourth quarter of fiscal 2025, which ends August 28, 2025. The Company previously provided guidance for revenue of $10.7 billion \u00b1 $300 million, non-GAAP gross margins of 42.0% \u00b1 1.0%, and non-GAAP ",
-          "high": 10700000000.0,
-          "low": 10700000000.0,
+          "evidence": " of $2.50 \u00b1 $0.15 for the fourth quarter of fiscal 2025. The Company today updated its guidance for fourth quarter of fiscal 2025 revenue to $11.2 billion \u00b1 $100 million, non-GAAP gross margins to 44.5% \u00b1 0.5%, and non-GAAP ",
+          "high": 11200000000.0,
+          "low": 11200000000.0,
           "metric": "revenue",
-          "midpoint": 10700000000.0,
+          "midpoint": 11200000000.0,
           "period": "Q4FY2025",
           "source_timestamp": "2025-08-11T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000110465925075940/tm2522933d1_ex99-1.htm",
@@ -480,32 +429,6 @@
           "source_timestamp": "2026-08-20T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningsreleasefy27q2.htm",
           "unit": "USD/share"
-        },
-        {
-          "action": "INITIATE",
-          "basis": "ADJUSTED",
-          "evidence": " (cc) Increase 3.0% to 3.75% Operating income (cc) Increase 2.0% to 4.0% Adjusted EPS $0.62 to $0.64 Fiscal year 2027 The Company\u2019s fiscal year guidance is based on the following FY26 figures: ",
-          "high": 0.64,
-          "low": 0.62,
-          "metric": "eps",
-          "midpoint": 0.63,
-          "period": "Q3FY2027",
-          "source_timestamp": "2026-08-20T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningspresentationfy27.htm",
-          "unit": "USD/share"
-        },
-        {
-          "action": "RAISE",
-          "basis": "UNSPECIFIED",
-          "evidence": "ainey, Walmart Inc. executive vice president and chief financial officer. Third quarter The Company\u2019s third quarter fiscal 2027 guidance is based on the following Q3 FY26 figures: Net sales: $177.8 billion, adjusted operating income",
-          "high": null,
-          "low": null,
-          "metric": "revenue",
-          "midpoint": null,
-          "period": "Q3FY2026",
-          "source_timestamp": "2026-08-20T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningsreleasefy27q2.htm",
-          "unit": "UNKNOWN"
         }
       ],
       "documents_fetched": 62,
@@ -535,7 +458,6 @@
       "rule_path": "guidance_v1_1.material_numeric_cut",
       "sources": [
         "https://www.sec.gov/Archives/edgar/data/104169/000010416926000095/earningsreleasefy27q1.htm",
-        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningspresentationfy27.htm",
         "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningsreleasefy27q2.htm"
       ],
       "ticker": "WMT"
@@ -985,19 +907,6 @@
         {
           "action": "RAISE",
           "basis": "ADJUSTED",
-          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the",
-          "high": null,
-          "low": null,
-          "metric": "eps",
-          "midpoint": null,
-          "period": "FY2026",
-          "source_timestamp": "2026-08-05T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
-          "unit": "UNKNOWN"
-        },
-        {
-          "action": "RAISE",
-          "basis": "ADJUSTED",
           "evidence": " guidance range to $6.84 to $7.04 from $6.24 to $6.44 \u25e6 Adjusted EPS guidance range to $7.90 to $8.10 from $7.30 to $7.50",
           "high": 8.1,
           "low": 7.9,
@@ -1007,6 +916,19 @@
           "source_timestamp": "2026-08-05T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
           "unit": "USD/share"
+        },
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": "The Company is increasing its full-year 2026 GAAP diluted EPS, Adjusted EPS and cash flow from operations guidance to reflect increases in the Health Care Benefits and Pharmacy & Consumer Wellness segments, while maintaining a cautious view for the remainder of the year in light of continued elevated cost trends and the",
+          "high": null,
+          "low": null,
+          "metric": "eps",
+          "midpoint": null,
+          "period": "FY2026",
+          "source_timestamp": "2026-08-05T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
+          "unit": "UNKNOWN"
         },
         {
           "action": "RAISE",
@@ -1045,11 +967,11 @@
         {
           "action": "RAISE",
           "basis": "ADJUSTED",
-          "evidence": " guidance range to $6.24 to $6.44 from $5.94 to $6.14 \u25e6 Adjusted EPS guidance range to $7.30 to $7.50 from $7.00 to $7.20",
-          "high": 7.5,
-          "low": 7.3,
+          "evidence": " of $2.30 and Adjusted EPS of $2.57 \u2022 Raising full-year 2026 guidance:",
+          "high": 2.57,
+          "low": 2.57,
           "metric": "eps",
-          "midpoint": 7.4,
+          "midpoint": 2.57,
           "period": "FY2026",
           "source_timestamp": "2026-05-06T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
@@ -1058,11 +980,11 @@
         {
           "action": "RAISE",
           "basis": "ADJUSTED",
-          "evidence": " of $2.30 and Adjusted EPS of $2.57 \u2022 Raising full-year 2026 guidance:",
-          "high": 2.57,
-          "low": 2.57,
+          "evidence": " guidance range to $6.24 to $6.44 from $5.94 to $6.14 \u25e6 Adjusted EPS guidance range to $7.30 to $7.50 from $7.00 to $7.20",
+          "high": 7.5,
+          "low": 7.3,
           "metric": "eps",
-          "midpoint": 2.57,
+          "midpoint": 7.4,
           "period": "FY2026",
           "source_timestamp": "2026-05-06T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000051/cvs_ex99x1q1-26.htm",
@@ -1257,19 +1179,6 @@
         {
           "action": "RAISE",
           "basis": "ADJUSTED",
-          "evidence": " and raise our non-GAAP EPS guidance to $8.05, which is growth of 18%",
-          "high": 8.05,
-          "low": 8.05,
-          "metric": "eps",
-          "midpoint": 8.05,
-          "period": "FY2027",
-          "source_timestamp": "2026-06-10T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526265848/orcl-ex99_1.htm",
-          "unit": "USD/share"
-        },
-        {
-          "action": "RAISE",
-          "basis": "ADJUSTED",
           "evidence": " is expected to grow between 57% and 63% in constant currency and is expected to grow between 58% and 64% in USD. \u2022 Non-GAAP earnings per share is expected to grow between 16% and 19% and be between $1.71 and $1.75 in constant currency and grow between 17% and 20% and be between $1.72 and $1.76 in USD. Guidance for Full FY 2027 For fiscal year 2027, we confirm our prior ",
           "high": null,
           "low": null,
@@ -1279,6 +1188,19 @@
           "source_timestamp": "2026-06-10T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526265848/orcl-ex99_1.htm",
           "unit": "UNKNOWN"
+        },
+        {
+          "action": "RAISE",
+          "basis": "ADJUSTED",
+          "evidence": " and raise our non-GAAP EPS guidance to $8.05, which is growth of 18%",
+          "high": 8.05,
+          "low": 8.05,
+          "metric": "eps",
+          "midpoint": 8.05,
+          "period": "FY2027",
+          "source_timestamp": "2026-06-10T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526265848/orcl-ex99_1.htm",
+          "unit": "USD/share"
         },
         {
           "action": "RAISE",
@@ -1345,19 +1267,6 @@
           "unit": "USD/share"
         },
         {
-          "action": "INITIATE",
-          "basis": "UNSPECIFIED",
-          "evidence": " and all non-GAAP metrics for the full fiscal year 2026. The company expects: \u2022 Revenue of $21.341 billion to $21.374 billion, growth of approximately 13 to 14 percent.",
-          "high": 21374000000.0,
-          "low": 21341000000.0,
-          "metric": "revenue",
-          "midpoint": 21357500000.0,
-          "period": "FY2026",
-          "source_timestamp": "2026-05-20T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/896878/000089687826000024/fy26q3earningspressrelease.htm",
-          "unit": "USD"
-        },
-        {
           "action": "RAISE",
           "basis": "UNSPECIFIED",
           "evidence": "Intuit raised total company guidance for revenue and all non-GAAP metrics for the full fiscal year 2026.",
@@ -1369,6 +1278,19 @@
           "source_timestamp": "2026-05-20T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/896878/000089687826000024/fy26q3earningspressrelease.htm",
           "unit": "UNKNOWN"
+        },
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": " and all non-GAAP metrics for the full fiscal year 2026. The company expects: \u2022 Revenue of $21.341 billion to $21.374 billion, growth of approximately 13 to 14 percent.",
+          "high": 21374000000.0,
+          "low": 21341000000.0,
+          "metric": "revenue",
+          "midpoint": 21357500000.0,
+          "period": "FY2026",
+          "source_timestamp": "2026-05-20T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/896878/000089687826000024/fy26q3earningspressrelease.htm",
+          "unit": "USD"
         },
         {
           "action": "RAISE",
@@ -1446,19 +1368,6 @@
           "source_timestamp": "2026-07-22T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/1373715/000137371526000072/erq2fy26.htm",
           "unit": "UNKNOWN"
-        },
-        {
-          "action": "RAISE",
-          "basis": "UNSPECIFIED",
-          "evidence": "r Q3 2026 cRPO. Q2 2026 subscription revenues exceeded the high end of our guidance range by 150 basis points, driven by a combination of net new ACV outperformance and on-premise revenue mix coming in ahead of expectations. This higher mix is primarily attributable to strong U.S. Federal demand, which accelerated some on-premise subscription revenues from Q3 2026 into Q2 2026. We are raising our FY 2026 subscription revenues guidance to refle",
-          "high": null,
-          "low": null,
-          "metric": "revenue",
-          "midpoint": null,
-          "period": "Q2FY2026",
-          "source_timestamp": "2026-07-22T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/1373715/000137371526000072/erq2fy26.htm",
-          "unit": "UNKNOWN"
         }
       ],
       "documents_fetched": 54,
@@ -1516,19 +1425,6 @@
       "guidance_records": 21,
       "prior": [
         {
-          "action": "NONE",
-          "basis": "UNSPECIFIED",
-          "evidence": ") exceeded guidance. \u2022 Expecting fiscal year 2026 revenue of $9.610 billion at",
-          "high": 9610000000.0,
-          "low": 9610000000.0,
-          "metric": "revenue",
-          "midpoint": 9610000000.0,
-          "period": "FY2026",
-          "source_timestamp": "2025-12-10T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/883241/000119312525314200/d29055dex991.htm",
-          "unit": "USD"
-        },
-        {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
           "evidence": "iscal year 2026 with an intense focus on driving sustainable growth and margin expansion through continued innovation and disciplined execution.\u201d \u201cWe finished the year with record revenue and strong backlog of $11.4 billion dollars, which underscores the resilience of business,\u201d said Shelagh Glaser, CFO of Synopsys. \u201cWe expect to set another ",
@@ -1536,6 +1432,19 @@
           "low": 11400000000.0,
           "metric": "revenue",
           "midpoint": 11400000000.0,
+          "period": "FY2026",
+          "source_timestamp": "2025-12-10T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/883241/000119312525314200/d29055dex991.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "NONE",
+          "basis": "UNSPECIFIED",
+          "evidence": ") exceeded guidance. \u2022 Expecting fiscal year 2026 revenue of $9.610 billion at",
+          "high": 9610000000.0,
+          "low": 9610000000.0,
+          "metric": "revenue",
+          "midpoint": 9610000000.0,
           "period": "FY2026",
           "source_timestamp": "2025-12-10T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/883241/000119312525314200/d29055dex991.htm",
@@ -1656,32 +1565,6 @@
           "unit": "UNKNOWN"
         },
         {
-          "action": "INITIATE",
-          "basis": "UNSPECIFIED",
-          "evidence": "ven by increasing demand for custom AI accelerators and AI networking,\u201d said Hock Tan, President and CEO of Broadcom Inc. \u201cThe momentum continues and in Q3 we expect semiconductor revenue from AI to grow over 200 percent year-over-year to $16.0 billion.\u201d",
-          "high": 16000000000.0,
-          "low": 16000000000.0,
-          "metric": "revenue",
-          "midpoint": 16000000000.0,
-          "period": "Q3FY2026",
-          "source_timestamp": "2026-06-03T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000051/avgo-05032026x8kxex99.htm",
-          "unit": "USD"
-        },
-        {
-          "action": "INITIATE",
-          "basis": "UNSPECIFIED",
-          "evidence": " and strong operating leverage. Q2 semiconductor revenue from AI of $10.8 billion grew 143% year-over-year, above our forecast, driven by increasing demand for custom AI accelerators and AI networking,\u201d said Hock Tan, President and CEO of Broadcom Inc. \u201cThe momentum continues and in Q3 we expect semiconductor ",
-          "high": 10800000000.0,
-          "low": 10800000000.0,
-          "metric": "revenue",
-          "midpoint": 10800000000.0,
-          "period": "Q3FY2026",
-          "source_timestamp": "2026-06-03T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000051/avgo-05032026x8kxex99.htm",
-          "unit": "USD"
-        },
-        {
           "action": "RAISE",
           "basis": "UNSPECIFIED",
           "evidence": "ly $29.4 billion, an increase of 84 percent from the prior year period \u2022 Third quarter fiscal year 2026 Non-GAAP operating income guidance of approximately 67 percent of projected revenue",
@@ -1706,6 +1589,32 @@
           "source_timestamp": "2026-06-03T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000051/avgo-05032026x8kxex99.htm",
           "unit": "USD"
+        },
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": " and strong operating leverage. Q2 semiconductor revenue from AI of $10.8 billion grew 143% year-over-year, above our forecast, driven by increasing demand for custom AI accelerators and AI networking,\u201d said Hock Tan, President and CEO of Broadcom Inc. \u201cThe momentum continues and in Q3 we expect semiconductor ",
+          "high": 10800000000.0,
+          "low": 10800000000.0,
+          "metric": "revenue",
+          "midpoint": 10800000000.0,
+          "period": "Q3FY2026",
+          "source_timestamp": "2026-06-03T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000051/avgo-05032026x8kxex99.htm",
+          "unit": "USD"
+        },
+        {
+          "action": "INITIATE",
+          "basis": "UNSPECIFIED",
+          "evidence": "ven by increasing demand for custom AI accelerators and AI networking,\u201d said Hock Tan, President and CEO of Broadcom Inc. \u201cThe momentum continues and in Q3 we expect semiconductor revenue from AI to grow over 200 percent year-over-year to $16.0 billion.\u201d",
+          "high": 16000000000.0,
+          "low": 16000000000.0,
+          "metric": "revenue",
+          "midpoint": 16000000000.0,
+          "period": "Q3FY2026",
+          "source_timestamp": "2026-06-03T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000051/avgo-05032026x8kxex99.htm",
+          "unit": "USD"
         }
       ],
       "documents_fetched": 53,
@@ -1716,9 +1625,9 @@
       "guidance_records": 33,
       "prior": [],
       "reasons": [
-        "At least one current quantitative non-initiated guidance metric lacks a verified comparable prior record."
+        "No comparable prior/current quantitative guidance metric pair is available."
       ],
-      "rule_path": "guidance_v1_1.incomplete_comparable_set",
+      "rule_path": "guidance_v1_1.no_comparable_prior",
       "sources": [
         "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000051/avgo-05032026x8kxex99.htm"
       ],
@@ -1864,15 +1773,15 @@
       "current": [
         {
           "action": "RAISE",
-          "basis": "ADJUSTED",
-          "evidence": " $0.91, Non-GAAP EPS $0.85 Raises Fiscal Year 2026 Guidance",
+          "basis": "UNSPECIFIED",
+          "evidence": "Raises Fiscal Year 2026 Guidance for Comparable Stores Sales Growth and Non-GAAP ",
           "high": null,
           "low": null,
-          "metric": "eps",
+          "metric": "revenue",
           "midpoint": null,
-          "period": "Q3FY2026",
-          "source_timestamp": "2026-07-29T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/829224/000082922426000129/sbux-06282026xearningsrele.htm",
+          "period": "FY2026",
+          "source_timestamp": "2026-04-28T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/829224/000082922426000078/sbux-03292026xearningsrele.htm",
           "unit": "UNKNOWN"
         }
       ],
@@ -2047,19 +1956,6 @@
           "source_timestamp": "2026-08-05T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000046/cat-20260630.htm",
           "unit": "USD"
-        },
-        {
-          "action": "INITIATE",
-          "basis": "UNSPECIFIED",
-          "evidence": "nventory will be higher at year-end 2026 as compared to year-end 2025. As a result, we expect an unfavorable impact from changes in dealer inventories for Construction Industries\u2019 sales volume in the second half of 2026 as compared to the second half of 2025. Excluding the expected IEEPA tariff recoveries in the second quarter of 2026, we now expect 2026 tariff costs of around $2.2 billion. Our outlook does not include any additional IEEPA t",
-          "high": 2200000000.0,
-          "low": 2200000000.0,
-          "metric": "revenue",
-          "midpoint": 2200000000.0,
-          "period": "Q4FY2026",
-          "source_timestamp": "2026-08-05T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/18230/000001823026000046/cat-20260630.htm",
-          "unit": "USD"
         }
       ],
       "documents_fetched": 52,
@@ -2120,11 +2016,11 @@
         {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
-          "evidence": " of $78 million in Sundyne during the three months ended June 30, 2026 and higher organic sales of $54 million in Projects driven by increased volume, partially offset by lower organic ",
-          "high": 54000000.0,
-          "low": 54000000.0,
+          "evidence": " of $54 million in Projects driven by increased volume, partially offset by lower organic sales of $77 million in Aftermarket driven by a decline in catalyst shipments.",
+          "high": 77000000.0,
+          "low": 77000000.0,
           "metric": "revenue",
-          "midpoint": 54000000.0,
+          "midpoint": 77000000.0,
           "period": "Q2FY2025",
           "source_timestamp": "2026-07-23T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/773840/000077384026000124/hon-20260630.htm",
@@ -2133,11 +2029,11 @@
         {
           "action": "INITIATE",
           "basis": "UNSPECIFIED",
-          "evidence": " of $54 million in Projects driven by increased volume, partially offset by lower organic sales of $77 million in Aftermarket driven by a decline in catalyst shipments.",
-          "high": 77000000.0,
-          "low": 77000000.0,
+          "evidence": " of $78 million in Sundyne during the three months ended June 30, 2026 and higher organic sales of $54 million in Projects driven by increased volume, partially offset by lower organic ",
+          "high": 54000000.0,
+          "low": 54000000.0,
           "metric": "revenue",
-          "midpoint": 77000000.0,
+          "midpoint": 54000000.0,
           "period": "Q2FY2025",
           "source_timestamp": "2026-07-23T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/773840/000077384026000124/hon-20260630.htm",
@@ -2232,19 +2128,6 @@
         {
           "action": "RAISE",
           "basis": "UNSPECIFIED",
-          "evidence": "a99-q22026earningsexhibit.htm EX-99 Document Exhibit 99 Carrier Reports Second Quarter 2026 Results Increases Full-year Outlook for Sales, Adj. Op. Profit and Adj. ",
-          "high": null,
-          "low": null,
-          "metric": "revenue",
-          "midpoint": null,
-          "period": "Q2FY2026",
-          "source_timestamp": "2026-07-28T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/1783180/000178318026000030/a99-q22026earningsexhibit.htm",
-          "unit": "UNKNOWN"
-        },
-        {
-          "action": "RAISE",
-          "basis": "UNSPECIFIED",
           "evidence": " in the second quarter supported by continued data center demand. Given record backlog levels and our year-to-date performance, we are raising our full-year outlook and now expect sales of about $23 billion and ",
           "high": 23000000000.0,
           "low": 23000000000.0,
@@ -2254,6 +2137,19 @@
           "source_timestamp": "2026-07-28T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/1783180/000178318026000030/a99-q22026earningsexhibit.htm",
           "unit": "USD"
+        },
+        {
+          "action": "RAISE",
+          "basis": "UNSPECIFIED",
+          "evidence": "a99-q22026earningsexhibit.htm EX-99 Document Exhibit 99 Carrier Reports Second Quarter 2026 Results Increases Full-year Outlook for Sales, Adj. Op. Profit and Adj. ",
+          "high": null,
+          "low": null,
+          "metric": "revenue",
+          "midpoint": null,
+          "period": "Q2FY2026",
+          "source_timestamp": "2026-07-28T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1783180/000178318026000030/a99-q22026earningsexhibit.htm",
+          "unit": "UNKNOWN"
         }
       ],
       "documents_fetched": 40,
@@ -2311,7 +2207,7 @@
     {
       "archived_submission_files_fetched": 0,
       "cik": "0000001800",
-      "classification": "NOT_DETERIORATED",
+      "classification": "UNKNOWN",
       "comparable_pairs": 2,
       "current": [
         {
@@ -2358,22 +2254,9 @@
       "duplicates_removed": 3,
       "errors": [],
       "filings_considered": 26,
-      "guidance_deterioration": false,
+      "guidance_deterioration": null,
       "guidance_records": 23,
       "prior": [
-        {
-          "action": "NONE",
-          "basis": "ADJUSTED",
-          "evidence": "Abbott projects full-year 2026 adjusted diluted EPS of $5.38 to $5.58, which includes $0.20 of dilution related to the acquisition of Exact Sciences",
-          "high": 5.58,
-          "low": 5.38,
-          "metric": "eps",
-          "midpoint": 5.48,
-          "period": "FY2026",
-          "source_timestamp": "2026-04-16T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/1800/000162828026025365/abt-2026q1xexhibitx991.htm",
-          "unit": "USD/share"
-        },
         {
           "action": "NONE",
           "basis": "ADJUSTED",
@@ -2386,12 +2269,25 @@
           "source_timestamp": "2026-04-16T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/1800/000162828026025365/abt-2026q1xexhibitx991.htm",
           "unit": "USD/share"
+        },
+        {
+          "action": "NONE",
+          "basis": "ADJUSTED",
+          "evidence": "Abbott projects full-year 2026 adjusted diluted EPS of $5.38 to $5.58, which includes $0.20 of dilution related to the acquisition of Exact Sciences",
+          "high": 5.58,
+          "low": 5.38,
+          "metric": "eps",
+          "midpoint": 5.48,
+          "period": "FY2026",
+          "source_timestamp": "2026-04-16T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800/000162828026025365/abt-2026q1xexhibitx991.htm",
+          "unit": "USD/share"
         }
       ],
       "reasons": [
-        "All verified comparable current quantitative guidance metrics remain within frozen non-deterioration tolerances or are higher."
+        "Primary-source action language conflicts with the comparable numeric guidance table for the same metric/period."
       ],
-      "rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "rule_path": "guidance_v1_1.conflicting_primary_evidence",
       "sources": [
         "https://www.sec.gov/Archives/edgar/data/1800/000162828026025365/abt-2026q1xexhibitx991.htm",
         "https://www.sec.gov/Archives/edgar/data/1800/000162828026048377/abt-2026q2xexhibitx991.htm"
@@ -2459,19 +2355,6 @@
       "guidance_records": 14,
       "prior": [
         {
-          "action": "NONE",
-          "basis": "ADJUSTED",
-          "evidence": " will increase in the 3% to 6% range year-over-year. The Company is also increasing its full year adjusted diluted net earnings per common share guidance to a range of $8.35 to $8.55 versus previous guidance of $8.35 to $8.50.",
-          "high": 8.55,
-          "low": 8.35,
-          "metric": "eps",
-          "midpoint": 8.45,
-          "period": "FY2026",
-          "source_timestamp": "2026-04-21T00:00:00+00:00",
-          "source_url": "https://www.sec.gov/Archives/edgar/data/313616/000031361626000109/dhr-20260421xex991.htm",
-          "unit": "USD/share"
-        },
-        {
           "action": "RAISE",
           "basis": "ADJUSTED",
           "evidence": "Strong Q1 earnings performance enabling increased full year 2026 adjusted diluted net earnings per common share guidance.",
@@ -2483,6 +2366,19 @@
           "source_timestamp": "2026-04-21T00:00:00+00:00",
           "source_url": "https://www.sec.gov/Archives/edgar/data/313616/000031361626000109/dhr-20260421xex991.htm",
           "unit": "UNKNOWN"
+        },
+        {
+          "action": "NONE",
+          "basis": "ADJUSTED",
+          "evidence": " will increase in the 3% to 6% range year-over-year. The Company is also increasing its full year adjusted diluted net earnings per common share guidance to a range of $8.35 to $8.55 versus previous guidance of $8.35 to $8.50.",
+          "high": 8.55,
+          "low": 8.35,
+          "metric": "eps",
+          "midpoint": 8.45,
+          "period": "FY2026",
+          "source_timestamp": "2026-04-21T00:00:00+00:00",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/313616/000031361626000109/dhr-20260421xex991.htm",
+          "unit": "USD/share"
         }
       ],
       "reasons": [
