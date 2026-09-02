@@ -215,14 +215,21 @@ def main() -> int:
     for target in targets:
         ids_by_ticker[str(target["ticker"]).upper()].append(target["id"])
 
+    print(f"Validation basket: {basket['basket_id']}", flush=True)
+    print(f"Targets: {len(targets)} across {len(ids_by_ticker)} tickers", flush=True)
+
     try:
         ticker_map = _ticker_map(client, cache_dir, throttle_state, force=args.force)
         cutoff = date.today() - timedelta(days=int(basket["lookback_days"]))
-        for ticker, target_ids in ids_by_ticker.items():
+        ticker_items = list(ids_by_ticker.items())
+        for ticker_index, (ticker, target_ids) in enumerate(ticker_items, start=1):
+            wanted = ", ".join(target_by_id[target_id]["target_event_type"] for target_id in target_ids)
+            print(f"[{ticker_index}/{len(ticker_items)}] {ticker}: searching {wanted}", flush=True)
             cik = ticker_map.get(ticker)
             if cik is None:
                 for target_id in target_ids:
                     result_by_id[target_id]["error"] = "ticker_not_found_in_sec_map"
+                print(f"  {ticker}: SEC ticker mapping unavailable", flush=True)
                 continue
             try:
                 submissions = _submissions_payload(
@@ -259,7 +266,7 @@ def main() -> int:
                             break
                         try:
                             document = doc_service.fetch(doc_ref, rules_hash=candidate_rules_hash, force=args.force)
-                        except Exception as exc:
+                        except Exception:
                             # A failed exhibit must not erase a usable primary filing or become evidence.
                             continue
                         is_biotech = any(bool(target_by_id[target_id].get("is_biotech", False)) for target_id in unresolved)
@@ -294,7 +301,15 @@ def main() -> int:
                                 row["materiality_scored"] = assessment.materiality is not None
                                 row["provenance_complete"] = _provenance_complete(assessment) if assessment.materiality is not None else False
                                 unresolved.discard(target_id)
+                                score_text = assessment.materiality if assessment.materiality is not None else "null"
+                                print(
+                                    f"  found {target_id}: materiality={score_text}, sufficient={row['sufficient_primary_evidence']}",
+                                    flush=True,
+                                )
+                if unresolved:
+                    print(f"  unresolved targets: {', '.join(sorted(unresolved))}", flush=True)
             except Exception as exc:
+                print(f"  {ticker}: {type(exc).__name__}: {exc}", flush=True)
                 for target_id in target_ids:
                     if not result_by_id[target_id]["primary_evidence_found"]:
                         result_by_id[target_id]["error"] = f"{type(exc).__name__}: {exc}"
@@ -353,8 +368,8 @@ def main() -> int:
         "results": results,
     }
     _write_report(output_dir, payload)
-    print(json.dumps(summary, indent=2, sort_keys=True))
-    print(f"Validation artifacts: {output_dir}")
+    print(json.dumps(summary, indent=2, sort_keys=True), flush=True)
+    print(f"Validation artifacts: {output_dir}", flush=True)
     return 0 if pass_gate else 2
 
 
