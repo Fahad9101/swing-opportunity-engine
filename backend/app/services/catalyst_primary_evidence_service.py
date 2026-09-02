@@ -17,7 +17,7 @@ _SCRIPT_STYLE_RE = re.compile(r"<(script|style)\b[^>]*>.*?</\1>", re.I | re.S)
 _WS_RE = re.compile(r"\s+")
 
 _EARNINGS_PATTERNS = [
-    re.compile(r"\breports?\s+(?:first|second|third|fourth|quarterly|fiscal).*?financial\s+results\b", re.I),
+    re.compile(r"\b(?:reports?|announces?)\b.{0,90}\b(?:first|second|third|fourth|quarterly|fiscal|Q[1-4]|FY\s*20\d{2})\b.{0,100}\b(?:financial\s+)?results\b", re.I | re.S),
     re.compile(r"\bfinancial\s+results\s+for\s+(?:the\s+)?(?:quarter|three\s+months|six\s+months|nine\s+months)\b", re.I),
     re.compile(r"\bquarter\s+ended\b.{0,180}\b(?:net\s+sales|revenue|revenues|earnings|income)\b", re.I | re.S),
 ]
