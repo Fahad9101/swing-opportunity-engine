@@ -39,7 +39,6 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
     """
     text = html_to_text(document.content or "")
     results: list[dict[str, Any]] = []
-    seen: set[DistressHardFlag] = set()
 
     going_patterns = [
         re.compile(r"substantial\s+doubt.{0,180}?ability.{0,120}?continue\s+as\s+a\s+going\s+concern", re.I | re.S),
@@ -51,7 +50,6 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
             span = _window(text, match.start(), match.end())
             if not _NEGATED_GOING_CONCERN.search(span):
                 results.append(_evidence(DistressHardFlag.GOING_CONCERN, document, span, "SEC text explicitly states substantial doubt about ability to continue as a going concern."))
-                seen.add(DistressHardFlag.GOING_CONCERN)
                 break
 
     bankruptcy_patterns = [
@@ -64,7 +62,6 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
         if match:
             span = _window(text, match.start(), match.end())
             results.append(_evidence(DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING, document, span, "Primary filing explicitly records a bankruptcy/reorganization filing."))
-            seen.add(DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING)
             break
 
     default_patterns = [
@@ -77,7 +74,6 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
             span = _window(text, match.start(), match.end())
             if not _CURED_DEFAULT.search(span):
                 results.append(_evidence(DistressHardFlag.PAYMENT_DEFAULT, document, span, "Primary filing explicitly states a current payment default."))
-                seen.add(DistressHardFlag.PAYMENT_DEFAULT)
                 break
 
     covenant_patterns = [
@@ -89,7 +85,6 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
         if match:
             span = _window(text, match.start(), match.end())
             results.append(_evidence(DistressHardFlag.UNRESOLVED_COVENANT_BREACH, document, span, "Primary filing explicitly states an unresolved/unwaived covenant breach or default."))
-            seen.add(DistressHardFlag.UNRESOLVED_COVENANT_BREACH)
             break
 
     reliability = re.search(r"financial\s+statements?.{0,220}?should\s+no\s+longer\s+be\s+relied\s+upon", text, re.I | re.S)
@@ -97,7 +92,6 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
         span = _window(text, reliability.start(), reliability.end(), 500)
         if re.search(r"\b(?:solvency|liquidity|ability\s+to\s+meet\s+obligations)\b", span, re.I):
             results.append(_evidence(DistressHardFlag.UNRESOLVED_SOLVENCY_RELIABILITY_ISSUE, document, span, "Primary filing states financial statements cannot be relied upon in connection with an unresolved solvency/liquidity issue."))
-            seen.add(DistressHardFlag.UNRESOLVED_SOLVENCY_RELIABILITY_ISSUE)
 
     shortfall = re.search(
         r"(?:do|does|will)\s+not\s+have\s+sufficient\s+(?:cash|liquidity|resources).{0,240}?(?:next|following)\s+(?:12|twelve)\s+months",
@@ -112,7 +106,6 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
             re.I | re.S,
         ):
             results.append(_evidence(DistressHardFlag.EXPLICIT_12M_OBLIGATION_SHORTFALL_WITHOUT_COMMITTED_FINANCING, document, span, "Primary filing explicitly states a 12-month liquidity shortfall with financing not committed/assured."))
-            seen.add(DistressHardFlag.EXPLICIT_12M_OBLIGATION_SHORTFALL_WITHOUT_COMMITTED_FINANCING)
 
     # Keep one evidence item per hard flag per document.
     deduped: list[dict[str, Any]] = []
@@ -138,3 +131,43 @@ def merge_hard_distress_evidence(facts: DistressRawFacts, evidence: list[dict[st
     audit = dict(facts.audit)
     audit["hard_distress_evidence"] = evidence
     return facts.model_copy(update={"hard_distress_flags": flags, "sources": sorted(set(sources)), "audit": audit})
+
+
+def finalize_hard_distress_screen(
+    facts: DistressRawFacts,
+    *,
+    screened_documents: list[SourceDocument],
+    evidence: list[dict[str, Any]],
+    failed_document_urls: list[str] | None = None,
+    required_document_count: int | None = None,
+) -> DistressRawFacts:
+    """Finalize the universal hard-distress screen without inferring safety.
+
+    Completion is true only when at least one required primary document was
+    screened, every document selected by the orchestration policy was retrieved
+    successfully, and the screened count meets the predeclared required count.
+    The function records all screened source URLs even when no adverse flag was
+    found so a later NOT_DISTRESSED state has positive provenance.
+    """
+    merged = merge_hard_distress_evidence(facts, evidence)
+    failed = sorted(set(failed_document_urls or []))
+    screened_urls = sorted({document.source_url for document in screened_documents if document.source_url})
+    required = required_document_count if required_document_count is not None else len(screened_urls)
+    complete = bool(screened_urls) and not failed and len(screened_urls) >= required and required > 0
+
+    audit = dict(merged.audit)
+    audit["hard_distress_screen"] = {
+        "complete": complete,
+        "required_document_count": required,
+        "screened_document_count": len(screened_urls),
+        "screened_document_urls": screened_urls,
+        "failed_document_urls": failed,
+    }
+    sources = sorted(set(merged.sources + screened_urls))
+    return merged.model_copy(
+        update={
+            "hard_flag_screen_complete": complete,
+            "sources": sources,
+            "audit": audit,
+        }
+    )
