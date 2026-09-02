@@ -39,7 +39,10 @@ class DistressRawFacts(BaseModel):
     """Validated primary-source facts used only to derive distress metrics.
 
     All monetary fields must use the same currency/unit scale. Missing facts stay
-    null. Sector-specific fields are supplied only by the corresponding adapter.
+    null. `liquid_assets_complete` means the cash + marketable-securities input
+    is complete enough to support leverage/liquidity/runway arithmetic. A cash
+    value alone may still prove a net-cash safety path when cash exceeds debt,
+    but it must not silently treat missing investments as zero for adverse paths.
     """
 
     ticker: str
@@ -50,6 +53,8 @@ class DistressRawFacts(BaseModel):
     debt: float | None = None
     cash: float | None = None
     marketable_securities: float | None = None
+    liquid_assets_total: float | None = None
+    liquid_assets_complete: bool = False
     ebitda: float | None = None
     ebit: float | None = None
     cash_interest_expense: float | None = None
