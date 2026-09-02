@@ -34,10 +34,11 @@ _MERGER_PATTERNS = [
     re.compile(r"\bmerger\s+agreement\b", re.I),
 ]
 _REGULATORY_PATTERNS = [
-    re.compile(r"\b(?:FDA|Food\s+and\s+Drug\s+Administration)\b.{0,160}\b(?:approved?|approval|complete\s+response\s+letter|CRL|PDUFA|advisory\s+committee)\b", re.I | re.S),
+    re.compile(r"\b(?:FDA|Food\s+and\s+Drug\s+Administration)\b.{0,180}\b(?:has\s+approved|approved|granted\s+(?:accelerated\s+)?approval|issued\s+(?:a\s+)?complete\s+response\s+letter|received\s+(?:a\s+)?complete\s+response\s+letter|set\s+(?:a\s+)?PDUFA|advisory\s+committee\s+(?:voted|recommended))\b", re.I | re.S),
 ]
 _PHASE3_PATTERNS = [
-    re.compile(r"\bphase\s*3\b.{0,220}\bprimary\s+endpoint\b.{0,160}\b(?:met|meet|did\s+not\s+meet|failed|achieved)\b", re.I | re.S),
+    re.compile(r"\bphase\s*3\b.{0,220}\bprimary\s+endpoint\b.{0,160}\b(?:was\s+met|met|did\s+not\s+meet|failed|achieved)\b", re.I | re.S),
+    re.compile(r"\bphase\s*3\b.{0,180}\b(?:met|did\s+not\s+meet|failed|achieved)\b.{0,100}\b(?:its\s+|the\s+)?primary\s+endpoint\b", re.I | re.S),
 ]
 _PHASE2_PATTERNS = [
     re.compile(r"\bphase\s*2\b.{0,220}\b(?:proof[- ]of[- ]concept|primary\s+endpoint|efficacy)\b", re.I | re.S),
