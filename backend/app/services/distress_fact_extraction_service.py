@@ -13,6 +13,7 @@ _NEGATED_GOING_CONCERN = re.compile(
     re.I,
 )
 _CURED_DEFAULT = re.compile(r"\b(?:cured|remedied|waived|paid in full|no longer in default)\b", re.I)
+_SUBJECT = r"(?:the\s+company|we|the\s+registrant)"
 
 
 def _window(text: str, start: int, end: int, radius: int = 320) -> str:
@@ -32,69 +33,153 @@ def _evidence(flag: DistressHardFlag, document: SourceDocument, span: str, reaso
 
 
 def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]]:
-    """Extract only explicit universal hard-distress facts from primary SEC text.
+    """Extract explicit registrant-level universal hard-distress facts.
 
-    The extractor is intentionally narrow. Absence of a match is never safety,
-    and generic risk-factor language is not converted into a hard flag.
+    This extractor is deliberately precision-first. A bankruptcy/default/breach
+    involving a customer, counterparty, divested business, subsidiary, or other
+    named third party must not become a hard flag for the registrant. Likewise,
+    hypothetical covenant language ("if we breach", "may default", etc.) is not
+    current distress. Absence of a match is never treated as safety.
     """
     text = html_to_text(document.content or "")
     results: list[dict[str, Any]] = []
 
     going_patterns = [
-        re.compile(r"substantial\s+doubt.{0,180}?ability.{0,120}?continue\s+as\s+a\s+going\s+concern", re.I | re.S),
-        re.compile(r"ability\s+to\s+continue\s+as\s+a\s+going\s+concern.{0,180}?substantial\s+doubt", re.I | re.S),
+        re.compile(
+            rf"substantial\s+doubt.{{0,180}}?{_SUBJECT}\s+(?:'?s\s+)?ability.{{0,120}}?continue\s+as\s+a\s+going\s+concern",
+            re.I | re.S,
+        ),
+        re.compile(
+            rf"{_SUBJECT}\s+(?:'?s\s+)?ability\s+to\s+continue\s+as\s+a\s+going\s+concern.{{0,180}}?substantial\s+doubt",
+            re.I | re.S,
+        ),
+        re.compile(
+            r"substantial\s+doubt.{0,180}?our\s+ability.{0,120}?continue\s+as\s+a\s+going\s+concern",
+            re.I | re.S,
+        ),
     ]
     for pattern in going_patterns:
         match = pattern.search(text)
         if match:
             span = _window(text, match.start(), match.end())
             if not _NEGATED_GOING_CONCERN.search(span):
-                results.append(_evidence(DistressHardFlag.GOING_CONCERN, document, span, "SEC text explicitly states substantial doubt about ability to continue as a going concern."))
+                results.append(
+                    _evidence(
+                        DistressHardFlag.GOING_CONCERN,
+                        document,
+                        span,
+                        "SEC text explicitly states substantial doubt about the registrant's ability to continue as a going concern.",
+                    )
+                )
                 break
 
     bankruptcy_patterns = [
-        re.compile(r"filed\s+(?:a\s+)?(?:voluntary\s+)?petition(?:s)?[^.]{0,180}?chapter\s+(?:7|11)\b", re.I | re.S),
-        re.compile(r"commenced\s+(?:voluntary\s+)?cases?[^.]{0,180}?chapter\s+11\b", re.I | re.S),
-        re.compile(r"filed\s+for\s+bankruptcy\b", re.I),
+        re.compile(
+            rf"\b{_SUBJECT}\s+(?:has\s+)?filed\s+(?:a\s+)?(?:voluntary\s+)?petition(?:s)?[^.]{{0,180}}?chapter\s+(?:7|11)\b",
+            re.I | re.S,
+        ),
+        re.compile(
+            rf"\b{_SUBJECT}\s+(?:has\s+)?commenced\s+(?:voluntary\s+)?cases?[^.]{{0,180}}?chapter\s+11\b",
+            re.I | re.S,
+        ),
+        re.compile(rf"\b{_SUBJECT}\s+(?:has\s+)?filed\s+for\s+bankruptcy\b", re.I),
     ]
     for pattern in bankruptcy_patterns:
         match = pattern.search(text)
         if match:
             span = _window(text, match.start(), match.end())
-            results.append(_evidence(DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING, document, span, "Primary filing explicitly records a bankruptcy/reorganization filing."))
+            results.append(
+                _evidence(
+                    DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING,
+                    document,
+                    span,
+                    "Primary filing explicitly records a bankruptcy/reorganization filing by the registrant.",
+                )
+            )
             break
 
     default_patterns = [
-        re.compile(r"\b(?:is|remains)\s+in\s+(?:payment\s+)?default\b[^.]{0,180}?(?:debt|loan|notes?|credit|indenture|principal|interest)", re.I | re.S),
-        re.compile(r"failed\s+to\s+make\s+(?:a\s+)?(?:scheduled|required)?\s*(?:principal|interest|debt)\s+payment", re.I),
+        re.compile(
+            rf"\b{_SUBJECT}\s+(?:is|are|remains?|remain)\s+in\s+(?:payment\s+)?default\b[^.]{{0,180}}?(?:debt|loan|notes?|credit|indenture|principal|interest)",
+            re.I | re.S,
+        ),
+        re.compile(
+            rf"\b{_SUBJECT}\s+(?:has|have)\s+failed\s+to\s+make\s+(?:a\s+)?(?:scheduled|required)?\s*(?:principal|interest|debt)\s+payment",
+            re.I,
+        ),
     ]
     for pattern in default_patterns:
         match = pattern.search(text)
         if match:
             span = _window(text, match.start(), match.end())
             if not _CURED_DEFAULT.search(span):
-                results.append(_evidence(DistressHardFlag.PAYMENT_DEFAULT, document, span, "Primary filing explicitly states a current payment default."))
+                results.append(
+                    _evidence(
+                        DistressHardFlag.PAYMENT_DEFAULT,
+                        document,
+                        span,
+                        "Primary filing explicitly states a current registrant payment default.",
+                    )
+                )
                 break
 
     covenant_patterns = [
-        re.compile(r"\b(?:uncured|unwaived|unresolved)\b.{0,100}?\b(?:covenant\s+)?(?:breach|default|noncompliance)\b", re.I | re.S),
-        re.compile(r"\b(?:covenant\s+)?(?:breach|noncompliance|default)\b.{0,180}?\b(?:has\s+not|have\s+not|not\s+been|without)\b.{0,80}?\b(?:waiv|cure)", re.I | re.S),
+        re.compile(
+            rf"\b{_SUBJECT}\s+(?:is|are|remains?|remain)\s+in\s+(?:an?\s+)?(?:uncured\s+|unwaived\s+|unresolved\s+)?(?:covenant\s+)?(?:breach|default|noncompliance)\b",
+            re.I,
+        ),
+        re.compile(
+            rf"\b{_SUBJECT}\s+(?:has|have)\s+(?:an?\s+)?(?:uncured|unwaived|unresolved)\s+(?:covenant\s+)?(?:breach|default|noncompliance)\b",
+            re.I,
+        ),
+        re.compile(
+            rf"\b{_SUBJECT}.{{0,100}}?\b(?:covenant\s+)?(?:breach|default|noncompliance)\b.{{0,120}}?\b(?:has\s+not|have\s+not|not\s+been)\s+(?:waived|cured|remedied)\b",
+            re.I | re.S,
+        ),
     ]
     for pattern in covenant_patterns:
         match = pattern.search(text)
         if match:
             span = _window(text, match.start(), match.end())
-            results.append(_evidence(DistressHardFlag.UNRESOLVED_COVENANT_BREACH, document, span, "Primary filing explicitly states an unresolved/unwaived covenant breach or default."))
+            if not _CURED_DEFAULT.search(span):
+                results.append(
+                    _evidence(
+                        DistressHardFlag.UNRESOLVED_COVENANT_BREACH,
+                        document,
+                        span,
+                        "Primary filing explicitly states a current unresolved/unwaived registrant covenant breach or default.",
+                    )
+                )
+                break
+
+    reliability_patterns = [
+        re.compile(
+            rf"\b{_SUBJECT}.{{0,180}}?financial\s+statements?.{{0,220}}?should\s+no\s+longer\s+be\s+relied\s+upon",
+            re.I | re.S,
+        ),
+        re.compile(
+            rf"financial\s+statements?.{{0,220}}?should\s+no\s+longer\s+be\s+relied\s+upon.{{0,180}}?\b{_SUBJECT}\b",
+            re.I | re.S,
+        ),
+    ]
+    for reliability in reliability_patterns:
+        match = reliability.search(text)
+        if not match:
+            continue
+        span = _window(text, match.start(), match.end(), 500)
+        if re.search(r"\b(?:solvency|liquidity|ability\s+to\s+meet\s+obligations)\b", span, re.I):
+            results.append(
+                _evidence(
+                    DistressHardFlag.UNRESOLVED_SOLVENCY_RELIABILITY_ISSUE,
+                    document,
+                    span,
+                    "Primary filing states registrant financial statements cannot be relied upon in connection with an unresolved solvency/liquidity issue.",
+                )
+            )
             break
 
-    reliability = re.search(r"financial\s+statements?.{0,220}?should\s+no\s+longer\s+be\s+relied\s+upon", text, re.I | re.S)
-    if reliability:
-        span = _window(text, reliability.start(), reliability.end(), 500)
-        if re.search(r"\b(?:solvency|liquidity|ability\s+to\s+meet\s+obligations)\b", span, re.I):
-            results.append(_evidence(DistressHardFlag.UNRESOLVED_SOLVENCY_RELIABILITY_ISSUE, document, span, "Primary filing states financial statements cannot be relied upon in connection with an unresolved solvency/liquidity issue."))
-
     shortfall = re.search(
-        r"(?:do|does|will)\s+not\s+have\s+sufficient\s+(?:cash|liquidity|resources).{0,240}?(?:next|following)\s+(?:12|twelve)\s+months",
+        rf"\b{_SUBJECT}\s+(?:do|does|will)\s+not\s+have\s+sufficient\s+(?:cash|liquidity|resources).{{0,240}}?(?:next|following)\s+(?:12|twelve)\s+months",
         text,
         re.I | re.S,
     )
@@ -105,9 +190,15 @@ def extract_hard_distress_flags(document: SourceDocument) -> list[dict[str, Any]
             span,
             re.I | re.S,
         ):
-            results.append(_evidence(DistressHardFlag.EXPLICIT_12M_OBLIGATION_SHORTFALL_WITHOUT_COMMITTED_FINANCING, document, span, "Primary filing explicitly states a 12-month liquidity shortfall with financing not committed/assured."))
+            results.append(
+                _evidence(
+                    DistressHardFlag.EXPLICIT_12M_OBLIGATION_SHORTFALL_WITHOUT_COMMITTED_FINANCING,
+                    document,
+                    span,
+                    "Primary filing explicitly states a registrant 12-month liquidity shortfall with financing not committed/assured.",
+                )
+            )
 
-    # Keep one evidence item per hard flag per document.
     deduped: list[dict[str, Any]] = []
     emitted: set[str] = set()
     for item in results:
