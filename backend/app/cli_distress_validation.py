@@ -128,34 +128,51 @@ def _screen_refs(submissions: dict[str, Any], *, ticker: str, cik: str, cutoff: 
 
 
 def _sufficient_inputs(adapter: DistressSectorAdapter, inputs) -> tuple[bool, list[str]]:
+    """Identify names with enough evidence for at least one complete frozen rule path.
+
+    Merely possessing one side of an adverse/safe decision is not sufficient.
+    For example, debt plus 2.7x interest coverage can rule out the absolute <1x
+    distress trigger but cannot establish either the paired leverage distress
+    rule or a frozen safety path. Such a name remains outside the validation
+    denominator until leverage/liquidity/runway evidence completes a rule path.
+    This changes validation-denominator semantics only; classifier thresholds and
+    investment rules are unchanged.
+    """
     reasons: list[str] = []
     if inputs.hard_distress_flags:
         return True, ["verified_hard_distress_flag"]
 
     if adapter is DistressSectorAdapter.CORPORATE:
+        if inputs.net_cash is True:
+            reasons.append("verified_net_cash")
         if inputs.net_debt_to_ebitda is not None and inputs.interest_coverage is not None:
-            reasons.append("leverage_and_interest_coverage")
-        if inputs.debt_outstanding is not None and inputs.interest_coverage is not None:
-            reasons.append("debt_and_absolute_interest_coverage")
+            reasons.append("complete_leverage_and_interest_coverage_pair")
         if inputs.liquidity_coverage is not None:
             reasons.append("verified_12m_liquidity_coverage")
         if inputs.trailing_fcf is not None and inputs.trailing_fcf < 0 and inputs.cash_runway_months is not None:
             reasons.append("negative_fcf_and_runway")
-        if inputs.net_cash is True:
-            reasons.append("verified_net_cash")
+        # Absolute coverage alone is decisive only when it actually trips the
+        # frozen <1x distress threshold; otherwise it is partial evidence.
+        if (
+            inputs.debt_outstanding is not None
+            and inputs.debt_outstanding > 0
+            and inputs.interest_coverage is not None
+            and inputs.interest_coverage < 1.0
+        ):
+            reasons.append("absolute_interest_coverage_distress_path")
     elif adapter is DistressSectorAdapter.UTILITY:
         if inputs.net_debt_to_ebitda is not None and inputs.interest_coverage is not None:
-            reasons.append("utility_leverage_and_interest_coverage")
+            reasons.append("utility_complete_leverage_and_interest_coverage_pair")
         if inputs.liquidity_coverage is not None:
             reasons.append("utility_verified_12m_liquidity_coverage")
     elif adapter is DistressSectorAdapter.REIT:
         if inputs.debt_to_ebitdare is not None and inputs.fixed_charge_coverage is not None:
-            reasons.append("reit_debt_ebitdare_and_fixed_charge_coverage")
+            reasons.append("reit_complete_debt_ebitdare_and_fixed_charge_coverage_pair")
         if inputs.liquidity_coverage is not None:
             reasons.append("reit_verified_12m_liquidity_coverage")
     elif adapter is DistressSectorAdapter.BANK:
-        if inputs.regulatory_capital_breach is not None or inputs.prompt_corrective_action_unresolved is not None:
-            reasons.append("bank_regulatory_action_evidence")
+        if inputs.regulatory_capital_breach is True or inputs.prompt_corrective_action_unresolved is True:
+            reasons.append("bank_regulatory_breach_path")
         if inputs.cet1_ratio is not None and inputs.cet1_requirement_plus_buffer is not None:
             reasons.append("bank_cet1_pair")
     elif adapter is DistressSectorAdapter.INSURER:
