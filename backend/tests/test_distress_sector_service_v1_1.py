@@ -42,5 +42,5 @@ def test_ambiguous_real_estate_never_falls_back_to_corporate():
     assert route_distress_sector(instrument(sector="Real Estate", industry="Real Estate Services")) is None
 
 
-def test_missing_metadata_defaults_to_corporate_only_when_not_known_financial():
-    assert route_distress_sector(instrument(sector=None, industry=None)) is DistressSectorAdapter.CORPORATE
+def test_missing_metadata_remains_unclassified():
+    assert route_distress_sector(instrument(sector=None, industry=None)) is None
