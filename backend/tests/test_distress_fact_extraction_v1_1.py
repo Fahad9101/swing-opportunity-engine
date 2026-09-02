@@ -48,7 +48,7 @@ def test_negated_going_concern_is_not_flagged():
     "text",
     [
         "The Company filed a voluntary petition for relief under Chapter 11 of the Bankruptcy Code.",
-        "The Company commenced a voluntary case under chapter 11 of the Bankruptcy Code.",
+        "The Company commenced voluntary cases under chapter 11 of the Bankruptcy Code.",
         "The Company filed for bankruptcy on August 1, 2026.",
     ],
 )
