@@ -58,6 +58,67 @@ def test_uses_same_balance_sheet_date_for_cash_debt_and_investments():
     assert facts.audit["balance_period_end"] == "2026-06-30"
 
 
+def test_newer_alternative_debt_concept_beats_stale_legacy_concept():
+    facts = normalize(
+        {
+            "CashAndCashEquivalentsAtCarryingValue": [fact(100, "2026-06-30")],
+            "ShortTermInvestments": [fact(50, "2026-06-30")],
+            "LongTermDebtAndFinanceLeaseObligations": [fact(300, "2026-06-30")],
+            "LongTermDebt": [fact(999, "2022-06-30", filed="2022-08-01")],
+        }
+    )
+    assert facts.audit["balance_period_end"] == "2026-06-30"
+    assert facts.debt == 300
+
+
+def test_newer_alternative_annual_concept_beats_stale_first_history():
+    facts = normalize(
+        {
+            "CashAndCashEquivalentsAtCarryingValue": [fact(100, "2026-06-30")],
+            "ShortTermInvestments": [fact(50, "2026-06-30")],
+            "LongTermDebtNoncurrent": [fact(300, "2026-06-30")],
+            "OperatingIncomeLoss": [fact(100, "2025-12-31", start="2025-01-01", form="10-K")],
+            "DepreciationDepletionAndAmortization": [fact(20, "2019-12-31", start="2019-01-01", form="10-K", filed="2020-02-01")],
+            "DepreciationDepletionAndAmortizationPropertyPlantAndEquipment": [fact(30, "2025-12-31", start="2025-01-01", form="10-K")],
+            "InterestPaid": [fact(10, "2025-12-31", start="2025-01-01", form="10-K")],
+        }
+    )
+    assert facts.audit["annual_coverage_period_end"] == "2025-12-31"
+    assert facts.ebitda == 130
+    assert facts.cash_interest_expense == 10
+
+
+def test_stale_balance_sheet_is_suppressed_not_carried_forward():
+    facts = normalize(
+        {
+            "CashAndCashEquivalentsAtCarryingValue": [fact(500, "2023-06-30", filed="2023-08-01")],
+            "ShortTermInvestments": [fact(100, "2023-06-30", filed="2023-08-01")],
+            "LongTermDebt": [fact(200, "2023-06-30", filed="2023-08-01")],
+        }
+    )
+    assert facts.audit["balance_period_end"] is None
+    assert facts.debt is None
+    assert facts.cash is None
+    assert derive_distress_inputs(facts).net_cash is None
+
+
+def test_stale_annual_coverage_is_suppressed():
+    facts = normalize(
+        {
+            "CashAndCashEquivalentsAtCarryingValue": [fact(100, "2026-06-30")],
+            "ShortTermInvestments": [fact(50, "2026-06-30")],
+            "LongTermDebtNoncurrent": [fact(300, "2026-06-30")],
+            "OperatingIncomeLoss": [fact(100, "2019-12-31", start="2019-01-01", form="10-K", filed="2020-02-01")],
+            "DepreciationDepletionAndAmortization": [fact(20, "2019-12-31", start="2019-01-01", form="10-K", filed="2020-02-01")],
+            "InterestPaidNet": [fact(10, "2019-12-31", start="2019-01-01", form="10-K", filed="2020-02-01")],
+        }
+    )
+    assert facts.audit["annual_coverage_period_end"] is None
+    assert facts.ebit is None
+    assert facts.ebitda is None
+    assert facts.cash_interest_expense is None
+
+
 def test_missing_marketable_securities_is_not_assumed_zero():
     facts = normalize(
         {
