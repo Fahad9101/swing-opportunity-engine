@@ -38,17 +38,18 @@ class DistressHardFlag(str, Enum):
 class DistressRawFacts(BaseModel):
     """Validated primary-source facts used only to derive distress metrics.
 
-    All monetary fields must use the same currency/unit scale. Missing facts stay
-    null. `liquid_assets_complete` means the cash + marketable-securities input
-    is complete enough to support leverage/liquidity/runway arithmetic. A cash
-    value alone may still prove a net-cash safety path when cash exceeds debt,
-    but it must not silently treat missing investments as zero for adverse paths.
+    Missing facts stay null. `liquid_assets_complete` means the cash +
+    marketable-securities input is complete enough to support adverse arithmetic.
+    `hard_flag_screen_complete` means the required recent primary SEC forms were
+    successfully screened for universal hard-distress overrides; without it a
+    numerically safe result cannot become NOT_DISTRESSED.
     """
 
     ticker: str
     sector_adapter: DistressSectorAdapter
     as_of: datetime = Field(default_factory=lambda: datetime.now(UTC))
     hard_distress_flags: list[DistressHardFlag] = Field(default_factory=list)
+    hard_flag_screen_complete: bool = False
 
     debt: float | None = None
     cash: float | None = None
@@ -84,6 +85,7 @@ class DistressInputs(BaseModel):
     sector_adapter: DistressSectorAdapter
     as_of: datetime
     hard_distress_flags: list[DistressHardFlag] = Field(default_factory=list)
+    hard_flag_screen_complete: bool = False
 
     net_cash: bool | None = None
     debt_outstanding: float | None = None
@@ -120,6 +122,7 @@ class DistressAssessment(BaseModel):
     sector_adapter: DistressSectorAdapter
     as_of: datetime
     hard_distress_flags: list[DistressHardFlag] = Field(default_factory=list)
+    hard_flag_screen_complete: bool = False
 
     net_debt_to_ebitda: float | None = None
     interest_coverage: float | None = None
