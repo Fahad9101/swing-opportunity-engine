@@ -7,7 +7,7 @@ from app.domain.schemas import Instrument
 
 
 _BANK = re.compile(r"\b(bank|banking|banks|savings|thrift|credit union)\b", re.I)
-_INSURER = re.compile(r"\b(insurance|insurer|reinsurance|reinsurer)\b", re.I)
+_INSURER = re.compile(r"\b(insurance|insurer|insurers|reinsurance|reinsurer|reinsurers)\b", re.I)
 _REIT = re.compile(r"\b(REIT|real estate investment trust)\b", re.I)
 _UTILITY = re.compile(r"\b(utilities|utility|electric|gas utility|water utility|regulated power)\b", re.I)
 _FINANCIAL_SECTOR = re.compile(r"\b(finance|financial|financials)\b", re.I)
