@@ -4,21 +4,25 @@ import pytest
 
 from app.domain.distress_v1_1 import DistressHardFlag, DistressRawFacts, DistressSectorAdapter
 from app.domain.soe_v1_1 import SourceDocument
-from app.services.distress_fact_extraction_service import extract_hard_distress_flags, merge_hard_distress_evidence
+from app.services.distress_fact_extraction_service import (
+    extract_hard_distress_flags,
+    finalize_hard_distress_screen,
+    merge_hard_distress_evidence,
+)
 
 
 NOW = datetime(2026, 9, 2, tzinfo=UTC)
 
 
-def doc(text: str) -> SourceDocument:
+def doc(text: str, *, suffix: str = "test.htm") -> SourceDocument:
     return SourceDocument(
-        document_id="doc",
+        document_id="doc-" + suffix,
         rules_hash="1" * 64,
         ticker="TEST",
         cik="0000000001",
         accession="0000000001-26-000001",
         form="10-Q",
-        source_url="https://www.sec.gov/Archives/edgar/data/1/000000000126000001/test.htm",
+        source_url=f"https://www.sec.gov/Archives/edgar/data/1/000000000126000001/{suffix}",
         source_timestamp=NOW,
         fetched_at=NOW,
         content_hash="a" * 64,
@@ -98,3 +102,40 @@ def test_merge_preserves_primary_source_provenance_and_evidence():
     assert DistressHardFlag.GOING_CONCERN in merged.hard_distress_flags
     assert document.source_url in merged.sources
     assert merged.audit["hard_distress_evidence"][0]["evidence_span"]
+
+
+def test_completed_screen_requires_all_selected_documents_to_succeed():
+    first = doc("No adverse condition is stated here.", suffix="q.htm")
+    second = doc("No adverse condition is stated here either.", suffix="k.htm")
+    raw = DistressRawFacts(ticker="TEST", sector_adapter=DistressSectorAdapter.CORPORATE)
+    completed = finalize_hard_distress_screen(
+        raw,
+        screened_documents=[first, second],
+        evidence=[],
+        failed_document_urls=[],
+        required_document_count=2,
+    )
+    assert completed.hard_flag_screen_complete is True
+    assert first.source_url in completed.sources
+    assert second.source_url in completed.sources
+    assert completed.audit["hard_distress_screen"]["screened_document_count"] == 2
+
+
+def test_failed_required_document_keeps_screen_incomplete():
+    first = doc("No adverse condition is stated here.", suffix="q.htm")
+    raw = DistressRawFacts(ticker="TEST", sector_adapter=DistressSectorAdapter.CORPORATE)
+    completed = finalize_hard_distress_screen(
+        raw,
+        screened_documents=[first],
+        evidence=[],
+        failed_document_urls=["https://www.sec.gov/Archives/edgar/data/1/missing.htm"],
+        required_document_count=2,
+    )
+    assert completed.hard_flag_screen_complete is False
+    assert completed.audit["hard_distress_screen"]["failed_document_urls"]
+
+
+def test_empty_screen_never_counts_as_complete():
+    raw = DistressRawFacts(ticker="TEST", sector_adapter=DistressSectorAdapter.CORPORATE)
+    completed = finalize_hard_distress_screen(raw, screened_documents=[], evidence=[])
+    assert completed.hard_flag_screen_complete is False
