@@ -12,7 +12,7 @@
     "UNKNOWN": 48
   },
   "errors": [],
-  "generated_at": "2026-09-02T17:06:17.317048+00:00",
+  "generated_at": "2026-09-02T17:20:10.256166+00:00",
   "model_version": "SOE-1.1.0",
   "phase": "1.1B",
   "results": [
@@ -43,7 +43,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:51.347329+00:00",
+        "fetched_at": "2026-09-02T17:19:44.055562+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -71,6 +71,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "technology",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -121,7 +122,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:51.500408+00:00",
+        "fetched_at": "2026-09-02T17:19:44.217539+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -149,6 +150,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "technology",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -201,7 +203,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:52.120866+00:00",
+        "fetched_at": "2026-09-02T17:19:44.835130+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -230,6 +232,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "technology",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -283,7 +286,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:52.404859+00:00",
+        "fetched_at": "2026-09-02T17:19:45.122264+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -311,6 +314,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "technology",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 119.64942528735632,
@@ -332,7 +336,7 @@
       ],
       "sufficient_input_reasons": [
         "verified_net_cash",
-        "complete_leverage_and_interest_coverage_pair"
+        "leverage_coverage_safe_path"
       ],
       "sufficient_inputs": true,
       "ticker": "META"
@@ -364,7 +368,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:52.692902+00:00",
+        "fetched_at": "2026-09-02T17:19:45.391772+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -392,6 +396,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "semiconductors",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -442,7 +447,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:52.884487+00:00",
+        "fetched_at": "2026-09-02T17:19:45.581841+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -473,6 +478,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "semiconductors",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -526,7 +532,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:ShortTermInvestments:USD|us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:53.106931+00:00",
+        "fetched_at": "2026-09-02T17:19:45.820081+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -556,6 +562,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "semiconductors",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -610,7 +617,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:53.325046+00:00",
+        "fetched_at": "2026-09-02T17:19:46.043405+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -638,6 +645,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "software",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -688,7 +696,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:53.896654+00:00",
+        "fetched_at": "2026-09-02T17:19:46.599155+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -716,6 +724,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "software",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 30.184782608695652,
@@ -766,7 +775,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:54.199906+00:00",
+        "fetched_at": "2026-09-02T17:19:46.890382+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -795,6 +804,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "software",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 35.390243902439025,
@@ -817,7 +827,7 @@
       ],
       "sufficient_input_reasons": [
         "verified_net_cash",
-        "complete_leverage_and_interest_coverage_pair"
+        "leverage_coverage_safe_path"
       ],
       "sufficient_inputs": true,
       "ticker": "ADBE"
@@ -849,7 +859,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:54.414925+00:00",
+        "fetched_at": "2026-09-02T17:19:47.120753+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -878,6 +888,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "software",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -929,7 +940,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:54.708828+00:00",
+        "fetched_at": "2026-09-02T17:19:47.407187+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -963,6 +974,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "hardware",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 6.018463810930576,
@@ -1019,7 +1031,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:55.039669+00:00",
+        "fetched_at": "2026-09-02T17:19:47.725002+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1047,6 +1059,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "industrials",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 6.0537459283387625,
@@ -1097,7 +1110,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:55.516912+00:00",
+        "fetched_at": "2026-09-02T17:19:48.223682+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1125,6 +1138,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "industrials",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -1175,7 +1189,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:56.109248+00:00",
+        "fetched_at": "2026-09-02T17:19:48.812890+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1204,6 +1218,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "industrials",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 6.251538461538462,
@@ -1225,7 +1240,7 @@
         "https://www.sec.gov/Archives/edgar/data/773840/000077384026000130/hon-20260819.htm"
       ],
       "sufficient_input_reasons": [
-        "complete_leverage_and_interest_coverage_pair"
+        "leverage_coverage_safe_path"
       ],
       "sufficient_inputs": true,
       "ticker": "HON"
@@ -1257,7 +1272,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:56.423311+00:00",
+        "fetched_at": "2026-09-02T17:19:49.136208+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1285,6 +1300,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "industrials",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -1335,7 +1351,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:56.643376+00:00",
+        "fetched_at": "2026-09-02T17:19:49.327327+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1363,6 +1379,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "industrials",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 5.1469194312796205,
@@ -1413,7 +1430,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:56.867196+00:00",
+        "fetched_at": "2026-09-02T17:19:49.550591+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1441,6 +1458,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "industrials",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -1491,7 +1509,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:57.058323+00:00",
+        "fetched_at": "2026-09-02T17:19:49.741600+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1519,6 +1537,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "consumer",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -1569,7 +1588,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:ShortTermInvestments:USD|us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:57.250614+00:00",
+        "fetched_at": "2026-09-02T17:19:49.946300+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1597,6 +1616,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "consumer",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 8.135135135135135,
@@ -1617,7 +1637,7 @@
         "https://www.sec.gov/Archives/edgar/data/27419/000002741926000042/tgt-20260801.htm"
       ],
       "sufficient_input_reasons": [
-        "complete_leverage_and_interest_coverage_pair"
+        "leverage_coverage_safe_path"
       ],
       "sufficient_inputs": true,
       "ticker": "TGT"
@@ -1649,7 +1669,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:57.395366+00:00",
+        "fetched_at": "2026-09-02T17:19:50.089291+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1677,6 +1697,9 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "consumer",
+      "gray_zone_reasons": [
+        "corporate_leverage_coverage_gray_zone"
+      ],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 6.818670248488918,
@@ -1696,10 +1719,8 @@
         "https://data.sec.gov/api/xbrl/companyfacts/CIK0000060667.json",
         "https://www.sec.gov/Archives/edgar/data/60667/000006066726000117/low-20260731.htm"
       ],
-      "sufficient_input_reasons": [
-        "complete_leverage_and_interest_coverage_pair"
-      ],
-      "sufficient_inputs": true,
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
       "ticker": "LOW"
     },
     {
@@ -1729,7 +1750,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:57.565283+00:00",
+        "fetched_at": "2026-09-02T17:19:50.298203+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1757,6 +1778,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "consumer",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 8.686070686070686,
@@ -1807,7 +1829,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:57.708981+00:00",
+        "fetched_at": "2026-09-02T17:19:50.439433+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1836,6 +1858,7 @@
       "cash_runway_months": null,
       "classification": "NOT_DISTRESSED",
       "cohort": "consumer",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 97.95283018867924,
@@ -1858,7 +1881,7 @@
       ],
       "sufficient_input_reasons": [
         "verified_net_cash",
-        "complete_leverage_and_interest_coverage_pair"
+        "leverage_coverage_safe_path"
       ],
       "sufficient_inputs": true,
       "ticker": "COST"
@@ -1890,7 +1913,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:57.851449+00:00",
+        "fetched_at": "2026-09-02T17:19:50.583402+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1918,6 +1941,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "consumer",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 4.991670916199218,
@@ -1968,7 +1992,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:58.154477+00:00",
+        "fetched_at": "2026-09-02T17:19:50.900714+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -1998,6 +2022,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "transportation",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 7.946464646464647,
@@ -2050,7 +2075,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:58.440201+00:00",
+        "fetched_at": "2026-09-02T17:19:51.168079+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2080,6 +2105,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "transportation",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 6.200908059023837,
@@ -2132,7 +2158,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:58.915507+00:00",
+        "fetched_at": "2026-09-02T17:19:51.656224+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2161,6 +2187,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "healthcare",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -2212,7 +2239,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:59.122877+00:00",
+        "fetched_at": "2026-09-02T17:19:51.873180+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2241,6 +2268,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "healthcare",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -2292,7 +2320,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:05:59.391782+00:00",
+        "fetched_at": "2026-09-02T17:19:52.138707+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2320,6 +2348,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "healthcare",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -2370,7 +2399,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD|us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:05:59.662722+00:00",
+        "fetched_at": "2026-09-02T17:19:52.407032+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2399,6 +2428,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "healthcare",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -2450,7 +2480,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:05:59.933418+00:00",
+        "fetched_at": "2026-09-02T17:19:52.681430+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2479,6 +2509,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "healthcare",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 11.32601880877743,
@@ -2530,7 +2561,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:00.203490+00:00",
+        "fetched_at": "2026-09-02T17:19:52.933628+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2558,6 +2589,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "healthcare",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 8.400343642611684,
@@ -2608,7 +2640,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:00.495969+00:00",
+        "fetched_at": "2026-09-02T17:19:53.218894+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2638,6 +2670,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "utilities",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -2690,7 +2723,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:00.900838+00:00",
+        "fetched_at": "2026-09-02T17:19:53.630537+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2720,6 +2753,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "utilities",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 2.402785515320334,
@@ -2772,7 +2806,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:01.838426+00:00",
+        "fetched_at": "2026-09-02T17:19:54.553285+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2803,6 +2837,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "utilities",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -2856,7 +2891,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:02.591871+00:00",
+        "fetched_at": "2026-09-02T17:19:55.322016+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2884,6 +2919,9 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "utilities",
+      "gray_zone_reasons": [
+        "utility_leverage_coverage_gray_zone"
+      ],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": 2.808342133051742,
@@ -2903,10 +2941,8 @@
         "https://data.sec.gov/api/xbrl/companyfacts/CIK0000004904.json",
         "https://www.sec.gov/Archives/edgar/data/4904/000000490426000059/aep-20260630.htm"
       ],
-      "sufficient_input_reasons": [
-        "utility_complete_leverage_and_interest_coverage_pair"
-      ],
-      "sufficient_inputs": true,
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
       "ticker": "AEP"
     },
     {
@@ -2936,7 +2972,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:03.697321+00:00",
+        "fetched_at": "2026-09-02T17:19:56.461710+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -2965,6 +3001,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "utilities",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3016,7 +3053,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:04.661927+00:00",
+        "fetched_at": "2026-09-02T17:19:57.444113+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3045,6 +3082,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "utilities",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3096,7 +3134,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:04.930827+00:00",
+        "fetched_at": "2026-09-02T17:19:57.715458+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3127,6 +3165,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "reits",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3180,7 +3219,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:05.504929+00:00",
+        "fetched_at": "2026-09-02T17:19:58.321112+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3208,6 +3247,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "reits",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3258,7 +3298,7 @@
           "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:05.826406+00:00",
+        "fetched_at": "2026-09-02T17:19:58.645969+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3287,6 +3327,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "reits",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3338,7 +3379,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:06.159943+00:00",
+        "fetched_at": "2026-09-02T17:19:59.001144+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3370,6 +3411,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "reits",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3424,7 +3466,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:06.665504+00:00",
+        "fetched_at": "2026-09-02T17:19:59.479813+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3452,6 +3494,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "reits",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3502,7 +3545,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:07.063915+00:00",
+        "fetched_at": "2026-09-02T17:19:59.872166+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3532,6 +3575,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "reits",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3584,7 +3628,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:07.440584+00:00",
+        "fetched_at": "2026-09-02T17:20:00.287102+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3612,6 +3656,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "banks",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3662,7 +3707,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:08.640378+00:00",
+        "fetched_at": "2026-09-02T17:20:01.617287+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3690,6 +3735,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "banks",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3740,7 +3786,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:09.839281+00:00",
+        "fetched_at": "2026-09-02T17:20:02.748492+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3769,6 +3815,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "banks",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3820,7 +3867,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:10.982800+00:00",
+        "fetched_at": "2026-09-02T17:20:03.808156+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3848,6 +3895,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "banks",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3898,7 +3946,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:12.268215+00:00",
+        "fetched_at": "2026-09-02T17:20:05.114884+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -3926,6 +3974,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "banks",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -3976,7 +4025,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:12.801560+00:00",
+        "fetched_at": "2026-09-02T17:20:05.656080+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -4004,6 +4053,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "banks",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -4054,7 +4104,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:13.540402+00:00",
+        "fetched_at": "2026-09-02T17:20:06.495970+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -4082,6 +4132,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "insurers",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -4132,7 +4183,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:14.063124+00:00",
+        "fetched_at": "2026-09-02T17:20:07.034478+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -4161,6 +4212,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "insurers",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -4212,7 +4264,7 @@
           "liquid_assets_total": null,
           "marketable_securities": null
         },
-        "fetched_at": "2026-09-02T17:06:14.553329+00:00",
+        "fetched_at": "2026-09-02T17:20:07.525002+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -4242,6 +4294,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "insurers",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -4294,7 +4347,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:14.878266+00:00",
+        "fetched_at": "2026-09-02T17:20:07.859957+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -4324,6 +4377,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "insurers",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -4376,7 +4430,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD"
         },
-        "fetched_at": "2026-09-02T17:06:15.258011+00:00",
+        "fetched_at": "2026-09-02T17:20:08.223420+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -4405,6 +4459,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "insurers",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -4456,7 +4511,7 @@
           "liquid_assets_total": null,
           "marketable_securities": "us-gaap:ShortTermInvestments:USD|us-gaap:MarketableSecuritiesCurrent:USD"
         },
-        "fetched_at": "2026-09-02T17:06:16.180857+00:00",
+        "fetched_at": "2026-09-02T17:20:09.149575+00:00",
         "hard_distress_evidence": [],
         "hard_distress_screen": {
           "complete": true,
@@ -4484,6 +4539,7 @@
       "cash_runway_months": null,
       "classification": "UNKNOWN",
       "cohort": "insurers",
+      "gray_zone_reasons": [],
       "hard_distress_flags": [],
       "hard_flag_screen_complete": true,
       "interest_coverage": null,
@@ -4510,13 +4566,18 @@
   ],
   "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
   "summary": {
-    "classification_coverage_pct": 80.0,
+    "classification_coverage_pct": 100.0,
     "error_count": 0,
-    "exit_gate": "FAIL",
+    "exit_gate": "PASS",
     "false_safe_missing_maturity_or_coverage_count": 0,
     "financial_corporate_fallback_count": 0,
     "nonfinancial_classified": 8,
-    "nonfinancial_sufficient_inputs": 10,
+    "nonfinancial_gray_zone_count": 2,
+    "nonfinancial_gray_zone_tickers": [
+      "LOW",
+      "AEP"
+    ],
+    "nonfinancial_sufficient_inputs": 8,
     "provenance_complete_pct": 100.0,
     "tickers_attempted": 56,
     "tickers_with_results": 56
