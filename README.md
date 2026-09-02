@@ -138,6 +138,10 @@ Automatic checks cover impossible percentages, EOD staleness, price/share market
 
 See `MILESTONE_2_5_REPORT.md` for the original real 5,156-security free-data run, `MILESTONE_2_5E_REPORT.md` for targeted estimate/revision validation, `MILESTONE_2_5F_REPORT.md` for ownership/short-float validation, `MILESTONE_2_5G_REPORT.md` for free/public valuation and expected-upside validation, `MILESTONE_2_5H_REPORT.md` for free/public catalyst-intelligence validation, and `MILESTONE_2_5I_REPORT.md` for biotech cash-runway, financing and catalyst-eligibility validation. A fresh full-market validation run remains required before Milestone 2.5 can be considered fully production-validated.
 
+## SOE-1.1 Phase 1.1A shadow validation
+
+Phase 1.1A adds a primary-source SEC guidance ledger and deterministic tri-state guidance-deterioration classifier while keeping SOE-1.0.0 as the default runtime. The validation harness now performs true historical SEC submissions backfill by following official `filings.files` archive references whose SEC-reported date ranges overlap the lookback window, merging those records with `filings.recent`, and de-duplicating accessions before targeted filing/exhibit retrieval. This expands evidence coverage only; the frozen 2% revenue, 5% EPS/EBITDA/FCF, 100-bps margin, and multi-metric deterioration thresholds are unchanged. Phase 1.1A remains non-active until the live sample contains at least 10 genuinely comparable names, at least 80% classification coverage among them, and 100% provenance on non-null classifications.
+
 ## Explicitly deferred
 
 Entry Score, support, stops, T1/T2, R:R, maximum acceptable entry, Why Now/Why Not, thesis breaker, polished dashboard, Execution Engine handoff, alerts, and historical outcome tracking are not implemented. Fully automated qualitative materiality/surprise scoring and authoritative biotech readout/regulatory-date extraction also remain deferred until they can be implemented without changing or fabricating frozen SOE-1.0.0 rules.
