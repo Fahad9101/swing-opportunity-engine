@@ -48,16 +48,25 @@ def test_negated_going_concern_is_not_flagged():
     "text",
     [
         "The Company filed a voluntary petition for relief under Chapter 11 of the Bankruptcy Code.",
-        "The debtors commenced voluntary cases under chapter 11 of the Bankruptcy Code.",
+        "The Company commenced a voluntary case under chapter 11 of the Bankruptcy Code.",
         "The Company filed for bankruptcy on August 1, 2026.",
     ],
 )
-def test_extracts_explicit_bankruptcy_filing(text):
+def test_extracts_explicit_registrant_bankruptcy_filing(text):
     assert DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING in flags(text)
 
 
 def test_generic_restructuring_risk_does_not_equal_bankruptcy_filing():
     assert DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING not in flags("We may consider restructuring alternatives if market conditions worsen.")
+
+
+def test_counterparty_or_subsidiary_bankruptcy_is_not_registrant_distress():
+    assert DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING not in flags(
+        "On June 30, 2026, DISH filed petitions for relief under chapter 11 of the Bankruptcy Code. DISH is a customer of the Company."
+    )
+    assert DistressHardFlag.BANKRUPTCY_OR_RESTRUCTURING not in flags(
+        "KFI, a divested business, filed a voluntary petition seeking relief under chapter 11 of the Bankruptcy Code."
+    )
 
 
 def test_extracts_current_payment_default():
@@ -77,10 +86,24 @@ def test_generic_covenant_risk_or_waived_breach_is_not_hard_flag():
     assert DistressHardFlag.UNRESOLVED_COVENANT_BREACH not in flags("A covenant breach occurred and the lenders granted a waiver.")
 
 
-def test_extracts_solvency_related_nonreliance_only_when_linked():
-    text = "The financial statements should no longer be relied upon due to unresolved liquidity and ability-to-meet-obligations issues."
+def test_hypothetical_or_contractual_breach_language_is_not_current_registrant_distress():
+    nvda = (
+        "Our ability to comply with the covenants may be affected by events beyond our control. "
+        "If we breach any of the covenants without a waiver from the note holders, the indebtedness may be declared immediately due and payable."
+    )
+    honeywell = (
+        "The license may terminate in connection with certain uncured breach events or following a change of control to which the counterparty has not consented."
+    )
+    assert DistressHardFlag.UNRESOLVED_COVENANT_BREACH not in flags(nvda)
+    assert DistressHardFlag.UNRESOLVED_COVENANT_BREACH not in flags(honeywell)
+
+
+def test_extracts_solvency_related_nonreliance_only_when_linked_to_registrant():
+    text = "The Company concluded that its financial statements should no longer be relied upon due to unresolved liquidity and ability-to-meet-obligations issues."
     assert DistressHardFlag.UNRESOLVED_SOLVENCY_RELIABILITY_ISSUE in flags(text)
-    assert DistressHardFlag.UNRESOLVED_SOLVENCY_RELIABILITY_ISSUE not in flags("The financial statements should no longer be relied upon because of a revenue-recognition error.")
+    assert DistressHardFlag.UNRESOLVED_SOLVENCY_RELIABILITY_ISSUE not in flags(
+        "The Company concluded that its financial statements should no longer be relied upon because of a revenue-recognition error."
+    )
 
 
 def test_extracts_explicit_12m_shortfall_only_with_uncommitted_financing():
