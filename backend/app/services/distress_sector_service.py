@@ -18,15 +18,16 @@ def route_distress_sector(instrument: Instrument) -> DistressSectorAdapter | Non
     """Route an issuer to the frozen SOE-1.1 distress adapter.
 
     Financial/real-estate issuers are never silently routed to the generic
-    corporate adapter. If their available metadata cannot establish bank,
-    insurer, or REIT status, the adapter is null and the distress state must
-    remain UNKNOWN until better primary metadata is available.
+    corporate adapter. Missing sector metadata is also left unclassified rather
+    than assuming a conventional corporate balance sheet.
     """
 
     sector = (instrument.sector or "").strip()
     industry = (instrument.industry or "").strip()
     combined = f"{sector} {industry}".strip()
 
+    if not combined:
+        return None
     if _REIT.search(combined):
         return DistressSectorAdapter.REIT
     if _BANK.search(industry) or (_FINANCIAL_SECTOR.search(sector) and _BANK.search(combined)):
