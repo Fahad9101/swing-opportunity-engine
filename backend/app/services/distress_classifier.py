@@ -52,6 +52,7 @@ def _result(
         sector_adapter=metrics.sector_adapter,
         as_of=metrics.as_of,
         hard_distress_flags=metrics.hard_distress_flags,
+        hard_flag_screen_complete=metrics.hard_flag_screen_complete,
         net_debt_to_ebitda=metrics.net_debt_to_ebitda,
         interest_coverage=metrics.interest_coverage,
         liquidity_coverage=metrics.liquidity_coverage,
@@ -79,11 +80,29 @@ def _unknown(metrics: DistressInputs, rules_hash: str, path: str, reason: str) -
     )
 
 
+def _safe_result(metrics: DistressInputs, rules_hash: str, path: str, reason: str) -> DistressAssessment:
+    if not metrics.hard_flag_screen_complete:
+        return _unknown(
+            metrics,
+            rules_hash,
+            "balance_sheet_distress_v1_1.hard_flag_screen_incomplete",
+            "A numerically safe path was present, but the required recent primary-source hard-distress screen was not completed.",
+        )
+    return _result(
+        metrics,
+        rules_hash=rules_hash,
+        classification=DistressClassification.NOT_DISTRESSED,
+        rule_path=path,
+        reason=reason,
+    )
+
+
 def classify_distress(metrics: DistressInputs, rules: dict[str, Any], *, rules_hash: str) -> DistressAssessment:
     """Pure SOE-1.1 sector-aware distress classifier.
 
-    Missing evidence never becomes a favorable value. A NOT_DISTRESSED result
-    requires both a frozen safety path and primary-source provenance.
+    Missing evidence never becomes a favorable value. Positive distress can be
+    classified from verified adverse evidence, but NOT_DISTRESSED requires both
+    a frozen safety path and a completed recent primary-source hard-flag screen.
     """
     config = _distress_rules(rules)
 
@@ -150,7 +169,7 @@ def _classify_corporate(metrics: DistressInputs, rules: dict[str, Any], rules_ha
         return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.DISTRESSED, rule_path="balance_sheet_distress_v1_1.corporate.negative_fcf_short_runway", reason="Negative-FCF runway is below 12 months without verified secured financing.")
 
     if safe.get("net_cash") is True and metrics.net_cash is True:
-        return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.corporate.net_cash_safe", reason="Verified net-cash position satisfies the frozen corporate safety path.")
+        return _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.corporate.net_cash_safe", "Verified net-cash position satisfies the frozen corporate safety path.")
 
     if (
         metrics.net_debt_to_ebitda is not None
@@ -158,7 +177,7 @@ def _classify_corporate(metrics: DistressInputs, rules: dict[str, Any], rules_ha
         and metrics.net_debt_to_ebitda <= safe["net_debt_to_ebitda_lte"]
         and metrics.interest_coverage >= safe["paired_interest_coverage_gte"]
     ):
-        return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.corporate.leverage_coverage_safe", reason="Net debt/EBITDA and interest coverage satisfy the frozen corporate safety pair.")
+        return _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe", "Net debt/EBITDA and interest coverage satisfy the frozen corporate safety pair.")
 
     if (
         metrics.liquidity_coverage is not None
@@ -166,7 +185,7 @@ def _classify_corporate(metrics: DistressInputs, rules: dict[str, Any], rules_ha
         and metrics.trailing_fcf is not None
         and metrics.trailing_fcf > 0
     ):
-        return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.corporate.liquidity_fcf_safe", reason="Verified liquidity coverage is at least 1.5x and trailing FCF is positive.")
+        return _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.corporate.liquidity_fcf_safe", "Verified liquidity coverage is at least 1.5x and trailing FCF is positive.")
 
     if (
         metrics.trailing_fcf is not None
@@ -174,7 +193,7 @@ def _classify_corporate(metrics: DistressInputs, rules: dict[str, Any], rules_ha
         and metrics.cash_runway_months is not None
         and metrics.cash_runway_months >= safe["negative_fcf_runway_months_gte"]
     ):
-        return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.corporate.negative_fcf_runway_safe", reason="Negative-FCF runway meets the frozen 18-month safety threshold.")
+        return _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.corporate.negative_fcf_runway_safe", "Negative-FCF runway meets the frozen 18-month safety threshold.")
 
     return _unknown(metrics, rules_hash, "balance_sheet_distress_v1_1.corporate.unknown", "Corporate evidence is insufficient for a frozen distress or safety path.")
 
@@ -197,7 +216,7 @@ def _classify_utility(metrics: DistressInputs, rules: dict[str, Any], rules_hash
         and metrics.net_debt_to_ebitda <= safe["net_debt_to_ebitda_lte"]
         and metrics.interest_coverage >= safe["paired_interest_coverage_gte"]
     ):
-        return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.utilities.leverage_coverage_safe", reason="Utility leverage and coverage satisfy the frozen safety pair.")
+        return _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.utilities.leverage_coverage_safe", "Utility leverage and coverage satisfy the frozen safety pair.")
     return _unknown(metrics, rules_hash, "balance_sheet_distress_v1_1.utilities.unknown", "Utility evidence is insufficient for a frozen distress or safety path.")
 
 
@@ -219,7 +238,7 @@ def _classify_reit(metrics: DistressInputs, rules: dict[str, Any], rules_hash: s
         and metrics.debt_to_ebitdare <= safe["debt_to_ebitdare_lte"]
         and metrics.fixed_charge_coverage >= safe["paired_fixed_charge_coverage_gte"]
     ):
-        return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.reits.leverage_coverage_safe", reason="REIT debt/EBITDAre and fixed-charge coverage satisfy the frozen safety pair.")
+        return _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.reits.leverage_coverage_safe", "REIT debt/EBITDAre and fixed-charge coverage satisfy the frozen safety pair.")
     return _unknown(metrics, rules_hash, "balance_sheet_distress_v1_1.reits.unknown", "REIT evidence is insufficient for a frozen distress or safety path.")
 
 
@@ -236,8 +255,9 @@ def _classify_bank(metrics: DistressInputs, rules: dict[str, Any], rules_hash: s
             return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.DISTRESSED, rule_path="balance_sheet_distress_v1_1.banks.cet1_below_requirement", reason="CET1 is below the institution-specific requirement plus buffer.")
         required_safe_ratio = requirement + rules["safe_cet1_excess_over_requirement_and_buffer_bps_gte"] / 10_000.0
         if ratio >= required_safe_ratio:
-            assessment = _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.banks.cet1_excess_safe", reason="CET1 exceeds the applicable requirement plus buffer by at least the frozen 250 bps margin.")
-            assessment.audit["cet1_excess_bps"] = (ratio - requirement) * 10_000.0
+            assessment = _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.banks.cet1_excess_safe", "CET1 exceeds the applicable requirement plus buffer by at least the frozen 250 bps margin.")
+            if assessment.classification is DistressClassification.NOT_DISTRESSED:
+                assessment.audit["cet1_excess_bps"] = (ratio - requirement) * 10_000.0
             return assessment
 
     return _unknown(metrics, rules_hash, "balance_sheet_distress_v1_1.banks.unknown", "Bank regulatory-capital evidence is insufficient for a frozen distress or safety path.")
@@ -251,8 +271,9 @@ def _classify_insurer(metrics: DistressInputs, rules: dict[str, Any], rules_hash
             return _result(metrics, rules_hash=rules_hash, classification=DistressClassification.DISTRESSED, rule_path="balance_sheet_distress_v1_1.insurers.below_regulatory_action_threshold", reason="Insurer solvency/RBC ratio is below the applicable regulatory action threshold.")
         ratio_to_threshold = ratio / threshold
         if ratio_to_threshold >= rules["safe_ratio_to_regulatory_action_threshold_gte"]:
-            assessment = _result(metrics, rules_hash=rules_hash, classification=DistressClassification.NOT_DISTRESSED, rule_path="balance_sheet_distress_v1_1.insurers.solvency_margin_safe", reason="Insurer solvency/RBC ratio is at least 1.5x the applicable regulatory action threshold.")
-            assessment.audit["ratio_to_regulatory_action_threshold"] = ratio_to_threshold
+            assessment = _safe_result(metrics, rules_hash, "balance_sheet_distress_v1_1.insurers.solvency_margin_safe", "Insurer solvency/RBC ratio is at least 1.5x the applicable regulatory action threshold.")
+            if assessment.classification is DistressClassification.NOT_DISTRESSED:
+                assessment.audit["ratio_to_regulatory_action_threshold"] = ratio_to_threshold
             return assessment
 
     return _unknown(metrics, rules_hash, "balance_sheet_distress_v1_1.insurers.unknown", "Insurer regulatory-solvency evidence is insufficient for a frozen distress or safety path.")
