@@ -63,6 +63,7 @@ def derive_distress_inputs(facts: DistressRawFacts) -> DistressInputs:
             "metric_derivation": "SOE-1.1 deterministic distress derivations",
             "liquid_assets": liquid_assets,
             "liquid_assets_complete": liquid_assets_complete,
+            "hard_flag_screen_complete": facts.hard_flag_screen_complete,
             "leverage_suppressed_nonpositive_ebitda": facts.ebitda is not None and facts.ebitda <= 0,
             "leverage_suppressed_incomplete_liquid_assets": not liquid_assets_complete,
             "liquidity_suppressed_without_positive_12m_maturities": facts.debt_maturities_12m is None
@@ -75,6 +76,7 @@ def derive_distress_inputs(facts: DistressRawFacts) -> DistressInputs:
         sector_adapter=facts.sector_adapter,
         as_of=facts.as_of,
         hard_distress_flags=facts.hard_distress_flags,
+        hard_flag_screen_complete=facts.hard_flag_screen_complete,
         net_cash=net_cash,
         debt_outstanding=facts.debt,
         net_debt_to_ebitda=net_debt_to_ebitda,
