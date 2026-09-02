@@ -36,6 +36,18 @@ def test_earnings_and_formal_guidance_are_separate_primary_evidence_candidates()
     assert by_type["quarterly_earnings"].structured_provenance["accession"] == doc.accession
 
 
+def test_common_reports_q3_results_title_is_recognized():
+    doc = _doc("Adobe Reports Q3 FY2026 Results. Revenue was $6.2 billion for the quarter ended August 29, 2026.")
+    candidates = extract_sec_catalyst_candidates(doc)
+    assert any(item.input.event_type == "quarterly_earnings" for item in candidates)
+
+
+def test_annual_outlook_language_is_formal_guidance_evidence():
+    doc = _doc("The company raises its fiscal year 2026 outlook and now expects revenue of approximately $10 billion.")
+    candidates = extract_sec_catalyst_candidates(doc)
+    assert any(item.input.event_type == "formal_full_year_guidance_update" for item in candidates)
+
+
 def test_phase3_readout_does_not_become_company_wide_without_exposure_evidence():
     doc = _doc("Phase 3 study met its primary endpoint with a statistically significant result.")
     candidates = extract_sec_catalyst_candidates(doc, is_biotech=True)
@@ -66,6 +78,14 @@ def test_admin_language_cannot_override_real_earnings_event():
 def test_hypothetical_risk_factor_does_not_create_regulatory_candidate():
     doc = _doc("If the FDA does not approve a future product candidate, our business could be harmed.", form="10-Q")
     assert extract_sec_catalyst_candidates(doc, is_biotech=True) == []
+
+
+def test_explicit_fda_approval_is_regulatory_candidate_but_exposure_stays_missing():
+    doc = _doc("The FDA has approved the Company's application for the new indication.")
+    candidates = extract_sec_catalyst_candidates(doc, is_biotech=True)
+    assert len(candidates) == 1
+    assert candidates[0].input.event_type == "regulatory_decision"
+    assert candidates[0].input.biotech_pipeline_value_fraction is None
 
 
 def test_merger_language_is_fact_only_and_exposure_remains_missing():
