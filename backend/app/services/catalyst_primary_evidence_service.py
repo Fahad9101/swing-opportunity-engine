@@ -21,9 +21,13 @@ _EARNINGS_PATTERNS = [
     re.compile(r"\bfinancial\s+results\s+for\s+(?:the\s+)?(?:quarter|three\s+months|six\s+months|nine\s+months)\b", re.I),
     re.compile(r"\bquarter\s+ended\b.{0,180}\b(?:net\s+sales|revenue|revenues|earnings|income)\b", re.I | re.S),
 ]
+_GUIDANCE_ACTION = r"(?:raises?|raised|reaffirms?|reaffirmed|maintains?|maintained|lowers?|lowered|reduces?|reduced|cuts?|cut|updates?|updated|withdraws?|withdrew|initiates?|initiated)"
+_ANNUAL_PERIOD = r"(?:full[- ]year|fiscal(?:\s+year)?\s+20\d{2}|FY\s*20\d{2}|annual)"
+_GUIDANCE_TERM = r"(?:guidance|outlook)"
 _GUIDANCE_PATTERNS = [
-    re.compile(r"\b(?:raises?|raised|reaffirms?|reaffirmed|lowers?|lowered|reduces?|reduced|cuts?|cut|updates?|updated|withdraws?|withdrew|initiates?|initiated)\b.{0,120}\b(?:full[- ]year|fiscal\s+20\d{2}|annual)\b.{0,80}\bguidance\b", re.I | re.S),
-    re.compile(r"\b(?:full[- ]year|fiscal\s+20\d{2}|annual)\b.{0,80}\bguidance\b.{0,120}\b(?:raises?|raised|reaffirms?|reaffirmed|lowers?|lowered|updates?|updated|withdraws?|withdrew)\b", re.I | re.S),
+    re.compile(rf"\b{_GUIDANCE_ACTION}\b.{{0,140}}\b{_ANNUAL_PERIOD}\b.{{0,100}}\b{_GUIDANCE_TERM}\b", re.I | re.S),
+    re.compile(rf"\b{_ANNUAL_PERIOD}\b.{{0,100}}\b{_GUIDANCE_TERM}\b.{{0,140}}\b{_GUIDANCE_ACTION}\b", re.I | re.S),
+    re.compile(rf"\b{_GUIDANCE_ACTION}\b.{{0,100}}\b{_GUIDANCE_TERM}\b.{{0,100}}\b{_ANNUAL_PERIOD}\b", re.I | re.S),
 ]
 _MERGER_PATTERNS = [
     re.compile(r"\bagreement\s+and\s+plan\s+of\s+merger\b", re.I),
