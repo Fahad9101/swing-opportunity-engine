@@ -29,20 +29,73 @@ _UNSUPPORTED_REVENUE = re.compile(
     re.I,
 )
 _FORWARD_VERB = re.compile(r"\b(?:expects?|anticipates?|projects?|forecast(?:s|ed|ing)?)\b", re.I)
+_QUARTER_MAP = {"first": 1, "second": 2, "third": 3, "fourth": 4}
+_GUIDANCE_HEADER = r"(?:guidance|outlook|forecast|targets?|expects?|expected)"
+_QUARTER_WORD_HEADER = re.compile(
+    rf"\b(first|second|third|fourth)\s+quarter(?:\s+of)?\s+(?:(?:fiscal(?:\s+year)?|FY)\s*)?(20\d{{2}}).{{0,35}}\b{_GUIDANCE_HEADER}\b",
+    re.I | re.S,
+)
+_QUARTER_NUMERIC_HEADER = re.compile(
+    rf"\bQ([1-4])\s*(?:FY|fiscal(?:\s+year)?)?\s*'?((?:20)?\d{{2}}).{{0,35}}\b{_GUIDANCE_HEADER}\b",
+    re.I | re.S,
+)
+_FULL_YEAR_HEADER = re.compile(
+    rf"\b(?:FY|fiscal\s+year|full[-\s]?year)\s*(20\d{{2}}).{{0,35}}\b{_GUIDANCE_HEADER}\b",
+    re.I | re.S,
+)
+_MIXED_GAAP_NON_GAAP = re.compile(r"\bGAAP\s*:.*\b(?:non[-\s]?GAAP|adjusted)\s*:", re.I | re.S)
+
+
+def _normalize_year(token: str) -> int:
+    year = int(token)
+    return year + 2000 if year < 100 else year
+
+
+def _explicit_guidance_periods(text: str) -> set[str]:
+    """Return explicit guidance-period headers present in an evidence span.
+
+    This is a conservative assessment-time cross-check against extraction. It
+    prevents a quarter table such as "third quarter FY2026 targets" from being
+    compared as full-year FY2026 simply because the embedded FY token was also
+    recognized by the generic full-year parser.
+    """
+    periods: set[str] = set()
+    quarter_spans: list[tuple[int, int]] = []
+    for match in _QUARTER_WORD_HEADER.finditer(text):
+        year = int(match.group(2))
+        periods.add(f"Q{_QUARTER_MAP[match.group(1).lower()]}FY{year}")
+        quarter_spans.append((match.start(), match.end()))
+    for match in _QUARTER_NUMERIC_HEADER.finditer(text):
+        year = _normalize_year(match.group(2))
+        periods.add(f"Q{match.group(1)}FY{year}")
+        quarter_spans.append((match.start(), match.end()))
+    for match in _FULL_YEAR_HEADER.finditer(text):
+        if any(start <= match.start() < end for start, end in quarter_spans):
+            continue
+        prefix = text[max(0, match.start() - 36) : match.start()]
+        if re.search(r"\b(?:first|second|third|fourth)\s+quarter\s*$|\bQ[1-4]\s*$", prefix, re.I):
+            continue
+        periods.add(f"FY{int(match.group(1))}")
+    return periods
 
 
 def _assessment_eligible(record: GuidanceMetricRecord) -> bool:
     """Return whether an extracted fact may participate in guidance assessment.
 
     Structured/manual records without an evidence span are accepted unchanged.
-    Deterministic text records are screened for primary-metric scope and obvious
-    reported-actual contamination before they can create current/prior pairs.
+    Deterministic text records are screened for primary-metric scope, explicit
+    period consistency, mixed-basis ambiguity, and obvious reported-actual
+    contamination before they can create current/prior pairs.
     """
     if not record.verified:
         return False
     text = (record.evidence_span or "").strip()
     if not text:
         return True
+
+    explicit_periods = _explicit_guidance_periods(text)
+    if explicit_periods and record.fiscal_period not in explicit_periods:
+        return False
 
     if record.metric is GuidanceMetric.REVENUE and _UNSUPPORTED_REVENUE.search(text):
         # SOE-1.1 primary revenue means company-level revenue/net sales, not ARR,
@@ -58,6 +111,12 @@ def _assessment_eligible(record: GuidanceMetricRecord) -> bool:
             in {GuidanceAction.RAISE, GuidanceAction.REAFFIRM, GuidanceAction.LOWER, GuidanceAction.WITHDRAW}
             and bool(_GUIDANCE_CONTEXT.search(text))
         )
+
+    if record.metric is GuidanceMetric.EPS and _MIXED_GAAP_NON_GAAP.search(text):
+        # Mixed GAAP/non-GAAP SEC table rows are excluded unless extraction can
+        # prove which labeled range was bound. This prevents a GAAP midpoint from
+        # being compared under an ADJUSTED key (or vice versa).
+        return False
 
     if not _GUIDANCE_CONTEXT.search(text):
         return False
