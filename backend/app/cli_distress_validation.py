@@ -127,58 +127,162 @@ def _screen_refs(submissions: dict[str, Any], *, ticker: str, cik: str, cutoff: 
     return selected, required_count, failures, overflow
 
 
-def _sufficient_inputs(adapter: DistressSectorAdapter, inputs) -> tuple[bool, list[str]]:
-    """Identify names with enough evidence for at least one complete frozen rule path.
+def _sufficient_inputs(adapter: DistressSectorAdapter, inputs, rules: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Identify names whose available evidence can resolve a frozen rule path.
 
-    Merely possessing one side of an adverse/safe decision is not sufficient.
-    For example, debt plus 2.7x interest coverage can rule out the absolute <1x
-    distress trigger but cannot establish either the paired leverage distress
-    rule or a frozen safety path. Such a name remains outside the validation
-    denominator until leverage/liquidity/runway evidence completes a rule path.
-    This changes validation-denominator semantics only; classifier thresholds and
-    investment rules are unchanged.
+    A complete metric pair is not automatically decision-eligible. The frozen
+    rules deliberately contain neutral gray zones between distress and safety
+    thresholds. Those observations must remain UNKNOWN and must not be counted
+    as classifier coverage failures. The validation denominator therefore
+    contains only inputs that independently satisfy at least one frozen adverse
+    or safe path. This changes validation-denominator semantics only; no
+    classifier threshold or SOE investment rule is changed.
     """
-    reasons: list[str] = []
-    if inputs.hard_distress_flags:
+    config = rules.get("balance_sheet_distress_v1_1")
+    if not isinstance(config, dict):
+        raise ValueError("SOE-1.1 balance-sheet distress rules are missing")
+
+    hard_rules = config.get("universal_hard_overrides", {})
+    if any(hard_rules.get(flag.value) is True for flag in inputs.hard_distress_flags):
         return True, ["verified_hard_distress_flag"]
 
+    reasons: list[str] = []
+
     if adapter is DistressSectorAdapter.CORPORATE:
-        if inputs.net_cash is True:
+        bad = config["corporate"]["distressed"]
+        safe = config["corporate"]["safe"]
+        if safe.get("net_cash") is True and inputs.net_cash is True:
             reasons.append("verified_net_cash")
         if inputs.net_debt_to_ebitda is not None and inputs.interest_coverage is not None:
-            reasons.append("complete_leverage_and_interest_coverage_pair")
-        if inputs.liquidity_coverage is not None:
-            reasons.append("verified_12m_liquidity_coverage")
-        if inputs.trailing_fcf is not None and inputs.trailing_fcf < 0 and inputs.cash_runway_months is not None:
-            reasons.append("negative_fcf_and_runway")
-        # Absolute coverage alone is decisive only when it actually trips the
-        # frozen <1x distress threshold; otherwise it is partial evidence.
+            if inputs.net_debt_to_ebitda > bad["net_debt_to_ebitda_gt"] and inputs.interest_coverage < bad["paired_interest_coverage_lt"]:
+                reasons.append("high_leverage_low_coverage_distress_path")
+            if inputs.net_debt_to_ebitda <= safe["net_debt_to_ebitda_lte"] and inputs.interest_coverage >= safe["paired_interest_coverage_gte"]:
+                reasons.append("leverage_coverage_safe_path")
         if (
             inputs.debt_outstanding is not None
             and inputs.debt_outstanding > 0
             and inputs.interest_coverage is not None
-            and inputs.interest_coverage < 1.0
+            and inputs.interest_coverage < bad["interest_coverage_absolute_lt"]
         ):
             reasons.append("absolute_interest_coverage_distress_path")
+        if inputs.liquidity_coverage is not None:
+            if inputs.liquidity_coverage < bad["liquidity_coverage_lt"] and inputs.financing_secured is not True:
+                reasons.append("liquidity_shortfall_distress_path")
+            if (
+                inputs.liquidity_coverage >= safe["liquidity_coverage_gte"]
+                and inputs.trailing_fcf is not None
+                and inputs.trailing_fcf > 0
+            ):
+                reasons.append("liquidity_fcf_safe_path")
+        if inputs.trailing_fcf is not None and inputs.trailing_fcf < 0 and inputs.cash_runway_months is not None:
+            if inputs.cash_runway_months < bad["negative_fcf_runway_months_lt"] and inputs.financing_secured is not True:
+                reasons.append("negative_fcf_short_runway_distress_path")
+            if inputs.cash_runway_months >= safe["negative_fcf_runway_months_gte"]:
+                reasons.append("negative_fcf_runway_safe_path")
+
     elif adapter is DistressSectorAdapter.UTILITY:
+        bad = config["utilities"]["distressed"]
+        safe = config["utilities"]["safe"]
         if inputs.net_debt_to_ebitda is not None and inputs.interest_coverage is not None:
-            reasons.append("utility_complete_leverage_and_interest_coverage_pair")
-        if inputs.liquidity_coverage is not None:
-            reasons.append("utility_verified_12m_liquidity_coverage")
+            if inputs.net_debt_to_ebitda > bad["net_debt_to_ebitda_gt"] and inputs.interest_coverage < bad["paired_interest_coverage_lt"]:
+                reasons.append("utility_high_leverage_low_coverage_distress_path")
+            if inputs.net_debt_to_ebitda <= safe["net_debt_to_ebitda_lte"] and inputs.interest_coverage >= safe["paired_interest_coverage_gte"]:
+                reasons.append("utility_leverage_coverage_safe_path")
+        if inputs.liquidity_coverage is not None and inputs.liquidity_coverage < bad["liquidity_coverage_lt"] and inputs.financing_secured is not True:
+            reasons.append("utility_liquidity_shortfall_distress_path")
+
     elif adapter is DistressSectorAdapter.REIT:
+        bad = config["reits"]["distressed"]
+        safe = config["reits"]["safe"]
         if inputs.debt_to_ebitdare is not None and inputs.fixed_charge_coverage is not None:
-            reasons.append("reit_complete_debt_ebitdare_and_fixed_charge_coverage_pair")
-        if inputs.liquidity_coverage is not None:
-            reasons.append("reit_verified_12m_liquidity_coverage")
+            if inputs.debt_to_ebitdare > bad["debt_to_ebitdare_gt"] and inputs.fixed_charge_coverage < bad["paired_fixed_charge_coverage_lt"]:
+                reasons.append("reit_high_leverage_low_fixed_charge_distress_path")
+            if inputs.debt_to_ebitdare <= safe["debt_to_ebitdare_lte"] and inputs.fixed_charge_coverage >= safe["paired_fixed_charge_coverage_gte"]:
+                reasons.append("reit_leverage_coverage_safe_path")
+        if inputs.liquidity_coverage is not None and inputs.liquidity_coverage < bad["liquidity_coverage_lt"] and inputs.financing_secured is not True:
+            reasons.append("reit_liquidity_shortfall_distress_path")
+
     elif adapter is DistressSectorAdapter.BANK:
-        if inputs.regulatory_capital_breach is True or inputs.prompt_corrective_action_unresolved is True:
+        bank = config["banks"]
+        if bank.get("distressed_if_regulatory_capital_breach") is True and (
+            inputs.regulatory_capital_breach is True or inputs.prompt_corrective_action_unresolved is True
+        ):
             reasons.append("bank_regulatory_breach_path")
         if inputs.cet1_ratio is not None and inputs.cet1_requirement_plus_buffer is not None:
-            reasons.append("bank_cet1_pair")
+            if inputs.cet1_ratio < inputs.cet1_requirement_plus_buffer:
+                reasons.append("bank_cet1_below_requirement_distress_path")
+            safe_ratio = inputs.cet1_requirement_plus_buffer + bank["safe_cet1_excess_over_requirement_and_buffer_bps_gte"] / 10_000.0
+            if inputs.cet1_ratio >= safe_ratio:
+                reasons.append("bank_cet1_excess_safe_path")
+
     elif adapter is DistressSectorAdapter.INSURER:
-        if inputs.insurer_solvency_ratio is not None and inputs.insurer_regulatory_action_threshold is not None:
-            reasons.append("insurer_regulatory_solvency_pair")
+        insurer = config["insurers"]
+        ratio = inputs.insurer_solvency_ratio
+        threshold = inputs.insurer_regulatory_action_threshold
+        if ratio is not None and threshold is not None and threshold > 0:
+            if insurer.get("distressed_below_regulatory_action_threshold") is True and ratio < threshold:
+                reasons.append("insurer_below_regulatory_threshold_distress_path")
+            if ratio / threshold >= insurer["safe_ratio_to_regulatory_action_threshold_gte"]:
+                reasons.append("insurer_solvency_margin_safe_path")
+
     return bool(reasons), reasons
+
+
+def _gray_zone_reasons(adapter: DistressSectorAdapter, inputs, rules: dict[str, Any]) -> list[str]:
+    """Record complete-but-neutral inputs excluded from the coverage denominator."""
+    config = rules.get("balance_sheet_distress_v1_1")
+    if not isinstance(config, dict):
+        raise ValueError("SOE-1.1 balance-sheet distress rules are missing")
+    reasons: list[str] = []
+
+    if adapter is DistressSectorAdapter.CORPORATE:
+        bad = config["corporate"]["distressed"]
+        safe = config["corporate"]["safe"]
+        if inputs.net_debt_to_ebitda is not None and inputs.interest_coverage is not None:
+            distressed = inputs.net_debt_to_ebitda > bad["net_debt_to_ebitda_gt"] and inputs.interest_coverage < bad["paired_interest_coverage_lt"]
+            safe_pair = inputs.net_debt_to_ebitda <= safe["net_debt_to_ebitda_lte"] and inputs.interest_coverage >= safe["paired_interest_coverage_gte"]
+            if not distressed and not safe_pair:
+                reasons.append("corporate_leverage_coverage_gray_zone")
+        if inputs.trailing_fcf is not None and inputs.trailing_fcf < 0 and inputs.cash_runway_months is not None:
+            short = inputs.cash_runway_months < bad["negative_fcf_runway_months_lt"] and inputs.financing_secured is not True
+            long = inputs.cash_runway_months >= safe["negative_fcf_runway_months_gte"]
+            if not short and not long:
+                reasons.append("corporate_negative_fcf_runway_gray_zone")
+
+    elif adapter is DistressSectorAdapter.UTILITY:
+        bad = config["utilities"]["distressed"]
+        safe = config["utilities"]["safe"]
+        if inputs.net_debt_to_ebitda is not None and inputs.interest_coverage is not None:
+            distressed = inputs.net_debt_to_ebitda > bad["net_debt_to_ebitda_gt"] and inputs.interest_coverage < bad["paired_interest_coverage_lt"]
+            safe_pair = inputs.net_debt_to_ebitda <= safe["net_debt_to_ebitda_lte"] and inputs.interest_coverage >= safe["paired_interest_coverage_gte"]
+            if not distressed and not safe_pair:
+                reasons.append("utility_leverage_coverage_gray_zone")
+
+    elif adapter is DistressSectorAdapter.REIT:
+        bad = config["reits"]["distressed"]
+        safe = config["reits"]["safe"]
+        if inputs.debt_to_ebitdare is not None and inputs.fixed_charge_coverage is not None:
+            distressed = inputs.debt_to_ebitdare > bad["debt_to_ebitdare_gt"] and inputs.fixed_charge_coverage < bad["paired_fixed_charge_coverage_lt"]
+            safe_pair = inputs.debt_to_ebitdare <= safe["debt_to_ebitdare_lte"] and inputs.fixed_charge_coverage >= safe["paired_fixed_charge_coverage_gte"]
+            if not distressed and not safe_pair:
+                reasons.append("reit_leverage_coverage_gray_zone")
+
+    elif adapter is DistressSectorAdapter.BANK:
+        bank = config["banks"]
+        if inputs.cet1_ratio is not None and inputs.cet1_requirement_plus_buffer is not None:
+            safe_ratio = inputs.cet1_requirement_plus_buffer + bank["safe_cet1_excess_over_requirement_and_buffer_bps_gte"] / 10_000.0
+            if inputs.cet1_requirement_plus_buffer <= inputs.cet1_ratio < safe_ratio:
+                reasons.append("bank_cet1_gray_zone")
+
+    elif adapter is DistressSectorAdapter.INSURER:
+        insurer = config["insurers"]
+        ratio = inputs.insurer_solvency_ratio
+        threshold = inputs.insurer_regulatory_action_threshold
+        if ratio is not None and threshold is not None and threshold > 0:
+            if threshold <= ratio < threshold * insurer["safe_ratio_to_regulatory_action_threshold_gte"]:
+                reasons.append("insurer_solvency_gray_zone")
+
+    return reasons
 
 
 def _safe_input_integrity(assessment) -> bool:
@@ -215,9 +319,10 @@ def _write_report(output_dir: Path, payload: dict[str, Any]) -> None:
         f"- Model: `{payload['model_version']}`",
         f"- Rules hash: `{payload['rules_hash']}`",
         f"- Tickers attempted: **{summary['tickers_attempted']}**",
-        f"- Non-financial names with sufficient inputs: **{summary['nonfinancial_sufficient_inputs']}**",
+        f"- Non-financial decision-eligible names: **{summary['nonfinancial_sufficient_inputs']}**",
         f"- Non-financial classified: **{summary['nonfinancial_classified']}**",
         f"- Classification coverage: **{summary['classification_coverage_pct']:.2f}%**",
+        f"- Non-financial complete-but-neutral gray-zone names: **{summary['nonfinancial_gray_zone_count']}**",
         f"- Financial corporate fallback count: **{summary['financial_corporate_fallback_count']}**",
         f"- False-safe missing-data count: **{summary['false_safe_missing_maturity_or_coverage_count']}**",
         f"- Non-null provenance complete: **{summary['provenance_complete_pct']:.2f}%**",
@@ -231,8 +336,9 @@ def _write_report(output_dir: Path, payload: dict[str, Any]) -> None:
         lines.append(f"- {key}: {value}")
     lines.extend(["", "## Per-name audit", ""])
     for row in payload["results"]:
+        gray = ",".join(row.get("gray_zone_reasons") or []) or "none"
         lines.append(
-            f"- **{row['ticker']}** ({row['adapter']}): {row['classification']} | sufficient={row['sufficient_inputs']} | screen={row['hard_flag_screen_complete']} | path=`{row['rule_path']}`"
+            f"- **{row['ticker']}** ({row['adapter']}): {row['classification']} | sufficient={row['sufficient_inputs']} | gray={gray} | screen={row['hard_flag_screen_complete']} | path=`{row['rule_path']}`"
         )
     (output_dir / "PHASE_1_1B_DISTRESS_VALIDATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -325,7 +431,8 @@ def main() -> int:
                     )
                     inputs = derive_distress_inputs(raw)
                     assessment = classify_distress(inputs, rules, rules_hash=current_rules_hash)
-                    sufficient, sufficient_reasons = _sufficient_inputs(adapter, inputs)
+                    sufficient, sufficient_reasons = _sufficient_inputs(adapter, inputs, rules)
+                    gray_zone_reasons = _gray_zone_reasons(adapter, inputs, rules)
                     nonnull_provenance = assessment.balance_sheet_distressed is None or bool(assessment.sources)
                     safe_integrity = _safe_input_integrity(assessment)
                     row = {
@@ -338,6 +445,7 @@ def main() -> int:
                         "reasons": assessment.reasons,
                         "sufficient_inputs": sufficient,
                         "sufficient_input_reasons": sufficient_reasons,
+                        "gray_zone_reasons": gray_zone_reasons,
                         "hard_flag_screen_complete": assessment.hard_flag_screen_complete,
                         "hard_distress_flags": [item.value for item in assessment.hard_distress_flags],
                         "screened_document_count": len(screened),
@@ -367,6 +475,7 @@ def main() -> int:
     nonfinancial = [row for row in results if DistressSectorAdapter(row["adapter"]) in _NONFINANCIAL_ADAPTERS]
     sufficient_nonfinancial = [row for row in nonfinancial if row["sufficient_inputs"]]
     classified_nonfinancial = [row for row in sufficient_nonfinancial if row["classification"] != DistressClassification.UNKNOWN.value]
+    gray_zone_nonfinancial = [row for row in nonfinancial if row.get("gray_zone_reasons")]
     coverage = 100.0 * len(classified_nonfinancial) / len(sufficient_nonfinancial) if sufficient_nonfinancial else 0.0
 
     financial_fallback = sum(
@@ -394,6 +503,8 @@ def main() -> int:
         "nonfinancial_sufficient_inputs": len(sufficient_nonfinancial),
         "nonfinancial_classified": len(classified_nonfinancial),
         "classification_coverage_pct": coverage,
+        "nonfinancial_gray_zone_count": len(gray_zone_nonfinancial),
+        "nonfinancial_gray_zone_tickers": [row["ticker"] for row in gray_zone_nonfinancial],
         "financial_corporate_fallback_count": financial_fallback,
         "false_safe_missing_maturity_or_coverage_count": false_safe,
         "provenance_complete_pct": provenance_complete,
