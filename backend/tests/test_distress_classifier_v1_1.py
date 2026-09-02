@@ -24,6 +24,7 @@ def metrics(adapter: DistressSectorAdapter, **updates) -> DistressInputs:
         "sector_adapter": adapter,
         "as_of": NOW,
         "sources": [SOURCE],
+        "hard_flag_screen_complete": True,
     }
     payload.update(updates)
     return DistressInputs(**payload)
@@ -35,7 +36,7 @@ def classify(item: DistressInputs):
 
 @pytest.mark.parametrize("flag", list(DistressHardFlag))
 def test_every_universal_hard_override_is_distressed(flag):
-    result = classify(metrics(DistressSectorAdapter.CORPORATE, hard_distress_flags=[flag]))
+    result = classify(metrics(DistressSectorAdapter.CORPORATE, hard_distress_flags=[flag], hard_flag_screen_complete=False))
     assert result.classification is DistressClassification.DISTRESSED
     assert result.balance_sheet_distressed is True
     assert result.rule_path == "balance_sheet_distress_v1_1.universal_hard_override"
@@ -165,12 +166,43 @@ def test_missing_primary_source_provenance_cannot_be_called_safe():
             sector_adapter=DistressSectorAdapter.CORPORATE,
             as_of=NOW,
             net_cash=True,
+            hard_flag_screen_complete=True,
             sources=[],
         )
     )
     assert result.classification is DistressClassification.UNKNOWN
     assert result.balance_sheet_distressed is None
     assert result.rule_path == "balance_sheet_distress_v1_1.missing_provenance"
+
+
+@pytest.mark.parametrize(
+    "adapter,kwargs",
+    [
+        (DistressSectorAdapter.CORPORATE, {"net_cash": True}),
+        (DistressSectorAdapter.UTILITY, {"net_debt_to_ebitda": 5.0, "interest_coverage": 2.5}),
+        (DistressSectorAdapter.REIT, {"debt_to_ebitdare": 6.0, "fixed_charge_coverage": 2.5}),
+        (DistressSectorAdapter.BANK, {"cet1_ratio": 0.13, "cet1_requirement_plus_buffer": 0.10}),
+        (DistressSectorAdapter.INSURER, {"insurer_solvency_ratio": 1.6, "insurer_regulatory_action_threshold": 1.0}),
+    ],
+)
+def test_numerically_safe_path_stays_unknown_until_hard_flag_screen_completes(adapter, kwargs):
+    result = classify(metrics(adapter, hard_flag_screen_complete=False, **kwargs))
+    assert result.classification is DistressClassification.UNKNOWN
+    assert result.balance_sheet_distressed is None
+    assert result.rule_path == "balance_sheet_distress_v1_1.hard_flag_screen_incomplete"
+
+
+def test_adverse_numeric_distress_does_not_require_complete_hard_flag_screen():
+    result = classify(
+        metrics(
+            DistressSectorAdapter.CORPORATE,
+            hard_flag_screen_complete=False,
+            debt_outstanding=100.0,
+            interest_coverage=0.5,
+        )
+    )
+    assert result.classification is DistressClassification.DISTRESSED
+    assert result.balance_sheet_distressed is True
 
 
 def test_unknown_is_null_not_false():
