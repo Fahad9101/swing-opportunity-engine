@@ -22,14 +22,33 @@ _DEPRECIATION = (
 )
 _CASH_INTEREST = ("InterestPaidNet", "InterestPaid")
 
+_MAX_BALANCE_AGE_DAYS = 220
+_MAX_ANNUAL_AGE_DAYS = 550
+
 
 def _concept_rows(payload: dict[str, Any], concepts: tuple[str, ...], unit: str = "USD") -> tuple[list[dict[str, Any]], str | None]:
+    """Return rows across all semantically compatible alternative concepts.
+
+    SEC issuers frequently migrate between equivalent US-GAAP tags. Selecting the
+    first concept that has *any* historical rows can therefore freeze a metric on
+    an obsolete year. We merge alternatives and retain concept priority only as a
+    tie-breaker for the same filing/end date.
+    """
     namespace = ((payload.get("facts") or {}).get("us-gaap") or {})
-    for concept in concepts:
+    merged: list[dict[str, Any]] = []
+    used: list[str] = []
+    for priority, concept in enumerate(concepts):
         rows = (((namespace.get(concept) or {}).get("units") or {}).get(unit)) or []
-        if rows:
-            return list(rows), f"us-gaap:{concept}:{unit}"
-    return [], None
+        if not rows:
+            continue
+        used.append(concept)
+        for row in rows:
+            tagged = dict(row)
+            tagged["_concept"] = concept
+            tagged["_concept_priority"] = priority
+            merged.append(tagged)
+    label = "|".join(f"us-gaap:{concept}:{unit}" for concept in used) if used else None
+    return merged, label
 
 
 def _latest_by_end(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -39,7 +58,12 @@ def _latest_by_end(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         if not end or row.get("form") not in {"10-Q", "10-Q/A", "10-K", "10-K/A"}:
             continue
         existing = result.get(end)
-        if existing is None or str(row.get("filed") or "") > str(existing.get("filed") or ""):
+        candidate_key = (str(row.get("filed") or ""), -int(row.get("_concept_priority") or 0))
+        existing_key = (
+            str(existing.get("filed") or ""),
+            -int(existing.get("_concept_priority") or 0),
+        ) if existing is not None else None
+        if existing is None or candidate_key > existing_key:
             result[end] = row
     return result
 
@@ -64,7 +88,7 @@ def _duration_days(row: dict[str, Any]) -> int | None:
 
 def _annual_map(payload: dict[str, Any], concepts: tuple[str, ...]) -> tuple[dict[str, float], str | None]:
     rows, concept = _concept_rows(payload, concepts)
-    values: dict[str, tuple[str, float]] = {}
+    values: dict[str, tuple[str, int, float]] = {}
     for row in rows:
         days = _duration_days(row)
         end = row.get("end")
@@ -75,10 +99,22 @@ def _annual_map(payload: dict[str, Any], concepts: tuple[str, ...]) -> tuple[dic
         except (KeyError, TypeError, ValueError):
             continue
         filed = str(row.get("filed") or "")
+        priority = int(row.get("_concept_priority") or 0)
         existing = values.get(end)
-        if existing is None or filed > existing[0]:
-            values[end] = (filed, value)
-    return {end: value for end, (_, value) in values.items()}, concept
+        candidate_key = (filed, -priority)
+        existing_key = (existing[0], -existing[1]) if existing is not None else None
+        if existing is None or candidate_key > existing_key:
+            values[end] = (filed, priority, value)
+    return {end: value for end, (_, _, value) in values.items()}, concept
+
+
+def _fresh_end(end: str, fetched_at: datetime, *, max_age_days: int) -> bool:
+    try:
+        period_end = datetime.fromisoformat(end).date()
+    except ValueError:
+        return False
+    age = (fetched_at.date() - period_end).days
+    return -7 <= age <= max_age_days
 
 
 def _debt_by_end(payload: dict[str, Any]) -> tuple[dict[str, float], dict[str, str | None]]:
@@ -116,12 +152,12 @@ def normalize_distress_companyfacts(
     sector_adapter: DistressSectorAdapter,
     fetched_at: datetime,
 ) -> DistressRawFacts:
-    """Normalize only primary SEC companyfacts suitable for SOE-1.1B.
+    """Normalize current primary SEC companyfacts suitable for SOE-1.1B.
 
-    The function deliberately omits revolver capacity, debt-maturity schedules,
-    REIT EBITDAre, and regulatory capital when companyfacts cannot establish
-    them deterministically. Those facts require targeted primary documents or
-    sector-specific regulatory evidence and therefore remain null here.
+    Alternative US-GAAP concepts are merged instead of selecting whichever tag
+    happens to appear first historically. Facts outside the explicit freshness
+    windows are suppressed to null so an obsolete balance sheet or coverage year
+    can never create a safe/distressed classification.
     """
 
     cash_map, cash_concept = _instant_map(payload, _CASH)
@@ -129,21 +165,28 @@ def normalize_distress_companyfacts(
     liquid_total_map, liquid_total_concept = _instant_map(payload, _LIQUID_TOTAL)
     debt_map, debt_concepts = _debt_by_end(payload)
 
-    common_balance_ends = sorted(set(debt_map) & (set(cash_map) | set(liquid_total_map)))
+    common_balance_ends = sorted(
+        end
+        for end in set(debt_map) & (set(cash_map) | set(liquid_total_map))
+        if _fresh_end(end, fetched_at, max_age_days=_MAX_BALANCE_AGE_DAYS)
+    )
     balance_end = common_balance_ends[-1] if common_balance_ends else None
 
     debt = debt_map.get(balance_end) if balance_end else None
     cash = cash_map.get(balance_end) if balance_end else None
     marketable = marketable_map.get(balance_end) if balance_end else None
     liquid_total = liquid_total_map.get(balance_end) if balance_end else None
-
     liquid_complete = liquid_total is not None or (cash is not None and marketable is not None)
 
     op_income_map, op_income_concept = _annual_map(payload, _OPERATING_INCOME)
     depreciation_map, depreciation_concept = _annual_map(payload, _DEPRECIATION)
     cash_interest_map, cash_interest_concept = _annual_map(payload, _CASH_INTEREST)
 
-    annual_ends = sorted(set(op_income_map) & set(depreciation_map))
+    annual_ends = sorted(
+        end
+        for end in set(op_income_map) & set(depreciation_map)
+        if _fresh_end(end, fetched_at, max_age_days=_MAX_ANNUAL_AGE_DAYS)
+    )
     annual_end = annual_ends[-1] if annual_ends else None
     ebit = op_income_map.get(annual_end) if annual_end else None
     ebitda = None
@@ -166,6 +209,10 @@ def normalize_distress_companyfacts(
         "fetched_at": fetched_at.isoformat(),
         "balance_period_end": balance_end,
         "annual_coverage_period_end": annual_end,
+        "staleness_policy": {
+            "balance_max_age_days": _MAX_BALANCE_AGE_DAYS,
+            "annual_max_age_days": _MAX_ANNUAL_AGE_DAYS,
+        },
         "concepts": {
             "cash": cash_concept,
             "marketable_securities": marketable_concept,
@@ -181,6 +228,7 @@ def normalize_distress_companyfacts(
             "REIT EBITDAre/fixed-charge coverage not inferred",
             "bank/insurer regulatory capital not inferred",
             "trailing FCF not inferred from annual companyfacts",
+            "stale balance/annual facts are suppressed rather than carried forward",
         ],
     }
 
