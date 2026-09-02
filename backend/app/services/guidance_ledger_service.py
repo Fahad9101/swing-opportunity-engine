@@ -8,6 +8,7 @@ from typing import Iterable
 from app.domain.soe_v1_1 import (
     GuidanceAction,
     GuidanceAssessment,
+    GuidanceClassification,
     GuidanceMetric,
     GuidanceMetricRecord,
     GuidancePolicyEvidence,
@@ -196,6 +197,36 @@ class GuidanceLedger:
         as_of: datetime | None = None,
     ) -> GuidanceAssessment:
         current, prior = self.current_and_prior(ticker, as_of=as_of)
+
+        # Extraction can legitimately produce records that are all excluded from
+        # the assessment view (for example reported actuals near a guidance
+        # headline or non-primary revenue metrics). That state is UNKNOWN, not an
+        # execution error. Preserve the requested ticker so an expanded validation
+        # basket cannot abort simply because one issuer has no eligible evidence.
+        if not current and not prior and policy is None:
+            effective_as_of = as_of or datetime.now(UTC)
+            candidate_records = [
+                item
+                for item in self._records
+                if item.ticker == ticker and item.source_timestamp <= effective_as_of
+            ]
+            sources = sorted({item.source_url for item in candidate_records if item.source_url})
+            return GuidanceAssessment(
+                rules_hash=rules_hash,
+                ticker=ticker,
+                as_of=effective_as_of,
+                classification=GuidanceClassification.UNKNOWN,
+                guidance_deterioration=None,
+                rule_path="guidance_v1_1.no_assessment_eligible_primary_guidance",
+                reasons=[
+                    "Extracted primary-source records exist, but none are eligible for deterministic guidance assessment."
+                    if candidate_records
+                    else "No assessment-eligible primary-source guidance evidence is available."
+                ],
+                sources=sources,
+                audit={"excluded_or_absent_record_count": len(candidate_records)},
+            )
+
         return classify_guidance(
             current,
             prior,
