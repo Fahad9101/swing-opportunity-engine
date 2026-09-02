@@ -21,21 +21,34 @@ def raw(**updates) -> DistressRawFacts:
     return DistressRawFacts(**payload)
 
 
-def test_derives_net_debt_to_ebitda_from_liquid_cash():
-    result = derive_distress_inputs(raw(debt=500.0, cash=100.0, marketable_securities=50.0, ebitda=100.0))
+def test_derives_net_debt_to_ebitda_from_complete_liquid_assets():
+    result = derive_distress_inputs(raw(debt=500.0, cash=100.0, marketable_securities=50.0, liquid_assets_complete=True, ebitda=100.0))
     assert result.net_cash is False
     assert result.net_debt_to_ebitda == pytest.approx(3.5)
 
 
-def test_net_cash_position_sets_zero_leverage_ratio():
-    result = derive_distress_inputs(raw(debt=100.0, cash=120.0, marketable_securities=30.0, ebitda=50.0))
+def test_net_cash_can_be_proven_by_cash_alone_even_if_securities_incomplete():
+    result = derive_distress_inputs(raw(debt=100.0, cash=120.0, ebitda=50.0))
     assert result.net_cash is True
-    assert result.net_debt_to_ebitda == 0.0
+    assert result.net_debt_to_ebitda is None
+
+
+def test_incomplete_liquid_assets_cannot_create_adverse_leverage_ratio():
+    result = derive_distress_inputs(raw(debt=500.0, cash=100.0, ebitda=100.0))
+    assert result.net_cash is None
+    assert result.net_debt_to_ebitda is None
+    assert result.audit["leverage_suppressed_incomplete_liquid_assets"] is True
+
+
+def test_explicit_total_liquid_assets_supports_leverage():
+    result = derive_distress_inputs(raw(debt=500.0, liquid_assets_total=150.0, ebitda=100.0))
+    assert result.net_cash is False
+    assert result.net_debt_to_ebitda == pytest.approx(3.5)
 
 
 @pytest.mark.parametrize("ebitda", [0.0, -1.0])
 def test_nonpositive_ebitda_suppresses_leverage(ebitda):
-    result = derive_distress_inputs(raw(debt=500.0, cash=100.0, marketable_securities=0.0, ebitda=ebitda))
+    result = derive_distress_inputs(raw(debt=500.0, cash=100.0, marketable_securities=0.0, liquid_assets_complete=True, ebitda=ebitda))
     assert result.net_debt_to_ebitda is None
     assert result.audit["leverage_suppressed_nonpositive_ebitda"] is True
 
@@ -51,11 +64,12 @@ def test_invalid_interest_expense_keeps_coverage_null(interest):
     assert result.interest_coverage is None
 
 
-def test_liquidity_coverage_uses_committed_revolver_and_positive_fcf():
+def test_liquidity_coverage_uses_complete_liquid_assets_committed_revolver_and_positive_fcf():
     result = derive_distress_inputs(
         raw(
             cash=100.0,
             marketable_securities=20.0,
+            liquid_assets_complete=True,
             committed_undrawn_revolver=80.0,
             trailing_fcf=50.0,
             debt_maturities_12m=100.0,
@@ -70,6 +84,7 @@ def test_negative_fcf_does_not_increase_committed_liquidity():
         raw(
             cash=100.0,
             marketable_securities=20.0,
+            liquid_assets_complete=True,
             committed_undrawn_revolver=80.0,
             trailing_fcf=-50.0,
             debt_maturities_12m=100.0,
@@ -79,12 +94,20 @@ def test_negative_fcf_does_not_increase_committed_liquidity():
     assert result.liquidity_coverage == pytest.approx(2.0)
 
 
+def test_missing_revolver_or_incomplete_liquid_assets_keeps_liquidity_null():
+    incomplete = derive_distress_inputs(raw(cash=100.0, committed_undrawn_revolver=80.0, debt_maturities_12m=100.0))
+    no_revolver = derive_distress_inputs(raw(liquid_assets_total=100.0, debt_maturities_12m=100.0))
+    assert incomplete.liquidity_coverage is None
+    assert no_revolver.liquidity_coverage is None
+
+
 @pytest.mark.parametrize("maturities", [None, 0.0, -1.0])
 def test_unverified_or_nonpositive_maturities_keep_liquidity_coverage_null(maturities):
     result = derive_distress_inputs(
         raw(
             cash=100.0,
             marketable_securities=20.0,
+            liquid_assets_complete=True,
             committed_undrawn_revolver=80.0,
             trailing_fcf=50.0,
             debt_maturities_12m=maturities,
@@ -94,13 +117,15 @@ def test_unverified_or_nonpositive_maturities_keep_liquidity_coverage_null(matur
     assert result.audit["liquidity_suppressed_without_positive_12m_maturities"] is True
 
 
-def test_negative_fcf_runway_is_derived_in_months():
-    result = derive_distress_inputs(raw(cash=100.0, marketable_securities=20.0, trailing_fcf=-80.0))
+def test_negative_fcf_runway_is_derived_only_from_complete_liquid_assets():
+    result = derive_distress_inputs(raw(cash=100.0, marketable_securities=20.0, liquid_assets_complete=True, trailing_fcf=-80.0))
     assert result.cash_runway_months == pytest.approx(18.0)
+    incomplete = derive_distress_inputs(raw(cash=100.0, trailing_fcf=-80.0))
+    assert incomplete.cash_runway_months is None
 
 
 def test_explicit_cash_runway_is_not_overwritten():
-    result = derive_distress_inputs(raw(cash=100.0, marketable_securities=20.0, trailing_fcf=-80.0, cash_runway_months=30.0))
+    result = derive_distress_inputs(raw(cash=100.0, trailing_fcf=-80.0, cash_runway_months=30.0))
     assert result.cash_runway_months == 30.0
 
 
