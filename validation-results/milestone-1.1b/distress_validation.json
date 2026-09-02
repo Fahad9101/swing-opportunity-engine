@@ -1,0 +1,4343 @@
+{
+  "basket_gate": {
+    "false_safe_missing_maturity_or_coverage_count_eq": 0,
+    "financial_corporate_fallback_count_eq": 0,
+    "nonfinancial_sufficient_input_classification_coverage_pct_gte": 90.0,
+    "nonnull_provenance_complete_pct_eq": 100.0
+  },
+  "basket_id": "SOE-1.1B-DISTRESS-V1-56",
+  "basket_path": "D:\\Download 2 on D\\Githup clones\\swing-opportunity-engine\\validation\\phase_1_1b_preregistered_basket_v1.json",
+  "classification_counts": {
+    "DISTRESSED": 4,
+    "NOT_DISTRESSED": 10,
+    "UNKNOWN": 42
+  },
+  "errors": [],
+  "generated_at": "2026-09-02T16:49:28.501884+00:00",
+  "model_version": "SOE-1.1.0",
+  "phase": "1.1B",
+  "results": [
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-09-27",
+        "balance_period_end": "2026-06-27",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:48.775385+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/320193/000032019326000020/aapl-20260627.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 62399000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "technology",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 0.1374872191671042,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json",
+        "https://www.sec.gov/Archives/edgar/data/320193/000032019326000020/aapl-20260627.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "AAPL"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaid:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:49.300228+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 76843000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "technology",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000789019.json",
+        "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "MSFT"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:50.156936+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1652044/000119312526342390/d171253d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 242474000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "technology",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001652044.json",
+        "https://www.sec.gov/Archives/edgar/data/1652044/000119312526342390/d171253d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "GOOGL"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:50.626658+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 90260000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "technology",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 119.64942528735632,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 0.0,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+        "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage",
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "META"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2026-01-25",
+        "balance_period_end": "2026-07-26",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:51.022803+00:00",
+        "hard_distress_evidence": [
+          {
+            "accession": "0001045810-26-000075",
+            "evidence_span": "lity in responding to changes in our business and industry; impair our ability to obtain future financing; and restrict our ability to grant liens on property, enter into certain mergers and dispose of assets. Our ability to comply with the covenants in our indenture may be affected by events beyond our control. If we breach any of the covenants without a waiver from the note holders, then, subject to applicable cure periods, any such indebtedness may be declared immediately due and payable. In addition, changes to our credit rating may negatively impact the value and liquidity of our securities, restrict our ability to obtain future financing and affect the terms of any su",
+            "flag": "unresolved_covenant_breach",
+            "reason": "Primary filing explicitly states an unresolved/unwaived covenant breach or default.",
+            "source": "SEC EDGAR",
+            "source_timestamp": "2026-08-26T00:00:00+00:00",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm"
+          }
+        ],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 22443000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": true,
+      "cash_runway_months": null,
+      "classification": "DISTRESSED",
+      "cohort": "semiconductors",
+      "hard_distress_flags": [
+        "unresolved_covenant_breach"
+      ],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified hard-distress condition: unresolved_covenant_breach"
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.universal_hard_override",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001045810.json",
+        "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_hard_distress_flag"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "NVDA"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-05-03",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:48:51.281638+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 4,
+          "screened_document_count": 4,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1730168/000119312526266777/d152717d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1730168/000119312526275077/d149683d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1730168/000119312526295589/d84378d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000054/avgo-20260503.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 19628000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "semiconductors",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 4,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 4,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001730168.json",
+        "https://www.sec.gov/Archives/edgar/data/1730168/000119312526266777/d152717d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1730168/000119312526275077/d149683d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1730168/000119312526295589/d84378d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1730168/000173016826000054/avgo-20260503.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "AVGO"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2019-12-28",
+        "balance_period_end": "2026-06-27",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:52.165534+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/2488/000000248826000123/amd-20260627.htm",
+            "https://www.sec.gov/Archives/edgar/data/2488/000000248826000163/amd-20260817.htm",
+            "https://www.sec.gov/Archives/edgar/data/2488/000119312526354029/d142696d8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 13111000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "semiconductors",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 9.417910447761194,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 0.0,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000002488.json",
+        "https://www.sec.gov/Archives/edgar/data/2488/000000248826000123/amd-20260627.htm",
+        "https://www.sec.gov/Archives/edgar/data/2488/000000248826000163/amd-20260817.htm",
+        "https://www.sec.gov/Archives/edgar/data/2488/000119312526354029/d142696d8k.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage",
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "AMD"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2022-05-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:48:52.785799+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1341439/000119312526277521/orcl-20260531.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 21383000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "software",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001341439.json",
+        "https://www.sec.gov/Archives/edgar/data/1341439/000119312526277521/orcl-20260531.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "ORCL"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2026-01-31",
+        "balance_period_end": "2026-07-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:53.484671+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000190/crm-20260731.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 8310000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "software",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 30.184782608695652,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001108524.json",
+        "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000190/crm-20260731.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "CRM"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-11-28",
+        "balance_period_end": "2026-05-29",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:53.860198+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/796343/000079634326000112/adbe-20260529.htm",
+            "https://www.sec.gov/Archives/edgar/data/796343/000079634326000120/adbe-20260714.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 5626000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "software",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 35.390243902439025,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 0.0,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000796343.json",
+        "https://www.sec.gov/Archives/edgar/data/796343/000079634326000112/adbe-20260529.htm",
+        "https://www.sec.gov/Archives/edgar/data/796343/000079634326000120/adbe-20260714.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage",
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "ADBE"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-07-31",
+        "balance_period_end": "2023-07-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaid:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:54.266258+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1327567/000119312526361122/d180372d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 2390000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "software",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 0.0,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001327567.json",
+        "https://www.sec.gov/Archives/edgar/data/1327567/000119312526361122/d180372d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000015/panw-20260430.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "PANW"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2026-01-30",
+        "balance_period_end": "2026-05-01",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:54.826981+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 7,
+          "screened_document_count": 7,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1571996/000119312526265877/d98058d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1571996/000119312526269594/d131151d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1571996/000119312526272720/d20600d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1571996/000119312526296224/d32716d8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000030/dell-20260501.htm",
+            "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000032/dell-20260611.htm",
+            "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000036/dell-20260625.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 11578000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "hardware",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 6.018463810930576,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 7,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 7,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001571996.json",
+        "https://www.sec.gov/Archives/edgar/data/1571996/000119312526265877/d98058d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1571996/000119312526269594/d131151d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1571996/000119312526272720/d20600d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1571996/000119312526296224/d32716d8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000030/dell-20260501.htm",
+        "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000032/dell-20260611.htm",
+        "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000036/dell-20260625.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "DELL"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2025-12-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": null,
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:56.503001+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/18230/000001823026000046/cat-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 9980000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "industrials",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 6.0537459283387625,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000018230.json",
+        "https://www.sec.gov/Archives/edgar/data/18230/000001823026000046/cat-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "CAT"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2024-10-27",
+        "balance_period_end": "2022-05-01",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": null,
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:48:57.138615+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/315189/000110465926102213/de-20260802x10q.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 3878000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "industrials",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 2.7407519708914494,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000315189.json",
+        "https://www.sec.gov/Archives/edgar/data/315189/000110465926102213/de-20260802x10q.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "DE"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:57.829017+00:00",
+        "hard_distress_evidence": [
+          {
+            "accession": "0000773840-26-000124",
+            "evidence_span": "out limitation, (1) on the 6th anniversary of the distribution date, in which case Honeywell Technologies is obligated to reimburse Honeywell Aerospace $ 250 million of the license fees Honeywell Aerospace paid to Honeywell Technologies during the first five years of the license term, or (2) in connection with certain uncured breach events or following a change of control to which Honeywell Technologies has not provided prior consent. 13 Honeywell International Inc. TABLE OF CONTENTS HONEYWELL INTERNATIONAL INC. NOTES TO CONSOLIDATED FINANCIAL STATEMENTS (Unaudited) (Dollars in tables in millions, except per share amounts) NOTE 4. REVENUE RECOGNI",
+            "flag": "unresolved_covenant_breach",
+            "reason": "Primary filing explicitly states an unresolved/unwaived covenant breach or default.",
+            "source": "SEC EDGAR",
+            "source_timestamp": "2026-07-23T00:00:00+00:00",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/773840/000077384026000124/hon-20260630.htm"
+          }
+        ],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/773840/000077384026000124/hon-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/773840/000077384026000130/hon-20260819.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 9196000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": true,
+      "cash_runway_months": null,
+      "classification": "DISTRESSED",
+      "cohort": "industrials",
+      "hard_distress_flags": [
+        "unresolved_covenant_breach"
+      ],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 6.251538461538462,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 2.605570152390962,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified hard-distress condition: unresolved_covenant_breach"
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.universal_hard_override",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000773840.json",
+        "https://www.sec.gov/Archives/edgar/data/773840/000077384026000124/hon-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/773840/000077384026000130/hon-20260819.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_hard_distress_flag"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "HON"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2019-12-31",
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaid:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:58.304054+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1551182/000155118226000030/etn-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 695000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "industrials",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 13.172043010752688,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 4.368501864443957,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001551182.json",
+        "https://www.sec.gov/Archives/edgar/data/1551182/000155118226000030/etn-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "ETN"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:48:58.677945+00:00",
+        "hard_distress_evidence": [
+          {
+            "accession": "0001783180-26-000032",
+            "evidence_span": "ses pending in the U.S. federal courts against the Company, KFI and others to the U.S. District Court for the District of South Carolina (the \"MDL Proceedings\"). In 2013, KFI divested the AFFF businesses to an unrelated third party. The Company acquired KFI as part of the Separation in April 2020. On May 14, 2023, KFI filed a voluntary petition with the United States Bankruptcy Court for the District of Delaware (the \u201cBankruptcy Court\u201d) seeking relief under chapter 11 of the Bankruptcy Code, after the Company determined that it would not provide financial support to KFI going forward other than ensuring KFI has access to services necessary for the effective operation of its business. As a result, all litigation against KFI was automatically stayed. By agreement, all AFFF-related li",
+            "flag": "bankruptcy_or_restructuring",
+            "reason": "Primary filing explicitly records a bankruptcy/reorganization filing.",
+            "source": "SEC EDGAR",
+            "source_timestamp": "2026-07-28T00:00:00+00:00",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1783180/000178318026000032/carr-20260630.htm"
+          }
+        ],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1783180/000178318026000032/carr-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 1371000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": true,
+      "cash_runway_months": null,
+      "classification": "DISTRESSED",
+      "cohort": "industrials",
+      "hard_distress_flags": [
+        "bankruptcy_or_restructuring"
+      ],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 5.1469194312796205,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified hard-distress condition: bankruptcy_or_restructuring"
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.universal_hard_override",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001783180.json",
+        "https://www.sec.gov/Archives/edgar/data/1783180/000178318026000032/carr-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_hard_distress_flag"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "CARR"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2016-12-31",
+        "balance_period_end": "2025-12-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:48:58.989565+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1067701/000106770126000026/uri-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 459000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "industrials",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 3.4096385542168677,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001067701.json",
+        "https://www.sec.gov/Archives/edgar/data/1067701/000106770126000026/uri-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "URI"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2019-01-31",
+        "balance_period_end": "2026-07-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:48:59.286024+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/104169/000010416926000154/wmt-20260731.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 11529000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "consumer",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 9.351362862010221,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000104169.json",
+        "https://www.sec.gov/Archives/edgar/data/104169/000010416926000154/wmt-20260731.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "WMT"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2026-01-31",
+        "balance_period_end": "2026-01-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:59.562388+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/27419/000002741926000042/tgt-20260801.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 5488000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "consumer",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 8.135135135135135,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 1.0798691067749364,
+      "provenance_complete": true,
+      "reasons": [
+        "Net debt/EBITDA and interest coverage satisfy the frozen corporate safety pair."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000027419.json",
+        "https://www.sec.gov/Archives/edgar/data/27419/000002741926000042/tgt-20260801.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "TGT"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2026-01-30",
+        "balance_period_end": "2026-01-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:48:59.824175+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/60667/000006066726000117/low-20260731.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 1352000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "consumer",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 6.818670248488918,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 3.1154936421802866,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000060667.json",
+        "https://www.sec.gov/Archives/edgar/data/60667/000006066726000117/low-20260731.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "LOW"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2026-02-01",
+        "balance_period_end": "2026-02-01",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:00.132758+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/354950/000162828026058715/hd-20260802.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 1389000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "consumer",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 8.686070686070686,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000354950.json",
+        "https://www.sec.gov/Archives/edgar/data/354950/000162828026058715/hd-20260802.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "HD"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-08-31",
+        "balance_period_end": "2026-05-10",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:00.377242+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/909832/000090983226000051/cost-20260510.htm",
+            "https://www.sec.gov/Archives/edgar/data/909832/000090983226000060/cost-20260707.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 19996000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "consumer",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 97.95283018867924,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 0.0,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified net-cash position satisfies the frozen corporate safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000909832.json",
+        "https://www.sec.gov/Archives/edgar/data/909832/000090983226000051/cost-20260510.htm",
+        "https://www.sec.gov/Archives/edgar/data/909832/000090983226000060/cost-20260707.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage",
+        "verified_net_cash"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "COST"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-09-28",
+        "balance_period_end": "2022-07-03",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:00.821309+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/829224/000082922426000130/sbux-20260628.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 3254400000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": false,
+      "cash_runway_months": null,
+      "classification": "NOT_DISTRESSED",
+      "cohort": "consumer",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 4.991670916199218,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 2.52235509016376,
+      "provenance_complete": true,
+      "reasons": [
+        "Net debt/EBITDA and interest coverage satisfy the frozen corporate safety pair."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000829224.json",
+        "https://www.sec.gov/Archives/edgar/data/829224/000082922426000130/sbux-20260628.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "SBUX"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2025-12-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:MarketableSecuritiesCurrent:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:01.250797+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1090727/000110465926094502/tm2622353d5_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1090727/000110465926098351/tm2622353d8_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1090727/000162828026053249/ups-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 5887000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "transportation",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 7.946464646464647,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001090727.json",
+        "https://www.sec.gov/Archives/edgar/data/1090727/000110465926094502/tm2622353d5_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1090727/000110465926098351/tm2622353d8_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1090727/000162828026053249/ups-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "UPS"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2026-05-31",
+        "balance_period_end": "2026-05-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:01.905067+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1048911/000104891126000105/fdx-20260531.htm",
+            "https://www.sec.gov/Archives/edgar/data/1048911/000104891126000108/fdx-20260721.htm",
+            "https://www.sec.gov/Archives/edgar/data/1048911/000110465926086643/tm2621019d1_8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 13311000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "transportation",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 6.200908059023837,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048911.json",
+        "https://www.sec.gov/Archives/edgar/data/1048911/000104891126000105/fdx-20260531.htm",
+        "https://www.sec.gov/Archives/edgar/data/1048911/000104891126000108/fdx-20260721.htm",
+        "https://www.sec.gov/Archives/edgar/data/1048911/000110465926086643/tm2621019d1_8k.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "FDX"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:02.787088+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1800/000110465926099247/tm2623675d1_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1800/000162828026050134/abt-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 7295000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "healthcare",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000001800.json",
+        "https://www.sec.gov/Archives/edgar/data/1800/000110465926099247/tm2623675d1_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1800/000162828026050134/abt-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "ABT"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2023-12-31",
+        "balance_period_end": "2020-10-02",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:03.225489+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/313616/000031361626000161/dhr-20260626.htm",
+            "https://www.sec.gov/Archives/edgar/data/313616/000119312526330652/d161342d8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 5687700000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "healthcare",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 13.270408163265307,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000313616.json",
+        "https://www.sec.gov/Archives/edgar/data/313616/000031361626000161/dhr-20260626.htm",
+        "https://www.sec.gov/Archives/edgar/data/313616/000119312526330652/d161342d8k.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "DHR"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2018-12-31",
+        "balance_period_end": "2026-06-27",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:03.714410+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/97745/000009774526000144/tmo-20260627.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 4064000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "healthcare",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 5.506550218340611,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 6.317355371900827,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000097745.json",
+        "https://www.sec.gov/Archives/edgar/data/97745/000009774526000144/tmo-20260627.htm"
+      ],
+      "sufficient_input_reasons": [
+        "leverage_and_interest_coverage",
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "TMO"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": null,
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": null,
+            "short_term": null
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:04.131742+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1035267/000103526726000058/isrg-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/1035267/000103526726000063/isrg-20260723.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "healthcare",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001035267.json",
+        "https://www.sec.gov/Archives/edgar/data/1035267/000103526726000058/isrg-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/1035267/000103526726000063/isrg-20260723.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "ISRG"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2018-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:04.579388+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/885725/000088572526000053/bsx-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/885725/000088572526000056/bsx-20260826.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 208000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "healthcare",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 11.32601880877743,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000885725.json",
+        "https://www.sec.gov/Archives/edgar/data/885725/000088572526000053/bsx-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/885725/000088572526000056/bsx-20260826.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "BSX"
+    },
+    {
+      "adapter": "corporate",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:05.047710+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/310764/000031076426000050/syk-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 3391000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "healthcare",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 8.400343642611684,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Corporate evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000310764.json",
+        "https://www.sec.gov/Archives/edgar/data/310764/000031076426000050/syk-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "debt_and_absolute_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "SYK"
+    },
+    {
+      "adapter": "utilities",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": null,
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:05.540710+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/753308/000075330826000060/nee-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/753308/000075330826000065/nee-20260810.htm",
+            "https://www.sec.gov/Archives/edgar/data/753308/000110465926100476/tm2623831d1_8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 1998000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "utilities",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Utility evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.utilities.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000753308.json",
+        "https://www.sec.gov/Archives/edgar/data/753308/000075330826000060/nee-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/753308/000075330826000065/nee-20260810.htm",
+        "https://www.sec.gov/Archives/edgar/data/753308/000110465926100476/tm2623831d1_8k.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "NEE"
+    },
+    {
+      "adapter": "utilities",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:06.307707+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1326160/000110465926091159/tm2622337d1_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1326160/000110465926095903/tm2623082d1_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1326160/000132616026000040/duk-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 2140000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "utilities",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 2.402785515320334,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Utility evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.utilities.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326160.json",
+        "https://www.sec.gov/Archives/edgar/data/1326160/000110465926091159/tm2622337d1_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1326160/000110465926095903/tm2623082d1_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1326160/000132616026000040/duk-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "DUK"
+    },
+    {
+      "adapter": "utilities",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": null,
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:07.694810+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 4,
+          "screened_document_count": 4,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/92122/000009212226000054/so-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/92122/000009212226000058/so-20260803.htm",
+            "https://www.sec.gov/Archives/edgar/data/92122/000009212226000060/so-20260803.htm",
+            "https://www.sec.gov/Archives/edgar/data/92122/000009212226000063/so-20260803.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "utilities",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Utility evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 4,
+      "rule_path": "balance_sheet_distress_v1_1.utilities.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 4,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000092122.json",
+        "https://www.sec.gov/Archives/edgar/data/92122/000009212226000054/so-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/92122/000009212226000058/so-20260803.htm",
+        "https://www.sec.gov/Archives/edgar/data/92122/000009212226000060/so-20260803.htm",
+        "https://www.sec.gov/Archives/edgar/data/92122/000009212226000063/so-20260803.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "SO"
+    },
+    {
+      "adapter": "utilities",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:09.069526+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/4904/000000490426000059/aep-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 516000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "utilities",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 2.808342133051742,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 5.852961591855623,
+      "provenance_complete": true,
+      "reasons": [
+        "Utility evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.utilities.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000004904.json",
+        "https://www.sec.gov/Archives/edgar/data/4904/000000490426000059/aep-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "utility_leverage_and_interest_coverage"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "AEP"
+    },
+    {
+      "adapter": "utilities",
+      "audit": {
+        "annual_coverage_period_end": "2022-12-31",
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:10.371842+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1109357/000110935726000080/exc-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/1109357/000110935726000084/exc-20260825.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 713000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "utilities",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 2.311715481171548,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Utility evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.utilities.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001109357.json",
+        "https://www.sec.gov/Archives/edgar/data/1109357/000110935726000080/exc-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/1109357/000110935726000084/exc-20260825.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "EXC"
+    },
+    {
+      "adapter": "utilities",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:11.559008+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/72903/000007290326000154/xel-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/72903/000007290326000160/xel-20260819.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 2010000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "utilities",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Utility evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.utilities.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000072903.json",
+        "https://www.sec.gov/Archives/edgar/data/72903/000007290326000154/xel-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/72903/000007290326000160/xel-20260819.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "XEL"
+    },
+    {
+      "adapter": "reits",
+      "audit": {
+        "annual_coverage_period_end": "2015-12-31",
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:11.993638+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 4,
+          "screened_document_count": 4,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1045609/000110465926089980/tm2621154d2_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1045609/000110465926090724/tm2621155d5_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1045609/000110465926092072/tm2621154d3_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1045609/000119312526323746/pld-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 861144000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "reits",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": 1.0990298222689903,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "REIT evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 4,
+      "rule_path": "balance_sheet_distress_v1_1.reits.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 4,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001045609.json",
+        "https://www.sec.gov/Archives/edgar/data/1045609/000110465926089980/tm2621154d2_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1045609/000110465926090724/tm2621155d5_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1045609/000110465926092072/tm2621154d3_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1045609/000119312526323746/pld-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "PLD"
+    },
+    {
+      "adapter": "reits",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:13.367600+00:00",
+        "hard_distress_evidence": [
+          {
+            "accession": "0001053507-26-000133",
+            "evidence_span": "DISH of the SCA and related agreements with DISH. On June 15, 2026, we amended the complaint to (i) add claims seeking damages for DISH\u2019s breaches of the SCA and other agreements, and (ii) add DISH\u2019s parent company, EchoStar Corporation, as a party for tortious interference with such agreements. On June 30, 2026, DISH filed petitions for relief under chapter 11 of the United States Bankruptcy Code. Consistent with applicable law, we continue to seek relief in connection with DISH\u2019s failure to comply with its obligations under the SCA and other agreements described in the amended complaint. DISH represented approximately 2% and 4% of our total annual property revenue and tota",
+            "flag": "bankruptcy_or_restructuring",
+            "reason": "Primary filing explicitly records a bankruptcy/reorganization filing.",
+            "source": "SEC EDGAR",
+            "source_timestamp": "2026-07-28T00:00:00+00:00",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1053507/000105350726000133/amt-20260630.htm"
+          }
+        ],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1053507/000105350726000133/amt-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 1608800000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": true,
+      "cash_runway_months": null,
+      "classification": "DISTRESSED",
+      "cohort": "reits",
+      "hard_distress_flags": [
+        "bankruptcy_or_restructuring"
+      ],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Verified hard-distress condition: bankruptcy_or_restructuring"
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.universal_hard_override",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001053507.json",
+        "https://www.sec.gov/Archives/edgar/data/1053507/000105350726000133/amt-20260630.htm"
+      ],
+      "sufficient_input_reasons": [
+        "verified_hard_distress_flag"
+      ],
+      "sufficient_inputs": true,
+      "ticker": "AMT"
+    },
+    {
+      "adapter": "reits",
+      "audit": {
+        "annual_coverage_period_end": "2025-12-31",
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": "us-gaap:CashCashEquivalentsAndShortTermInvestments:USD",
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:13.861107+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1101239/000110123926000147/eqix-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/1101239/000110465926092009/tm2622384d1_8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 2224000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "reits",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": 4.527706516162135,
+      "provenance_complete": true,
+      "reasons": [
+        "REIT evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.reits.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001101239.json",
+        "https://www.sec.gov/Archives/edgar/data/1101239/000110123926000147/eqix-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/1101239/000110465926092009/tm2622384d1_8k.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "EQIX"
+    },
+    {
+      "adapter": "reits",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2017-03-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:14.417744+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 5,
+          "screened_document_count": 5,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/726728/000072672826000048/o-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/726728/000110465926094098/tm2622133d1_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/726728/000110465926094314/tm2622133d2_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/726728/000110465926097260/tm2622133d3_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/726728/000110465926100789/tm2623824d1_8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 27598000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "reits",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "REIT evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 5,
+      "rule_path": "balance_sheet_distress_v1_1.reits.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 5,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000726728.json",
+        "https://www.sec.gov/Archives/edgar/data/726728/000072672826000048/o-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/726728/000110465926094098/tm2622133d1_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/726728/000110465926094314/tm2622133d2_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/726728/000110465926097260/tm2622133d3_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/726728/000110465926100789/tm2623824d1_8k.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "O"
+    },
+    {
+      "adapter": "reits",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:15.669988+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1063761/000110465926093360/spg-20260630x10q.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 1019091000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "reits",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "REIT evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.reits.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001063761.json",
+        "https://www.sec.gov/Archives/edgar/data/1063761/000110465926093360/spg-20260630x10q.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "SPG"
+    },
+    {
+      "adapter": "reits",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:16.231805+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1705696/000110465926092034/tm2622400d1_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1705696/000110465926097167/tm2623237d1_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/1705696/000170569626000090/vici-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 288063000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "reits",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "REIT evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.reits.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001705696.json",
+        "https://www.sec.gov/Archives/edgar/data/1705696/000110465926092034/tm2622400d1_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1705696/000110465926097167/tm2623237d1_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/1705696/000170569626000090/vici-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "VICI"
+    },
+    {
+      "adapter": "banks",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:17.020093+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/19617/000162828026054343/jpm-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "banks",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Bank regulatory-capital evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.banks.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000019617.json",
+        "https://www.sec.gov/Archives/edgar/data/19617/000162828026054343/jpm-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "JPM"
+    },
+    {
+      "adapter": "banks",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2020-09-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:18.246310+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/70858/000007085826000394/bac-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 301006000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "banks",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Bank regulatory-capital evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.banks.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000070858.json",
+        "https://www.sec.gov/Archives/edgar/data/70858/000007085826000394/bac-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "BAC"
+    },
+    {
+      "adapter": "banks",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": null,
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:19.457577+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/72971/000007297126000302/wfc-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/72971/000119312526356890/d144651d8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "banks",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Bank regulatory-capital evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.banks.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000072971.json",
+        "https://www.sec.gov/Archives/edgar/data/72971/000007297126000302/wfc-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/72971/000119312526356890/d144651d8k.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "WFC"
+    },
+    {
+      "adapter": "banks",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2018-12-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:20.663200+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/831001/000083100126000045/c-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 188105000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "banks",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Bank regulatory-capital evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.banks.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000831001.json",
+        "https://www.sec.gov/Archives/edgar/data/831001/000083100126000045/c-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "C"
+    },
+    {
+      "adapter": "banks",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2012-12-31",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:21.994953+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/36104/000003610426000044/usb-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 8252000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "banks",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Bank regulatory-capital evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.banks.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000036104.json",
+        "https://www.sec.gov/Archives/edgar/data/36104/000003610426000044/usb-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "USB"
+    },
+    {
+      "adapter": "banks",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": null,
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:22.617296+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/713676/000162828026053170/pnc-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "banks",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Bank regulatory-capital evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.banks.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000713676.json",
+        "https://www.sec.gov/Archives/edgar/data/713676/000162828026053170/pnc-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "PNC"
+    },
+    {
+      "adapter": "insurers",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2023-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:23.433983+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/896159/000089615926000017/cb-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 2285000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "insurers",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Insurer regulatory-solvency evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.insurers.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000896159.json",
+        "https://www.sec.gov/Archives/edgar/data/896159/000089615926000017/cb-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "CB"
+    },
+    {
+      "adapter": "insurers",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": null,
+          "cash_interest": "us-gaap:InterestPaid:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:24.040824+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/899051/000089905126000118/all-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/899051/000089905126000127/all-20260820.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "insurers",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Insurer regulatory-solvency evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.insurers.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000899051.json",
+        "https://www.sec.gov/Archives/edgar/data/899051/000089905126000118/all-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/899051/000089905126000127/all-20260820.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "ALL"
+    },
+    {
+      "adapter": "insurers",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": null,
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": null,
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": null
+        },
+        "fetched_at": "2026-09-02T16:49:24.721967+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/86312/000008631226000145/trv-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/86312/000110465926092716/tm2622405d1_8k.htm",
+            "https://www.sec.gov/Archives/edgar/data/86312/000119312526316247/d659242d8k.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "insurers",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Insurer regulatory-solvency evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.insurers.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000086312.json",
+        "https://www.sec.gov/Archives/edgar/data/86312/000008631226000145/trv-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/86312/000110465926092716/tm2622405d1_8k.htm",
+        "https://www.sec.gov/Archives/edgar/data/86312/000119312526316247/d659242d8k.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "TRV"
+    },
+    {
+      "adapter": "insurers",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": null,
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": null,
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": "us-gaap:LongTermDebtCurrent:USD",
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": null
+          },
+          "depreciation": null,
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:25.534971+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 3,
+          "screened_document_count": 3,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/80661/000008066126000308/pgr-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/80661/000008066126000310/pgr-20260807.htm",
+            "https://www.sec.gov/Archives/edgar/data/80661/000008066126000315/pgr-20260819.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": null,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "insurers",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Insurer regulatory-solvency evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 3,
+      "rule_path": "balance_sheet_distress_v1_1.insurers.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 3,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0000080661.json",
+        "https://www.sec.gov/Archives/edgar/data/80661/000008066126000308/pgr-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/80661/000008066126000310/pgr-20260807.htm",
+        "https://www.sec.gov/Archives/edgar/data/80661/000008066126000315/pgr-20260819.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "PGR"
+    },
+    {
+      "adapter": "insurers",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2012-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaidNet:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": null,
+            "long_term_total": "us-gaap:LongTermDebt:USD",
+            "short_term": "us-gaap:ShortTermBorrowings:USD"
+          },
+          "depreciation": null,
+          "ebit": "us-gaap:OperatingIncomeLoss:USD",
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:26.351988+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 2,
+          "screened_document_count": 2,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1099219/000109921926000050/met-20260630.htm",
+            "https://www.sec.gov/Archives/edgar/data/1099219/000109921926000052/met-20260817.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": false,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 34561000000.0,
+        "liquid_assets_complete": true,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "insurers",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Insurer regulatory-solvency evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 2,
+      "rule_path": "balance_sheet_distress_v1_1.insurers.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 2,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001099219.json",
+        "https://www.sec.gov/Archives/edgar/data/1099219/000109921926000050/met-20260630.htm",
+        "https://www.sec.gov/Archives/edgar/data/1099219/000109921926000052/met-20260817.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "MET"
+    },
+    {
+      "adapter": "insurers",
+      "audit": {
+        "annual_coverage_period_end": null,
+        "balance_period_end": "2026-06-30",
+        "companyfacts_limits": [
+          "committed undrawn revolver not inferred",
+          "12-month debt maturities not inferred from absence/presence of current debt tags",
+          "REIT EBITDAre/fixed-charge coverage not inferred",
+          "bank/insurer regulatory capital not inferred",
+          "trailing FCF not inferred from annual companyfacts"
+        ],
+        "concepts": {
+          "cash": "us-gaap:CashAndCashEquivalentsAtCarryingValue:USD",
+          "cash_interest": "us-gaap:InterestPaid:USD",
+          "debt": {
+            "long_term_current": null,
+            "long_term_noncurrent": "us-gaap:LongTermDebtNoncurrent:USD",
+            "long_term_total": null,
+            "short_term": null
+          },
+          "depreciation": "us-gaap:DepreciationDepletionAndAmortization:USD",
+          "ebit": null,
+          "liquid_assets_total": null,
+          "marketable_securities": "us-gaap:ShortTermInvestments:USD"
+        },
+        "fetched_at": "2026-09-02T16:49:27.386344+00:00",
+        "hard_distress_evidence": [],
+        "hard_distress_screen": {
+          "complete": true,
+          "failed_document_urls": [],
+          "required_document_count": 1,
+          "screened_document_count": 1,
+          "screened_document_urls": [
+            "https://www.sec.gov/Archives/edgar/data/1137774/000113777426000176/pru-20260630.htm"
+          ]
+        },
+        "hard_flag_screen_complete": true,
+        "leverage_suppressed_incomplete_liquid_assets": true,
+        "leverage_suppressed_nonpositive_ebitda": false,
+        "liquid_assets": 15162000000.0,
+        "liquid_assets_complete": false,
+        "liquidity_suppressed_without_positive_12m_maturities": true,
+        "metric_derivation": "SOE-1.1 deterministic distress derivations",
+        "source": "SEC EDGAR companyfacts"
+      },
+      "balance_sheet_distressed": null,
+      "cash_runway_months": null,
+      "classification": "UNKNOWN",
+      "cohort": "insurers",
+      "hard_distress_flags": [],
+      "hard_flag_screen_complete": true,
+      "interest_coverage": null,
+      "liquidity_coverage": null,
+      "net_debt_to_ebitda": null,
+      "provenance_complete": true,
+      "reasons": [
+        "Insurer regulatory-solvency evidence is insufficient for a frozen distress or safety path."
+      ],
+      "required_screen_document_count": 1,
+      "rule_path": "balance_sheet_distress_v1_1.insurers.unknown",
+      "safe_input_integrity": true,
+      "screen_failures": [],
+      "screen_overflow_count": 0,
+      "screened_document_count": 1,
+      "sources": [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001137774.json",
+        "https://www.sec.gov/Archives/edgar/data/1137774/000113777426000176/pru-20260630.htm"
+      ],
+      "sufficient_input_reasons": [],
+      "sufficient_inputs": false,
+      "ticker": "PRU"
+    }
+  ],
+  "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "summary": {
+    "classification_coverage_pct": 46.666666666666664,
+    "error_count": 0,
+    "exit_gate": "FAIL",
+    "false_safe_missing_maturity_or_coverage_count": 0,
+    "financial_corporate_fallback_count": 0,
+    "nonfinancial_classified": 14,
+    "nonfinancial_sufficient_inputs": 30,
+    "provenance_complete_pct": 100.0,
+    "tickers_attempted": 56,
+    "tickers_with_results": 56
+  }
+}
