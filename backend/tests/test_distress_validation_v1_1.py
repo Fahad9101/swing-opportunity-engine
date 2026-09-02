@@ -1,7 +1,11 @@
 from datetime import date
 
 from app.cli_distress_validation import _safe_input_integrity, _screen_refs, _sufficient_inputs
+from app.core.config import SOE_1_1_RULES_PATH, load_rules_for_version
 from app.domain.distress_v1_1 import DistressAssessment, DistressClassification, DistressInputs, DistressSectorAdapter
+
+
+RULES = load_rules_for_version(SOE_1_1_RULES_PATH, "SOE-1.1.0")
 
 
 def submissions(forms, dates):
@@ -77,8 +81,8 @@ def test_sufficient_inputs_is_adapter_specific_and_does_not_use_financial_corpor
         interest_coverage=4.0,
     )
     bank = corporate.model_copy(update={"sector_adapter": DistressSectorAdapter.BANK})
-    assert _sufficient_inputs(DistressSectorAdapter.CORPORATE, corporate)[0] is True
-    assert _sufficient_inputs(DistressSectorAdapter.BANK, bank)[0] is False
+    assert _sufficient_inputs(DistressSectorAdapter.CORPORATE, corporate, RULES)[0] is True
+    assert _sufficient_inputs(DistressSectorAdapter.BANK, bank, RULES)[0] is False
 
 
 def test_safe_integrity_rejects_safe_state_without_completed_screen():
