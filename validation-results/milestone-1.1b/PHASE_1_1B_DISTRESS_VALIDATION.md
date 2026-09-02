@@ -4,9 +4,9 @@
 - Model: `SOE-1.1.0`
 - Rules hash: `bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca`
 - Tickers attempted: **56**
-- Non-financial names with sufficient inputs: **30**
-- Non-financial classified: **14**
-- Classification coverage: **46.67%**
+- Non-financial names with sufficient inputs: **10**
+- Non-financial classified: **8**
+- Classification coverage: **80.00%**
 - Financial corporate fallback count: **0**
 - False-safe missing-data count: **0**
 - Non-null provenance complete: **100.00%**
@@ -15,9 +15,8 @@
 
 ## Classification counts
 
-- DISTRESSED: 4
-- NOT_DISTRESSED: 10
-- UNKNOWN: 42
+- NOT_DISTRESSED: 8
+- UNKNOWN: 48
 
 ## Per-name audit
 
@@ -25,34 +24,34 @@
 - **MSFT** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
 - **GOOGL** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
 - **META** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
-- **NVDA** (corporate): DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.universal_hard_override`
+- **NVDA** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **AVGO** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **AMD** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
-- **ORCL** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
-- **CRM** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **ORCL** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **CRM** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **ADBE** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
-- **PANW** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
-- **DELL** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **CAT** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **DE** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **HON** (corporate): DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.universal_hard_override`
-- **ETN** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **CARR** (corporate): DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.universal_hard_override`
-- **URI** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **WMT** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **PANW** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **DELL** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **CAT** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **DE** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **HON** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.leverage_coverage_safe`
+- **ETN** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **CARR** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **URI** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **WMT** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **TGT** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.leverage_coverage_safe`
 - **LOW** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **HD** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **HD** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **COST** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.net_cash_safe`
-- **SBUX** (corporate): NOT_DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.leverage_coverage_safe`
-- **UPS** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **FDX** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **SBUX** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **UPS** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **FDX** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **ABT** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **DHR** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **TMO** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **DHR** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **TMO** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **ISRG** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **BSX** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
-- **SYK** (corporate): UNKNOWN | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **BSX** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
+- **SYK** (corporate): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.corporate.unknown`
 - **NEE** (utilities): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.utilities.unknown`
 - **DUK** (utilities): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.utilities.unknown`
 - **SO** (utilities): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.utilities.unknown`
@@ -60,7 +59,7 @@
 - **EXC** (utilities): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.utilities.unknown`
 - **XEL** (utilities): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.utilities.unknown`
 - **PLD** (reits): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.reits.unknown`
-- **AMT** (reits): DISTRESSED | sufficient=True | screen=True | path=`balance_sheet_distress_v1_1.universal_hard_override`
+- **AMT** (reits): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.reits.unknown`
 - **EQIX** (reits): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.reits.unknown`
 - **O** (reits): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.reits.unknown`
 - **SPG** (reits): UNKNOWN | sufficient=False | screen=True | path=`balance_sheet_distress_v1_1.reits.unknown`
