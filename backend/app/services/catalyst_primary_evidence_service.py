@@ -17,13 +17,27 @@ _SCRIPT_STYLE_RE = re.compile(r"<(script|style)\b[^>]*>.*?</\1>", re.I | re.S)
 _WS_RE = re.compile(r"\s+")
 
 _EARNINGS_PATTERNS = [
-    re.compile(r"\b(?:reports?|announces?)\b.{0,90}\b(?:first|second|third|fourth|quarterly|fiscal|Q[1-4]|FY\s*20\d{2})\b.{0,100}\b(?:financial\s+)?results\b", re.I | re.S),
+    re.compile(
+        r"\b(?:reports?|reported|announces?|announced)\b.{0,90}"
+        r"\b(?:first|second|third|fourth|quarterly|fiscal|Q[1-4]|FY\s*(?:20)?\d{2})\b"
+        r".{0,100}\b(?:financial\s+)?results\b",
+        re.I | re.S,
+    ),
+    re.compile(
+        r"\b(?:first|second|third|fourth)\s+quarter(?:\s+fiscal\s+(?:20)?\d{2})?\s+"
+        r"(?:financial\s+)?results\b",
+        re.I,
+    ),
     re.compile(r"\bfinancial\s+results\s+for\s+(?:the\s+)?(?:quarter|three\s+months|six\s+months|nine\s+months)\b", re.I),
     re.compile(r"\bquarter\s+ended\b.{0,180}\b(?:net\s+sales|revenue|revenues|earnings|income)\b", re.I | re.S),
 ]
-_GUIDANCE_ACTION = r"(?:raises?|raised|reaffirms?|reaffirmed|maintains?|maintained|lowers?|lowered|reduces?|reduced|cuts?|cut|updates?|updated|withdraws?|withdrew|initiates?|initiated)"
-_ANNUAL_PERIOD = r"(?:full[- ]year|fiscal(?:\s+year)?\s+20\d{2}|FY\s*20\d{2}|annual)"
-_GUIDANCE_TERM = r"(?:guidance|outlook)"
+_GUIDANCE_ACTION = (
+    r"(?:raises?|raised|reaffirms?|reaffirmed|maintains?|maintained|lowers?|lowered|"
+    r"reduces?|reduced|cuts?|cut|updates?|updated|withdraws?|withdrew|initiates?|initiated|"
+    r"provides?|provided)"
+)
+_ANNUAL_PERIOD = r"(?:full[- ]year|fiscal(?:\s+year)?\s+(?:20)?\d{2}|FY\s*(?:20)?\d{2}|annual)"
+_GUIDANCE_TERM = r"(?:guidance|outlook|targets?)"
 _GUIDANCE_PATTERNS = [
     re.compile(rf"\b{_GUIDANCE_ACTION}\b.{{0,140}}\b{_ANNUAL_PERIOD}\b.{{0,100}}\b{_GUIDANCE_TERM}\b", re.I | re.S),
     re.compile(rf"\b{_ANNUAL_PERIOD}\b.{{0,100}}\b{_GUIDANCE_TERM}\b.{{0,140}}\b{_GUIDANCE_ACTION}\b", re.I | re.S),
@@ -34,7 +48,13 @@ _MERGER_PATTERNS = [
     re.compile(r"\bmerger\s+agreement\b", re.I),
 ]
 _REGULATORY_PATTERNS = [
-    re.compile(r"\b(?:FDA|Food\s+and\s+Drug\s+Administration)\b.{0,180}\b(?:has\s+approved|approved|granted\s+(?:accelerated\s+)?approval|issued\s+(?:a\s+)?complete\s+response\s+letter|received\s+(?:a\s+)?complete\s+response\s+letter|set\s+(?:a\s+)?PDUFA|advisory\s+committee\s+(?:voted|recommended))\b", re.I | re.S),
+    re.compile(
+        r"\b(?:FDA|Food\s+and\s+Drug\s+Administration)\b.{0,180}"
+        r"\b(?:has\s+approved|approved|granted\s+(?:accelerated\s+)?approval|"
+        r"issued\s+(?:a\s+)?complete\s+response\s+letter|received\s+(?:a\s+)?complete\s+response\s+letter|"
+        r"set\s+(?:a\s+)?PDUFA|advisory\s+committee\s+(?:voted|recommended))\b",
+        re.I | re.S,
+    ),
 ]
 _PHASE3_PATTERNS = [
     re.compile(r"\bphase\s*3\b.{0,220}\bprimary\s+endpoint\b.{0,160}\b(?:was\s+met|met|did\s+not\s+meet|failed|achieved)\b", re.I | re.S),
@@ -44,7 +64,17 @@ _PHASE2_PATTERNS = [
     re.compile(r"\bphase\s*2\b.{0,220}\b(?:proof[- ]of[- ]concept|primary\s+endpoint|efficacy)\b", re.I | re.S),
 ]
 _REFINANCING_PATTERNS = [
-    re.compile(r"\b(?:refinancing|refinanced|amended\s+and\s+restated\s+credit\s+agreement|new\s+credit\s+facility|covenant\s+amendment)\b", re.I),
+    re.compile(
+        r"\b(?:the\s+company|company|we|registrant|borrower)\b.{0,80}"
+        r"\b(?:entered\s+into|completed|closed|obtained|executed|refinanced|amended\s+and\s+restated)\b"
+        r".{0,140}\b(?:credit\s+agreement|credit\s+facility|term\s+loan|revolver|debt|notes?|covenant)\b",
+        re.I | re.S,
+    ),
+    re.compile(r"\b(?:entered\s+into|completed|closed|obtained|executed)\b.{0,100}\bnew\s+credit\s+facility\b", re.I | re.S),
+    re.compile(r"\bamended\s+and\s+restated\s+credit\s+agreement\b", re.I),
+    re.compile(r"\bnew\s+credit\s+facility\b", re.I),
+    re.compile(r"\bcovenant\s+amendment\b", re.I),
+    re.compile(r"\brefinanced\b.{0,120}\b(?:debt|notes?|loans?|facility|credit\s+agreement)\b", re.I | re.S),
 ]
 _CONTRACT_PATTERNS = [
     re.compile(r"\b(?:awarded|award|entered\s+into)\b.{0,100}\b(?:material\s+)?contract\b", re.I | re.S),
@@ -68,13 +98,39 @@ def _plain_text(raw: str) -> str:
     return _WS_RE.sub(" ", value).strip()
 
 
+def _context(text: str, start: int, end: int) -> str:
+    return text[max(0, start - 180) : min(len(text), end + 240)]
+
+
 def _first_match(text: str, patterns: list[re.Pattern[str]]) -> str | None:
     for pattern in patterns:
         match = pattern.search(text)
         if match:
-            start = max(0, match.start() - 180)
-            end = min(len(text), match.end() + 240)
-            return text[start:end]
+            return _context(text, match.start(), match.end())
+    return None
+
+
+def _first_guidance_match(text: str) -> str | None:
+    """Return explicit annual guidance evidence while rejecting disclosure-policy wording.
+
+    Live validation exposed a false positive where the heading "Disclosure Updates"
+    preceded text about future reporting-and-guidance format changes. That is not an
+    economic guidance action. The rejection is deliberately narrow so genuine
+    raise/lower/reaffirm/provide/update language remains eligible.
+    """
+    for pattern in _GUIDANCE_PATTERNS:
+        for match in pattern.finditer(text):
+            core = match.group(0)
+            surrounding = text[max(0, match.start() - 60) : min(len(text), match.end() + 60)]
+            if re.search(r"\bdisclosure\s+updates?\b", surrounding, re.I):
+                continue
+            if re.search(r"\bupdates?\s+beginning\s+in\b", core, re.I) and re.search(
+                r"\bguidance\s+changes?\b", core, re.I
+            ):
+                continue
+            if re.search(r"\breporting\s+and\s+guidance\s+changes?\b", surrounding, re.I):
+                continue
+            return _context(text, match.start(), match.end())
     return None
 
 
@@ -85,10 +141,15 @@ def _make_input(
     event_family: CatalystEventFamily,
     event_type: str,
     evidence_span: str,
+    additional_evidence_spans: list[str] | None = None,
     company_wide: bool | None = None,
     is_biotech: bool = False,
     formal_guidance_action: bool | None = None,
 ) -> CatalystMaterialityInput:
+    evidence_spans = [evidence_span]
+    for span in additional_evidence_spans or []:
+        if span and span not in evidence_spans:
+            evidence_spans.append(span)
     return CatalystMaterialityInput(
         ticker=document.ticker,
         event_id=f"{document.accession}:{suffix}",
@@ -103,7 +164,7 @@ def _make_input(
         is_biotech=is_biotech,
         formal_guidance_action=formal_guidance_action,
         extraction_method=CatalystExtractionMethod.DETERMINISTIC_TEXT,
-        evidence_spans=[evidence_span],
+        evidence_spans=evidence_spans,
         structured_provenance={
             "accession": document.accession,
             "form": document.form,
@@ -137,7 +198,7 @@ def extract_sec_catalyst_candidates(
     candidates: list[ExtractedCatalystCandidate] = []
 
     earnings_span = _first_match(text, _EARNINGS_PATTERNS)
-    guidance_span = _first_match(text, _GUIDANCE_PATTERNS)
+    guidance_span = _first_guidance_match(text)
     if earnings_span:
         inp = _make_input(
             document,
@@ -145,6 +206,7 @@ def extract_sec_catalyst_candidates(
             event_family=CatalystEventFamily.EARNINGS_GUIDANCE,
             event_type="quarterly_earnings",
             evidence_span=earnings_span,
+            additional_evidence_spans=[guidance_span] if guidance_span else None,
             company_wide=True,
             is_biotech=is_biotech,
             formal_guidance_action=bool(guidance_span),
