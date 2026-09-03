@@ -55,6 +55,14 @@ def test_standalone_quarterly_results_heading_is_recognized():
     assert any(item.input.event_type == "quarterly_earnings" for item in candidates)
 
 
+def test_future_conference_call_schedule_is_not_earnings_evidence():
+    doc = _doc(
+        "The company will host a conference call tomorrow to discuss its third quarter financial results. "
+        "A webcast replay will be available after the call."
+    )
+    assert extract_sec_catalyst_candidates(doc) == []
+
+
 def test_annual_outlook_language_is_formal_guidance_evidence():
     doc = _doc("The company raises its fiscal year 2026 outlook and now expects revenue of approximately $10 billion.")
     candidates = extract_sec_catalyst_candidates(doc)
@@ -83,6 +91,20 @@ def test_provides_full_year_guidance_is_recognized():
     doc = _doc("The company provides fiscal year 2027 guidance for revenue and adjusted EPS.")
     candidates = extract_sec_catalyst_candidates(doc)
     assert any(item.input.event_type == "formal_full_year_guidance_update" for item in candidates)
+
+
+def test_executive_compensation_target_language_is_not_financial_guidance():
+    doc = _doc(
+        "If the Company's cash incentive compensation plan provides for semi-annual performance periods, "
+        "the Target Incentive Compensation shall be calculated on an annualized basis. "
+        "Eligible Executive termination of employment following a Change in Control is governed separately."
+    )
+    assert extract_sec_catalyst_candidates(doc) == []
+
+
+def test_target_word_requires_financial_metric_context():
+    doc = _doc("The company maintains its annual target incentive compensation under the compensation plan.")
+    assert extract_sec_catalyst_candidates(doc) == []
 
 
 def test_phase3_readout_does_not_become_company_wide_without_exposure_evidence():
@@ -142,7 +164,21 @@ def test_generic_indentures_permitted_refinancing_language_is_not_event():
     assert extract_sec_catalyst_candidates(doc) == []
 
 
+def test_plain_notes_offering_is_not_automatically_refinancing_event():
+    doc = _doc(
+        "The Company completed its previously announced underwritten public offering of $300 million Floating Rate Notes due 2028 "
+        "and $500 million 4.500% Notes due 2028."
+    )
+    assert extract_sec_catalyst_candidates(doc) == []
+
+
 def test_explicit_new_credit_facility_is_refinancing_event():
     doc = _doc("The Company entered into a new credit facility to refinance existing debt.")
+    candidates = extract_sec_catalyst_candidates(doc)
+    assert any(item.input.event_type == "material_refinancing_covenant_event" for item in candidates)
+
+
+def test_explicit_refinanced_notes_are_refinancing_event():
+    doc = _doc("The Company refinanced its outstanding notes and reduced the interest rate.")
     candidates = extract_sec_catalyst_candidates(doc)
     assert any(item.input.event_type == "material_refinancing_covenant_event" for item in candidates)
