@@ -152,6 +152,15 @@ def _first_guidance_match(text: str) -> str | None:
                 re.I,
             ):
                 continue
+            # Do not promote an annualized/run-rate calculation that merely references
+            # quarterly guidance into a formal full-year guidance update. This appeared
+            # in PANW investor material as "Annual Revenue run rate based on Q4 ... guidance".
+            if re.search(
+                r"\bannual(?:ized)?\s+(?:revenue\s+)?run[- ]?rate\s+based\s+on\b",
+                surrounding,
+                re.I,
+            ):
+                continue
             if re.search(r"\btargets?\b", core, re.I) and not re.search(
                 r"\b(?:revenue|sales|EPS|earnings|income|margin|ARR|cash\s+flow|free\s+cash\s+flow|"
                 r"operating\s+profit|EBITDA|bookings|billings|RPO|cRPO)\b",
