@@ -93,6 +93,15 @@ def test_provides_full_year_guidance_is_recognized():
     assert any(item.input.event_type == "formal_full_year_guidance_update" for item in candidates)
 
 
+def test_annual_narrative_near_quarter_guidance_is_not_full_year_guidance():
+    doc = _doc(
+        'We are excited to carry this momentum into fiscal year 2026, where we will continue to execute against our profitable growth framework. '
+        'Financial Outlook. The company provides guidance based on current market conditions and expectations. '
+        'For the fiscal first quarter 2026, we expect revenue of $2.1 billion.'
+    )
+    assert extract_sec_catalyst_candidates(doc) == []
+
+
 def test_executive_compensation_target_language_is_not_financial_guidance():
     doc = _doc(
         "If the Company's cash incentive compensation plan provides for semi-annual performance periods, "
