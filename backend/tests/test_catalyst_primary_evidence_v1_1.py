@@ -32,6 +32,8 @@ def test_earnings_and_formal_guidance_are_separate_primary_evidence_candidates()
     assert "formal_full_year_guidance_update" in by_type
     assert by_type["quarterly_earnings"].company_wide is True
     assert by_type["quarterly_earnings"].formal_guidance_action is True
+    assert len(by_type["quarterly_earnings"].evidence_spans) == 2
+    assert "raises full-year 2026 guidance" in by_type["quarterly_earnings"].evidence_spans[1]
     assert by_type["formal_full_year_guidance_update"].company_wide is True
     assert by_type["quarterly_earnings"].structured_provenance["accession"] == doc.accession
 
@@ -42,8 +44,44 @@ def test_common_reports_q3_results_title_is_recognized():
     assert any(item.input.event_type == "quarterly_earnings" for item in candidates)
 
 
+def test_past_tense_announced_earnings_is_recognized():
+    doc = _doc("UPS today announced second quarter 2026 financial results. Revenue was $22.8 billion.")
+    candidates = extract_sec_catalyst_candidates(doc)
+    assert any(item.input.event_type == "quarterly_earnings" for item in candidates)
+
+
+def test_standalone_quarterly_results_heading_is_recognized():
+    doc = _doc("Second Quarter Fiscal 2027 Financial Results. Revenue was $49.0 billion.")
+    candidates = extract_sec_catalyst_candidates(doc)
+    assert any(item.input.event_type == "quarterly_earnings" for item in candidates)
+
+
 def test_annual_outlook_language_is_formal_guidance_evidence():
     doc = _doc("The company raises its fiscal year 2026 outlook and now expects revenue of approximately $10 billion.")
+    candidates = extract_sec_catalyst_candidates(doc)
+    assert any(item.input.event_type == "formal_full_year_guidance_update" for item in candidates)
+
+
+def test_fy_shorthand_targets_are_formal_guidance_evidence():
+    doc = _doc(
+        "Adobe Reports Record Q2 Results. Adobe Raises FY26 Total Revenue and Non-GAAP EPS Targets."
+    )
+    candidates = extract_sec_catalyst_candidates(doc)
+    by_type = {candidate.input.event_type: candidate.input for candidate in candidates}
+    assert "formal_full_year_guidance_update" in by_type
+    assert by_type["quarterly_earnings"].formal_guidance_action is True
+
+
+def test_disclosure_reporting_guidance_format_change_is_not_guidance_action():
+    doc = _doc(
+        "Disclosure Updates Beginning in FY2026, we will implement reporting and guidance changes. "
+        "Our reporting and guidance will focus on customer group subscription revenue."
+    )
+    assert extract_sec_catalyst_candidates(doc) == []
+
+
+def test_provides_full_year_guidance_is_recognized():
+    doc = _doc("The company provides fiscal year 2027 guidance for revenue and adjusted EPS.")
     candidates = extract_sec_catalyst_candidates(doc)
     assert any(item.input.event_type == "formal_full_year_guidance_update" for item in candidates)
 
@@ -96,3 +134,16 @@ def test_merger_language_is_fact_only_and_exposure_remains_missing():
     assert inp.event_type == "merger_approval_or_close"
     assert inp.company_wide is None
     assert inp.economic_exposure_fraction is None
+
+
+def test_generic_indentures_permitted_refinancing_language_is_not_event():
+    doc = _doc(
+        "Any refinancing or replacement of any mortgages permitted by the foregoing clauses shall be of the type referred to in such clauses."
+    )
+    assert extract_sec_catalyst_candidates(doc) == []
+
+
+def test_explicit_new_credit_facility_is_refinancing_event():
+    doc = _doc("The Company entered into a new credit facility to refinance existing debt.")
+    candidates = extract_sec_catalyst_candidates(doc)
+    assert any(item.input.event_type == "material_refinancing_covenant_event" for item in candidates)
