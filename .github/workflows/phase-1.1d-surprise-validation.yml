@@ -1,0 +1,47 @@
+name: Phase 1.1D Surprise Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/app/domain/catalyst_surprise_v1_1.py"
+      - "backend/app/services/catalyst_surprise_service.py"
+      - "backend/app/providers/analyst_consensus_v1_1.py"
+      - "backend/app/providers/yahoo_surprise_consensus.py"
+      - "backend/app/cli_surprise_validation.py"
+      - "validation/phase_1_1d_preregistered_basket_v1.json"
+      - ".github/workflows/phase-1.1d-surprise-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  live-surprise-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: python -m pip install -e '.[test]'
+
+      - name: Run Phase 1.1D live consensus validation
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_1_1d_validation.db
+          PROVIDER_NAME: fixture
+        run: python -m app.cli_surprise_validation
+
+      - name: Upload validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1.1d-surprise-validation
+          path: validation-results/milestone-1.1d/
+          if-no-files-found: warn

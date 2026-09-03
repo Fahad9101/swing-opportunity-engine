@@ -1,0 +1,39 @@
+{
+  "phase": "1.1D",
+  "model_version": "SOE-1.1.0",
+  "exit_gate": "PASS",
+  "validation_scope": "live current-period consensus structural/provider validation; not a historical pre-event backtest",
+  "summary": {
+    "targets_attempted": 30,
+    "inherited_verified_candidates": 30,
+    "live_consensus_context_targets": 30,
+    "usable_expectation_evidence_targets": 30,
+    "surprise_scored_sufficient_events": 30,
+    "surprise_coverage_pct": 100.0,
+    "inherited_provenance_complete_pct": 100.0,
+    "non_directional_reason_pct": 100.0,
+    "provider_error_count": 0
+  },
+  "score_distribution": {
+    "2": 15,
+    "3": 10,
+    "4": 5
+  },
+  "expectation_basis_distribution": {
+    "eps_consensus_dispersion": 29,
+    "revenue_consensus_dispersion": 1
+  },
+  "null_reasons": {},
+  "remote_evidence": {
+    "github_actions_run_id": 33751982761,
+    "job": "live-surprise-validation",
+    "artifact": "phase-1.1d-surprise-validation",
+    "artifact_id": 9891900958,
+    "artifact_zip_sha256": "a107289867f9de6f8a09bdf132117aa3e82c9953e28e2f08803a760f536ed8ab"
+  },
+  "regression_ci": {
+    "tests_passed": 417,
+    "warnings": 2,
+    "test_failures": 0
+  }
+}
