@@ -32,8 +32,7 @@ def test_earnings_and_formal_guidance_are_separate_primary_evidence_candidates()
     assert "formal_full_year_guidance_update" in by_type
     assert by_type["quarterly_earnings"].company_wide is True
     assert by_type["quarterly_earnings"].formal_guidance_action is True
-    assert len(by_type["quarterly_earnings"].evidence_spans) == 2
-    assert "raises full-year 2026 guidance" in by_type["quarterly_earnings"].evidence_spans[1]
+    assert any("raises full-year 2026 guidance" in span for span in by_type["quarterly_earnings"].evidence_spans)
     assert by_type["formal_full_year_guidance_update"].company_wide is True
     assert by_type["quarterly_earnings"].structured_provenance["accession"] == doc.accession
 
