@@ -54,7 +54,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          PYTHONPATH=backend python -m app.cli_shadow_validation \
+          PYTHONPATH=backend python -m app.cli_shadow_validation_guarded \
             --contract validation/phase_1_1e_shadow_contract_v1.json \
             --output-dir validation-results/milestone-1.1e \
             --provider free_public \
