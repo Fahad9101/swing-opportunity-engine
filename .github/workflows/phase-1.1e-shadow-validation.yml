@@ -1,0 +1,75 @@
+name: Phase 1.1E Full-Market Shadow Validation
+
+on:
+  push:
+    branches:
+      - phase-1.1e-shadow-validation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-full-market:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./soe_phase_1_1e.db
+      PROVIDER_NAME: free_public
+      SEC_USER_AGENT: "SwingOpportunityEngine-Phase1.1E/1.0 (soe-validation@example.invalid)"
+      SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/companyfacts.zip
+      SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/submissions.zip
+      CACHE_DIR: .cache/soe
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Verify SOE-1.0.0 remains frozen
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+          echo "frozen_rules_blob_sha=$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)"
+
+      - name: Run deterministic regression suite
+        env:
+          PROVIDER_NAME: fixture
+          DATABASE_URL: sqlite+pysqlite:///./soe_phase_1_1e_ci.db
+        run: python -m pytest
+
+      - name: Download and validate SEC public bulk archives
+        run: PYTHONPATH=backend python -m app.cli_sec_bulk
+
+      - name: Run same-snapshot Phase 1.1E shadow validation
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=backend python -m app.cli_shadow_validation \
+            --contract validation/phase_1_1e_shadow_contract_v1.json \
+            --output-dir validation-results/milestone-1.1e \
+            --provider free_public \
+            2>&1 | tee phase_1_1e_shadow_validation.log
+
+      - name: Upload Phase 1.1E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1.1e-shadow-validation
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            validation-results/milestone-1.1e/shadow_validation.json
+            validation-results/milestone-1.1e/manual_audit_queue.json
+            validation-results/milestone-1.1e/PHASE_1_1E_SHADOW_VALIDATION.md
+            validation-results/milestone-1.1e/captured_snapshot_manifest.json
+            phase_1_1e_shadow_validation.log
