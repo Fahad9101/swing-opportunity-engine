@@ -75,7 +75,7 @@ def _context(
         current = _float(trend.get("current"))
         old_90d = _float(trend.get("90daysAgo"))
         analyst_count = _int(estimate.get("numberOfAnalysts"))
-        provenance = {
+        raw_fields = {
             "average": f"earningsTrend.trend[{period}].earningsEstimate.avg",
             "high": f"earningsTrend.trend[{period}].earningsEstimate.high",
             "low": f"earningsTrend.trend[{period}].earningsEstimate.low",
@@ -91,17 +91,26 @@ def _context(
         current = average
         old_90d = None
         analyst_count = _int(estimate.get("numberOfAnalysts"))
-        provenance = {
+        raw_fields = {
             "average": f"earningsTrend.trend[{period}].revenueEstimate.avg",
             "high": f"earningsTrend.trend[{period}].revenueEstimate.high",
             "low": f"earningsTrend.trend[{period}].revenueEstimate.low",
             "analyst_count": f"earningsTrend.trend[{period}].revenueEstimate.numberOfAnalysts",
         }
 
-    if all(value is None for value in (average, high, low, current, old_90d, analyst_count)):
+    values = {
+        "average": average,
+        "high": high,
+        "low": low,
+        "current_estimate": current,
+        "estimate_90d_ago": old_90d,
+        "analyst_count": analyst_count,
+    }
+    if all(value is None for value in values.values()):
         return None
 
     source = "Yahoo Finance quoteSummary earningsTrend (prototype-only)"
+    provenance = {key: raw_fields[key] for key, value in values.items() if value is not None and key in raw_fields}
     return AnalystConsensusContext(
         ticker=ticker,
         period=period,
@@ -115,7 +124,7 @@ def _context(
         source=source,
         source_timestamp=fetched_at,
         stale=stale,
-        field_provenance={key: value for key, value in provenance.items() if locals().get(key) is not None},
+        field_provenance=provenance,
     )
 
 
