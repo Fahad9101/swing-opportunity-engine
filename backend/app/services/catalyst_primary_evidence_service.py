@@ -39,6 +39,14 @@ _GUIDANCE_ACTION = (
 _ANNUAL_PERIOD = r"(?:full[- ]year|fiscal(?:\s+year)?\s+(?:20)?\d{2}|FY\s*(?:20)?\d{2}|annual)"
 _GUIDANCE_TERM = r"(?:guidance|outlook|targets?)"
 _GUIDANCE_PATTERNS = [
+    # Explicit annual expectation language is independently sufficient evidence
+    # of formal full-year guidance. This covers issuer outlook sections such as
+    # "For the fiscal year 2027, we expect:" without relying on nearby headings.
+    re.compile(
+        r"\bfor\s+(?:the\s+)?(?:fiscal(?:\s+year)?\s+(?:20)?\d{2}|FY\s*(?:20)?\d{2}|full[- ]year(?:\s+(?:20)?\d{2})?)"
+        r"\s*,?\s+(?:we|the\s+company|company)\s+(?:expect|expects)\b",
+        re.I,
+    ),
     re.compile(rf"\b{_GUIDANCE_ACTION}\b.{{0,140}}\b{_ANNUAL_PERIOD}\b.{{0,100}}\b{_GUIDANCE_TERM}\b", re.I | re.S),
     # When the annual period appears before the guidance term, require the linkage
     # to stay inside the same sentence. Otherwise narrative text such as
