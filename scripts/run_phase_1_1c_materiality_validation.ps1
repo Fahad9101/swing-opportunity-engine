@@ -87,7 +87,8 @@ if (-not $SkipTests) {
 $JsonOut = Join-Path $ResultsDir "catalyst_materiality_validation.json"
 $MarkdownOut = Join-Path $ResultsDir "PHASE_1_1C_CATALYST_MATERIALITY_VALIDATION.md"
 $LogOut = Join-Path $ResultsDir "catalyst_materiality_validation.log"
-foreach ($Output in @($JsonOut, $MarkdownOut, $LogOut)) {
+$ConsoleLogOut = Join-Path $ResultsDir "catalyst_materiality_validation.console.log"
+foreach ($Output in @($JsonOut, $MarkdownOut, $LogOut, $ConsoleLogOut)) {
     if (Test-Path $Output) { Remove-Item -Force $Output }
 }
 
@@ -108,22 +109,26 @@ $RunnerBat = Join-Path $env:TEMP "soe_phase_1_1c_materiality_validation.cmd"
 exit /b %ERRORLEVEL%
 "@ | Set-Content -Path $RunnerBat -Encoding ASCII
 
+# Keep the PowerShell/console transcript separate from the CLI-owned validation
+# log. On Windows, Tee-Object holds its destination open while the child runs;
+# pointing both writers at the same file causes PermissionError [Errno 13].
 try {
-    & $env:ComSpec /d /c $RunnerBat | Tee-Object -FilePath $LogOut
+    & $env:ComSpec /d /c $RunnerBat | Tee-Object -FilePath $ConsoleLogOut
     $ValidationExit = $LASTEXITCODE
 }
 finally {
     Remove-Item $RunnerBat -Force -ErrorAction SilentlyContinue
 }
 
-if (-not (Test-Path $JsonOut) -or -not (Test-Path $MarkdownOut)) {
-    throw "Materiality validation did not produce its required artifacts. Review $LogOut"
+if (-not (Test-Path $JsonOut) -or -not (Test-Path $MarkdownOut) -or -not (Test-Path $LogOut)) {
+    throw "Materiality validation did not produce its required artifacts. Review $ConsoleLogOut"
 }
 
 Write-Host "`n=== Phase 1.1C validation completed ==="
-Write-Host "Report: $MarkdownOut"
-Write-Host "JSON:   $JsonOut"
-Write-Host "Log:    $LogOut"
+Write-Host "Report:      $MarkdownOut"
+Write-Host "JSON:        $JsonOut"
+Write-Host "Validation:  $LogOut"
+Write-Host "Console log: $ConsoleLogOut"
 if ($ValidationExit -eq 0) {
     Write-Host "Exit gate: PASS"
 }
@@ -131,7 +136,7 @@ elseif ($ValidationExit -eq 2) {
     Write-Warning "Exit gate did not pass yet. This is a valid validation result; do not weaken frozen rules."
 }
 else {
-    throw "Materiality validation encountered an execution failure with exit code $ValidationExit. Review $LogOut"
+    throw "Materiality validation encountered an execution failure with exit code $ValidationExit. Review $ConsoleLogOut"
 }
 
 Write-Host "`nDo not commit the validation artifacts until they have been independently audited."
