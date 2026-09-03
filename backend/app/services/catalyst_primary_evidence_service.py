@@ -66,8 +66,8 @@ _PHASE2_PATTERNS = [
 _REFINANCING_PATTERNS = [
     re.compile(
         r"\b(?:the\s+company|company|we|registrant|borrower)\b.{0,80}"
-        r"\b(?:entered\s+into|completed|closed|obtained|executed|refinanced|amended\s+and\s+restated)\b"
-        r".{0,140}\b(?:credit\s+agreement|credit\s+facility|term\s+loan|revolver|debt|notes?|covenant)\b",
+        r"\b(?:entered\s+into|completed|closed|obtained|executed|amended\s+and\s+restated)\b"
+        r".{0,140}\b(?:credit\s+agreement|credit\s+facility|term\s+loan|revolver|covenant)\b",
         re.I | re.S,
     ),
     re.compile(r"\b(?:entered\s+into|completed|closed|obtained|executed)\b.{0,100}\bnew\s+credit\s+facility\b", re.I | re.S),
@@ -75,6 +75,7 @@ _REFINANCING_PATTERNS = [
     re.compile(r"\bnew\s+credit\s+facility\b", re.I),
     re.compile(r"\bcovenant\s+amendment\b", re.I),
     re.compile(r"\brefinanced\b.{0,120}\b(?:debt|notes?|loans?|facility|credit\s+agreement)\b", re.I | re.S),
+    re.compile(r"\brefinancing\b.{0,120}\b(?:debt|notes?|loans?|facility|credit\s+agreement)\b", re.I | re.S),
 ]
 _CONTRACT_PATTERNS = [
     re.compile(r"\b(?:awarded|award|entered\s+into)\b.{0,100}\b(?:material\s+)?contract\b", re.I | re.S),
@@ -110,18 +111,28 @@ def _first_match(text: str, patterns: list[re.Pattern[str]]) -> str | None:
     return None
 
 
-def _first_guidance_match(text: str) -> str | None:
-    """Return explicit annual guidance evidence while rejecting disclosure-policy wording.
+def _first_earnings_match(text: str) -> str | None:
+    """Return current-period earnings evidence, not a call/webcast scheduling notice."""
+    for pattern in _EARNINGS_PATTERNS:
+        for match in pattern.finditer(text):
+            surrounding = text[max(0, match.start() - 180) : min(len(text), match.end() + 220)]
+            scheduling = re.search(r"\b(?:conference\s+call|webcast)\b", surrounding, re.I) and re.search(
+                r"\b(?:to\s+discuss|will\s+discuss|will\s+host|scheduled|replay)\b",
+                surrounding,
+                re.I,
+            )
+            if scheduling:
+                continue
+            return _context(text, match.start(), match.end())
+    return None
 
-    Live validation exposed a false positive where the heading "Disclosure Updates"
-    preceded text about future reporting-and-guidance format changes. That is not an
-    economic guidance action. The rejection is deliberately narrow so genuine
-    raise/lower/reaffirm/provide/update language remains eligible.
-    """
+
+def _first_guidance_match(text: str) -> str | None:
+    """Return explicit annual financial guidance evidence while rejecting policy/compensation wording."""
     for pattern in _GUIDANCE_PATTERNS:
         for match in pattern.finditer(text):
             core = match.group(0)
-            surrounding = text[max(0, match.start() - 60) : min(len(text), match.end() + 60)]
+            surrounding = text[max(0, match.start() - 220) : min(len(text), match.end() + 260)]
             if re.search(r"\bdisclosure\s+updates?\b", surrounding, re.I):
                 continue
             if re.search(r"\bupdates?\s+beginning\s+in\b", core, re.I) and re.search(
@@ -129,6 +140,21 @@ def _first_guidance_match(text: str) -> str | None:
             ):
                 continue
             if re.search(r"\breporting\s+and\s+guidance\s+changes?\b", surrounding, re.I):
+                continue
+            if re.search(
+                r"\b(?:incentive\s+compensation|target\s+incentive|eligible\s+executive|"
+                r"change\s+in\s+control|severance|termination\s+of\s+employment|employment\s+agreement|"
+                r"equity\s+award|compensation\s+plan)\b",
+                surrounding,
+                re.I,
+            ):
+                continue
+            if re.search(r"\btargets?\b", core, re.I) and not re.search(
+                r"\b(?:revenue|sales|EPS|earnings|income|margin|ARR|cash\s+flow|free\s+cash\s+flow|"
+                r"operating\s+profit|EBITDA|bookings|billings|RPO|cRPO)\b",
+                surrounding,
+                re.I,
+            ):
                 continue
             return _context(text, match.start(), match.end())
     return None
@@ -197,7 +223,7 @@ def extract_sec_catalyst_candidates(
 
     candidates: list[ExtractedCatalystCandidate] = []
 
-    earnings_span = _first_match(text, _EARNINGS_PATTERNS)
+    earnings_span = _first_earnings_match(text)
     guidance_span = _first_guidance_match(text)
     if earnings_span:
         inp = _make_input(
