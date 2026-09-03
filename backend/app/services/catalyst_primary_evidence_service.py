@@ -40,7 +40,10 @@ _ANNUAL_PERIOD = r"(?:full[- ]year|fiscal(?:\s+year)?\s+(?:20)?\d{2}|FY\s*(?:20)
 _GUIDANCE_TERM = r"(?:guidance|outlook|targets?)"
 _GUIDANCE_PATTERNS = [
     re.compile(rf"\b{_GUIDANCE_ACTION}\b.{{0,140}}\b{_ANNUAL_PERIOD}\b.{{0,100}}\b{_GUIDANCE_TERM}\b", re.I | re.S),
-    re.compile(rf"\b{_ANNUAL_PERIOD}\b.{{0,100}}\b{_GUIDANCE_TERM}\b.{{0,140}}\b{_GUIDANCE_ACTION}\b", re.I | re.S),
+    # When the annual period appears before the guidance term, keep the linkage tight.
+    # A wider window let narrative phrases such as "into fiscal year 2026 ... Financial Outlook"
+    # bridge into a following quarterly-guidance section and masquerade as full-year guidance.
+    re.compile(rf"\b{_ANNUAL_PERIOD}\b.{{0,48}}\b{_GUIDANCE_TERM}\b.{{0,140}}\b{_GUIDANCE_ACTION}\b", re.I | re.S),
     re.compile(rf"\b{_GUIDANCE_ACTION}\b.{{0,100}}\b{_GUIDANCE_TERM}\b.{{0,100}}\b{_ANNUAL_PERIOD}\b", re.I | re.S),
 ]
 _MERGER_PATTERNS = [
