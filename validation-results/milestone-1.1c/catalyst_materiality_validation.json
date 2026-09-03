@@ -1,0 +1,1872 @@
+{
+  "basket_id": "SOE-1.1C-MATERIALITY-V1-38",
+  "default_runtime_model_unchanged": true,
+  "generated_at": "2026-09-03T11:04:10.989835+00:00",
+  "guardrails": {
+    "administrative_or_unverified_scored_max": 0,
+    "minimum_distinct_scored_event_types": 2,
+    "minimum_materiality_coverage_with_sufficient_evidence": 0.9,
+    "minimum_sufficient_primary_evidence_events": 12,
+    "require_100pct_provenance": true
+  },
+  "model_version": "SOE-1.1.0",
+  "phase": "1.1C",
+  "results": [
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000796343-26-000109:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "m EX-99.1 Document Exhibit 99.1 Investor Relations Contact Doug Clark Adobe ir@adobe.com Public Relations Contact Ashley Levine Adobe adobepr@adobe.com FOR IMMEDIATE RELEASE Adobe Reports Record Q2 Results \u2022 Adobe Raises FY26 Total Revenue and Non-GAAP EPS Targets \u2022 AI-first ARR triples year over year and exceeds $500 million SAN JOSE, Calif. \u2013 June 11, 2026 \u2013 Adobe (Nasdaq:ADBE), the global technology leader that unleashes creativity and pr",
+          "vestor Relations Contact Doug Clark Adobe ir@adobe.com Public Relations Contact Ashley Levine Adobe adobepr@adobe.com FOR IMMEDIATE RELEASE Adobe Reports Record Q2 Results \u2022 Adobe Raises FY26 Total Revenue and Non-GAAP EPS Targets \u2022 AI-first ARR triples year over year and exceeds $500 million SAN JOSE, Calif. \u2013 June 11, 2026 \u2013 Adobe (Nasdaq:ADBE), the global technology leader that unleashes creativity and productivity for individuals and businesses through innovativ"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-06-11T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
+        "structured_provenance": {
+          "accession": "0000796343-26-000109",
+          "content_hash": "1366e91ca09a9eb206d934f7e083280f683322d01e6ef8689c62b98bc6b3bfa2",
+          "document_id": "67f27f760f5014f146c4ef43c797585fcad24b510c30209212d95456e51bd3bb",
+          "filing_date": "2026-06-11",
+          "form": "8-K"
+        },
+        "ticker": "ADBE"
+      },
+      "error": null,
+      "id": "ADBE-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "ADBE"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001108524-26-000187:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 crm-q2fy27xexhibit991.htm EX-99.1 Document Exhibit 99.1 Salesforce Delivers Record Second Quarter Fiscal 2027 Results cRPO growth accelerates to 14% Y/Y CC; Raises FY27 revenue guidance by $200M, $300M in CC SAN FRANCISCO, Calif. - August 26, 2026 - Salesforce (NYSE: CRM), the world's #1 AI CRM, today announced results for its second quarter fiscal 2027 e",
+          "EX-99.1 2 crm-q2fy27xexhibit991.htm EX-99.1 Document Exhibit 99.1 Salesforce Delivers Record Second Quarter Fiscal 2027 Results cRPO growth accelerates to 14% Y/Y CC; Raises FY27 revenue guidance by $200M, $300M in CC SAN FRANCISCO, Calif. - August 26, 2026 - Salesforce (NYSE: CRM), the world's #1 AI CRM, today announced results for its second quarter fiscal 2027 ended July 31, 2026. Second Quarter Financial Highlights \u2022 Current re"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-26T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1108524/000110852426000187/crm-q2fy27xexhibit991.htm",
+        "structured_provenance": {
+          "accession": "0001108524-26-000187",
+          "content_hash": "f479dfcd2afe03ba956f6ad3f2ebbc40747bae8eb5d5e833c594417b5ab83187",
+          "document_id": "f75297fcd7ac7a3dc88b3cd0142c589df51105581d5cc3e8a8cfcb217acfd46a",
+          "filing_date": "2026-08-26",
+          "form": "8-K"
+        },
+        "ticker": "CRM"
+      },
+      "error": null,
+      "id": "CRM-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "CRM"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001327567-26-000019:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 ex991q426earningsrelease.htm EX-99.1 Document Exhibit 99.1 Palo Alto Networks Reports Fiscal Fourth Quarter and Fiscal Year 2026 Financial Results SANTA CLARA, Calif., Sept. 1, 2026 \u2014 Palo Alto Networks \u00ae (NASDAQ: PANW), the global AI cybersecurity leader, announced today financial results for its fiscal fourth quarter and fiscal year, ended July 31, 2026. \"We delivered a strong Q4 t",
+          "ion, representing year-over-year growth of 33% to 34%. \u2022 Diluted non-GAAP net income per share in the range of $0.96 to $0.98, using 837 million to 844 million shares outstanding. For the fiscal year 2027, we expect: \u2022 Next-Generation Security ARR of $11.075 billion to $11.175 billion, representing year-over-year growth of 22% to 23%. \u2022 Remaining performance obligations of $25.2 billion to $25.4 billion, representing year-over-year growth of 19% to 20"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-09-01T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000019/ex991q426earningsrelease.htm",
+        "structured_provenance": {
+          "accession": "0001327567-26-000019",
+          "content_hash": "4743aea7568eeff9b80a62b14f8fafb6018a085e876e77bf198642ab8b4c8aed",
+          "document_id": "327fae25df1f9f2531d136b6bc7358007ddcae1bebabd657b82c1be968fb955d",
+          "filing_date": "2026-09-01",
+          "form": "8-K"
+        },
+        "ticker": "PANW"
+      },
+      "error": null,
+      "id": "PANW-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "PANW"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001571996-26-000039:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 exhibit991earnings8kq2fy27.htm EX-99.1 Document Exhibit 99.1 Dell Technologies Delivers Second Quarter Fiscal 2027 Financial Results ROUND ROCK, Texas \u2014 Sept. 1, 2026 \u2014 Dell Technologies (NYSE: DELL) announces financial results for its fiscal 2027 second quarter and provides guidance for its fiscal 2027 third quarter and full year. Second-Quarter Summary \u2022 Record revenu",
+          "y (in billions, except percentages and per share amounts) Third-Quarter Guidance Q3FY27 (% Y/Y) Revenue $ 49.0 81 % GAAP diluted EPS $ 6.10 168 % Non-GAAP diluted EPS $ 6.50 151 % Full-Year Guidance FY27 Previous FY27 Updated (% Y/Y) Revenue $ 167.0 $ 192.0 69 % AI-Optimized Servers revenue $ 60.0 $ 74.0 200 % GAAP diluted EPS $ 17.31 $ 24.37 181 % Non-GAAP diluted EPS $ 17.90 $ 25.50 148 % 2 Second Quarter Fiscal 2027 Financial Results Three Months Ended Six M"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-09-01T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000039/exhibit991earnings8kq2fy27.htm",
+        "structured_provenance": {
+          "accession": "0001571996-26-000039",
+          "content_hash": "4fdaf4d099fe00a7f68cf346470f74a5fcaa0a7be364d6226ac24fb72f2033a2",
+          "document_id": "1b3539715b9756b03e7ab34e6b20eb1b8f74dfaa3a3a7628838ddbea6a462902",
+          "filing_date": "2026-09-01",
+          "form": "8-K"
+        },
+        "ticker": "DELL"
+      },
+      "error": null,
+      "id": "DELL-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "DELL"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000723125-26-000004:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "MEDIATE RELEASE Contacts: Satya Kumar Mark Plungy Investor Relations Media Relations satyakumar@micron.com mplungy@micron.com (408) 450-6199 (408) 203-2910 MICRON TECHNOLOGY, INC. REPORTS RESULTS FOR THE SECOND QUARTER OF FISCAL 2026 Record results and outlook reflect strategic value of memory in AI era BOISE, Idaho, March 18, 2026 \u2013 Micron Technology, Inc. (Nasdaq: MU) today announced results for its second quarter of fiscal 2026, which ended February 26, 2026. Fiscal Q2 2026 highli"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-03-18T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/723125/000072312526000004/a2026q2ex991-pressrelease.htm",
+        "structured_provenance": {
+          "accession": "0000723125-26-000004",
+          "content_hash": "ea0eabd425a84d4387ff4b66226f12a333d5bb57ee07b424df1b9cca3d9baf9c",
+          "document_id": "af003a70ede26ca45a58a23715d5d31c31e015f36cb770f42fd48f6361525f39",
+          "filing_date": "2026-03-18",
+          "form": "8-K"
+        },
+        "ticker": "MU"
+      },
+      "error": null,
+      "id": "MU-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "MU"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001045810-26-000073:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "incorporation language in such filing. Item 9.01 Financial Statements and Exhibits. (d) Exhibits Exhibit Description 99.1 Press Release, dated Augu st 2 6 , 2026, entitled \"NVIDIA Announces Financial Results for Second Quarter Fiscal 2027\" 99.2 CFO Commentary on Se cond Quarter Fiscal 2027 Results 104 The cover page of this Current Report on Form 8-K, formatted in inline XBRL (included as Exhibit 101) SIGNATURE Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signe"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-26T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/nvda-20260826.htm",
+        "structured_provenance": {
+          "accession": "0001045810-26-000073",
+          "content_hash": "84335b3247873da9fc91b4d9aa146be012801158183a7e9b0e98f0d31e50d0ea",
+          "document_id": "cc9cc774970d78c09f91997591b9d1603db691a5b299cc2ea2a6ec8955e00387",
+          "filing_date": "2026-08-26",
+          "form": "8-K"
+        },
+        "ticker": "NVDA"
+      },
+      "error": null,
+      "id": "NVDA-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "NVDA"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000002488-26-000121:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          " q22026991.htm EX-99.1 Document NEWS RELEASE Contact Carolyn Guss AMD Communications corporate.pressinquiry@amd.com Liz Stine AMD Investor Relations investor.relations@amd.com AMD Reports Second Quarter 2026 Financial Results SANTA CLARA, Calif. \u2015 August 4, 2026 \u2015 AMD (NASDAQ:AMD) today announced financial results for the second quarter of 2026. Second quarter revenue was $11.5 billion, gross margin was 54%, operating income was $2.0 billion, net income was $2."
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-04T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000121/q22026991.htm",
+        "structured_provenance": {
+          "accession": "0000002488-26-000121",
+          "content_hash": "251cb1dc61dc45e98d13328d5bc5151e25bb853068237b651925eb7089438d39",
+          "document_id": "e8d726b0a137200dc4df4302c111e0f7969b58da48521d5b405fb03fe889b8c9",
+          "filing_date": "2026-08-04",
+          "form": "8-K"
+        },
+        "ticker": "AMD"
+      },
+      "error": null,
+      "id": "AMD-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "AMD"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001018724-26-000024:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "AL STATEMENTS AND EXHIBITS. 3 SIGNATURES 4 EXHIBIT 99.1 EXHIBIT 99.2 Table of Contents ITEM 2.02. RESULTS OF OPERATIONS AND FINANCIAL CONDITION. On July 30, 2026, Amazon.com, Inc. announced its second quarter 2026 financial results. A copy of the press release containing the announcement is included as Exhibit 99.1 and additional information regarding the inclusion of non-GAAP financial measures in certain of Amazon.com, Inc.\u2019s public disclosures, including its secon"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-30T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000024/amzn-20260730.htm",
+        "structured_provenance": {
+          "accession": "0001018724-26-000024",
+          "content_hash": "0100ab39d898b67817437a007c096f18591db3f4dc5c39f2d1eb6f535d6508b3",
+          "document_id": "5abf08795879f9ef6b498db636ac6772bb9e434ec47d75ff5c6be767cf26cbda",
+          "filing_date": "2026-07-30",
+          "form": "8-K"
+        },
+        "ticker": "AMZN"
+      },
+      "error": null,
+      "id": "AMZN-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "AMZN"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001628280-26-050596:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "ct. \u2610 Item 2.02 Results of Operations and Financial Condition. On July 29, 2026, Meta Platforms, Inc. (\"Meta\") issued a press release and will hold a conference call regarding its financial results for the quarter ended June 30, 2026. A copy of the press release is furnished as Exhibit 99.1 to this report. The information furnished with this Item 2.02, including Exhibit 99.1, shall not be deemed \"filed\" for purposes of Section 18 of the Securities E"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-29T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050596/meta-20260729.htm",
+        "structured_provenance": {
+          "accession": "0001628280-26-050596",
+          "content_hash": "96f9c8482c2798770b715995e7513f43e0a026d44c844aa133f6c70951eb22a8",
+          "document_id": "2e3f4216efc5ff8bd6cdd5817a85ea9f350d0f7dfc177d1a8530c6ff0bb4f148",
+          "filing_date": "2026-07-29",
+          "form": "8-K"
+        },
+        "ticker": "META"
+      },
+      "error": null,
+      "id": "META-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "META"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000104169-26-000145:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 earningsreleasefy27q2.htm EX-99.1 Document Walmart reports second quarter results \u2022 Revenue growth of 5.9%, up 5.1% in constant currency (cc) 1 \u2022 Operating income growth of 28.8%, up 17.4% adjusted (cc) 1 \u2022 eCommerce sales up 23% globally \u2022 GAAP EPS of $0.80; Adjusted EPS 1 of $0.81 \u2022 Company issues guidance for Q3; rai",
+          "cc) 1 \u2022 Operating income growth of 28.8%, up 17.4% adjusted (cc) 1 \u2022 eCommerce sales up 23% globally \u2022 GAAP EPS of $0.80; Adjusted EPS 1 of $0.81 \u2022 Company issues guidance for Q3; raises outlook for FY27 \u201c BENTONVILLE, Ark., August 20, 2026 \u2013 Walmart Inc. (NASDAQ: WMT) announces second-quarter results with strong growth in revenue, including eCommerce, which grew 23% globally with strength across segments. Walmart U.S. comp sales 2 grew 2."
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-20T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningsreleasefy27q2.htm",
+        "structured_provenance": {
+          "accession": "0000104169-26-000145",
+          "content_hash": "973f86be5dc031a9c0b70a908eeee959e2ac6d76a01a4894e0aba21368444bed",
+          "document_id": "ccdd992bba42ac4165e060e0283343c4acfcd6844b0f42dc6f6a196c6b28e93e",
+          "filing_date": "2026-08-20",
+          "form": "8-K"
+        },
+        "ticker": "WMT"
+      },
+      "error": null,
+      "id": "WMT-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "WMT"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000354950-26-000145:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 hd_exhibit991x08022026.htm EX-99.1 Document Exhibit 99.1 The Home Depot Announces Second Quarter Fiscal 2026 Results; Reaffirms Fiscal 2026 Guidance ATLANTA, August 18, 2026 -- The Home Depot \u00ae , the world's largest home improvement retailer, today reported sales of $47.9 billion for the second quarter of fiscal 2026, an increase of $2.6 billion, or 5.7%",
+          "EX-99.1 2 hd_exhibit991x08022026.htm EX-99.1 Document Exhibit 99.1 The Home Depot Announces Second Quarter Fiscal 2026 Results; Reaffirms Fiscal 2026 Guidance ATLANTA, August 18, 2026 -- The Home Depot \u00ae , the world's largest home improvement retailer, today reported sales of $47.9 billion for the second quarter of fiscal 2026, an increase of $2.6 billion, or 5.7% from the second quarter of fisc"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-18T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/354950/000035495026000145/hd_exhibit991x08022026.htm",
+        "structured_provenance": {
+          "accession": "0000354950-26-000145",
+          "content_hash": "b0d505e6a60b2155a64644c2be5a00b3e8a7d9d4623def349ba2ed1b6cb6a0c9",
+          "document_id": "a528024f6e28fba18f4d2c7f2bad347a050fa78e7e0078f8794dfd1865d7d2a9",
+          "filing_date": "2026-08-18",
+          "form": "8-K"
+        },
+        "ticker": "HD"
+      },
+      "error": null,
+      "id": "HD-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "HD"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000060667-26-000113:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 exhibit991-07312026.htm PRESS RELEASE Document Exhibit 99.1 August 19, 2026 For 6:00 a.m. ET Release LOWE\u2019S REPORTS SECOND QUARTER 2026 SALES AND EARNINGS RESULTS \u2014 Diluted EPS of $4.27; Adjusted Diluted EPS 1 of $4.40 \u2014 \u2014 Comparable Sales Increased 0.2% \u2014 \u2014 Updates Full Year 2026 Outlook \u2014 MOORESVILLE, N.C., August 19, 2026 \u2013 Lowe\u2019s Companies, Inc. (NYSE: LOW) today reporte d net earnings of $2.4 b",
+          " 6:00 a.m. ET Release LOWE\u2019S REPORTS SECOND QUARTER 2026 SALES AND EARNINGS RESULTS \u2014 Diluted EPS of $4.27; Adjusted Diluted EPS 1 of $4.40 \u2014 \u2014 Comparable Sales Increased 0.2% \u2014 \u2014 Updates Full Year 2026 Outlook \u2014 MOORESVILLE, N.C., August 19, 2026 \u2013 Lowe\u2019s Companies, Inc. (NYSE: LOW) today reporte d net earnings of $2.4 billion and diluted earnings per share (EPS) of $4.27 for the quarter ended July 31, 2026, compared to diluted EPS of $4.27 in t"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-19T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066726000113/exhibit991-07312026.htm",
+        "structured_provenance": {
+          "accession": "0000060667-26-000113",
+          "content_hash": "a8af92aaac846e43abaab9927fffb05bd237a41c6157f1ac0dd9293c1ebd1c55",
+          "document_id": "1e30d8ff4ef75acf593bffc22d75125208f6fb8ad4ce17f2b1e7fac6050f1048",
+          "filing_date": "2026-08-19",
+          "form": "8-K"
+        },
+        "ticker": "LOW"
+      },
+      "error": null,
+      "id": "LOW-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "LOW"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001090727-25-000061:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "I want to thank all UPSers for their dedication and hard work in what continues to be a dynamic and evolving trade environment,\u201d said Carol Tom\u00e9, UPS chief executive officer. \u201cOur second quarter results reflect both the complexity of the landscape and the strength of our execution. We are making meaningful progress on our strategic initiatives, and we\u2019re confident these actions are positioning the company for stronger long-term financial "
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2025-07-29T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1090727/000109072725000061/exhibit991-earningspressre.htm",
+        "structured_provenance": {
+          "accession": "0001090727-25-000061",
+          "content_hash": "f6f7b80ef99c6f483f5c4a10fa61d3d7314c2b8068638edcaeb9cec7e2a527eb",
+          "document_id": "aa7eb354376e1232f03a4a4e8d69322ddd6a6de4e421b5e456d83b8433c58649",
+          "filing_date": "2025-07-29",
+          "form": "8-K"
+        },
+        "ticker": "UPS"
+      },
+      "error": null,
+      "id": "UPS-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "UPS"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000064803-26-000097:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 cvs_ex99x1q2-26.htm EX-99.1 Document Exhibit 99.1 CVS HEALTH CORPORATION REPORTS STRONG SECOND QUARTER 2026 RESULTS AND RAISES FULL-YEAR 2026 GUIDANCE \u2022 Second quarter total revenues increased to $106.1 billion, up 7.3% year-over-year \u2022 Second quarter GAAP diluted EPS of $2.31 and Adjusted EPS of $2.58 \u2022 Generated year-to-date cash flow from operations ",
+          "EX-99.1 2 cvs_ex99x1q2-26.htm EX-99.1 Document Exhibit 99.1 CVS HEALTH CORPORATION REPORTS STRONG SECOND QUARTER 2026 RESULTS AND RAISES FULL-YEAR 2026 GUIDANCE \u2022 Second quarter total revenues increased to $106.1 billion, up 7.3% year-over-year \u2022 Second quarter GAAP diluted EPS of $2.31 and Adjusted EPS of $2.58 \u2022 Generated year-to-date cash flow from operations of $10.6 billion \u2022 Raising full-yea"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-05T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
+        "structured_provenance": {
+          "accession": "0000064803-26-000097",
+          "content_hash": "d7a2889539da4b0b2ad0f1f73888c084d7314ad107fa6f2ecf73c797a67594d5",
+          "document_id": "702b3ff500d6b9f7eb833aaaa471bee566dac219fcf6177a5cbe3e5fb8bf89ce",
+          "filing_date": "2026-08-05",
+          "form": "8-K"
+        },
+        "ticker": "CVS"
+      },
+      "error": null,
+      "id": "CVS-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "CVS"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000049071-26-000045:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "hange Act. \u2610 Item 2.02 Results of Operations and Financial Condition. Item 7.01 Regulation FD Disclosure. Humana Inc. (the \"Company\") issued a press release this morning reporting financial results for the quarter ended June 30, 2026, and posted a detailed earnings release related to the same period to the Investor Relations portion of the Company\u2019s website at www.humana.com . A copy of each release is attached hereto as Exhibit 99.1 and Exhibit 99."
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-29T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000045/hum-20260729.htm",
+        "structured_provenance": {
+          "accession": "0000049071-26-000045",
+          "content_hash": "c20a1e81f52d54cf5b9a584281b885c0971c0fbba5a2c435fe89f78e6d156b8b",
+          "document_id": "ffd2c3027a2b056e6d75f60b53c914d3ac2b88e6f5c4b3dd8ab077b6f4ab00c0",
+          "filing_date": "2026-07-29",
+          "form": "8-K"
+        },
+        "ticker": "HUM"
+      },
+      "error": null,
+      "id": "HUM-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "HUM"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000310764-26-000048:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "as amended, or the Exchange Act, except as shall be expressly set forth by specific reference in such filing. ITEM 9.01 FINANCIAL STATEMENTS AND EXHIBITS (d) Exhibits 99.1 Stryker reports second quarter 2026 operating results, press release dated July 30, 2026 104 Cover Page Interactive Data File (the cover page XBRL tags are embedded within the Inline XBRL document) SIGNATURES Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant "
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-30T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/310764/000031076426000048/syk-20260730.htm",
+        "structured_provenance": {
+          "accession": "0000310764-26-000048",
+          "content_hash": "3ff99d823e619bc71ad2222efe0eacdd475a71ebb4cfc59a8c151c730f6387e6",
+          "document_id": "b32202393646469ae30b2aa4c0e342cee2ca7a8999bfe176c45c4ef916bfd7c9",
+          "filing_date": "2026-07-30",
+          "form": "8-K"
+        },
+        "ticker": "SYK"
+      },
+      "error": null,
+      "id": "SYK-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "SYK"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000773840-26-000120:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "xhibit 99 Contacts: Media Investor Relations Stacey Jones Mark Macaluso (980) 378-6258 (704) 627-6118 stacey.jones@honeywell.com mark.macaluso@honeywell.com HONEYWELL TECHNOLOGIES REPORTS SECOND QUARTER RESULTS CHARLOTTE, N.C., July 23, 2026 -- Honeywell Technologies (NASDAQ: HON) today announced results for the second quarter of 2026. The consolidated results include the operations of Honeywell Aerospace (NASDAQ: HONA), which successfully separa"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-23T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/773840/000077384026000120/exhibit99-q22026earningsre.htm",
+        "structured_provenance": {
+          "accession": "0000773840-26-000120",
+          "content_hash": "cc6c875b63b931365efd3498c7dad62e2424a36b80517c33f01f6ade376c86f9",
+          "document_id": "f78a2d6d80217ce51e4fab4812e6ede5a2c8de1cf30f217a0834c7a0a22054b1",
+          "filing_date": "2026-07-23",
+          "form": "8-K"
+        },
+        "ticker": "HON"
+      },
+      "error": null,
+      "id": "HON-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "HON"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001628280-26-048377:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "EX-99.1 2 abt-2026q2xexhibitx991.htm EX-99.1 Document Exhibit 99.1 News Release Abbott Reports Second-Quarter 2026 Results and Raises Full-Year EPS Guidance \u2013 Second-quarter reported sales growth of 13.0 percent; comparable sales growth of 4.8 percent \u2013 Second-quarter GAAP diluted EPS of $0.53; adjusted diluted EPS of $1.31 \u2013 Abbott reaffirms full-year 2026 co",
+          "EX-99.1 2 abt-2026q2xexhibitx991.htm EX-99.1 Document Exhibit 99.1 News Release Abbott Reports Second-Quarter 2026 Results and Raises Full-Year EPS Guidance \u2013 Second-quarter reported sales growth of 13.0 percent; comparable sales growth of 4.8 percent \u2013 Second-quarter GAAP diluted EPS of $0.53; adjusted diluted EPS of $1.31 \u2013 Abbott reaffirms full-year 2026 comparable sales growth guidance of "
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 9,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:earnings_with_formal_guidance_action=2",
+          "materiality=4+3+2->9"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-16T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1800/000162828026048377/abt-2026q2xexhibitx991.htm",
+        "structured_provenance": {
+          "accession": "0001628280-26-048377",
+          "content_hash": "149cd09c2dca0fef171d649071675821b6b3eaa872b1c36c86c02fa8b401ad39",
+          "document_id": "ca0e898aa4e0d0a10859e0aed8bf322a8abcea2f4abe3da42e47695cc4b44a2f",
+          "filing_date": "2026-07-16",
+          "form": "8-K"
+        },
+        "ticker": "ABT"
+      },
+      "error": null,
+      "id": "ABT-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "ABT"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000313616-26-000163:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "hall be expressly set forth by specific reference in such a filing. ITEM 9.01 FINANCIAL STATEMENTS AND EXHIBITS (c) Exhibits: Exhibit No. Description 99.1 Press release \u2014 \u201cDanaher Reports Second Quarter 2026 Results\u201d 104 The cover page from this Current Report on Form 8-K, formatted as Inline XBRL. SIGNATURES Pursuant to the requirements of the Securities Exchange Act of 1934, the Registrant has duly caused this report to be signed on its behalf by th"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-21T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/313616/000031361626000163/dhr-20260721.htm",
+        "structured_provenance": {
+          "accession": "0000313616-26-000163",
+          "content_hash": "69c4a80c6edd598d40c74bd8d8a5149c74644fa96626c339511ec02173ef3f3c",
+          "document_id": "dc6f553fd236ad600279547ac401e1d940ec03aed01a8306aadf5755b940eee2",
+          "filing_date": "2026-07-21",
+          "form": "8-K"
+        },
+        "ticker": "DHR"
+      },
+      "error": null,
+      "id": "DHR-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "DHR"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000320187-26-000076:earnings",
+        "event_type": "quarterly_earnings",
+        "evidence_spans": [
+          "X-99.1 2 q4fy26exhibit991er.htm EX-99.1 Document Investor Contact: Media Contact: Paul Trussell Sandra Carreon-John investor.relations@nike.com media.relations@nike.com NIKE, INC. REPORTS FISCAL 2026 FOURTH QUARTER AND FULL YEAR RESULTS BEAVERTON, Ore., June 30, 2026 \u2014 NIKE, Inc. (NYSE:NKE) today reported financial results for its fiscal 2026 fourth quarter and full year ended May 31, 2026. \u2022 Full year revenues were $46.4 billion, flat on a reported basis and down 2 perce"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:quarterly_earnings=4",
+          "economic_exposure:company_wide_earnings_default=3",
+          "consequence_severity:quarterly_earnings_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-06-30T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/320187/000032018726000076/q4fy26exhibit991er.htm",
+        "structured_provenance": {
+          "accession": "0000320187-26-000076",
+          "content_hash": "5f819f920b8c517978de1f9849b03704232f015e9d3981867bbdecc632cc25d1",
+          "document_id": "c7f40ec84467aacd742aa9010e3c13560d412876308a0871674084ccd9a4e447",
+          "filing_date": "2026-06-30",
+          "form": "8-K"
+        },
+        "ticker": "NKE"
+      },
+      "error": null,
+      "id": "NKE-EARN",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "quarterly_earnings",
+      "ticker": "NKE"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000796343-26-000109:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "vestor Relations Contact Doug Clark Adobe ir@adobe.com Public Relations Contact Ashley Levine Adobe adobepr@adobe.com FOR IMMEDIATE RELEASE Adobe Reports Record Q2 Results \u2022 Adobe Raises FY26 Total Revenue and Non-GAAP EPS Targets \u2022 AI-first ARR triples year over year and exceeds $500 million SAN JOSE, Calif. \u2013 June 11, 2026 \u2013 Adobe (Nasdaq:ADBE), the global technology leader that unleashes creativity and productivity for individuals and businesses through innovativ"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-06-11T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000109/adbeex991q226.htm",
+        "structured_provenance": {
+          "accession": "0000796343-26-000109",
+          "content_hash": "1366e91ca09a9eb206d934f7e083280f683322d01e6ef8689c62b98bc6b3bfa2",
+          "document_id": "67f27f760f5014f146c4ef43c797585fcad24b510c30209212d95456e51bd3bb",
+          "filing_date": "2026-06-11",
+          "form": "8-K"
+        },
+        "ticker": "ADBE"
+      },
+      "error": null,
+      "id": "ADBE-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "ADBE"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001327567-26-000019:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "ion, representing year-over-year growth of 33% to 34%. \u2022 Diluted non-GAAP net income per share in the range of $0.96 to $0.98, using 837 million to 844 million shares outstanding. For the fiscal year 2027, we expect: \u2022 Next-Generation Security ARR of $11.075 billion to $11.175 billion, representing year-over-year growth of 22% to 23%. \u2022 Remaining performance obligations of $25.2 billion to $25.4 billion, representing year-over-year growth of 19% to 20"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-09-01T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1327567/000132756726000019/ex991q426earningsrelease.htm",
+        "structured_provenance": {
+          "accession": "0001327567-26-000019",
+          "content_hash": "4743aea7568eeff9b80a62b14f8fafb6018a085e876e77bf198642ab8b4c8aed",
+          "document_id": "327fae25df1f9f2531d136b6bc7358007ddcae1bebabd657b82c1be968fb955d",
+          "filing_date": "2026-09-01",
+          "form": "8-K"
+        },
+        "ticker": "PANW"
+      },
+      "error": null,
+      "id": "PANW-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "PANW"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001571996-26-000039:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "y (in billions, except percentages and per share amounts) Third-Quarter Guidance Q3FY27 (% Y/Y) Revenue $ 49.0 81 % GAAP diluted EPS $ 6.10 168 % Non-GAAP diluted EPS $ 6.50 151 % Full-Year Guidance FY27 Previous FY27 Updated (% Y/Y) Revenue $ 167.0 $ 192.0 69 % AI-Optimized Servers revenue $ 60.0 $ 74.0 200 % GAAP diluted EPS $ 17.31 $ 24.37 181 % Non-GAAP diluted EPS $ 17.90 $ 25.50 148 % 2 Second Quarter Fiscal 2027 Financial Results Three Months Ended Six M"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-09-01T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1571996/000157199626000039/exhibit991earnings8kq2fy27.htm",
+        "structured_provenance": {
+          "accession": "0001571996-26-000039",
+          "content_hash": "4fdaf4d099fe00a7f68cf346470f74a5fcaa0a7be364d6226ac24fb72f2033a2",
+          "document_id": "1b3539715b9756b03e7ab34e6b20eb1b8f74dfaa3a3a7628838ddbea6a462902",
+          "filing_date": "2026-09-01",
+          "form": "8-K"
+        },
+        "ticker": "DELL"
+      },
+      "error": null,
+      "id": "DELL-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "DELL"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000104169-26-000145:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "cc) 1 \u2022 Operating income growth of 28.8%, up 17.4% adjusted (cc) 1 \u2022 eCommerce sales up 23% globally \u2022 GAAP EPS of $0.80; Adjusted EPS 1 of $0.81 \u2022 Company issues guidance for Q3; raises outlook for FY27 \u201c BENTONVILLE, Ark., August 20, 2026 \u2013 Walmart Inc. (NASDAQ: WMT) announces second-quarter results with strong growth in revenue, including eCommerce, which grew 23% globally with strength across segments. Walmart U.S. comp sales 2 grew 2."
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-20T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000145/earningsreleasefy27q2.htm",
+        "structured_provenance": {
+          "accession": "0000104169-26-000145",
+          "content_hash": "973f86be5dc031a9c0b70a908eeee959e2ac6d76a01a4894e0aba21368444bed",
+          "document_id": "ccdd992bba42ac4165e060e0283343c4acfcd6844b0f42dc6f6a196c6b28e93e",
+          "filing_date": "2026-08-20",
+          "form": "8-K"
+        },
+        "ticker": "WMT"
+      },
+      "error": null,
+      "id": "WMT-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "WMT"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000060667-26-000113:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          " 6:00 a.m. ET Release LOWE\u2019S REPORTS SECOND QUARTER 2026 SALES AND EARNINGS RESULTS \u2014 Diluted EPS of $4.27; Adjusted Diluted EPS 1 of $4.40 \u2014 \u2014 Comparable Sales Increased 0.2% \u2014 \u2014 Updates Full Year 2026 Outlook \u2014 MOORESVILLE, N.C., August 19, 2026 \u2013 Lowe\u2019s Companies, Inc. (NYSE: LOW) today reporte d net earnings of $2.4 billion and diluted earnings per share (EPS) of $4.27 for the quarter ended July 31, 2026, compared to diluted EPS of $4.27 in t"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-19T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/60667/000006066726000113/exhibit991-07312026.htm",
+        "structured_provenance": {
+          "accession": "0000060667-26-000113",
+          "content_hash": "a8af92aaac846e43abaab9927fffb05bd237a41c6157f1ac0dd9293c1ebd1c55",
+          "document_id": "1e30d8ff4ef75acf593bffc22d75125208f6fb8ad4ce17f2b1e7fac6050f1048",
+          "filing_date": "2026-08-19",
+          "form": "8-K"
+        },
+        "ticker": "LOW"
+      },
+      "error": null,
+      "id": "LOW-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "LOW"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001628280-26-049912:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "idated Revenues of $22.8B \u2022 Consolidated Operating Margin of 4.1%; Non-GAAP Adj. Consolidated Operating Margin of 9.2% \u2022 Diluted EPS of $0.71; Non-GAAP Adj. Diluted EPS of $1.76 \u2022 Raises Full-year 2026 Consolidated Revenue Outlook to Approximately $91.2B and Non-GAAP Adj. Operating Profit Target to Approximately $8.65B \u2022 Raises Full-year Non-GAAP Adj. Diluted EPS Guidance to Approximately $7.22 ATLANTA \u2013 July 28, 2026 \u2013 UPS (NYSE:UPS) today announced second-quarter 2026 consolidated revenues of $22.8 billion. Consolidated operatin"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-28T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1090727/000162828026049912/exhibit991-earningspressre.htm",
+        "structured_provenance": {
+          "accession": "0001628280-26-049912",
+          "content_hash": "7ec9f967e4dea882cf4dd14dcba82baec701132cc9038eaad1745e60877b6079",
+          "document_id": "696dbe3e138d8c588f3f9cbb2b4bc012ff293a8781261255315926d9d5c0aebd",
+          "filing_date": "2026-07-28",
+          "form": "8-K"
+        },
+        "ticker": "UPS"
+      },
+      "error": null,
+      "id": "UPS-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "UPS"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000064803-26-000097:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "EX-99.1 2 cvs_ex99x1q2-26.htm EX-99.1 Document Exhibit 99.1 CVS HEALTH CORPORATION REPORTS STRONG SECOND QUARTER 2026 RESULTS AND RAISES FULL-YEAR 2026 GUIDANCE \u2022 Second quarter total revenues increased to $106.1 billion, up 7.3% year-over-year \u2022 Second quarter GAAP diluted EPS of $2.31 and Adjusted EPS of $2.58 \u2022 Generated year-to-date cash flow from operations of $10.6 billion \u2022 Raising full-yea"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-05T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/64803/000006480326000097/cvs_ex99x1q2-26.htm",
+        "structured_provenance": {
+          "accession": "0000064803-26-000097",
+          "content_hash": "d7a2889539da4b0b2ad0f1f73888c084d7314ad107fa6f2ecf73c797a67594d5",
+          "document_id": "702b3ff500d6b9f7eb833aaaa471bee566dac219fcf6177a5cbe3e5fb8bf89ce",
+          "filing_date": "2026-08-05",
+          "form": "8-K"
+        },
+        "ticker": "CVS"
+      },
+      "error": null,
+      "id": "CVS-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "CVS"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000049071-26-000045:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "icare and Medicaid, families, individuals, military service personnel, and communities at large. Learn more about what we offer at Humana.com and at CenterWell.com. 11 Humana Inc. FY 2026 Guidance - As of July 29, 2026 no changes from initial FY 2026 guidance provided as of February 11, 2026, with the exception of GAAP EPS Diluted earnings per common share (EPS) GAAP: 'at least $6.52' (previously 'at least $8.36') FY 2026 GAAP EPS guidance and FY 2026 Adjusted (non-GAAP) EPS guidance exclude the impact "
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-29T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000045/hum-2026q2xex99x2detailedx.htm",
+        "structured_provenance": {
+          "accession": "0000049071-26-000045",
+          "content_hash": "639aca5b02c5f8e2eb966477dc89f0e8c7be089000d5c29758320a3a5472825f",
+          "document_id": "607b97a5b3db0408b73f8d03207f6907dee8b5d5142abd9ecc3dd2ffed805ab9",
+          "filing_date": "2026-07-29",
+          "form": "8-K"
+        },
+        "ticker": "HUM"
+      },
+      "error": null,
+      "id": "HUM-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "HUM"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0000773840-26-000015:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          " revised to $5,573 million, and operating margin was revised to 14.9%. However, these incremental charges do not change Honeywell\u2019s previously announced adjusted fourth quarter or full-year 2025 results or 2026 guidance, which the Company reaffirms today. As previously announced, Honeywell continues to expect to announce the sale of the PSS and WWS businesses in the first half of 2026. The Company's Annual Report on Form 10-K, including its audited financial statements and Management"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-02-17T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/773840/000077384026000015/exhibit991-pressrelease021.htm",
+        "structured_provenance": {
+          "accession": "0000773840-26-000015",
+          "content_hash": "8d15aac7f8de3c0d0040a4f90024761ef80f11554fc3ad74da563f71a780a089",
+          "document_id": "3b8d18af1c143aad8da3f32ce99a896b13d891219bf8b7c7aa94d15cea1f0beb",
+          "filing_date": "2026-02-17",
+          "form": "8-K"
+        },
+        "ticker": "HON"
+      },
+      "error": null,
+      "id": "HON-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "HON"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 1,
+        "economic_exposure_basis": "company_wide",
+        "economic_exposure_score": 3,
+        "economic_exposure_value": 1.0,
+        "event_class_base": 4,
+        "event_family": "earnings_guidance",
+        "event_id": "0001628280-26-048377:guidance",
+        "event_type": "formal_full_year_guidance_update",
+        "evidence_spans": [
+          "EX-99.1 2 abt-2026q2xexhibitx991.htm EX-99.1 Document Exhibit 99.1 News Release Abbott Reports Second-Quarter 2026 Results and Raises Full-Year EPS Guidance \u2013 Second-quarter reported sales growth of 13.0 percent; comparable sales growth of 4.8 percent \u2013 Second-quarter GAAP diluted EPS of $0.53; adjusted diluted EPS of $1.31 \u2013 Abbott reaffirms full-year 2026 comparable sales growth guidance of "
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": 8,
+        "materiality_ready": true,
+        "missing_fields": [],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:formal_full_year_guidance_update=4",
+          "economic_exposure:company_wide_guidance_default=3",
+          "consequence_severity:event_family_material_change_default=1",
+          "materiality=4+3+1->8"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.scored",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-16T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1800/000162828026048377/abt-2026q2xexhibitx991.htm",
+        "structured_provenance": {
+          "accession": "0001628280-26-048377",
+          "content_hash": "149cd09c2dca0fef171d649071675821b6b3eaa872b1c36c86c02fa8b401ad39",
+          "document_id": "ca0e898aa4e0d0a10859e0aed8bf322a8abcea2f4abe3da42e47695cc4b44a2f",
+          "filing_date": "2026-07-16",
+          "form": "8-K"
+        },
+        "ticker": "ABT"
+      },
+      "error": null,
+      "id": "ABT-GUIDE",
+      "is_biotech": false,
+      "materiality_scored": true,
+      "primary_evidence_found": true,
+      "provenance_complete": true,
+      "role": "candidate",
+      "sufficient_primary_evidence": true,
+      "target_event_type": "formal_full_year_guidance_update",
+      "ticker": "ABT"
+    },
+    {
+      "assessment": null,
+      "error": null,
+      "id": "MRNA-P3",
+      "is_biotech": true,
+      "materiality_scored": false,
+      "primary_evidence_found": false,
+      "provenance_complete": false,
+      "role": "cross_family_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "pivotal_phase3_readout",
+      "ticker": "MRNA"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": null,
+        "economic_exposure_score": null,
+        "economic_exposure_value": null,
+        "event_class_base": 5,
+        "event_family": "clinical_regulatory",
+        "event_id": "0000059478-26-000043:regulatory",
+        "event_type": "regulatory_decision",
+        "evidence_spans": [
+          "delivered 56% revenue growth in the first quarter and raised our full-year revenue guidance by $2 billion,\" said David A. Ricks, Lilly chair and CEO. \u201cA key milestone was the U.S. FDA approval of Foundayo\u2014the only approved GLP-1 pill that can be taken any time of day, without food and water restrictions. Foundayo will meaningfully expand the number of people who can benefit from GLP-1s. We also delivered pipeline progress across all four therapeutic areas an"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": null,
+        "materiality_ready": false,
+        "missing_fields": [
+          "economic_exposure"
+        ],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:regulatory_decision=5",
+          "consequence_severity:event_family_binary_default=2"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.not_ready",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-04-30T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/59478/000005947826000043/q126lillysalesandearningsp.htm",
+        "structured_provenance": {
+          "accession": "0000059478-26-000043",
+          "content_hash": "bea4db5fc0422ae1261456c1fb904179797fb1bc248587dcbee90e8b8b747c3d",
+          "document_id": "a73be1dd262884919a17b823f60a66edae7a8a1147a53772093407a5e4ed5896",
+          "filing_date": "2026-04-30",
+          "form": "8-K"
+        },
+        "ticker": "LLY"
+      },
+      "error": null,
+      "id": "LLY-REG",
+      "is_biotech": false,
+      "materiality_scored": false,
+      "primary_evidence_found": true,
+      "provenance_complete": false,
+      "role": "cross_family_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "regulatory_decision",
+      "ticker": "LLY"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": true,
+        "consequence_severity": 2,
+        "economic_exposure_basis": null,
+        "economic_exposure_score": null,
+        "economic_exposure_value": null,
+        "event_class_base": 5,
+        "event_family": "transaction_legal_financing",
+        "event_id": "0001193125-25-145772:merger",
+        "event_type": "merger_approval_or_close",
+        "evidence_spans": [
+          ")) has occurred on or prior to the earliest of (A) the date that is five (5) Business Days (as defined in the 364-Day Credit Agreement) after the \u201cOutside Date\u201d (as defined in the Agreement and Plan of Merger, dated as of May 26, 2025 (the \u201c Merger Agreement \u201d), by and among the Company, Phoenix I Merger Sub, Inc., and Informatica, as in effect as of May 26, 2025, after giving effect to certain extensions thereof), (B) the date of consummation "
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": null,
+        "materiality_ready": false,
+        "missing_fields": [
+          "economic_exposure"
+        ],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:merger_approval_or_close=5",
+          "consequence_severity:event_family_binary_default=2"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.not_ready",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2025-06-24T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1108524/000119312525145772/d71627d8k.htm",
+        "structured_provenance": {
+          "accession": "0001193125-25-145772",
+          "content_hash": "0625606f99dcbe0345c50949ebbaad9c7970f7d04272ba538cfcfa2363131f08",
+          "document_id": "d5d53be5601960c579525470f6d68af81da0c32f0eccb3b69e15641201b6a9ba",
+          "filing_date": "2025-06-24",
+          "form": "8-K"
+        },
+        "ticker": "CRM"
+      },
+      "error": null,
+      "id": "CRM-MERGER",
+      "is_biotech": false,
+      "materiality_scored": false,
+      "primary_evidence_found": true,
+      "provenance_complete": false,
+      "role": "cross_family_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "merger_approval_or_close",
+      "ticker": "CRM"
+    },
+    {
+      "assessment": null,
+      "error": null,
+      "id": "HPE-REFI",
+      "is_biotech": false,
+      "materiality_scored": false,
+      "primary_evidence_found": false,
+      "provenance_complete": false,
+      "role": "cross_family_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "material_refinancing_covenant_event",
+      "ticker": "HPE"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": false,
+        "consequence_severity": 0,
+        "economic_exposure_basis": null,
+        "economic_exposure_score": null,
+        "economic_exposure_value": null,
+        "event_class_base": 0,
+        "event_family": "corporate_strategic",
+        "event_id": "0000796343-26-000120:administrative",
+        "event_type": "administrative_or_unverifiable",
+        "evidence_spans": [
+          "as elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. \u2610 Item 5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers. On July 14, 2026, the Executive Compensation Committee (the \u201cCommittee\u201d) of the Board of Dir"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": null,
+        "materiality_ready": false,
+        "missing_fields": [
+          "economic_exposure"
+        ],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:administrative_or_unverifiable=0",
+          "consequence_severity:event_family_informational_default=0",
+          "base_zero_event_is_not_a_catalyst_candidate"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.administrative_reject",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-07-17T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/796343/000079634326000120/adbe-20260714.htm",
+        "structured_provenance": {
+          "accession": "0000796343-26-000120",
+          "content_hash": "7bebd0672f26ad42fca592b7ddc8aa5ada6f75d0b50574f3a81f3b0493bcaef3",
+          "document_id": "9c40f88640157540efc6f3ea1fe4122c4abf79ae5a7b653bf183ca28d38180af",
+          "filing_date": "2026-07-17",
+          "form": "8-K"
+        },
+        "ticker": "ADBE"
+      },
+      "error": null,
+      "id": "ADBE-ADMIN",
+      "is_biotech": false,
+      "materiality_scored": false,
+      "primary_evidence_found": true,
+      "provenance_complete": false,
+      "role": "negative_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "administrative_or_unverifiable",
+      "ticker": "ADBE"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": false,
+        "consequence_severity": 0,
+        "economic_exposure_basis": null,
+        "economic_exposure_score": null,
+        "economic_exposure_value": null,
+        "event_class_base": 0,
+        "event_family": "corporate_strategic",
+        "event_id": "0000104169-26-000008:administrative",
+        "event_type": "administrative_or_unverifiable",
+        "evidence_spans": [
+          "as elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. \u2610 Item 5.02. Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers. Effective January 8, 2026, the Board of Directors (the \"Board\") of Walmart Inc. (\"Walmart\")"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": null,
+        "materiality_ready": false,
+        "missing_fields": [
+          "economic_exposure"
+        ],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:administrative_or_unverifiable=0",
+          "consequence_severity:event_family_informational_default=0",
+          "base_zero_event_is_not_a_catalyst_candidate"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.administrative_reject",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-01-08T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/104169/000010416926000008/wmt-20260108.htm",
+        "structured_provenance": {
+          "accession": "0000104169-26-000008",
+          "content_hash": "5b6f32a6637450a9252b2020c1e2d95b0d8121743767910f41027d6016c58105",
+          "document_id": "fbf334e79b1997e2174be8003abd7c5429389a150f05bcc62441bb8a58c55b9a",
+          "filing_date": "2026-01-08",
+          "form": "8-K"
+        },
+        "ticker": "WMT"
+      },
+      "error": null,
+      "id": "WMT-ADMIN",
+      "is_biotech": false,
+      "materiality_scored": false,
+      "primary_evidence_found": true,
+      "provenance_complete": false,
+      "role": "negative_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "administrative_or_unverifiable",
+      "ticker": "WMT"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": false,
+        "consequence_severity": 0,
+        "economic_exposure_basis": null,
+        "economic_exposure_score": null,
+        "economic_exposure_value": null,
+        "event_class_base": 0,
+        "event_family": "corporate_strategic",
+        "event_id": "0000773840-26-000130:administrative",
+        "event_type": "administrative_or_unverifiable",
+        "evidence_spans": [
+          "as elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. \u2610 Item 5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers On August 19, 2026, Honeywell International Inc. (the \u201cCompany\u201d) announced the appointment of"
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": null,
+        "materiality_ready": false,
+        "missing_fields": [
+          "economic_exposure"
+        ],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:administrative_or_unverifiable=0",
+          "consequence_severity:event_family_informational_default=0",
+          "base_zero_event_is_not_a_catalyst_candidate"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.administrative_reject",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-19T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/773840/000077384026000130/hon-20260819.htm",
+        "structured_provenance": {
+          "accession": "0000773840-26-000130",
+          "content_hash": "e3cb7527360b2fa1020d091655b16c196a017c2e09a027ca63c53c3bff98805e",
+          "document_id": "7ca1871edd3b6c3e76a861941170cd3c36e3503abc77360e0f2db4fc4728ae07",
+          "filing_date": "2026-08-19",
+          "form": "8-K"
+        },
+        "ticker": "HON"
+      },
+      "error": null,
+      "id": "HON-ADMIN",
+      "is_biotech": false,
+      "materiality_scored": false,
+      "primary_evidence_found": true,
+      "provenance_complete": false,
+      "role": "negative_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "administrative_or_unverifiable",
+      "ticker": "HON"
+    },
+    {
+      "assessment": {
+        "catalyst_candidate": false,
+        "consequence_severity": 0,
+        "economic_exposure_basis": null,
+        "economic_exposure_score": null,
+        "economic_exposure_value": null,
+        "event_class_base": 0,
+        "event_family": "corporate_strategic",
+        "event_id": "0001193125-26-330652:administrative",
+        "event_type": "administrative_or_unverifiable",
+        "evidence_spans": [
+          "as elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. \u2610 ITEM 5.02 DEPARTURE OF DIRECTORS OR CERTAIN OFFICERS; ELECTION OF DIRECTORS; APPOINTMENT OF CERTAIN OFFICERS; COMPENSATORY ARRANGEMENTS OF CERTAIN OFFICERS Appointment of Julie Sawyer Montgomery as President and Chief Executive Officer On August 3, "
+        ],
+        "extraction_method": "deterministic_text",
+        "materiality": null,
+        "materiality_ready": false,
+        "missing_fields": [
+          "economic_exposure"
+        ],
+        "model_version": "SOE-1.1.0",
+        "reasons": [
+          "event_class_base:administrative_or_unverifiable=0",
+          "consequence_severity:event_family_informational_default=0",
+          "base_zero_event_is_not_a_catalyst_candidate"
+        ],
+        "rule_path": "catalyst_v1_1.materiality.administrative_reject",
+        "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2026-08-03T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/313616/000119312526330652/d161342d8k.htm",
+        "structured_provenance": {
+          "accession": "0001193125-26-330652",
+          "content_hash": "a9e889cd7ef20c27f9410422ed20b88659d3fbeb384987900a9b0ad24b0fac4f",
+          "document_id": "c4972efdf6c5c5499a52ab366374273758d2161f5e2431371c1d920907ce5072",
+          "filing_date": "2026-08-03",
+          "form": "8-K"
+        },
+        "ticker": "DHR"
+      },
+      "error": null,
+      "id": "DHR-ADMIN",
+      "is_biotech": false,
+      "materiality_scored": false,
+      "primary_evidence_found": true,
+      "provenance_complete": false,
+      "role": "negative_control",
+      "sufficient_primary_evidence": false,
+      "target_event_type": "administrative_or_unverifiable",
+      "ticker": "DHR"
+    }
+  ],
+  "rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "summary": {
+    "administrative_or_unverified_scored": 0,
+    "distinct_scored_event_types": 2,
+    "error_count": 0,
+    "exit_gate": "PASS",
+    "materiality_coverage_pct": 100.0,
+    "materiality_scored_sufficient_events": 30,
+    "primary_evidence_targets_found": 36,
+    "provenance_complete_pct": 100.0,
+    "scored_event_types": [
+      "formal_full_year_guidance_update",
+      "quarterly_earnings"
+    ],
+    "sufficient_primary_evidence_events": 30,
+    "targets_attempted": 38
+  }
+}

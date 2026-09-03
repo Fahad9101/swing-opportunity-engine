@@ -1,0 +1,11 @@
+basket=SOE-1.1C-MATERIALITY-V1-38
+targets_attempted=38
+primary_evidence_targets_found=36
+sufficient_primary_evidence_events=30
+materiality_scored_sufficient_events=30
+materiality_coverage_pct=100.0
+distinct_scored_event_types=2
+provenance_complete_pct=100.0
+administrative_or_unverified_scored=0
+error_count=0
+exit_gate=PASS
