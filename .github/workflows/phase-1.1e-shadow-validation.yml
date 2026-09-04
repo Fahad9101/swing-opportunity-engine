@@ -10,9 +10,9 @@ permissions:
   contents: read
 
 jobs:
-  shadow-full-market:
+  capture:
     runs-on: ubuntu-24.04
-    timeout-minutes: 330
+    timeout-minutes: 90
     env:
       DATABASE_URL: sqlite+pysqlite:///./soe_phase_1_1e.db
       PROVIDER_NAME: free_public
@@ -50,17 +50,131 @@ jobs:
       - name: Download and validate SEC public bulk archives
         run: PYTHONPATH=backend python -m app.cli_sec_bulk
 
-      - name: Run same-snapshot Phase 1.1E shadow validation
+      - name: Capture one full-market baseline snapshot
+        run: |
+          PYTHONPATH=backend python -m app.cli_shadow_capture \
+            --provider free_public \
+            --output-meta validation-results/milestone-1.1e/capture_meta.json
+
+      - name: Upload immutable capture
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1.1e-capture
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            soe_phase_1_1e.db
+            soe_phase_1_1e.db-*
+            validation-results/milestone-1.1e/capture_meta.json
+
+  growth-enrichment:
+    needs: capture
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5]
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./soe_phase_1_1e.db
+      PROVIDER_NAME: free_public
+      SEC_USER_AGENT: "SwingOpportunityEngine-Phase1.1E/1.0 (soe-validation@example.invalid)"
+      SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/companyfacts.zip
+      SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/submissions.zip
+      CACHE_DIR: .cache/soe
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: python -m pip install -e '.[test]'
+
+      - name: Download immutable capture
+        uses: actions/download-artifact@v4
+        with:
+          name: phase-1.1e-capture
+          path: .
+
+      - name: Download and validate SEC public bulk archives
+        run: PYTHONPATH=backend python -m app.cli_sec_bulk
+
+      - name: Run growth enrichment chunk
+        run: |
+          PYTHONPATH=backend python -m app.cli_shadow_growth_chunk \
+            --capture-meta validation-results/milestone-1.1e/capture_meta.json \
+            --chunk-index ${{ matrix.chunk }} \
+            --chunk-count 6 \
+            --output validation-results/milestone-1.1e/chunks/growth-${{ matrix.chunk }}.json
+
+      - name: Upload growth chunk
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1.1e-growth-${{ matrix.chunk }}
+          retention-days: 30
+          if-no-files-found: error
+          path: validation-results/milestone-1.1e/chunks/growth-${{ matrix.chunk }}.json
+
+  finalize:
+    needs: [capture, growth-enrichment]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./soe_phase_1_1e.db
+      PROVIDER_NAME: free_public
+      SEC_USER_AGENT: "SwingOpportunityEngine-Phase1.1E/1.0 (soe-validation@example.invalid)"
+      SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/companyfacts.zip
+      SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/submissions.zip
+      CACHE_DIR: .cache/soe
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: python -m pip install -e '.[test]'
+
+      - name: Download immutable capture
+        uses: actions/download-artifact@v4
+        with:
+          name: phase-1.1e-capture
+          path: .
+
+      - name: Download all growth chunks
+        uses: actions/download-artifact@v4
+        with:
+          pattern: phase-1.1e-growth-*
+          path: validation-results/milestone-1.1e/chunks
+          merge-multiple: true
+
+      - name: Download and validate SEC public bulk archives
+        run: PYTHONPATH=backend python -m app.cli_sec_bulk
+
+      - name: Finalize same-snapshot Phase 1.1E validation
         shell: bash
         run: |
           set -o pipefail
-          PYTHONPATH=backend python -m app.cli_shadow_validation_guarded \
+          PYTHONPATH=backend python -m app.cli_shadow_validation_finalize \
+            --capture-meta validation-results/milestone-1.1e/capture_meta.json \
+            --chunks-dir validation-results/milestone-1.1e/chunks \
             --contract validation/phase_1_1e_shadow_contract_v1.json \
             --output-dir validation-results/milestone-1.1e \
             --provider free_public \
             2>&1 | tee phase_1_1e_shadow_validation.log
 
-      - name: Upload Phase 1.1E artifacts
+      - name: Upload Phase 1.1E final artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -72,4 +186,5 @@ jobs:
             validation-results/milestone-1.1e/manual_audit_queue.json
             validation-results/milestone-1.1e/PHASE_1_1E_SHADOW_VALIDATION.md
             validation-results/milestone-1.1e/captured_snapshot_manifest.json
+            validation-results/milestone-1.1e/capture_meta.json
             phase_1_1e_shadow_validation.log
