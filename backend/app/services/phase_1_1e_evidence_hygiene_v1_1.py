@@ -40,7 +40,7 @@ _DIRECT_FORWARD = re.compile(
 _GUIDANCE_LABEL = re.compile(r"\b(?:guidance|outlook|forecast|financial\s+targets?)\b", re.I)
 _QUARTER_PERIOD = re.compile(
     r"\b(?:Q[1-4]\s*(?:FY|fiscal(?:\s+year)?)?\s*'?(?:20)?\d{2}|"
-    r"(?:first|second|third|fourth)\s+quarter(?:\s+of)?\s+(?:fiscal(?:\s+year)?\s*)?20\d{2})\b",
+    r"(?:first|second|third|fourth)\s+quarter(?:\s+of)?\s+(?:fiscal(?:\s+year)?\s*)?(?:FY\s*)?20\d{2})\b",
     re.I,
 )
 _FULL_YEAR_EXPLICIT = re.compile(
@@ -48,6 +48,7 @@ _FULL_YEAR_EXPLICIT = re.compile(
     re.I,
 )
 _BARE_FY = re.compile(r"\bFY\s*'?20\d{2}\b", re.I)
+_QUARTER_PREFIX = re.compile(r"(?:\bQ[1-4]|\b(?:first|second|third|fourth)\s+quarter)\s*$", re.I)
 _POLICY_SCOPE_NOISE = re.compile(
     r"\b(?:reconcil(?:e|es|ed|iation)|non[-\s]?GAAP|without\s+unreasonable\s+effort|"
     r"certain\s+items|stock[-\s]?based\s+compensation|share[-\s]?based\s+compensation|"
@@ -74,13 +75,9 @@ _SCALE = {
 }
 
 
-def _metric_aliases(metric: GuidanceMetric) -> tuple[str, ...]:
-    return hardened._METRIC_ALIASES[metric]
-
-
 def _metric_windows(text: str, metric: GuidanceMetric, *, left: int = 110, right: int = 170) -> list[str]:
     windows: list[str] = []
-    for alias in sorted(_metric_aliases(metric), key=len, reverse=True):
+    for alias in sorted(hardened._METRIC_ALIASES[metric], key=len, reverse=True):
         for match in re.finditer(rf"\b{re.escape(alias)}\b", text, re.I):
             windows.append(text[max(0, match.start() - left) : min(len(text), match.end() + right)])
     return windows
@@ -90,41 +87,34 @@ def _has_standalone_full_year(text: str) -> bool:
     if _FULL_YEAR_EXPLICIT.search(text):
         return True
     for match in _BARE_FY.finditer(text):
-        prefix = text[max(0, match.start() - 12) : match.start()]
-        if not re.search(r"\bQ[1-4]\s*$", prefix, re.I):
+        prefix = text[max(0, match.start() - 40) : match.start()]
+        if not _QUARTER_PREFIX.search(prefix):
             return True
     return False
 
 
 def _record_admissible(record: GuidanceMetricRecord) -> bool:
-    """Fail closed on actual-result contamination and period-scope ambiguity."""
+    """Fail closed on actual-result contamination and fiscal-period ambiguity."""
     if not record.verified:
         return False
     evidence = (record.evidence_span or "").strip()
     if not evidence:
         return True
-
     windows = _metric_windows(evidence, record.metric)
     if not windows:
         return False
 
-    # A historical actual near the metric cannot become guidance merely because a
-    # distant heading or boilerplate paragraph contains the word "guidance".
     for window in windows:
         if _ACTUAL_LOCAL.search(window) and not _DIRECT_FORWARD.search(window):
             return False
 
-    # Annual guidance must have an explicit annual scope. "Q3 FY2026" is a
-    # quarter label, not evidence of full-year FY2026 guidance.
     if record.fiscal_period.startswith("FY") and _QUARTER_PERIOD.search(evidence) and not _has_standalone_full_year(evidence):
         return False
 
-    # Numeric text guidance needs either a direct forward verb or a local
-    # guidance/outlook label around the same metric. This keeps dense historical
-    # result tables out while still allowing labeled guidance tables.
-    if record.midpoint is not None:
-        if not any(_DIRECT_FORWARD.search(window) or _GUIDANCE_LABEL.search(window) for window in windows):
-            return False
+    if record.midpoint is not None and not any(
+        _DIRECT_FORWARD.search(window) or _GUIDANCE_LABEL.search(window) for window in windows
+    ):
+        return False
     return True
 
 
@@ -132,20 +122,15 @@ def _policy_admissible(policy: GuidancePolicyEvidence | None) -> GuidancePolicyE
     if policy is None or not policy.verified:
         return None
     evidence = (policy.evidence_span or "").strip()
-    if not evidence:
+    if not evidence or _POLICY_SCOPE_NOISE.search(evidence) or _POLICY_SPECIFIC_SCOPE.search(evidence):
         return None
-    # Reconciliation-specific limitations are not a company-wide standing
-    # no-guidance policy.
-    if _POLICY_SCOPE_NOISE.search(evidence) or _POLICY_SPECIFIC_SCOPE.search(evidence):
-        return None
-    if not re.search(
+    broad = re.search(
         r"\b(?:we|the\s+company|company|management)\s+(?:does\s+not|do\s+not|doesn't|doesn’t|will\s+not)\s+"
         r"(?:provide|issue|give)\s+(?:quantitative\s+)?(?:financial\s+)?guidance\b",
         evidence,
         re.I,
-    ):
-        return None
-    return policy
+    )
+    return policy if broad else None
 
 
 def _amount(token: str, scale: str | None) -> float:
@@ -155,8 +140,7 @@ def _amount(token: str, scale: str | None) -> float:
     return value
 
 
-def _parse_first_current_value(fragment: str, metric: GuidanceMetric) -> tuple[float, float, str] | None:
-    """Parse the first value/range on the semantic current side of a transition."""
+def _parse_current_value(fragment: str, metric: GuidanceMetric) -> tuple[float, float, str] | None:
     if metric in {GuidanceMetric.GROSS_MARGIN, GuidanceMetric.OPERATING_MARGIN}:
         rng = re.search(r"(?P<lo>\d{1,3}(?:\.\d+)?)\s*%\s*(?:-|–|—|to|through)\s*(?P<hi>\d{1,3}(?:\.\d+)?)\s*%", fragment, re.I)
         if rng:
@@ -198,32 +182,31 @@ def _parse_first_current_value(fragment: str, metric: GuidanceMetric) -> tuple[f
 
 
 def _directional_rebind(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
-    """Bind the current side of explicit raise/lower transitions, not the old side."""
     if record.explicit_action not in {GuidanceAction.RAISE, GuidanceAction.LOWER}:
         return record
     evidence = (record.evidence_span or "").strip()
     if not evidence:
         return record
+    action = r"(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing)|boost(?:s|ed|ing)|lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)"
 
-    action_word = r"(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing)|boost(?:s|ed|ing)|lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)"
-    # "raised ... from OLD to NEW". Because this only runs after a strict
-    # RAISE/LOWER classification, a normal guidance range "from low to high"
-    # without a directional action is not reinterpreted as a transition.
-    transition = re.search(rf"\b{action_word}\b.{{0,220}}?\bfrom\b(?P<old>.{{0,140}}?)\bto\b(?P<new>.{{0,180}})", evidence, re.I | re.S)
+    transition = re.search(
+        rf"\b{action}\b.{{0,220}}?\bfrom\b.{{0,140}}?\bto\b(?P<new>.{{0,180}})",
+        evidence,
+        re.I | re.S,
+    )
     if transition:
-        numeric = _parse_first_current_value(transition.group("new"), record.metric)
+        numeric = _parse_current_value(transition.group("new"), record.metric)
         if numeric is not None:
             lo, hi, unit = numeric
             return record.model_copy(update={"low": lo, "high": hi, "midpoint": (lo + hi) / 2, "unit": unit})
 
-    # "raised ... to NEW, from/versus/prior OLD".
     reverse = re.search(
-        rf"\b{action_word}\b.{{0,180}}?\bto\b(?P<new>.{{0,150}}?)(?:\bfrom\b|\bversus\b|\bcompared\s+to\b|\bprevious(?:ly)?\b|\bprior\b)",
+        rf"\b{action}\b.{{0,180}}?\bto\b(?P<new>.{{0,150}}?)(?:\bfrom\b|\bversus\b|\bcompared\s+to\b|\bprevious(?:ly)?\b|\bprior\b)",
         evidence,
         re.I | re.S,
     )
     if reverse:
-        numeric = _parse_first_current_value(reverse.group("new"), record.metric)
+        numeric = _parse_current_value(reverse.group("new"), record.metric)
         if numeric is not None:
             lo, hi, unit = numeric
             return record.model_copy(update={"low": lo, "high": hi, "midpoint": (lo + hi) / 2, "unit": unit})
@@ -233,18 +216,18 @@ def _directional_rebind(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
 def extract_guidance_facts_hygienic(document: SourceDocument, *, rules_hash: str) -> GuidanceExtractionResult:
     install_binding_patch()
     base = _base_guidance_extract(document, rules_hash=rules_hash)
-    records: list[GuidanceMetricRecord] = []
-    for record in base.records:
-        rebound = _directional_rebind(record)
-        if _record_admissible(rebound):
-            records.append(rebound)
+    records = [
+        rebound
+        for record in base.records
+        if _record_admissible(rebound := _directional_rebind(record))
+    ]
     policy = _policy_admissible(base.policy_evidence)
     if any(record.midpoint is not None for record in records):
         policy = None
     return base.model_copy(update={"records": records, "policy_evidence": policy})
 
 
-def _source_priority(record: GuidanceMetricRecord) -> tuple[int, int, int, str]:
+def _source_score(record: GuidanceMetricRecord) -> int:
     evidence = record.evidence_span or ""
     filename = PurePosixPath(urlparse(record.source_url).path).name.lower()
     score = 0
@@ -256,11 +239,10 @@ def _source_priority(record: GuidanceMetricRecord) -> tuple[int, int, int, str]:
         score += 3
     if _ACTUAL_LOCAL.search(evidence) and not _DIRECT_FORWARD.search(evidence):
         score -= 10
-    return score, 1 if record.midpoint is not None else 0, -len(evidence), record.source_url
+    return score
 
 
 def dedupe_guidance_records_hygienic(records: list[GuidanceMetricRecord]) -> list[GuidanceMetricRecord]:
-    """Resolve same-key/same-date evidence with explicit directional semantics."""
     grouped: dict[tuple[tuple[str, str, str], object], list[GuidanceMetricRecord]] = defaultdict(list)
     for record in records:
         rebound = _directional_rebind(record)
@@ -268,22 +250,20 @@ def dedupe_guidance_records_hygienic(records: list[GuidanceMetricRecord]) -> lis
             grouped[(rebound.comparison_key, rebound.source_timestamp)].append(rebound)
 
     chosen: list[GuidanceMetricRecord] = []
-    for _, rows in grouped.items():
+    for rows in grouped.values():
         raises = [row for row in rows if row.explicit_action is GuidanceAction.RAISE and row.midpoint is not None]
         lowers = [row for row in rows if row.explicit_action is GuidanceAction.LOWER and row.midpoint is not None]
         if raises and not lowers:
-            # When multiple documents from one filing repeat old and new ranges,
-            # an explicit raise must resolve to the highest current numeric value.
-            item = max(raises, key=lambda row: (row.midpoint or float("-inf"), _source_priority(row)))
+            item = max(raises, key=lambda row: (row.midpoint or float("-inf"), _source_score(row), row.source_url))
         elif lowers and not raises:
-            item = min(lowers, key=lambda row: (row.midpoint if row.midpoint is not None else float("inf"), tuple(-x if isinstance(x, int) else x for x in _source_priority(row)[:3]), row.source_url))
+            item = min(lowers, key=lambda row: (row.midpoint if row.midpoint is not None else float("inf"), -_source_score(row), row.source_url))
         else:
-            item = max(rows, key=_source_priority)
+            item = max(rows, key=lambda row: (_source_score(row), row.midpoint is not None, -len(row.evidence_span or ""), row.source_url))
         chosen.append(item)
     return sorted(chosen, key=lambda item: (item.source_timestamp, item.metric.value, item.fiscal_period, item.accounting_basis, item.source_url))
 
 
-_LEGAL_FILENAME = re.compile(r"^(?:ex(?:hibit)?[-_]?10|ex10|ex(?:hibit)?[-_]?4|ex4)|(?:credit|loan|indenture|employment|purchase|merger)[-_ ]?agreement", re.I)
+_LEGAL_FILENAME = re.compile(r"^(?:ex(?:hibit)?[-_]?10|ex10|ex(?:hibit)?[-_]?4|ex4)|(?:credit|loan|indenture|employment|purchase)[-_ ]?agreement", re.I)
 _LEGAL_DOCUMENT = re.compile(r"\b(?:CREDIT\s+AGREEMENT|LOAN\s+AGREEMENT|INDENTURE|EMPLOYMENT\s+AGREEMENT|SECURITY\s+AGREEMENT)\b", re.I)
 _STRONG_EARNINGS_HEADLINE = re.compile(
     r"\b(?:reports?|announces?)\b.{0,140}\b(?:first|second|third|fourth|Q[1-4]|quarter|fiscal)\b.{0,140}\b(?:financial\s+results|results|earnings)\b|"
@@ -304,9 +284,6 @@ def earnings_document_admissible(document: SourceDocument) -> bool:
         return False
     if document.form in {"10-K", "10-Q"}:
         return strong_headline or not _LEGAL_DOCUMENT.search(text)
-    # 8-K/6-K generic HTML fallback must prove earnings relevance. Filename
-    # hints such as ex99/release are accepted only together with the existing
-    # content-pattern extraction downstream.
     return strong_headline or bool(_STRONG_FILENAME.search(filename))
 
 
