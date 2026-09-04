@@ -10,10 +10,10 @@ from app.services.phase_1_1e_evidence_hygiene_round3_patch_v1_1 import (
     _FORWARD_SUFFIX,
     _metric_occurrences,
     _nearest_period,
-    dedupe_guidance_records_round3_patched,
     extract_guidance_facts_round3_patched,
     tighten_guidance_record_round3_patched,
 )
+from app.services.phase_1_1e_evidence_hygiene_round3_v1_1 import _quality
 
 # Round 4 is an evidence-binding repair only. It does not alter any SOE rule,
 # threshold, score, scanner, penalty, market-regime rule, or classification logic.
@@ -198,14 +198,7 @@ def tighten_guidance_record_round4(record: GuidanceMetricRecord) -> GuidanceMetr
 
 
 def _action_consistent_history(records: list[GuidanceMetricRecord]) -> list[GuidanceMetricRecord]:
-    """Fail closed on impossible directional transitions for the same key.
-
-    This is evidence validation, not classification: if a record says the same
-    metric/period was RAISED but its bound midpoint is below the latest prior
-    midpoint, the binding is internally inconsistent and the record is excluded
-    instead of being allowed to manufacture a deterioration signal. LOWER is
-    treated symmetrically.
-    """
+    """Fail closed on impossible directional transitions for the same key."""
     by_ticker_key: dict[tuple[str, tuple[str, str, str]], list[GuidanceMetricRecord]] = defaultdict(list)
     for item in records:
         by_ticker_key[(item.ticker, item.comparison_key)].append(item)
@@ -229,10 +222,25 @@ def _action_consistent_history(records: list[GuidanceMetricRecord]) -> list[Guid
 
 
 def dedupe_guidance_records_round4(records: list[GuidanceMetricRecord]) -> list[GuidanceMetricRecord]:
-    # Preserve Round-3 same-timestamp source selection, but feed it only records
-    # whose period/metric/value bindings survive the Round-4 grammar checks.
+    # Do not call the Round-3 deduper here: it re-runs the Round-3 period binder
+    # and could undo a stronger Round-4 metric-bound period correction.
     tightened = [item for record in records if (item := tighten_guidance_record_round4(record)) is not None]
-    selected = dedupe_guidance_records_round3_patched(tightened)
+    grouped: dict[tuple[tuple[str, str, str], object], list[GuidanceMetricRecord]] = defaultdict(list)
+    for item in tightened:
+        grouped[(item.comparison_key, item.source_timestamp)].append(item)
+
+    selected: list[GuidanceMetricRecord] = []
+    for rows in grouped.values():
+        raises = [row for row in rows if row.explicit_action is GuidanceAction.RAISE and row.midpoint is not None]
+        lowers = [row for row in rows if row.explicit_action is GuidanceAction.LOWER and row.midpoint is not None]
+        if raises and not lowers:
+            chosen = max(raises, key=lambda row: (row.midpoint or float("-inf"), _quality(row)))
+        elif lowers and not raises:
+            chosen = min(lowers, key=lambda row: row.midpoint if row.midpoint is not None else float("inf"))
+        else:
+            chosen = max(rows, key=_quality)
+        selected.append(chosen)
+
     selected = _action_consistent_history(selected)
     return sorted(
         selected,
