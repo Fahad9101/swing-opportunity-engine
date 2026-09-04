@@ -5,6 +5,10 @@ from typing import Any
 from app import cli_shadow_validation
 from app.domain.soe_v1_1 import GuidanceMetric
 from app.services import fact_extraction_service, shadow_enrichment_service
+from app.services.guidance_extraction_hardening_v1_1 import (
+    dedupe_guidance_records,
+    extract_guidance_facts_hardened,
+)
 
 
 _original_numeric_range = fact_extraction_service._numeric_range
@@ -134,6 +138,8 @@ def install_guards() -> None:
         return
     fact_extraction_service._numeric_range = _guard_numeric_range
     shadow_enrichment_service.index_submissions_payload = _safe_index_submissions_payload
+    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_hardened
+    shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records
     shadow_enrichment_service.ShadowStructuralEnricher.enrich = _guarded_enrich
     _guards_installed = True
 
