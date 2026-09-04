@@ -4,11 +4,11 @@ from app.core.config import SOE_1_1_RULES_PATH, load_rules_for_version, rules_ha
 from app.domain.distress_v1_1 import DistressHardFlag
 from app.domain.soe_v1_1 import ExtractionMethod, GuidanceAction, GuidanceMetric, GuidanceMetricRecord, SourceDocument
 from app.services.guidance_ledger_service import GuidanceLedger
-from app.services.phase_1_1e_evidence_hygiene_round3_v1_1 import (
-    dedupe_guidance_records_round3,
+from app.services.phase_1_1e_evidence_hygiene_round3_patch_v1_1 import (
+    dedupe_guidance_records_round3_patched as dedupe_guidance_records_round3,
     extract_hard_distress_flags_round3,
     extract_sec_catalyst_candidates_round3,
-    tighten_guidance_record_round3,
+    tighten_guidance_record_round3_patched as tighten_guidance_record_round3,
 )
 
 NOW = datetime(2026, 9, 4, tzinfo=UTC)
