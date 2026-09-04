@@ -6,9 +6,9 @@ from app import cli_shadow_validation
 from app.domain.soe_v1_1 import GuidanceMetric
 from app.services import fact_extraction_service, shadow_enrichment_service
 from app.services.guidance_binding_patch_v1_1 import install_binding_patch
-from app.services.phase_1_1e_evidence_hygiene_round3_v1_1 import (
-    dedupe_guidance_records_round3,
-    extract_guidance_facts_round3,
+from app.services.phase_1_1e_evidence_hygiene_round3_patch_v1_1 import (
+    dedupe_guidance_records_round3_patched as dedupe_guidance_records_round3,
+    extract_guidance_facts_round3_patched as extract_guidance_facts_round3,
     extract_hard_distress_flags_round3,
     extract_sec_catalyst_candidates_round3,
 )
