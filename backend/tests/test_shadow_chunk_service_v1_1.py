@@ -69,9 +69,19 @@ def test_merge_growth_chunks_requires_exact_snapshot_and_coverage() -> None:
 
     assert set(merged) == {"A", "B"}
 
-    with pytest.raises(RuntimeError, match="coverage mismatch"):
+    with pytest.raises(RuntimeError, match="chunk set is incomplete"):
         merge_growth_chunks(
             payloads[:1],
+            expected_tickers=["A", "B"],
+            fingerprint="fp",
+            baseline_hash="b",
+            candidate_hash="c",
+        )
+
+    missing_name_payloads = [payloads[0], {**payloads[1], "items": []}]
+    with pytest.raises(RuntimeError, match="coverage mismatch"):
+        merge_growth_chunks(
+            missing_name_payloads,
             expected_tickers=["A", "B"],
             fingerprint="fp",
             baseline_hash="b",
