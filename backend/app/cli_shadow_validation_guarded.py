@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable
 from typing import Any
 
 from app import cli_shadow_validation
@@ -12,6 +11,7 @@ _original_numeric_range = fact_extraction_service._numeric_range
 _original_index_submissions_payload = shadow_enrichment_service.index_submissions_payload
 _original_enrich = shadow_enrichment_service.ShadowStructuralEnricher.enrich
 _malformed_sec_rows: dict[str, list[str]] = {}
+_guards_installed = False
 
 
 def _guard_numeric_range(
@@ -99,6 +99,11 @@ def _safe_index_submissions_payload(
     )
 
 
+def consume_sec_row_errors(ticker: str) -> list[str]:
+    """Return and clear malformed-row errors accumulated for one ticker."""
+    return _malformed_sec_rows.pop(ticker.upper(), [])
+
+
 async def _guarded_enrich(
     self,
     instrument,
@@ -118,14 +123,23 @@ async def _guarded_enrich(
         need_distress=need_distress,
         need_catalyst=need_catalyst,
     )
-    result.errors.extend(_malformed_sec_rows.pop(instrument.ticker.upper(), []))
+    result.errors.extend(consume_sec_row_errors(instrument.ticker))
     return result
 
 
-def main() -> int:
+def install_guards() -> None:
+    """Install fail-closed data guards for Phase 1.1E orchestration only."""
+    global _guards_installed
+    if _guards_installed:
+        return
     fact_extraction_service._numeric_range = _guard_numeric_range
     shadow_enrichment_service.index_submissions_payload = _safe_index_submissions_payload
     shadow_enrichment_service.ShadowStructuralEnricher.enrich = _guarded_enrich
+    _guards_installed = True
+
+
+def main() -> int:
+    install_guards()
     return cli_shadow_validation.main()
 
 
