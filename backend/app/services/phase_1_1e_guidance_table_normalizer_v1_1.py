@@ -330,11 +330,17 @@ def normalize_comparative_guidance_tables(
 
             row_start = max(0, mention.start - 220)
             row_end = min(len(table), mention.end + 220)
+            # Preserve the actual primary-source table header in the evidence
+            # span. The unchanged GuidanceLedger requires explicit forward-
+            # guidance context for quantitative evidence; a synthetic metadata
+            # prefix alone must never be used to bypass that eligibility gate.
+            source_header = context[-420:]
+            source_row = table[row_start:row_end]
             evidence = (
                 f"normalized_comparative_guidance_table; layout={layout}; "
                 f"scope={fiscal_scope}; table_scale={scale}; prior={prior.low}:{prior.high}; "
-                f"updated={current.low}:{current.high}; source_text="
-                + table[row_start:row_end]
+                f"updated={current.low}:{current.high}; source_header={source_header}; "
+                f"source_row={source_row}"
             )[:1000]
 
             normalized.append(
