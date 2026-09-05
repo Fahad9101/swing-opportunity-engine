@@ -6,6 +6,13 @@ on:
       - phase-1.1e-shadow-validation
   workflow_dispatch:
 
+# A full-market run is expensive and every newer commit supersedes the previous
+# branch snapshot. Keep only the latest validation active so obsolete captures
+# and enrichment matrices cannot consume runners ahead of the current head.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
