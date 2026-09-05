@@ -12,9 +12,9 @@ from app.services.phase_1_1e_catalyst_evidence_round5_v1_1 import (
 from app.services.phase_1_1e_evidence_hygiene_round3_patch_v1_1 import (
     extract_hard_distress_flags_round3,
 )
-from app.services.phase_1_1e_evidence_hygiene_round4_v1_1 import (
-    dedupe_guidance_records_round4,
-    extract_guidance_facts_round4,
+from app.services.phase_1_1e_guidance_actual_guard_round6_v1_1 import (
+    dedupe_guidance_records_round6,
+    extract_guidance_facts_round6,
 )
 
 
@@ -146,8 +146,8 @@ def install_guards() -> None:
     install_binding_patch()
     fact_extraction_service._numeric_range = _guard_numeric_range
     shadow_enrichment_service.index_submissions_payload = _safe_index_submissions_payload
-    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_round4
-    shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records_round4
+    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_round6
+    shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records_round6
     shadow_enrichment_service.extract_hard_distress_flags = extract_hard_distress_flags_round3
     shadow_enrichment_service.extract_sec_catalyst_candidates = extract_sec_catalyst_candidates_round5
     shadow_enrichment_service.ShadowStructuralEnricher.enrich = _guarded_enrich
