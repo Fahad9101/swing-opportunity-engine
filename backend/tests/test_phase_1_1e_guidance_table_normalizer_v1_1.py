@@ -138,6 +138,19 @@ def test_global_dedupe_preserves_normalized_table_record_over_bogus_generic_row(
     assert revenue[0].extraction_method is ExtractionMethod.STRUCTURED
 
 
+def test_global_dedupe_preserves_linked_prior_and_updated_table_pair():
+    normalized = normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
+    deduped = dedupe_guidance_records_table_normalized(normalized)
+    revenue = [record for record in deduped if record.metric is GuidanceMetric.REVENUE]
+    assert len(revenue) == 2
+    current = next(record for record in revenue if record.explicit_action is GuidanceAction.RAISE)
+    prior = next(record for record in revenue if record.record_id == current.supersedes_record_id)
+    assert prior.low == pytest.approx(5_575_000_000)
+    assert current.low == pytest.approx(5_800_000_000)
+    assessment = GuidanceLedger(deduped).assess("ALSN", RULES, rules_hash=RULES_HASH, as_of=NOW)
+    assert assessment.classification.value == "NOT_DETERIORATED"
+
+
 def test_alsn_prior_to_updated_revenue_is_not_deteriorated_under_frozen_rules():
     records = normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
     ledger = GuidanceLedger(records)
