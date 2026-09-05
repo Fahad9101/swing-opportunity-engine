@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 import pytest
 
@@ -53,34 +53,12 @@ def _document(text: str = ALSN_TABLE) -> SourceDocument:
     )
 
 
-def _prior_revenue() -> GuidanceMetricRecord:
-    when = NOW - timedelta(days=161)
-    return GuidanceMetricRecord(
-        rules_hash=RULES_HASH,
-        ticker="ALSN",
-        fiscal_period="FY2026",
-        metric=GuidanceMetric.REVENUE,
-        accounting_basis="UNSPECIFIED",
-        low=5_575_000_000,
-        high=5_925_000_000,
-        unit="USD",
-        source="SEC EDGAR",
-        source_url="https://www.sec.gov/Archives/edgar/data/1411207/000119312526063975/d105532dex991.htm",
-        source_accession="0001193125-26-063975",
-        source_timestamp=when,
-        explicit_action=GuidanceAction.INITIATE,
-        verified=True,
-        extraction_method=ExtractionMethod.DETERMINISTIC_TEXT,
-        evidence_span="Full Year 2026 Guidance: Consolidated net sales in the range of $5,575 to $5,925 million.",
-        source_document_hash="b" * 64,
-        as_of=when,
-        fetched_at=when,
-    )
-
-
 def test_alsn_table_level_millions_and_transposed_rows_are_normalized():
     records = normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
-    by_metric = {record.metric: record for record in records}
+    by_metric = {}
+    for record in records:
+        if record.source_timestamp == NOW:
+            by_metric[record.metric] = record
 
     revenue = by_metric[GuidanceMetric.REVENUE]
     assert revenue.fiscal_period == "FY2026"
@@ -103,7 +81,12 @@ def test_alsn_table_level_millions_and_transposed_rows_are_normalized():
 
 def test_alsn_normalized_revenue_does_not_bind_next_net_income_row():
     records = normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
-    revenue = next(record for record in records if record.metric is GuidanceMetric.REVENUE)
+    revenue = next(
+        record
+        for record in records
+        if record.metric is GuidanceMetric.REVENUE
+        and record.explicit_action is GuidanceAction.RAISE
+    )
     assert revenue.low != pytest.approx(600_000_000)
     assert revenue.high != pytest.approx(700_000_000)
     assert revenue.low == pytest.approx(5_800_000_000)
@@ -117,10 +100,17 @@ def test_alsn_full_extraction_overrides_conflicting_generic_table_record():
         for record in extraction.records
         if record.metric is GuidanceMetric.REVENUE and record.fiscal_period == "FY2026"
     ]
-    assert len(revenue) == 1
-    assert revenue[0].low == pytest.approx(5_800_000_000)
-    assert revenue[0].high == pytest.approx(6_000_000_000)
-    assert (revenue[0].evidence_span or "").startswith("normalized_comparative_guidance_table;")
+    assert len(revenue) == 2
+    current = next(record for record in revenue if record.explicit_action is GuidanceAction.RAISE)
+    prior = next(record for record in revenue if record.record_id == current.supersedes_record_id)
+    assert prior.source_timestamp == NOW
+    assert current.source_timestamp == NOW
+    assert prior.low == pytest.approx(5_575_000_000)
+    assert prior.high == pytest.approx(5_925_000_000)
+    assert current.low == pytest.approx(5_800_000_000)
+    assert current.high == pytest.approx(6_000_000_000)
+    assert "row_version=prior" in (prior.evidence_span or "")
+    assert "row_version=updated" in (current.evidence_span or "")
 
 
 def test_global_dedupe_preserves_normalized_table_record_over_bogus_generic_row():
@@ -128,6 +118,7 @@ def test_global_dedupe_preserves_normalized_table_record_over_bogus_generic_row(
         record
         for record in normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
         if record.metric is GuidanceMetric.REVENUE
+        and record.explicit_action is GuidanceAction.RAISE
     )
     bogus = normalized.model_copy(
         update={
@@ -148,15 +139,32 @@ def test_global_dedupe_preserves_normalized_table_record_over_bogus_generic_row(
 
 
 def test_alsn_prior_to_updated_revenue_is_not_deteriorated_under_frozen_rules():
-    current = next(
-        record
-        for record in normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
-        if record.metric is GuidanceMetric.REVENUE
-    )
-    ledger = GuidanceLedger([_prior_revenue(), current])
+    records = normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
+    ledger = GuidanceLedger(records)
     assessment = ledger.assess("ALSN", RULES, rules_hash=RULES_HASH, as_of=NOW)
     assert assessment.guidance_deterioration is False
     assert assessment.classification.value == "NOT_DETERIORATED"
+
+
+def test_same_document_prior_pair_does_not_leak_before_primary_source_timestamp():
+    records = normalize_comparative_guidance_tables(_document(), rules_hash=RULES_HASH)
+    ledger = GuidanceLedger(records)
+    current, prior = ledger.current_and_prior("ALSN", as_of=datetime(2026, 8, 2, tzinfo=UTC))
+    assert current == []
+    assert prior == []
+
+
+def test_ambiguous_comparative_header_does_not_invent_prior_timestamp():
+    text = """
+    Full Year 2026 Guidance Update ($ in millions)
+    Prior Guide Updated Guide
+    $5,575 to $5,925 $5,800 to $6,000 Net Sales
+    """
+    records = normalize_comparative_guidance_tables(_document(text), rules_hash=RULES_HASH)
+    revenue = [record for record in records if record.metric is GuidanceMetric.REVENUE]
+    assert len(revenue) == 1
+    assert revenue[0].source_timestamp == NOW
+    assert "row_version=updated" in (revenue[0].evidence_span or "")
 
 
 def test_table_scale_is_not_applied_to_eps_per_share_ranges():

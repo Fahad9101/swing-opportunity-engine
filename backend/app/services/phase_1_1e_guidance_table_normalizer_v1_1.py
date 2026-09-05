@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from app.domain.soe_v1_1 import (
     ExtractionMethod,
@@ -45,6 +46,12 @@ _COMPARATIVE_HEADER = re.compile(
 )
 _TABLE_SCALE = re.compile(
     r"\$\s*(?:values?\s*)?(?:in\s+)?(thousands?|millions?|billions?)\b",
+    re.I,
+)
+_EXACT_DATE = re.compile(
+    r"\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
+    r"Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|"
+    r"Dec(?:ember)?)\.?\s+\d{1,2},?\s+20\d{2}\b",
     re.I,
 )
 _QUARTER_SCOPE = re.compile(
@@ -160,6 +167,41 @@ def _table_scale(context: str) -> float | None:
     if not matches:
         return None
     return _SCALE.get(matches[-1].group(1).lower())
+
+
+def _parse_exact_date(token: str, *, tzinfo) -> datetime | None:
+    cleaned = token.replace(".", "").replace(",", "")
+    for pattern in ("%B %d %Y", "%b %d %Y"):
+        try:
+            parsed = datetime.strptime(cleaned, pattern)
+            return parsed.replace(tzinfo=tzinfo or UTC)
+        except ValueError:
+            continue
+    return None
+
+
+def _comparative_dates(context: str, document_timestamp: datetime) -> tuple[datetime, datetime] | None:
+    """Return verified prior/current table dates without inventing precision.
+
+    Comparative presentations often print two exact dates immediately around
+    the Prior Guide / Updated Guide headers.  The first date is accepted as the
+    prior effective date only when the second date agrees with the primary
+    document timestamp (allowing a short SEC filing delay).  Month-only or
+    otherwise ambiguous headers remain unpaired and therefore fail closed.
+    """
+    dates = [
+        parsed
+        for match in _EXACT_DATE.finditer(context)
+        if (parsed := _parse_exact_date(match.group(0), tzinfo=document_timestamp.tzinfo)) is not None
+    ]
+    if len(dates) < 2:
+        return None
+    prior, updated = dates[-2], dates[-1]
+    if prior >= updated:
+        return None
+    if abs((updated.date() - document_timestamp.date()).days) > 7:
+        return None
+    return prior, updated
 
 
 def _metric_mentions(text: str) -> list[_Mention]:
@@ -287,16 +329,20 @@ def normalize_comparative_guidance_tables(
 ) -> list[GuidanceMetricRecord]:
     """Normalize primary-source prior-vs-updated guidance tables.
 
-    Returns only current/updated records. The prior range is used to establish
-    directional evidence but is not emitted at the current source timestamp.
-    Historical prior records continue to come from their original source dates.
+    When the table supplies two verified exact dates, emit both the quoted prior
+    range and the updated range at the primary document's availability timestamp,
+    linking the updated record to the quoted prior through ``supersedes_record_id``.
+    The prior effective date remains explicit in evidence without back-dating a
+    fact to before the source document was available. If exact dates cannot be
+    verified, emit only the updated row and let the ledger fail closed unless an
+    independently dated prior primary-source record exists.
     """
     text = re.sub(r"\s+", " ", html_to_text(document.content or "")).strip()
     if not text:
         return []
 
     normalized: list[GuidanceMetricRecord] = []
-    seen: set[tuple[str, str, str, float, float]] = set()
+    seen: set[tuple[str, str, str, datetime, float, float]] = set()
 
     for header in _COMPARATIVE_HEADER.finditer(text):
         context_start = max(0, header.start() - 360)
@@ -313,6 +359,10 @@ def normalize_comparative_guidance_tables(
         if next_header is not None:
             table_end = min(table_end, next_header.start())
         table = text[header.end() : table_end]
+        comparative_dates = _comparative_dates(
+            text[header.start() : min(table_end, header.end() + 260)],
+            document.source_timestamp,
+        )
         mentions = _metric_mentions(table)
         if not mentions:
             continue
@@ -323,7 +373,14 @@ def normalize_comparative_guidance_tables(
                 continue
             prior, current, layout = pair
             basis = _basis(mention.metric, mention.alias)
-            key = (mention.metric.value, fiscal_scope, basis, current.low, current.high)
+            key = (
+                mention.metric.value,
+                fiscal_scope,
+                basis,
+                document.source_timestamp,
+                current.low,
+                current.high,
+            )
             if key in seen:
                 continue
             seen.add(key)
@@ -343,28 +400,70 @@ def normalize_comparative_guidance_tables(
                 f"source_row={source_row}"
             )[:1000]
 
+            common = dict(
+                rules_hash=rules_hash,
+                ticker=document.ticker,
+                fiscal_period=fiscal_scope,
+                metric=mention.metric,
+                accounting_basis=basis,
+                unit=current.unit,
+                source=document.source,
+                source_url=document.source_url,
+                source_accession=document.accession,
+                verified=True,
+                extraction_method=ExtractionMethod.STRUCTURED,
+                source_document_hash=document.content_hash,
+                fetched_at=document.fetched_at,
+                stale=document.stale,
+            )
+
+            quoted_prior: GuidanceMetricRecord | None = None
+            if comparative_dates is not None:
+                prior_timestamp, updated_timestamp = comparative_dates
+                prior_key = (
+                    mention.metric.value,
+                    fiscal_scope,
+                    basis,
+                    document.source_timestamp,
+                    prior.low,
+                    prior.high,
+                )
+                if prior_key not in seen:
+                    seen.add(prior_key)
+                    prior_evidence = (
+                        f"normalized_comparative_guidance_table; row_version=prior; layout={layout}; "
+                        f"scope={fiscal_scope}; table_scale={scale}; prior_date={prior_timestamp.date()}; "
+                        f"updated_date={updated_timestamp.date()}; prior={prior.low}:{prior.high}; "
+                        f"updated={current.low}:{current.high}; source_header={source_header}; "
+                        f"source_row={source_row}"
+                    )[:1000]
+                    quoted_prior = GuidanceMetricRecord(
+                        **common,
+                        low=prior.low,
+                        high=prior.high,
+                        source_timestamp=document.source_timestamp,
+                        explicit_action=GuidanceAction.NONE,
+                        evidence_span=prior_evidence,
+                        as_of=document.source_timestamp,
+                    )
+                    normalized.append(quoted_prior)
+
             normalized.append(
                 GuidanceMetricRecord(
-                    rules_hash=rules_hash,
-                    ticker=document.ticker,
-                    fiscal_period=fiscal_scope,
-                    metric=mention.metric,
-                    accounting_basis=basis,
+                    **common,
                     low=current.low,
                     high=current.high,
-                    unit=current.unit,
-                    source=document.source,
-                    source_url=document.source_url,
-                    source_accession=document.accession,
                     source_timestamp=document.source_timestamp,
                     explicit_action=_direction(prior, current),
-                    verified=True,
-                    extraction_method=ExtractionMethod.STRUCTURED,
-                    evidence_span=evidence,
-                    source_document_hash=document.content_hash,
+                    supersedes_record_id=quoted_prior.record_id if quoted_prior is not None else None,
+                    evidence_span=(
+                        evidence.replace(
+                            "normalized_comparative_guidance_table; ",
+                            "normalized_comparative_guidance_table; row_version=updated; ",
+                            1,
+                        )
+                    ),
                     as_of=document.source_timestamp,
-                    fetched_at=document.fetched_at,
-                    stale=document.stale,
                 )
             )
 
