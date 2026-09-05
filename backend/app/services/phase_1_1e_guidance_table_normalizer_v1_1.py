@@ -110,14 +110,23 @@ _METRIC_ALIASES: list[tuple[GuidanceMetric, tuple[str, ...]]] = [
 _DOLLAR_RANGE = re.compile(
     r"(?P<d1>\$)?\s*(?P<low>\d[\d,]*(?:\.\d+)?)\s*"
     r"(?P<s1>billions?|millions?|thousands?|bn|mm|[bmk])?\s*"
-    r"(?:to|through|-|–|—)\s*"
+    r"(?:to|through|and|-|–|—)\s*"
     r"(?P<d2>\$)?\s*(?P<high>\d[\d,]*(?:\.\d+)?)\s*"
     r"(?P<s2>billions?|millions?|thousands?|bn|mm|[bmk])?",
     re.I,
 )
 _PERCENT_RANGE = re.compile(
-    r"(?P<low>\d{1,3}(?:\.\d+)?)\s*%\s*(?:to|through|-|–|—)\s*"
+    r"(?P<low>\d{1,3}(?:\.\d+)?)\s*%\s*(?:to|through|and|-|–|—)\s*"
     r"(?P<high>\d{1,3}(?:\.\d+)?)\s*%",
+    re.I,
+)
+
+_FINANCIAL_ROW_BOUNDARY = re.compile(
+    r"\b(?:gross\s+bookings|bookings|operating\s+profit|net\s+(?:income|loss)|"
+    r"cash(?:\s+and\s+cash\s+equivalents)?\s+(?:provided\s+by|from)\s+operating\s+activities|"
+    r"capital\s+expenditures?|adjusted\s+ebitda|ebitda|free\s+cash\s+flow|fcf|"
+    r"total\s+revenue|revenue|net\s+sales|sales|adjusted\s+eps|diluted\s+eps|eps|"
+    r"gross\s+margin|operating\s+margin)\b",
     re.I,
 )
 
@@ -144,22 +153,23 @@ def _normalize_year(token: str) -> int:
     return year + 2000 if year < 100 else year
 
 
-def _scope(context: str) -> str | None:
-    quarter = list(_QUARTER_SCOPE.finditer(context))
-    if quarter:
-        m = quarter[-1]
-        return f"Q{m.group(1)}FY{_normalize_year(m.group(2))}"
-    quarter_word = list(_QUARTER_WORD_SCOPE.finditer(context))
-    if quarter_word:
-        m = quarter_word[-1]
-        return f"Q{_QUARTER_WORDS[m.group(1).lower()]}FY{_normalize_year(m.group(2))}"
-    annual = list(_ANNUAL_SCOPE.finditer(context))
-    if annual:
-        return f"FY{_normalize_year(annual[-1].group(1))}"
-    year_ending = list(_YEAR_ENDING_SCOPE.finditer(context))
-    if year_ending:
-        return f"FY{int(year_ending[-1].group(1))}"
-    return None
+def _scopes(context: str) -> set[str]:
+    """Return every explicit quarter/annual fiscal scope in a table header."""
+    result: set[str] = set()
+    quarter_spans: list[tuple[int, int]] = []
+    for match in _QUARTER_SCOPE.finditer(context):
+        result.add(f"Q{match.group(1)}FY{_normalize_year(match.group(2))}")
+        quarter_spans.append(match.span())
+    for match in _QUARTER_WORD_SCOPE.finditer(context):
+        result.add(f"Q{_QUARTER_WORDS[match.group(1).lower()]}FY{_normalize_year(match.group(2))}")
+        quarter_spans.append(match.span())
+    for match in _ANNUAL_SCOPE.finditer(context):
+        if any(match.start() < end and match.end() > start for start, end in quarter_spans):
+            continue
+        result.add(f"FY{_normalize_year(match.group(1))}")
+    for match in _YEAR_ENDING_SCOPE.finditer(context):
+        result.add(f"FY{int(match.group(1))}")
+    return result
 
 
 def _table_scale(context: str) -> float | None:
@@ -303,6 +313,69 @@ def _pair_for_metric(
     return prior, current, layout
 
 
+def _range_matches_record(candidate: _Range, record: GuidanceMetricRecord) -> bool:
+    if record.low is None or record.high is None:
+        return False
+    scale = max(abs(record.low), abs(record.high), abs(candidate.low), abs(candidate.high), 1.0)
+    tolerance = scale * 1e-9
+    return abs(candidate.low - record.low) <= tolerance and abs(candidate.high - record.high) <= tolerance
+
+
+def _metric_spans(text: str, metric: GuidanceMetric) -> list[tuple[int, int]]:
+    aliases = next(aliases for item, aliases in _METRIC_ALIASES if item is metric)
+    spans: list[tuple[int, int]] = []
+    for alias in sorted(aliases, key=len, reverse=True):
+        spans.extend(
+            (match.start(), match.end())
+            for match in re.finditer(rf"\b{re.escape(alias)}\b", text, re.I)
+        )
+    return sorted(spans)
+
+
+def _record_has_metric_local_range(record: GuidanceMetricRecord) -> bool:
+    """Require a numeric record to stay inside its financial-metric row.
+
+    The prose extractor operates on bounded sliding windows so that flattened
+    SEC tables remain readable.  A window can still contain several rows.  A
+    range is admissible only when at least one occurrence of the claimed metric
+    reaches that exact range without crossing another financial row label.
+
+    Structured comparative-table records already have explicit row binding and
+    are validated separately by ``_pair_for_metric``.
+    """
+    if record.extraction_method is ExtractionMethod.STRUCTURED or record.low is None or record.high is None:
+        return True
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return True
+
+    matching_ranges = [
+        candidate
+        for candidate in _ranges(text, record.metric, table_scale=None)
+        if _range_matches_record(candidate, record)
+    ]
+    if not matching_ranges:
+        # This guard only adjudicates explicit ranges.  Scalar and qualitative
+        # records continue through the existing evidence-hygiene pipeline.
+        return True
+
+    spans = _metric_spans(text, record.metric)
+    for candidate in matching_ranges:
+        for start, end in spans:
+            if candidate.start >= end:
+                distance = candidate.start - end
+                bridge = text[end:candidate.start]
+            elif start >= candidate.end:
+                distance = start - candidate.end
+                bridge = text[candidate.end:start]
+            else:
+                distance = 0
+                bridge = ""
+            if distance <= 260 and not _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                return True
+    return False
+
+
 def _basis(metric: GuidanceMetric, alias: str) -> str:
     if metric is GuidanceMetric.REVENUE:
         return "UNSPECIFIED"
@@ -347,9 +420,13 @@ def normalize_comparative_guidance_tables(
     for header in _COMPARATIVE_HEADER.finditer(text):
         context_start = max(0, header.start() - 360)
         context = text[context_start : header.end()]
-        fiscal_scope = _scope(context)
-        if fiscal_scope is None:
+        fiscal_scopes = _scopes(context)
+        # A single comparative header can include FY prior/current columns and
+        # a next-quarter column.  There is no deterministic two-column mapping
+        # in that shape, so do not normalize any row under an ambiguous scope.
+        if len(fiscal_scopes) != 1:
             continue
+        fiscal_scope = next(iter(fiscal_scopes))
         scale = _table_scale(context)
 
         # Bound the table window. Stop at the next comparative header when one
@@ -479,9 +556,30 @@ def extract_guidance_facts_table_normalized(
     rules_hash: str,
 ) -> GuidanceExtractionResult:
     base = extract_guidance_facts_round8(document, rules_hash=rules_hash)
+    rejected = list(base.rejected_candidates)
+    base_records: list[GuidanceMetricRecord] = []
+    for record in base.records:
+        if _record_has_metric_local_range(record):
+            base_records.append(record)
+        else:
+            rejected.append(
+                {
+                    "reason": "cross_metric_row_range_binding",
+                    "metric": record.metric.value,
+                    "fiscal_period": record.fiscal_period,
+                    "source_url": record.source_url,
+                    "evidence": (record.evidence_span or "")[:400],
+                }
+            )
+
     table_records = normalize_comparative_guidance_tables(document, rules_hash=rules_hash)
     if not table_records:
-        return base
+        policy = base.policy_evidence
+        if any(item.midpoint is not None for item in base_records):
+            policy = None
+        return base.model_copy(
+            update={"records": base_records, "policy_evidence": policy, "rejected_candidates": rejected}
+        )
 
     # The normalized comparative table is authoritative for the same document,
     # metric and fiscal scope. Remove generic prose/table records that can have
@@ -489,7 +587,7 @@ def extract_guidance_facts_table_normalized(
     authoritative = {(item.metric, item.fiscal_period) for item in table_records}
     records = [
         item
-        for item in base.records
+        for item in base_records
         if (item.metric, item.fiscal_period) not in authoritative
     ]
     records.extend(table_records)
@@ -508,4 +606,6 @@ def extract_guidance_facts_table_normalized(
     policy = base.policy_evidence
     if any(item.midpoint is not None for item in records):
         policy = None
-    return base.model_copy(update={"records": records, "policy_evidence": policy})
+    return base.model_copy(
+        update={"records": records, "policy_evidence": policy, "rejected_candidates": rejected}
+    )
