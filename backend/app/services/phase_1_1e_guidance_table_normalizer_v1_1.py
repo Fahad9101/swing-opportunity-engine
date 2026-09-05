@@ -129,6 +129,12 @@ _FINANCIAL_ROW_BOUNDARY = re.compile(
     r"gross\s+margin|operating\s+margin)\b",
     re.I,
 )
+_TABLE_SECTION_END = re.compile(
+    r"\b(?:reconciliations?(?:\s+and\s+other)?|quarterly\s+revenue|"
+    r"GAAP\s+to\s+non[-\s]?GAAP|non[-\s]?GAAP\s+reconciliations?|"
+    r"forward[-\s]?looking\s+statements?|conference\s+call|quarterly\s+dividend|appendix)\b",
+    re.I,
+)
 
 
 @dataclass(frozen=True)
@@ -435,6 +441,9 @@ def normalize_comparative_guidance_tables(
         table_end = min(len(text), header.end() + 2400)
         if next_header is not None:
             table_end = min(table_end, next_header.start())
+        section_end = _TABLE_SECTION_END.search(text, header.end(), table_end)
+        if section_end is not None:
+            table_end = section_end.start()
         table = text[header.end() : table_end]
         comparative_dates = _comparative_dates(
             text[header.start() : min(table_end, header.end() + 260)],

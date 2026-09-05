@@ -14,6 +14,7 @@ from app.services.phase_1_1e_guidance_table_normalizer_v1_1 import (
     _record_has_metric_local_range,
     _scopes,
     extract_guidance_facts_table_normalized,
+    normalize_comparative_guidance_tables,
 )
 
 
@@ -142,6 +143,26 @@ Adjusted EBITDA margin expansion +1 - 1.25pts +1 - 1.25pts 0.5 - 1pt""",
 
 def test_quarter_scope_with_embedded_fiscal_year_is_not_falsely_ambiguous():
     assert _scopes("Q2 fiscal year 2026 Previous Guidance Current Guidance") == {"Q2FY2026"}
+
+
+def test_comparative_table_stops_before_reconciliation_section():
+    document = _document(
+        "OPLN",
+        """Full-Year FY26 Guidance ($ in millions)
+Previous Guidance Revised Guidance
+Adjusted EBITDA $365 to $385 $385 to $400
+Operating Adjusted EPS $1.28 to $1.42 $1.40 to $1.50.
+Reconciliations and Other.
+Historical Free Cash Flow $100 to $120 $50 to $60.""",
+        when=NOW,
+        suffix="001",
+    )
+
+    records = normalize_comparative_guidance_tables(document, rules_hash=RULES_HASH)
+    assert any(row.metric is GuidanceMetric.EBITDA for row in records)
+    assert any(row.metric is GuidanceMetric.EPS for row in records)
+    assert not any(row.metric is GuidanceMetric.FCF for row in records)
+    assert not any(row.explicit_action is GuidanceAction.LOWER for row in records)
 
 
 def test_metric_local_range_remains_admissible():
