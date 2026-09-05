@@ -73,9 +73,8 @@ def test_insm_full_year_2026_arikayce_guidance_binds_to_fy2026():
         when=NOW,
         period="FY2025",  # deliberately wrong input to prove evidence wins
         evidence=(
-            "Insmed continues to anticipate full-year 2026 ARIKAYCE revenues "
-            "of $450 million to $470 million and reiterates its full-year 2026 "
-            "ARIKAYCE revenue guidance."
+            "Company Expects Full-Year 2026 BRINSUPRI Revenues to Be at Least $1 Billion; "
+            "Reiterates Full-Year 2026 ARIKAYCE Revenue Guidance of $450 Million to $470 Million."
         ),
         action=GuidanceAction.REAFFIRM,
     )
@@ -102,7 +101,7 @@ def test_insm_fy2025_and_fy2026_guidance_cannot_form_comparable_pair():
         period="FY2026",
         action=GuidanceAction.REAFFIRM,
         evidence=(
-            "Insmed reiterates full-year 2026 ARIKAYCE revenue guidance of "
+            "Reiterates Full-Year 2026 ARIKAYCE Revenue Guidance of "
             "$450 million to $470 million."
         ),
     )
