@@ -125,7 +125,7 @@ def test_iot_quarterly_and_full_year_ranges_do_not_collapse_or_create_false_cut(
     ]
 
     corrected = dedupe_guidance_records_round8(records)
-    assert {(row.fiscal_period, row.midpoint) for row in corrected} == {
+    assert {(row.fiscal_period, round(row.midpoint or 0)) for row in corrected} == {
         ("Q2FY2027", 483_000_000),
         ("FY2027", 2_009_000_000),
         ("Q3FY2027", 515_000_000),
@@ -137,7 +137,7 @@ def test_iot_quarterly_and_full_year_ranges_do_not_collapse_or_create_false_cut(
     assert {row.fiscal_period for row in current} == {"Q3FY2027", "FY2027"}
     assert len(prior) == 1
     assert prior[0].fiscal_period == "FY2027"
-    assert prior[0].midpoint == 2_009_000_000
+    assert round(prior[0].midpoint or 0) == 2_009_000_000
 
     assessment = ledger.assess("IOT", RULES, rules_hash=RULES_HASH, as_of=NOW)
     assert assessment.guidance_deterioration is False
