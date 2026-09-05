@@ -6,9 +6,11 @@ from app import cli_shadow_validation
 from app.domain.soe_v1_1 import GuidanceMetric
 from app.services import fact_extraction_service, shadow_enrichment_service
 from app.services.guidance_binding_patch_v1_1 import install_binding_patch
+from app.services.phase_1_1e_catalyst_evidence_round5_v1_1 import (
+    extract_sec_catalyst_candidates_round5,
+)
 from app.services.phase_1_1e_evidence_hygiene_round3_patch_v1_1 import (
     extract_hard_distress_flags_round3,
-    extract_sec_catalyst_candidates_round3,
 )
 from app.services.phase_1_1e_evidence_hygiene_round4_v1_1 import (
     dedupe_guidance_records_round4,
@@ -147,7 +149,7 @@ def install_guards() -> None:
     shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_round4
     shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records_round4
     shadow_enrichment_service.extract_hard_distress_flags = extract_hard_distress_flags_round3
-    shadow_enrichment_service.extract_sec_catalyst_candidates = extract_sec_catalyst_candidates_round3
+    shadow_enrichment_service.extract_sec_catalyst_candidates = extract_sec_catalyst_candidates_round5
     shadow_enrichment_service.ShadowStructuralEnricher.enrich = _guarded_enrich
     _guards_installed = True
 
