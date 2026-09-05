@@ -327,6 +327,26 @@ def _range_matches_record(candidate: _Range, record: GuidanceMetricRecord) -> bo
     return abs(candidate.low - record.low) <= tolerance and abs(candidate.high - record.high) <= tolerance
 
 
+def _unscaled_dollar_ranges(text: str) -> list[_Range]:
+    """Return explicit dollar ranges without guessing their economic scale.
+
+    These candidates are used only to validate whether a pre-existing prose
+    record crossed a metric-row boundary.  They are never emitted as guidance
+    facts, so matching raw values does not manufacture a unit or scale.
+    """
+    result: list[_Range] = []
+    for match in _DOLLAR_RANGE.finditer(text):
+        if not (match.group("d1") or match.group("d2")):
+            continue
+        if match.group("s1") or match.group("s2"):
+            continue
+        low = float(match.group("low").replace(",", ""))
+        high = float(match.group("high").replace(",", ""))
+        if low <= high:
+            result.append(_Range(low, high, "UNSCALED_USD", match.start(), match.end()))
+    return result
+
+
 def _metric_spans(text: str, metric: GuidanceMetric) -> list[tuple[int, int]]:
     aliases = next(aliases for item, aliases in _METRIC_ALIASES if item is metric)
     spans: list[tuple[int, int]] = []
@@ -355,9 +375,10 @@ def _record_has_metric_local_range(record: GuidanceMetricRecord) -> bool:
     if not text:
         return True
 
+    candidates = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
     matching_ranges = [
         candidate
-        for candidate in _ranges(text, record.metric, table_scale=None)
+        for candidate in candidates
         if _range_matches_record(candidate, record)
     ]
     if not matching_ranges:

@@ -165,6 +165,47 @@ Historical Free Cash Flow $100 to $120 $50 to $60.""",
     assert not any(row.explicit_action is GuidanceAction.LOWER for row in records)
 
 
+def test_tex_actual_fcf_and_adjacent_eps_range_do_not_create_false_fcf_cut():
+    prior = _extract(
+        "TEX",
+        """Terex Reports Second Quarter 2025 Results.
+Strong free cash flow generation of $78 million, up from $43 million in the prior year period.
+Maintaining full-year adjusted EPS outlook.
+Full-Year 2025 Outlook (in millions, except per share data)
+Net Sales $5,300 - $5,500
+EBITDA approximately $640
+EPS $4.70 - $5.10
+Free Cash Flow $300 - $350
+FCF Conversion greater than 120%.""",
+        when=NOW - timedelta(days=402),
+        suffix="001",
+    )
+    current = _extract(
+        "TEX",
+        """Terex Reports Third Quarter 2025 Results.
+Free Cash Flow of $130 million, cash conversion of 200%.
+Strong free cash flow generation of $130 million, up from $88 million in the prior year period.
+Maintaining full-year adjusted EPS outlook.
+Full-Year 2025 Outlook (in millions, except per share data)
+Net Sales $5,300 - $5,500
+EBITDA approximately $640
+EPS $4.70 - $5.10
+Free Cash Flow $300 - $350
+FCF Conversion greater than 120%.""",
+        when=NOW - timedelta(days=311),
+        suffix="002",
+    )
+
+    records = [*prior.records, *current.records]
+    assert not any(
+        row.metric is GuidanceMetric.EBITDA and row.low == 4.70 and row.high == 5.10
+        for row in records
+    )
+    assessment = GuidanceLedger(records).assess("TEX", RULES, rules_hash=RULES_HASH, as_of=NOW)
+    assert assessment.guidance_deterioration is not True
+    assert not assessment.rule_path.endswith("material_numeric_cut")
+
+
 def test_metric_local_range_remains_admissible():
     result = _extract(
         "SAFE",
