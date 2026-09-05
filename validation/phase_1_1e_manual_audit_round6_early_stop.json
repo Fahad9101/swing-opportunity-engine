@@ -1,0 +1,30 @@
+{
+  "phase": "1.1E",
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "run_id": 33947399771,
+  "head_sha": "c6e45edd00e5badffe398a3d0cec18437a9d2c76",
+  "audit_round": 6,
+  "status": "FAIL",
+  "early_stop": true,
+  "sample_completed": false,
+  "numerical_concordance": null,
+  "systematic_error": true,
+  "blocking_domain": "guidance",
+  "blocking_ticker": "VG",
+  "engine_classification": "DETERIORATED",
+  "engine_rule_path": "guidance_v1_1.material_numeric_cut",
+  "engine_metric": "revenue",
+  "manual_classification": "NOT_DETERIORATED_OR_UNKNOWN_BUT_NOT_DETERIORATED",
+  "defect_family": "historical_actual_metric_borrowed_forward_guidance_context",
+  "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/2007855/000200785526000042/vgincq12026earningsrelease.htm",
+    "https://www.sec.gov/Archives/edgar/data/2007855/000200785526000063/vgincq22026earningsrelease.htm"
+  ],
+  "verified_economic_fact": "Full-year 2026 Consolidated Adjusted EBITDA guidance increased from $8.2B-$8.5B to $8.7B-$9.1B; reported quarterly revenue is historical actual data, not full-year revenue guidance.",
+  "governance": {
+    "active_model": "SOE-1.0.0",
+    "promote_candidate": false,
+    "merge_pr_16": false,
+    "milestone_3_unlocked": false
+  }
+}
