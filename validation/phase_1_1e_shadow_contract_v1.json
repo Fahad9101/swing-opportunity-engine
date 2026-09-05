@@ -1,0 +1,62 @@
+{
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "phase": "1.1E",
+  "baseline_model": "SOE-1.0.0",
+  "candidate_model": "SOE-1.1.0",
+  "provider": "free_public",
+  "snapshot_policy": "Run the frozen SOE-1.0.0 free/public scan once, persist its normalized inputs, then replay both models from that same captured snapshot. Do not obtain a second market snapshot for SOE-1.1.0.",
+  "governance": {
+    "freeze_universe_and_gate_thresholds": true,
+    "freeze_technical_rules": true,
+    "freeze_scanner_thresholds": true,
+    "freeze_score_weights": true,
+    "freeze_penalties": true,
+    "freeze_market_regime_rules": true,
+    "missing_evidence_remains_null": true,
+    "no_threshold_tuning_after_results": true,
+    "do_not_modify_investment_execution_engine_v1_7_2": true,
+    "milestone_3_blocked_until_pass": true
+  },
+  "allowed_candidate_model_changes": [
+    "FundamentalSnapshot.guidance_deterioration",
+    "FundamentalSnapshot.balance_sheet_distressed",
+    "Catalyst.materiality",
+    "Catalyst.surprise_potential"
+  ],
+  "acceptance_gates": {
+    "universe_equality_required": true,
+    "universal_gate_equality_required": true,
+    "technical_snapshot_equality_required": true,
+    "rerating_condition_equality_required": true,
+    "minimum_materiality_coverage_with_sufficient_evidence": 0.90,
+    "minimum_surprise_coverage_with_sufficient_evidence": 0.80,
+    "minimum_guidance_classification_coverage_with_comparable_guidance": 0.80,
+    "minimum_nonfinancial_distress_coverage_with_sufficient_inputs": 0.90,
+    "manual_audit_minimum_sample": 100,
+    "manual_audit_minimum_rule_concordance": 0.95,
+    "systematic_manual_audit_error_blocks_activation": true
+  },
+  "required_report": [
+    "baseline_and_candidate_rules_hashes",
+    "captured_snapshot_fingerprint",
+    "universe_and_universal_gate_equality",
+    "technical_snapshot_equality",
+    "rerating_scanner_condition_equality",
+    "growth_pullback_newly_resolved_true_false_null_by_field",
+    "biotech_catalyst_qualification_changes_with_evidence_paths",
+    "catalyst_candidates_scoring_ready_count_and_score_distribution",
+    "fully_scored_opportunity_count_baseline_and_candidate",
+    "top_20_candidate_complete_score_list",
+    "per_name_component_delta_baseline_to_candidate",
+    "provider_and_data_errors",
+    "null_reason_distribution",
+    "manual_audit_sample_at_least_100",
+    "manual_audit_rule_concordance",
+    "final_decision_pass_conditional_pass_or_fail"
+  ],
+  "decision_policy": {
+    "PASS": "All required acceptance gates pass. SOE-1.1.0 may be recommended as the discovery model and Milestone 3 may start only after the activation change is separately approved.",
+    "CONDITIONAL_PASS": "Deterministic behavior is sound but one structural coverage gate remains below target. Keep Milestone 3 blocked unless governance explicitly accepts the unresolved field.",
+    "FAIL": "Rule integrity, data integrity, coverage, or audit concordance is inadequate. Keep SOE-1.0.0 active and Milestone 3 blocked."
+  }
+}

@@ -10,6 +10,11 @@ os.environ["PROVIDER_NAME"] = "fixture"
 from app.core.config import load_rules  # noqa: E402
 from app.domain.enums import AssetType  # noqa: E402
 from app.domain.schemas import Instrument, MarketSnapshot  # noqa: E402
+from app.services.guidance_binding_patch_v1_1 import install_binding_patch  # noqa: E402
+
+# Install only the Phase 1.1E evidence-binding repair. This does not patch the
+# frozen SOE rules or the base production guidance extractor used by legacy tests.
+install_binding_patch()
 
 
 @pytest.fixture(scope="session")

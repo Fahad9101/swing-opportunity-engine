@@ -1,0 +1,59 @@
+{
+  "phase": "1.1E",
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "workflow_run_id": 33874931056,
+  "head_sha": "446d4cb059d5c8993d9ed16fe3a48f702060d9c2",
+  "automated_decision": "PENDING_MANUAL_AUDIT",
+  "manual_audit": {
+    "sample_size": 100,
+    "minimum_required": 100,
+    "minimum_rule_concordance": 0.95,
+    "concordant": 89,
+    "discordant": 11,
+    "rule_concordance": 0.89,
+    "domain_results": {
+      "balance_sheet_distress": {"concordant": 22, "sample": 22, "rate": 1.0},
+      "catalyst_materiality": {"concordant": 21, "sample": 21, "rate": 1.0},
+      "catalyst_surprise": {"concordant": 21, "sample": 22, "rate": 0.9545},
+      "guidance": {"concordant": 25, "sample": 35, "rate": 0.7143}
+    },
+    "systematic_error_categories": {
+      "guidance_direction_or_numeric_binding": ["CLS", "CPAY", "MWH", "VG", "DUOL"],
+      "historical_actual_or_non_guidance_bound_as_guidance": ["HPE", "SMCI", "IESC"],
+      "fiscal_period_comparability_binding": ["TTMI"],
+      "no_guidance_policy_scope": ["PR"],
+      "catalyst_primary_evidence_type_validation": ["ILMN"]
+    },
+    "discrepancies": [
+      {"ticker":"CLS","domain":"guidance","manual_concordant":false,"manual_notes":"Primary releases increased FY2026 outlook from revenue $19.0B / adjusted EPS $10.15 to $20.5B / $11.30, but engine classified a material revenue+EPS cut."},
+      {"ticker":"TTMI","domain":"guidance","manual_concordant":false,"manual_notes":"Cited releases provide Q2 then Q3 quarterly guidance and only later introduce quantitative full-year FY2026 guidance; the claimed same-period comparable set is not substantiated. Expected UNKNOWN."},
+      {"ticker":"PR","domain":"guidance","manual_concordant":false,"manual_notes":"Q2 release contains explicit quantitative Updated Full Year Guidance. Engine generalized a reconciliation-specific no-guidance disclaimer into a company-wide standing policy."},
+      {"ticker":"HPE","domain":"guidance","manual_concordant":false,"manual_notes":"Cited 10-Q evidence is historical actual/accounting-guidance language rather than a verified same-period quantitative management-guidance pair. Expected UNKNOWN."},
+      {"ticker":"CPAY","domain":"guidance","manual_concordant":false,"manual_notes":"Q1 FY2026 revenue outlook $5.250–5.330B was followed by Q2 explicitly raising full-year outlook to $5.290–5.330B; engine classified a revenue cut."},
+      {"ticker":"MWH","domain":"guidance","manual_concordant":false,"manual_notes":"FY2026 revenue/EBITDA increased from $3.720–3.820B / $435–455M to $3.870–3.970B / $485–505M; engine classified deterioration."},
+      {"ticker":"VG","domain":"guidance","manual_concordant":false,"manual_notes":"FY2026 EBITDA increased from $8.2–8.5B to $8.7–9.1B; engine classified revenue/EBITDA deterioration."},
+      {"ticker":"SMCI","domain":"guidance","manual_concordant":false,"manual_notes":"Prior FY2026 net-sales guidance was $38.9–40.4B; later 10-K reports actual FY2026 revenue $39.063B rather than new forward guidance. Engine compared guidance with a historical actual and called it a cut."},
+      {"ticker":"DUOL","domain":"guidance","manual_concordant":false,"manual_notes":"FY2026 revenue/EBITDA increased from about $1.205B / $310M to $1.207B / $320M; engine classified EBITDA deterioration."},
+      {"ticker":"IESC","domain":"guidance","manual_concordant":false,"manual_notes":"Cited Q1 FY2025/FY2026 releases contain historical revenue results and qualitative outlook, not same-period quantitative management revenue guidance. Expected UNKNOWN."},
+      {"ticker":"ILMN","domain":"catalyst_surprise","manual_concordant":false,"manual_notes":"The cited primary earnings evidence is SEC Exhibit 10.1, an August 13, 2026 CREDIT AGREEMENT, not an earnings-results source. Surprise promotion is therefore unsupported."}
+    ]
+  },
+  "final_decision": "FAIL",
+  "activation_allowed": false,
+  "milestone_3_unlocked": false,
+  "governance": {
+    "soe_1_0_remains_active": true,
+    "soe_1_1_promoted": false,
+    "pr_16_should_remain_unmerged": true,
+    "reason": "Manual rule concordance is below 95% and systematic evidence/binding errors remain."
+  },
+  "repair_scope": [
+    "Strictly separate historical actuals from management guidance.",
+    "Require same fiscal period and same supported metric/basis before forming comparable guidance pairs.",
+    "Fix direction/current-vs-prior binding for quantitative guidance comparisons.",
+    "Scope no-guidance policy language to company-wide guidance; do not generalize reconciliation-specific disclaimers.",
+    "Validate catalyst primary-evidence document type/content before promoting earnings evidence.",
+    "Add regression tests for all 11 fresh audit discrepancies, then rerun the complete Phase 1.1E validation on a new immutable snapshot.",
+    "Do not change thresholds, scanner gates, score weights, penalties, market-regime logic, SOE-1.0.0, or IEE v1.7.2."
+  ]
+}
