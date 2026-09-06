@@ -11,6 +11,7 @@ from app.domain.soe_v1_1 import (
 )
 from app.services.guidance_ledger_service import GuidanceLedger
 from app.services.phase_1_1e_guidance_table_normalizer_v1_1 import (
+    _metric_local_eps_basis,
     _record_has_metric_local_range,
     _scopes,
     extract_guidance_facts_table_normalized,
@@ -204,6 +205,80 @@ FCF Conversion greater than 120%.""",
     assessment = GuidanceLedger(records).assess("TEX", RULES, rules_hash=RULES_HASH, as_of=NOW)
     assert assessment.guidance_deterioration is not True
     assert not assessment.rule_path.endswith("material_numeric_cut")
+
+
+def test_etn_gaap_eps_cut_is_not_masked_by_adjacent_adjusted_eps_row():
+    prior = _extract(
+        "ETN",
+        """Guidance
+For the full year 2026, the company anticipates:
+Earnings per share between $11.57 and $12.07
+Adjusted earnings per share between $13.00 and $13.50
+For the first quarter of 2026, the company anticipates:
+Adjusted earnings per share between $2.75 and $2.85.""",
+        when=NOW - timedelta(days=212),
+        suffix="001",
+    )
+    current = _extract(
+        "ETN",
+        """Guidance
+For the full year 2026, the company anticipates:
+Earnings per share between $10.36 and $10.56
+Adjusted earnings per share between $13.40 and $13.60
+For the third quarter of 2026, the company anticipates:
+Adjusted earnings per share between $3.50 and $3.60.""",
+        when=NOW - timedelta(days=36),
+        suffix="002",
+    )
+
+    prior_gaap = [
+        row
+        for row in prior.records
+        if row.metric is GuidanceMetric.EPS
+        and row.fiscal_period == "FY2026"
+        and row.accounting_basis == "UNSPECIFIED"
+    ]
+    current_gaap = [
+        row
+        for row in current.records
+        if row.metric is GuidanceMetric.EPS
+        and row.fiscal_period == "FY2026"
+        and row.accounting_basis == "UNSPECIFIED"
+    ]
+    assert [(row.low, row.high) for row in prior_gaap] == [(11.57, 12.07)]
+    assert [(row.low, row.high) for row in current_gaap] == [(10.36, 10.56)]
+
+    assessment = GuidanceLedger([*prior.records, *current.records]).assess(
+        "ETN", RULES, rules_hash=RULES_HASH, as_of=NOW
+    )
+    assert assessment.guidance_deterioration is True
+    assert assessment.rule_path == "guidance_v1_1.material_numeric_cut"
+    assert any(
+        delta.accounting_basis == "UNSPECIFIED" and delta.material_cut
+        for delta in assessment.metric_deltas
+    )
+
+
+def test_metric_local_eps_basis_preserves_adjusted_row():
+    adjusted = GuidanceMetricRecord(
+        rules_hash=RULES_HASH,
+        ticker="SAFE",
+        fiscal_period="FY2026",
+        metric=GuidanceMetric.EPS,
+        accounting_basis="ADJUSTED",
+        low=13.40,
+        high=13.60,
+        unit="USD/share",
+        source="SEC EDGAR",
+        source_url="https://www.sec.gov/Archives/safe.htm",
+        source_timestamp=NOW,
+        extraction_method=ExtractionMethod.DETERMINISTIC_TEXT,
+        evidence_span="Adjusted earnings per share expected between $13.40 and $13.60.",
+        as_of=NOW,
+        fetched_at=NOW,
+    )
+
+    assert _metric_local_eps_basis(adjusted).accounting_basis == "ADJUSTED"
 
 
 def test_metric_local_range_remains_admissible():

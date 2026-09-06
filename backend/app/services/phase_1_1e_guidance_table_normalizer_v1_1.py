@@ -98,6 +98,7 @@ _METRIC_ALIASES: list[tuple[GuidanceMetric, tuple[str, ...]]] = [
             "adjusted diluted earnings per share",
             "adjusted earnings per share",
             "diluted earnings per share",
+            "earnings per share",
             "adjusted diluted eps",
             "adjusted eps",
             "diluted eps",
@@ -358,6 +359,81 @@ def _metric_spans(text: str, metric: GuidanceMetric) -> list[tuple[int, int]]:
     return sorted(spans)
 
 
+def _metric_local_eps_basis(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
+    """Bind an EPS range to its own adjusted or unqualified row label.
+
+    Some releases place GAAP and adjusted EPS guidance next to each other.  A
+    broad extraction window can see the word ``adjusted`` from the adjacent
+    row and assign it to the unqualified EPS range.  Rebind only when the exact
+    persisted range and a local EPS label make the basis deterministic.
+    """
+    if (
+        record.metric is not GuidanceMetric.EPS
+        or record.extraction_method is ExtractionMethod.STRUCTURED
+        or record.low is None
+        or record.high is None
+    ):
+        return record
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return record
+
+    adjusted_spans: list[tuple[int, int, str]] = []
+    for pattern in (
+        r"\badjusted\s+diluted\s+earnings\s+per\s+share\b",
+        r"\badjusted\s+earnings\s+per\s+share\b",
+        r"\badjusted\s+diluted\s+eps\b",
+        r"\badjusted\s+eps\b",
+    ):
+        adjusted_spans.extend(
+            (match.start(), match.end(), "ADJUSTED")
+            for match in re.finditer(pattern, text, re.I)
+        )
+
+    unqualified_spans: list[tuple[int, int, str]] = []
+    for pattern in (
+        r"\bdiluted\s+earnings\s+per\s+share\b",
+        r"\bearnings\s+per\s+share\b",
+        r"\bdiluted\s+eps\b",
+        r"\beps\b",
+    ):
+        for match in re.finditer(pattern, text, re.I):
+            if any(start <= match.start() and match.end() <= end for start, end, _ in adjusted_spans):
+                continue
+            unqualified_spans.append((match.start(), match.end(), "UNSPECIFIED"))
+
+    ranges = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    local: list[tuple[int, int, str]] = []
+    for candidate in ranges:
+        if not _range_matches_record(candidate, record):
+            continue
+        for start, end, basis in [*adjusted_spans, *unqualified_spans]:
+            if candidate.start >= end:
+                direction_priority = 0
+                distance = candidate.start - end
+                bridge = text[end:candidate.start]
+            elif start >= candidate.end:
+                direction_priority = 1
+                distance = start - candidate.end
+                bridge = text[candidate.end:start]
+            else:
+                direction_priority = 0
+                distance = 0
+                bridge = ""
+            if distance <= 260 and not _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                local.append((direction_priority, distance, basis))
+
+    if not local:
+        return record
+    # Prose guidance states the metric before its range.  Prefer that binding
+    # over a zero-distance label that begins immediately after the range and
+    # therefore belongs to the next flattened row.
+    basis = min(local, key=lambda item: (item[0], item[1]))[2]
+    if basis == record.accounting_basis:
+        return record
+    return record.model_copy(update={"accounting_basis": basis})
+
+
 def _record_has_metric_local_range(record: GuidanceMetricRecord) -> bool:
     """Require a numeric record to stay inside its financial-metric row.
 
@@ -588,7 +664,8 @@ def extract_guidance_facts_table_normalized(
     base = extract_guidance_facts_round8(document, rules_hash=rules_hash)
     rejected = list(base.rejected_candidates)
     base_records: list[GuidanceMetricRecord] = []
-    for record in base.records:
+    for original_record in base.records:
+        record = _metric_local_eps_basis(original_record)
         if _record_has_metric_local_range(record):
             base_records.append(record)
         else:
