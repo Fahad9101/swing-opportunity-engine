@@ -80,6 +80,6 @@ def test_mod_interest_expense_range_cannot_be_bound_to_adjusted_ebitda():
         for record in extraction.records
     )
     assert any(
-        item["reason"] == "cross_metric_row_range_binding"
+        item["reason"] == "cross_metric_or_period_row_binding"
         for item in extraction.rejected_candidates
     )

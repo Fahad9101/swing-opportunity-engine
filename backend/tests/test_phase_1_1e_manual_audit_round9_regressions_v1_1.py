@@ -75,7 +75,10 @@ Bookings between $5,870 million and $5,970 million.""",
         row.metric is GuidanceMetric.REVENUE and row.midpoint in forbidden
         for row in current.records
     )
-    assert any(item["reason"] == "cross_metric_row_range_binding" for item in current.rejected_candidates)
+    assert any(
+        item["reason"] == "cross_metric_or_period_row_binding"
+        for item in current.rejected_candidates
+    )
 
     records = [*prior.records, *current.records]
     assessment = GuidanceLedger(records).assess("RBLX", RULES, rules_hash=RULES_HASH, as_of=NOW)

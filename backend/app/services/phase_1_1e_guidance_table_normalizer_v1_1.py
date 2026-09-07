@@ -116,6 +116,11 @@ _DOLLAR_RANGE = re.compile(
     r"(?P<s2>billions?|millions?|thousands?|bn|mm|[bmk])?",
     re.I,
 )
+_DOLLAR_SCALAR = re.compile(
+    r"(?P<dollar>\$)?\s*(?P<value>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<scale>billions?|millions?|thousands?|bn|mm|[bmk])?\b",
+    re.I,
+)
 _PERCENT_RANGE = re.compile(
     r"(?P<low>\d{1,3}(?:\.\d+)?)\s*%\s*(?:to|through|and|-|–|—)\s*"
     r"(?P<high>\d{1,3}(?:\.\d+)?)\s*%",
@@ -128,7 +133,7 @@ _FINANCIAL_ROW_BOUNDARY = re.compile(
     r"depreciation(?:\s+and\s+amortization)?|amortization|"
     r"cash(?:\s+and\s+cash\s+equivalents)?\s+(?:provided\s+by|from)\s+operating\s+activities|"
     r"capital\s+expenditures?|adjusted\s+ebitda|ebitda|free\s+cash\s+flow|fcf|"
-    r"total\s+revenue|revenue|net\s+sales|sales|adjusted\s+eps|diluted\s+eps|eps|"
+    r"total\s+revenues?|revenues?|net\s+sales|sales|adjusted\s+eps|diluted\s+eps|eps|"
     r"gross\s+margin|operating\s+margin)\b",
     re.I,
 )
@@ -350,6 +355,17 @@ def _unscaled_dollar_ranges(text: str) -> list[_Range]:
     return result
 
 
+def _scalar_amounts(text: str) -> list[_Range]:
+    """Return explicit monetary scalars for metric-locality validation only."""
+    result: list[_Range] = []
+    for match in _DOLLAR_SCALAR.finditer(text):
+        if not (match.group("dollar") or match.group("scale")):
+            continue
+        value = _amount(match.group("value"), match.group("scale"), None)
+        result.append(_Range(value, value, "SCALAR_USD", match.start(), match.end()))
+    return result
+
+
 def _metric_spans(text: str, metric: GuidanceMetric) -> list[tuple[int, int]]:
     aliases = next(aliases for item, aliases in _METRIC_ALIASES if item is metric)
     spans: list[tuple[int, int]] = []
@@ -359,6 +375,142 @@ def _metric_spans(text: str, metric: GuidanceMetric) -> list[tuple[int, int]]:
             for match in re.finditer(rf"\b{re.escape(alias)}\b", text, re.I)
         )
     return sorted(spans)
+
+
+def _period_spans(text: str) -> list[tuple[int, int, str]]:
+    """Return non-overlapping explicit fiscal-period mentions with locations."""
+    raw: list[tuple[int, int, str, int]] = []
+    for match in _QUARTER_SCOPE.finditer(text):
+        raw.append((match.start(), match.end(), f"Q{match.group(1)}FY{_normalize_year(match.group(2))}", 0))
+    for match in _QUARTER_WORD_SCOPE.finditer(text):
+        raw.append(
+            (
+                match.start(),
+                match.end(),
+                f"Q{_QUARTER_WORDS[match.group(1).lower()]}FY{_normalize_year(match.group(2))}",
+                0,
+            )
+        )
+    for match in _ANNUAL_SCOPE.finditer(text):
+        raw.append((match.start(), match.end(), f"FY{_normalize_year(match.group(1))}", 1))
+    for match in _YEAR_ENDING_SCOPE.finditer(text):
+        raw.append((match.start(), match.end(), f"FY{int(match.group(1))}", 1))
+    raw.sort(key=lambda item: (item[0], item[3], -(item[1] - item[0])))
+    chosen: list[tuple[int, int, str]] = []
+    for start, end, period, _ in raw:
+        if any(start < old_end and end > old_start for old_start, old_end, _ in chosen):
+            continue
+        chosen.append((start, end, period))
+    return sorted(chosen)
+
+
+def _metric_local_fiscal_period(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
+    """Bind a numeric record to the period attached to its own metric/range row.
+
+    Earnings-release headlines can place a forward FY2026 range immediately
+    before a different row such as "Total Company Revenues ... Full-Year 2025."
+    A nearest-period search can then borrow the following historical period.
+    Prefer a preceding period whose bridge contains the claimed metric; accept
+    a following period only when no intervening financial row begins.
+    """
+    if (
+        record.extraction_method is ExtractionMethod.STRUCTURED
+        or record.low is None
+        or record.high is None
+    ):
+        return record
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return record
+
+    numeric = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    if record.low == record.high:
+        numeric.extend(_scalar_amounts(text))
+    matching = [candidate for candidate in numeric if _range_matches_record(candidate, record)]
+    periods = _period_spans(text)
+    metric_spans = _metric_spans(text, record.metric)
+    local: list[tuple[int, int, str]] = []
+
+    for candidate in matching:
+        for start, end, period in periods:
+            if end <= candidate.start:
+                bridge = text[end:candidate.start]
+                contained_metrics = [span for span in metric_spans if span[0] >= end and span[1] <= candidate.start]
+                if not contained_metrics:
+                    continue
+                metric_end = max(span[1] for span in contained_metrics)
+                if _FINANCIAL_ROW_BOUNDARY.search(text[metric_end:candidate.start]):
+                    continue
+                distance = candidate.start - end
+                direction = 0
+            elif start >= candidate.end:
+                bridge = text[candidate.end:start]
+                if _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                    continue
+                preceding_metrics = [span for span in metric_spans if span[1] <= candidate.start]
+                if not preceding_metrics:
+                    continue
+                metric_end = max(span[1] for span in preceding_metrics)
+                if candidate.start - metric_end > 260:
+                    continue
+                if _FINANCIAL_ROW_BOUNDARY.search(text[metric_end:candidate.start]):
+                    continue
+                distance = start - candidate.end
+                direction = 1
+            else:
+                continue
+            if distance <= 320:
+                local.append((direction, distance, period))
+
+    if not local:
+        return record
+    period = min(local, key=lambda item: (item[0], item[1]))[2]
+    if period == record.fiscal_period:
+        return record
+    return record.model_copy(update={"fiscal_period": period})
+
+
+def _record_has_metric_local_period(record: GuidanceMetricRecord) -> bool:
+    """Require the persisted fiscal period to remain attached to its value row."""
+    if record.extraction_method is ExtractionMethod.STRUCTURED or record.low is None or record.high is None:
+        return True
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return True
+    periods = _period_spans(text)
+    if not periods:
+        return True
+    numeric = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    if record.low == record.high:
+        numeric.extend(_scalar_amounts(text))
+    matching = [candidate for candidate in numeric if _range_matches_record(candidate, record)]
+    if not matching:
+        return True
+    metric_spans = _metric_spans(text, record.metric)
+    for candidate in matching:
+        for start, end, period in periods:
+            if period != record.fiscal_period:
+                continue
+            if end <= candidate.start:
+                contained = [span for span in metric_spans if span[0] >= end and span[1] <= candidate.start]
+                if not contained:
+                    continue
+                metric_end = max(span[1] for span in contained)
+                if candidate.start - end <= 320 and not _FINANCIAL_ROW_BOUNDARY.search(
+                    text[metric_end:candidate.start]
+                ):
+                    return True
+            elif start >= candidate.end:
+                bridge = text[candidate.end:start]
+                preceding = [span for span in metric_spans if span[1] <= candidate.start]
+                if not preceding or _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                    continue
+                metric_end = max(span[1] for span in preceding)
+                if candidate.start - metric_end <= 260 and not _FINANCIAL_ROW_BOUNDARY.search(
+                    text[metric_end:candidate.start]
+                ):
+                    return True
+    return False
 
 
 def _metric_local_eps_basis(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
@@ -454,14 +606,26 @@ def _record_has_metric_local_range(record: GuidanceMetricRecord) -> bool:
         return True
 
     candidates = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    if record.low == record.high:
+        candidates.extend(_scalar_amounts(text))
     matching_ranges = [
         candidate
         for candidate in candidates
         if _range_matches_record(candidate, record)
     ]
     if not matching_ranges:
-        # This guard only adjudicates explicit ranges.  Scalar and qualitative
-        # records continue through the existing evidence-hygiene pipeline.
+        # A persisted monetary scalar must be visible in its own evidence span.
+        # Otherwise a distant reconciliation-table cell can become the value
+        # while the retained span shows only unrelated rows.
+        if record.low == record.high and record.metric in {
+            GuidanceMetric.REVENUE,
+            GuidanceMetric.EBITDA,
+            GuidanceMetric.FCF,
+            GuidanceMetric.EPS,
+        }:
+            return False
+        # Non-monetary scalar and qualitative records continue through the
+        # existing evidence-hygiene pipeline.
         return True
 
     spans = _metric_spans(text, record.metric)
@@ -473,6 +637,15 @@ def _record_has_metric_local_range(record: GuidanceMetricRecord) -> bool:
             elif start >= candidate.end:
                 distance = start - candidate.end
                 bridge = text[candidate.end:start]
+                # If a following metric label has its own nearby number, that
+                # row owns the following value and cannot borrow this range.
+                following_values = [
+                    item
+                    for item in [*_ranges(text[end : end + 180], record.metric, None), *_scalar_amounts(text[end : end + 180])]
+                    if item.start <= 120
+                ]
+                if following_values:
+                    continue
             else:
                 distance = 0
                 bridge = ""
@@ -667,13 +840,14 @@ def extract_guidance_facts_table_normalized(
     rejected = list(base.rejected_candidates)
     base_records: list[GuidanceMetricRecord] = []
     for original_record in base.records:
-        record = _metric_local_eps_basis(original_record)
-        if _record_has_metric_local_range(record):
+        record = _metric_local_fiscal_period(original_record)
+        record = _metric_local_eps_basis(record)
+        if _record_has_metric_local_period(record) and _record_has_metric_local_range(record):
             base_records.append(record)
         else:
             rejected.append(
                 {
-                    "reason": "cross_metric_row_range_binding",
+                    "reason": "cross_metric_or_period_row_binding",
                     "metric": record.metric.value,
                     "fiscal_period": record.fiscal_period,
                     "source_url": record.source_url,
