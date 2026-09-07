@@ -43,6 +43,12 @@ _FULL_YEAR_HEADER = re.compile(
     rf"\b(?:FY|fiscal\s+year|full[-\s]?year)\s*(20\d{{2}}).{{0,35}}\b{_GUIDANCE_HEADER}\b",
     re.I | re.S,
 )
+_ACTION_YEAR_GUIDANCE = re.compile(
+    rf"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|rais(?:e|es|ed|ing)|"
+    rf"increas(?:e|es|ed|ing)|maintain(?:s|ed|ing)?|updat(?:e|es|ed|ing)|"
+    rf"provid(?:e|es|ed|ing)|expect(?:s|ed|ing)?)\s+(20\d{{2}}).{{0,45}}\b{_GUIDANCE_HEADER}\b",
+    re.I | re.S,
+)
 _MIXED_GAAP_NON_GAAP = re.compile(r"\bGAAP\s*:.*\b(?:non[-\s]?GAAP|adjusted)\s*:", re.I | re.S)
 
 
@@ -75,6 +81,8 @@ def _explicit_guidance_periods(text: str) -> set[str]:
         prefix = text[max(0, match.start() - 36) : match.start()]
         if re.search(r"\b(?:first|second|third|fourth)\s+quarter\s*$|\bQ[1-4]\s*$", prefix, re.I):
             continue
+        periods.add(f"FY{int(match.group(1))}")
+    for match in _ACTION_YEAR_GUIDANCE.finditer(text):
         periods.add(f"FY{int(match.group(1))}")
     return periods
 

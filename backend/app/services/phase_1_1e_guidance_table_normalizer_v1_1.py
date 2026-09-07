@@ -39,9 +39,14 @@ from app.services.phase_1_1e_guidance_scope_guard_round8_v1_1 import extract_gui
 # No SOE threshold, score, weight, scanner, classifier, technical rule,
 # catalyst rule, market-regime rule, SOE-1.0.0 rule, or IEE logic is changed.
 
-_COMPARATIVE_HEADER = re.compile(
+_COMPARATIVE_HEADER_PRIOR_FIRST = re.compile(
     r"\b(?:prior|previous)\s+(?:guide|guidance)\b.{0,140}?"
     r"\b(?:updated|current|revised)\s+(?:guide|guidance)\b",
+    re.I | re.S,
+)
+_COMPARATIVE_HEADER_UPDATED_FIRST = re.compile(
+    r"\b(?:updated|current|revised)\s+(?:guide|guidance)\b.{0,140}?"
+    r"\b(?:prior|previous)\s+(?:guide|guidance)\b",
     re.I | re.S,
 )
 _TABLE_SCALE = re.compile(
@@ -69,6 +74,13 @@ _ANNUAL_SCOPE = re.compile(
 )
 _YEAR_ENDING_SCOPE = re.compile(
     r"\byear\s+ending\s+[A-Za-z]+\s+\d{1,2},?\s*(20\d{2})\b",
+    re.I,
+)
+_ACTION_GUIDANCE_YEAR_SCOPE = re.compile(
+    r"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|rais(?:e|es|ed|ing)|"
+    r"increas(?:e|es|ed|ing)|maintain(?:s|ed|ing)?|updat(?:e|es|ed|ing)|"
+    r"provid(?:e|es|ed|ing)|expect(?:s|ed|ing)?)\s+(20\d{2})\s+"
+    r"(?:[A-Za-z][A-Za-z-]*\s+){0,5}(?:guidance|outlook)\b",
     re.I,
 )
 _QUARTER_WORDS = {"first": 1, "second": 2, "third": 3, "fourth": 4}
@@ -105,7 +117,21 @@ _METRIC_ALIASES: list[tuple[GuidanceMetric, tuple[str, ...]]] = [
             "eps",
         ),
     ),
-    (GuidanceMetric.REVENUE, ("consolidated net sales", "total net sales", "net sales", "total revenue", "revenue")),
+    (
+        GuidanceMetric.REVENUE,
+        (
+            "consolidated net revenues",
+            "consolidated net sales",
+            "total net revenues",
+            "total net sales",
+            "net revenues",
+            "net sales",
+            "total revenues",
+            "total revenue",
+            "revenues",
+            "revenue",
+        ),
+    ),
 ]
 
 _DOLLAR_RANGE = re.compile(
@@ -119,6 +145,17 @@ _DOLLAR_RANGE = re.compile(
 _DOLLAR_SCALAR = re.compile(
     r"(?P<dollar>\$)?\s*(?P<value>\d[\d,]*(?:\.\d+)?)\s*"
     r"(?P<scale>billions?|millions?|thousands?|bn|mm|[bmk])?\b",
+    re.I,
+)
+_VALUE_BEFORE_GUIDANCE_ROW = re.compile(
+    r"(?P<d1>\$)?\s*(?P<low>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s1>billions?|millions?|thousands?|bn|mm|[bmk])?\s*"
+    r"(?:to|through|and|-|–|—)\s*"
+    r"(?P<d2>\$)?\s*(?P<high>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s2>billions?|millions?|thousands?|bn|mm|[bmk])?\s+"
+    r"(?P<year>20\d{2})\s+"
+    r"(?P<label>(?:adjusted\s+)?(?:net\s+)?(?:revenues?|sales|ebitda|eps|earnings\s+per\s+share|free\s+cash\s+flow))\s+"
+    r"(?:guidance|outlook)\b",
     re.I,
 )
 _PERCENT_RANGE = re.compile(
@@ -162,6 +199,15 @@ class _Range:
     end: int
 
 
+def _comparative_headers(text: str) -> list[tuple[re.Match[str], bool]]:
+    """Return comparative headers and whether updated/current columns come first."""
+    headers = [
+        *((match, False) for match in _COMPARATIVE_HEADER_PRIOR_FIRST.finditer(text)),
+        *((match, True) for match in _COMPARATIVE_HEADER_UPDATED_FIRST.finditer(text)),
+    ]
+    return sorted(headers, key=lambda item: item[0].start())
+
+
 def _normalize_year(token: str) -> int:
     year = int(token)
     return year + 2000 if year < 100 else year
@@ -182,6 +228,8 @@ def _scopes(context: str) -> set[str]:
             continue
         result.add(f"FY{_normalize_year(match.group(1))}")
     for match in _YEAR_ENDING_SCOPE.finditer(context):
+        result.add(f"FY{int(match.group(1))}")
+    for match in _ACTION_GUIDANCE_YEAR_SCOPE.finditer(context):
         result.add(f"FY{int(match.group(1))}")
     return result
 
@@ -204,7 +252,12 @@ def _parse_exact_date(token: str, *, tzinfo) -> datetime | None:
     return None
 
 
-def _comparative_dates(context: str, document_timestamp: datetime) -> tuple[datetime, datetime] | None:
+def _comparative_dates(
+    context: str,
+    document_timestamp: datetime,
+    *,
+    updated_first: bool = False,
+) -> tuple[datetime, datetime] | None:
     """Return verified prior/current table dates without inventing precision.
 
     Comparative presentations often print two exact dates immediately around
@@ -220,7 +273,8 @@ def _comparative_dates(context: str, document_timestamp: datetime) -> tuple[date
     ]
     if len(dates) < 2:
         return None
-    prior, updated = dates[-2], dates[-1]
+    first, second = dates[-2], dates[-1]
+    prior, updated = (second, first) if updated_first else (first, second)
     if prior >= updated:
         return None
     if abs((updated.date() - document_timestamp.date()).days) > 7:
@@ -293,11 +347,54 @@ def _ranges(text: str, metric: GuidanceMetric, table_scale: float | None) -> lis
     return result
 
 
+def _table_scalar_ranges(
+    text: str,
+    metric: GuidanceMetric,
+    table_scale: float | None,
+) -> list[_Range]:
+    """Pair four flattened low/high cells into two comparative ranges.
+
+    Some SEC tables flatten ``Low High Low High`` cells without separators such
+    as ``to`` or a dash. This fallback runs only inside a verified comparative
+    guidance section and requires four explicit monetary cells.
+    """
+    if metric in {GuidanceMetric.GROSS_MARGIN, GuidanceMetric.OPERATING_MARGIN}:
+        return []
+    cells: list[_Range] = []
+    for match in _DOLLAR_SCALAR.finditer(text):
+        if not (match.group("dollar") or match.group("scale")):
+            continue
+        if metric is GuidanceMetric.EPS:
+            if match.group("scale"):
+                return []
+            value = float(match.group("value").replace(",", ""))
+            unit = "USD/share"
+        else:
+            if not match.group("scale") and table_scale is None:
+                return []
+            scale = None if match.group("scale") else table_scale
+            value = _amount(match.group("value"), match.group("scale"), scale)
+            unit = "USD"
+        cells.append(_Range(value, value, unit, match.start(), match.end()))
+
+    if len(cells) != 4:
+        return []
+    ranges: list[_Range] = []
+    for index in range(0, len(cells) - 1, 2):
+        low, high = cells[index], cells[index + 1]
+        if low.low <= high.low:
+            ranges.append(_Range(low.low, high.low, low.unit, low.start, high.end))
+    return ranges
+
+
 def _pair_for_metric(
     text: str,
     mentions: list[_Mention],
     index: int,
     table_scale: float | None,
+    *,
+    updated_first: bool = False,
+    preferred_layout: str | None = None,
 ) -> tuple[_Range, _Range, str] | None:
     mention = mentions[index]
     previous_end = mentions[index - 1].end if index > 0 else 0
@@ -307,6 +404,11 @@ def _pair_for_metric(
     suffix = text[mention.end : next_start]
     prefix_ranges = _ranges(prefix, mention.metric, table_scale)
     suffix_ranges = _ranges(suffix, mention.metric, table_scale)
+    has_low_high_columns = bool(re.match(r"\s*Low\s+High\s+Low\s+High\b", text, re.I))
+    if len(prefix_ranges) < 2 and has_low_high_columns:
+        prefix_ranges = _table_scalar_ranges(prefix, mention.metric, table_scale)
+    if len(suffix_ranges) < 2 and has_low_high_columns:
+        suffix_ranges = _table_scalar_ranges(suffix, mention.metric, table_scale)
 
     candidates: list[tuple[int, _Range, _Range, str]] = []
     if len(prefix_ranges) >= 2:
@@ -320,10 +422,15 @@ def _pair_for_metric(
 
     if not candidates:
         return None
-    distance, prior, current, layout = min(candidates, key=lambda item: item[0])
+    if preferred_layout is not None:
+        matching_layout = [item for item in candidates if item[3] == preferred_layout]
+        if matching_layout:
+            candidates = matching_layout
+    distance, first, second, layout = min(candidates, key=lambda item: item[0])
     # Fail closed when the pair is not locally attached to the metric row.
     if distance > 120:
         return None
+    prior, current = (second, first) if updated_first else (first, second)
     return prior, current, layout
 
 
@@ -395,6 +502,11 @@ def _period_spans(text: str) -> list[tuple[int, int, str]]:
         raw.append((match.start(), match.end(), f"FY{_normalize_year(match.group(1))}", 1))
     for match in _YEAR_ENDING_SCOPE.finditer(text):
         raw.append((match.start(), match.end(), f"FY{int(match.group(1))}", 1))
+    for match in _ACTION_GUIDANCE_YEAR_SCOPE.finditer(text):
+        # Keep only the year token as the period span. The surrounding action,
+        # metric and ``guidance`` words establish annual scope but must remain
+        # available to the metric-to-value locality bridge below.
+        raw.append((match.start(1), match.end(1), f"FY{int(match.group(1))}", 1))
     raw.sort(key=lambda item: (item[0], item[3], -(item[1] - item[0])))
     chosen: list[tuple[int, int, str]] = []
     for start, end, period, _ in raw:
@@ -673,6 +785,91 @@ def _direction(prior: _Range, current: _Range) -> GuidanceAction:
     return GuidanceAction.REAFFIRM
 
 
+def _action_near(text: str, start: int) -> GuidanceAction:
+    context = text[max(0, start - 260) : start]
+    if re.search(r"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b", context, re.I):
+        return GuidanceAction.REAFFIRM
+    if re.search(r"\b(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing))\b", context, re.I):
+        return GuidanceAction.RAISE
+    if re.search(r"\b(?:lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)\b", context, re.I):
+        return GuidanceAction.LOWER
+    return GuidanceAction.NONE
+
+
+def normalize_value_before_guidance_rows(
+    document: SourceDocument,
+    *,
+    rules_hash: str,
+) -> list[GuidanceMetricRecord]:
+    """Normalize exact range/year/metric rows flattened value-first by SEC HTML.
+
+    Investor presentations can flatten a visual row as ``$1.0B-$1.04B 2026 NET
+    REVENUE GUIDANCE``. The generic prose extractor expects a metric before its
+    value, so this narrowly structured layout otherwise disappears.
+    """
+    text = re.sub(r"\s+", " ", html_to_text(document.content or "")).strip()
+    records: list[GuidanceMetricRecord] = []
+    seen: set[tuple[str, str, float, float]] = set()
+    for match in _VALUE_BEFORE_GUIDANCE_ROW.finditer(text):
+        if not (match.group("d1") or match.group("d2") or match.group("s1") or match.group("s2")):
+            continue
+        label = match.group("label").lower()
+        if "free cash flow" in label:
+            metric = GuidanceMetric.FCF
+        elif "ebitda" in label:
+            metric = GuidanceMetric.EBITDA
+        elif "eps" in label or "earnings per share" in label:
+            metric = GuidanceMetric.EPS
+        else:
+            metric = GuidanceMetric.REVENUE
+
+        if metric is GuidanceMetric.EPS:
+            if match.group("s1") or match.group("s2"):
+                continue
+            low = float(match.group("low").replace(",", ""))
+            high = float(match.group("high").replace(",", ""))
+            unit = "USD/share"
+        else:
+            if not (match.group("s1") or match.group("s2")):
+                continue
+            low = _amount(match.group("low"), match.group("s1") or match.group("s2"), None)
+            high = _amount(match.group("high"), match.group("s2") or match.group("s1"), None)
+            unit = "USD"
+        if low > high:
+            continue
+        period = f"FY{int(match.group('year'))}"
+        key = (metric.value, period, low, high)
+        if key in seen:
+            continue
+        seen.add(key)
+        evidence = text[max(0, match.start() - 260) : min(len(text), match.end() + 140)]
+        records.append(
+            GuidanceMetricRecord(
+                rules_hash=rules_hash,
+                ticker=document.ticker,
+                fiscal_period=period,
+                metric=metric,
+                accounting_basis="ADJUSTED" if "adjusted" in label else "UNSPECIFIED",
+                low=low,
+                high=high,
+                unit=unit,
+                source=document.source,
+                source_url=document.source_url,
+                source_accession=document.accession,
+                source_timestamp=document.source_timestamp,
+                explicit_action=_action_near(text, match.start()),
+                verified=True,
+                extraction_method=ExtractionMethod.STRUCTURED,
+                evidence_span=f"normalized_value_before_guidance_row; {evidence}"[:1000],
+                source_document_hash=document.content_hash,
+                as_of=document.source_timestamp,
+                fetched_at=document.fetched_at,
+                stale=document.stale,
+            )
+        )
+    return records
+
+
 def normalize_comparative_guidance_tables(
     document: SourceDocument,
     *,
@@ -695,7 +892,8 @@ def normalize_comparative_guidance_tables(
     normalized: list[GuidanceMetricRecord] = []
     seen: set[tuple[str, str, str, datetime, float, float]] = set()
 
-    for header in _COMPARATIVE_HEADER.finditer(text):
+    headers = _comparative_headers(text)
+    for header_index, (header, updated_first) in enumerate(headers):
         context_start = max(0, header.start() - 360)
         context = text[context_start : header.end()]
         fiscal_scopes = _scopes(context)
@@ -709,10 +907,9 @@ def normalize_comparative_guidance_tables(
 
         # Bound the table window. Stop at the next comparative header when one
         # exists; otherwise use a conservative 2,400-character window.
-        next_header = _COMPARATIVE_HEADER.search(text, header.end())
         table_end = min(len(text), header.end() + 2400)
-        if next_header is not None:
-            table_end = min(table_end, next_header.start())
+        if header_index + 1 < len(headers):
+            table_end = min(table_end, headers[header_index + 1][0].start())
         section_end = _TABLE_SECTION_END.search(text, header.end(), table_end)
         if section_end is not None:
             table_end = section_end.start()
@@ -720,16 +917,26 @@ def normalize_comparative_guidance_tables(
         comparative_dates = _comparative_dates(
             text[header.start() : min(table_end, header.end() + 260)],
             document.source_timestamp,
+            updated_first=updated_first,
         )
         mentions = _metric_mentions(table)
         if not mentions:
             continue
 
+        table_layout: str | None = None
         for index, mention in enumerate(mentions):
-            pair = _pair_for_metric(table, mentions, index, scale)
+            pair = _pair_for_metric(
+                table,
+                mentions,
+                index,
+                scale,
+                updated_first=updated_first,
+                preferred_layout=table_layout,
+            )
             if pair is None:
                 continue
             prior, current, layout = pair
+            table_layout = table_layout or layout
             basis = _basis(mention.metric, mention.alias)
             key = (
                 mention.metric.value,
@@ -856,6 +1063,7 @@ def extract_guidance_facts_table_normalized(
             )
 
     table_records = normalize_comparative_guidance_tables(document, rules_hash=rules_hash)
+    table_records.extend(normalize_value_before_guidance_rows(document, rules_hash=rules_hash))
     if not table_records:
         policy = base.policy_evidence
         if any(item.midpoint is not None for item in base_records):

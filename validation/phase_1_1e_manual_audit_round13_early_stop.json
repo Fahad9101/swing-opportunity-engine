@@ -1,0 +1,41 @@
+{
+  "adjudication": "PRE_AUDIT_EARLY_STOP",
+  "audited_head_sha": "16b21693d9b5714765ebb09d859395ff9b1a5f47",
+  "blocking_cases": [
+    {
+      "correct_classification": "NOT_DETERIORATED",
+      "engine_at_repaired_head_before_fix": "UNKNOWN",
+      "root_cause": "updated_first_four_cell_comparative_table_not_normalized",
+      "rule_path_after_repair": "guidance_v1_1.comparable_set_within_tolerance",
+      "ticker": "DGX"
+    },
+    {
+      "correct_classification": "NOT_DETERIORATED",
+      "engine_at_repaired_head_before_fix": "UNKNOWN",
+      "root_cause": "annual_action_year_and_value_first_row_not_normalized",
+      "rule_path_after_repair": "guidance_v1_1.comparable_set_within_tolerance",
+      "ticker": "HRMY"
+    }
+  ],
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "full_market_run_id": 34140322868,
+  "full_market_artifact_id": 10028441098,
+  "full_market_automated_gates_passed": 9,
+  "fresh_manual_audit_completed": false,
+  "diagnostic_replay_used_synthetic_timestamps": true,
+  "governance": {
+    "milestone_3_unlocked": false,
+    "pr_16_merge_allowed": false,
+    "soe_1_0_active": true,
+    "soe_1_1_promoted": false
+  },
+  "preflight_artifact_id": 10025030851,
+  "preflight_run_id": 34129172850,
+  "preflight_snapshot_fingerprint": "dc6e8624ebb3bf21f5de6f9c47bcb2762f74a02cf5e912cbfe62176a1d87cb2e",
+  "systematic_error_found": true,
+  "tests": {
+    "failed": 0,
+    "passed": 526,
+    "warnings": 2
+  }
+}
