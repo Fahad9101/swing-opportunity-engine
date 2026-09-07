@@ -870,6 +870,55 @@ def normalize_value_before_guidance_rows(
     return records
 
 
+def normalize_eps_reconciliation_guidance_rows(
+    document: SourceDocument,
+    *,
+    rules_hash: str,
+) -> list[GuidanceMetricRecord]:
+    """Read explicitly labeled GAAP/adjusted low-high EPS guidance rows.
+
+    Reconciliation adjustments are never emitted as EPS. Require an annual
+    guidance header and adjacent dollar-denominated low/high cells after an
+    explicit basis label; reported-results tables cannot enter this path.
+    """
+    text = re.sub(r"\s+", " ", html_to_text(document.content or "")).strip()
+    header_pattern = re.compile(
+        r"Reconciliation of GAAP vs Adjusted EPS Guidance\s*[-–—]\s*"
+        r"Full[- ]Year\s+(20\d{2})\s+\1\s+Full[- ]Year Guidance\s+Low\s+High\b",
+        re.I,
+    )
+    row_pattern = re.compile(
+        r"\bEPS from Continuing Operations\s*[-–—]\s*(GAAP|Adjusted)\s+"
+        r"\$\s*(\d+(?:\.\d+)?)\s+\$\s*(\d+(?:\.\d+)?)(?![\d.])",
+        re.I,
+    )
+    records: list[GuidanceMetricRecord] = []
+    for header in header_pattern.finditer(text):
+        section = text[header.end():header.end() + 1200]
+        section = re.split(r"\b(?:Note:|Forward[- ]Looking|Reconciliation)\b", section, maxsplit=1, flags=re.I)[0]
+        rows = list(row_pattern.finditer(section))
+        # Duplicate basis rows could indicate multiple scenarios or columns.
+        if len({row.group(1).upper() for row in rows}) != len(rows):
+            continue
+        for row in rows:
+            low, high = float(row.group(2)), float(row.group(3))
+            if low > high:
+                continue
+            records.append(GuidanceMetricRecord(
+                rules_hash=rules_hash, ticker=document.ticker,
+                fiscal_period=f"FY{header.group(1)}", metric=GuidanceMetric.EPS,
+                accounting_basis=row.group(1).upper(), low=low, high=high,
+                unit="USD/share", source=document.source, source_url=document.source_url,
+                source_accession=document.accession, source_timestamp=document.source_timestamp,
+                explicit_action=GuidanceAction.NONE, verified=True,
+                extraction_method=ExtractionMethod.STRUCTURED,
+                evidence_span=f"{header.group(0)}; {row.group(0)}",
+                source_document_hash=document.content_hash, as_of=document.source_timestamp,
+                fetched_at=document.fetched_at, stale=document.stale,
+            ))
+    return records
+
+
 def normalize_comparative_guidance_tables(
     document: SourceDocument,
     *,
@@ -1064,6 +1113,7 @@ def extract_guidance_facts_table_normalized(
 
     table_records = normalize_comparative_guidance_tables(document, rules_hash=rules_hash)
     table_records.extend(normalize_value_before_guidance_rows(document, rules_hash=rules_hash))
+    table_records.extend(normalize_eps_reconciliation_guidance_rows(document, rules_hash=rules_hash))
     if not table_records:
         policy = base.policy_evidence
         if any(item.midpoint is not None for item in base_records):
