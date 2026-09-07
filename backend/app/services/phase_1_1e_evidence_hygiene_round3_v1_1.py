@@ -292,11 +292,48 @@ _DEBT_COVENANT_CONTEXT = re.compile(
     re.I,
 )
 
+_CURRENT_PAYMENT_DEFAULT = re.compile(
+    r"\b(?:we|the\s+company|company|the\s+registrant)\s+"
+    r"(?:is|are|remains?|remain)\s+in\s+(?:payment\s+)?default\b|"
+    r"\b(?:we|the\s+company|company|the\s+registrant)\s+"
+    r"(?:has|have)\s+failed\s+to\s+make\s+(?:a\s+)?(?:scheduled|required)?\s*"
+    r"(?:principal|interest|debt)\s+payment\b",
+    re.I,
+)
+_CONDITIONAL_DEFAULT_PREFIX = re.compile(
+    r"\b(?:if|unless|whether(?:\s+or\s+not)?|in\s+the\s+event(?:\s+that)?|should)\s*$",
+    re.I,
+)
+
+
+def _has_current_payment_default(span: str) -> bool:
+    """Require an unconditional present-tense registrant payment default.
+
+    SEC covenant boilerplate commonly says that the registrant *would* be in
+    default if a leverage covenant were breached, then describes remedies "if
+    we are in default."  The base precision-first extractor intentionally
+    requires present-tense language, but that latter conditional clause has the
+    same local verb shape.  Inspect each current-default match and reject it
+    when its subject is introduced by a conditional marker.
+    """
+    for match in _CURRENT_PAYMENT_DEFAULT.finditer(span):
+        prefix = span[max(0, match.start() - 80) : match.start()]
+        if _CONDITIONAL_DEFAULT_PREFIX.search(prefix):
+            continue
+        return True
+    return False
+
 
 def extract_hard_distress_flags_round3(document: SourceDocument) -> list[dict]:
     items = _base_distress_flags(document)
     filtered: list[dict] = []
     for item in items:
+        if item.get("flag") == DistressHardFlag.PAYMENT_DEFAULT.value:
+            span = str(item.get("evidence_span") or "")
+            if not _has_current_payment_default(span):
+                continue
+            filtered.append(item)
+            continue
         if item.get("flag") != DistressHardFlag.UNRESOLVED_COVENANT_BREACH.value:
             filtered.append(item)
             continue

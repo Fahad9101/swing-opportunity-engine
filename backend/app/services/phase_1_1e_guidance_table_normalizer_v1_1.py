@@ -124,6 +124,8 @@ _PERCENT_RANGE = re.compile(
 
 _FINANCIAL_ROW_BOUNDARY = re.compile(
     r"\b(?:gross\s+bookings|bookings|operating\s+profit|net\s+(?:income|loss)|"
+    r"interest\s+expense|(?:provision\s+for\s+)?income\s+tax(?:es)?|"
+    r"depreciation(?:\s+and\s+amortization)?|amortization|"
     r"cash(?:\s+and\s+cash\s+equivalents)?\s+(?:provided\s+by|from)\s+operating\s+activities|"
     r"capital\s+expenditures?|adjusted\s+ebitda|ebitda|free\s+cash\s+flow|fcf|"
     r"total\s+revenue|revenue|net\s+sales|sales|adjusted\s+eps|diluted\s+eps|eps|"
