@@ -13,6 +13,7 @@ from app.domain.soe_v1_1 import (
     SourceDocument,
 )
 from app.services.fact_extraction_service import html_to_text
+from app.services.guidance_explicit_scope_normalizer_v1_1 import normalize_explicit_guidance_scopes
 from app.services.phase_1_1e_evidence_hygiene_round4_v1_1 import _action_consistent_history
 from app.services.phase_1_1e_guidance_scope_guard_round8_v1_1 import extract_guidance_facts_round8
 
@@ -1114,6 +1115,13 @@ def extract_guidance_facts_table_normalized(
     table_records = normalize_comparative_guidance_tables(document, rules_hash=rules_hash)
     table_records.extend(normalize_value_before_guidance_rows(document, rules_hash=rules_hash))
     table_records.extend(normalize_eps_reconciliation_guidance_rows(document, rules_hash=rules_hash))
+    scoped_records = normalize_explicit_guidance_scopes(document, rules_hash=rules_hash)
+    if scoped_records:
+        keys = {(r.metric, r.fiscal_period) for r in scoped_records}
+        values = {(r.metric, r.low, r.high) for r in scoped_records}
+        base_records = [r for r in base_records if (r.metric, r.fiscal_period) not in keys and (r.metric, r.low, r.high) not in values]
+        table_records = [r for r in table_records if (r.metric, r.fiscal_period) not in keys and (r.metric, r.low, r.high) not in values]
+        table_records.extend(scoped_records)
     if not table_records:
         policy = base.policy_evidence
         if any(item.midpoint is not None for item in base_records):
