@@ -5,7 +5,7 @@ from app.services.phase_1_1e_evidence_hygiene_round4_v1_1 import _action_consist
 from app.services.phase_1_1e_guidance_scope_guard_round8_v1_1 import dedupe_guidance_records_round8
 
 
-_PREFIX = "normalized_comparative_guidance_table;"
+_PREFIX = ("normalized_comparative_guidance_table;", "normalized_explicit_guidance_scope;")
 
 
 def _is_normalized_table_record(record: GuidanceMetricRecord) -> bool:

@@ -317,6 +317,8 @@ class ShadowStructuralEnricher:
         assessment = ledger.assess(ticker, self.rules, rules_hash=self.rules_hash, policy=policy) if records or policy else None
         meta = {
             "records": len(records),
+            "ledger_records": [record.model_dump(mode="json") for record in records],
+            "policy_evidence": policy.model_dump(mode="json") if policy else None,
             "documents": len(documents),
             "comparable_pairs": comparable_pairs,
             "sufficient_comparable_guidance": comparable_pairs > 0,
