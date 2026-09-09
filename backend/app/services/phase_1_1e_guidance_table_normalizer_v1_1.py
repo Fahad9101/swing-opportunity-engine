@@ -14,6 +14,7 @@ from app.domain.soe_v1_1 import (
 )
 from app.services.fact_extraction_service import html_to_text
 from app.services.guidance_explicit_scope_normalizer_v1_1 import normalize_explicit_guidance_scopes
+from app.services.guidance_declared_layout_normalizer_v1_1 import normalize_declared_layouts, historical_republication_periods
 from app.services.phase_1_1e_evidence_hygiene_round4_v1_1 import _action_consistent_history
 from app.services.phase_1_1e_guidance_scope_guard_round8_v1_1 import extract_guidance_facts_round8
 
@@ -1122,8 +1123,19 @@ def extract_guidance_facts_table_normalized(
         base_records = [r for r in base_records if (r.metric, r.fiscal_period) not in keys and (r.metric, r.low, r.high) not in values]
         table_records = [r for r in table_records if (r.metric, r.fiscal_period) not in keys and (r.metric, r.low, r.high) not in values]
         table_records.extend(scoped_records)
+    declared, declared_keys = normalize_declared_layouts(document, rules_hash=rules_hash)
+    base_records = [r for r in base_records if (r.metric, r.fiscal_period) not in declared_keys]
+    table_records = [r for r in table_records if (r.metric, r.fiscal_period) not in declared_keys]
+    table_records.extend(declared)
+    historical = historical_republication_periods(document)
+    if historical:
+        for r in [*base_records, *table_records]:
+            if r.fiscal_period in historical:
+                rejected.append({"reason": "explicitly_not_reaffirmed_or_updated", "metric": r.metric.value, "fiscal_period": r.fiscal_period, "source_url": r.source_url})
+        base_records = [r for r in base_records if r.fiscal_period not in historical]
+        table_records = [r for r in table_records if r.fiscal_period not in historical]
     if not table_records:
-        policy = base.policy_evidence
+        policy = None if historical else base.policy_evidence
         if any(item.midpoint is not None for item in base_records):
             policy = None
         return base.model_copy(
@@ -1152,7 +1164,7 @@ def extract_guidance_facts_table_normalized(
         ),
     )
 
-    policy = base.policy_evidence
+    policy = None if historical else base.policy_evidence
     if any(item.midpoint is not None for item in records):
         policy = None
     return base.model_copy(

@@ -17,18 +17,19 @@ from app.domain.soe_v1_1 import (
 )
 from app.services.fact_extraction_service import html_to_text
 
-_NUM = r"\d+(?:\.\d+)?"
+_NUM = r"\d+(?:,\d{3})*(?:\.\d+)?"
 _RANGE = rf"\$\s*({_NUM})\s*(million|billion)?\s*(?:to|and|[-–—])\s*\$?\s*({_NUM})\s*(million|billion)?"
-_LABEL = r"(?:(?:non[- ]GAAP|adjusted|GAAP)\s+)?(?:diluted\s+)?(?:EPS|(?:net income|earnings) per (?:diluted )?share(?:, diluted)?|EBITDA|(?:consolidated |total )?(?:net sales|revenue))"
+_LABEL = r"(?:(?:non[- ]GAAP|adjusted|GAAP)\s+)?(?:diluted\s+)?(?:EPS|(?:net income|earnings) per (?:diluted )?share(?:, diluted)?|EBITDA|free cash flow|(?:consolidated |total )?(?:net sales|revenue))"
 _ROW = re.compile(
-    rf"(?P<label>{_LABEL})\s+(?:(?:is|are)\s+)?(?:now\s+)?(?:expected\s+to\s+(?:be\s+in\s+the\s+range\s+of|range\s+between|be\s+between)|(?:to\s+)?range\s+between|to\s+be\s+in\s+the\s+range\s+of|to\s+be\s+between|between|of|(?:guidance\s+)?(?:raised|increased)\s+to)\s+{_RANGE}",
+    rf"(?P<label>{_LABEL})\s+(?:(?:is|are)\s+)?(?:now\s+)?(?:expected\s+to\s+(?:be\s+in\s+the\s+range\s+of|range\s+between|be\s+between)|(?:to\s+)?range\s+between|to\s+be\s+in\s+the\s+range\s+of|to\s+be\s+between|between|of|(?:guidance\s+)?(?:raised|increased)\s+to|(?:guidance\s+)?(?:in\s+the\s+range\s+of|of))\s+{_RANGE}",
     re.I,
 )
 _ANNUAL = re.compile(
-    r"\b(?:(?:full[- ]year|fiscal year)\s+(20\d{2})|(20\d{2})\s+full year)\b", re.I
+    r"\b(?:(?:full[- ]year|fiscal year)\s+(?:guidance for )?(20\d{2})|(20\d{2})\s+full year)\b",
+    re.I,
 )
 _QUARTER = re.compile(
-    r"\b(first|second|third|fourth)\s+(?:fiscal\s+)?quarter(?:\s+ending\s+[A-Za-z]+\s+\d{1,2},|\s+(?:of\s+)?(?:fiscal year\s+)?)\s*(20\d{2})\b",
+    r"\b(first|second|third|fourth)\s+(?:fiscal\s+)?quarter(?:\s+ending\s+[A-Za-z]+\s+\d{1,2},|\s+(?:of\s+)?(?:fiscal(?: year)?\s+)?)\s*(20\d{2})\b",
     re.I,
 )
 _END = re.compile(
@@ -42,13 +43,21 @@ def _record(document, rules_hash, period, label, low, high, scale, evidence):
     metric = (
         GuidanceMetric.EPS
         if re.search(r"eps|per .*share", label)
-        else GuidanceMetric.EBITDA if "ebitda" in label else GuidanceMetric.REVENUE
+        else (
+            GuidanceMetric.EBITDA
+            if "ebitda" in label
+            else (
+                GuidanceMetric.FCF
+                if "free cash flow" in label
+                else GuidanceMetric.REVENUE
+            )
+        )
     )
     if "operating margin" in label:
         metric = GuidanceMetric.OPERATING_MARGIN
     basis = (
         "ADJUSTED"
-        if re.search(r"non[- ]gaap|adjusted", label)
+        if re.search(r"non[- ]gaap|adjusted|adj\.", label)
         else "GAAP" if "gaap" in label else "UNSPECIFIED"
     )
     multiplier = (
@@ -69,8 +78,8 @@ def _record(document, rules_hash, period, label, low, high, scale, evidence):
         fiscal_period=period,
         metric=metric,
         accounting_basis=basis,
-        low=float(low) * multiplier,
-        high=float(high) * multiplier,
+        low=float(str(low).replace(",", "")) * multiplier,
+        high=float(str(high).replace(",", "")) * multiplier,
         unit=unit,
         source=document.source,
         source_url=document.source_url,
@@ -165,8 +174,22 @@ def normalize_explicit_guidance_scopes(
                 match.group(),
             )
         )
+    scopes = [
+        scope
+        for scope in scopes
+        if not re.search(
+            r"(?:compared to|versus) (?:the )?$",
+            text[max(0, scope[0] - 30) : scope[0]],
+            re.I,
+        )
+    ]
     scopes.sort()
     for index, (start, end, period, header) in enumerate(scopes):
+        trailing = re.match(
+            r"\s*(?:financial )?(?:guidance|outlook)\b", text[end:], re.I
+        )
+        if trailing:
+            header += trailing.group()
         # A reported-results year is never sufficient to open a guidance scope.
         if not re.search(
             r"\b(?:guidance|outlook|expects?)\b",
@@ -176,7 +199,7 @@ def normalize_explicit_guidance_scopes(
             continue
         stop = min(
             len(text),
-            end + 1400,
+            end + 2200,
             scopes[index + 1][0] if index + 1 < len(scopes) else len(text),
         )
         section = text[end:stop]
@@ -191,7 +214,7 @@ def normalize_explicit_guidance_scopes(
                 continue
             label = row.group("label")
             low, scale1, high, scale2 = row.group(2, 3, 4, 5)
-            if float(low) > float(high) or (
+            if float(str(low).replace(",", "")) > float(str(high).replace(",", "")) or (
                 scale1 and scale2 and scale1.lower() != scale2.lower()
             ):
                 continue
@@ -284,7 +307,7 @@ def normalize_explicit_guidance_scopes(
                 (f"Q{h[2]}FY{h[1]}", m[2], m[4]),
                 (f"FY{h[1]}", m[6], m[8]),
             ]:
-                if float(lo) <= float(hi):
+                if float(str(lo).replace(",", "")) <= float(str(hi).replace(",", "")):
                     records.append(
                         _record(
                             document,
@@ -316,7 +339,7 @@ def normalize_explicit_guidance_scopes(
                 (f"FY{h[1]}", m[6], m[8]),
                 (f"FY{h[2]}", m[10], m[12]),
             ]:
-                if float(lo) <= float(hi):
+                if float(str(lo).replace(",", "")) <= float(str(hi).replace(",", "")):
                     records.append(
                         _record(
                             document,
@@ -329,6 +352,23 @@ def normalize_explicit_guidance_scopes(
                             f"{period} guidance (USD millions); {m[1]} ${lo} - ${hi}",
                         )
                     )
+    primary_totals = {
+        r.fiscal_period
+        for r in records
+        if r.metric is GuidanceMetric.REVENUE
+        and re.search(
+            r"(?:total|consolidated) (?:revenue|net sales)", r.evidence_span or "", re.I
+        )
+    }
+    records = [
+        r
+        for r in records
+        if r.metric is not GuidanceMetric.REVENUE
+        or r.fiscal_period not in primary_totals
+        or re.search(
+            r"(?:total|consolidated) (?:revenue|net sales)", r.evidence_span or "", re.I
+        )
+    ]
     unique = {}
     for r in records:
         unique[(r.metric, r.fiscal_period, r.accounting_basis, r.low, r.high)] = r
