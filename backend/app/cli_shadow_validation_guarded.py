@@ -4,7 +4,7 @@ from typing import Any
 
 from app import cli_shadow_validation
 from app.domain.soe_v1_1 import GuidanceMetric
-from app.services import fact_extraction_service, shadow_enrichment_service
+from app.services import fact_extraction_service, shadow_enrichment_service, shadow_validation_service
 from app.services.guidance_binding_patch_v1_1 import install_binding_patch
 from app.services.phase_1_1e_catalyst_evidence_round5_v1_1 import (
     extract_sec_catalyst_candidates_round5,
@@ -15,8 +15,11 @@ from app.services.phase_1_1e_evidence_hygiene_round3_patch_v1_1 import (
 from app.services.phase_1_1e_guidance_table_dedupe_v1_1 import (
     dedupe_guidance_records_table_normalized,
 )
-from app.services.phase_1_1e_guidance_table_normalizer_v1_1 import (
-    extract_guidance_facts_table_normalized,
+from app.services.phase_1_1e_run85_repairs_v1_1 import (
+    assess_earnings_catalysts_run85,
+    extract_guidance_facts_run85,
+    normalize_distress_companyfacts_run85,
+    promote_scoring_ready_event_run85,
 )
 
 
@@ -148,8 +151,17 @@ def install_guards() -> None:
     install_binding_patch()
     fact_extraction_service._numeric_range = _guard_numeric_range
     shadow_enrichment_service.index_submissions_payload = _safe_index_submissions_payload
-    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_table_normalized
+
+    # Run-85 repair batch: evidence normalization only.
+    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_run85
     shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records_table_normalized
+    shadow_enrichment_service.normalize_distress_companyfacts = normalize_distress_companyfacts_run85
+    shadow_enrichment_service.ShadowStructuralEnricher.assess_earnings_catalysts = (
+        assess_earnings_catalysts_run85
+    )
+    shadow_validation_service.promote_scoring_ready_event = promote_scoring_ready_event_run85
+
+    # Existing 1.1E evidence guards remain in force.
     shadow_enrichment_service.extract_hard_distress_flags = extract_hard_distress_flags_round3
     shadow_enrichment_service.extract_sec_catalyst_candidates = extract_sec_catalyst_candidates_round5
     shadow_enrichment_service.ShadowStructuralEnricher.enrich = _guarded_enrich
