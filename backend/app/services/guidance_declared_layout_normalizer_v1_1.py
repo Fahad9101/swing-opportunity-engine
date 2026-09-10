@@ -32,6 +32,7 @@ def normalize_declared_layouts(document, *, rules_hash):
 
     # These complete headers explicitly state column order and fiscal scope.
     layouts = [
+        (r"Previous Updated \(In millions, except for student starts\) FY (20\d{2}) Guidance FY \1 Guidance", 1, "million", 500),
         (r"Previous FY (20\d{2}) Guidance Updated FY \1 Guidance", 1, "million", 500),
         (
             r"Guidance Item Current Guidance for Full-Year (20\d{2})\s*(?:\d\s+)?Prior Guidance for Full-Year \1",
@@ -56,7 +57,7 @@ def normalize_declared_layouts(document, *, rules_hash):
         for header in re.finditer(pattern, text, re.I):
             period = f"FY{header[1]}"
             section = text[header.end() : header.end() + length]
-            for row in re.finditer(rf"(?P<label>{LABEL})(?:\s+\d)?\s+{R}\s+{R}", section, re.I):
+            for row in re.finditer(rf"(?P<label>{LABEL})(?:\s+\d)?\s+{R}(?:\s+\d)?\s+{R}", section, re.I):
                 prefix = section[max(0, row.start() - 20) : row.start()]
                 if re.search(r"(?:subscription|segment|product)\s+$", prefix, re.I):
                     continue
@@ -84,6 +85,20 @@ def normalize_declared_layouts(document, *, rules_hash):
             # 'Adjusted EBITDA Expense' is an expense, never EBITDA earnings.
             if re.search(r"Adjusted EBITDA Expense\s+\$", section, re.I):
                 authoritative.add((GuidanceMetric.EBITDA, period))
+
+    # Reconciliation tables explicitly label previous and revised low/high
+    # columns. Retain both reported EBITDA and its adjusted counterpart.
+    for h in re.finditer(r"(20\d{2}) GUIDANCE - PREVIOUS \1 GUIDANCE - REVISED \(In millions, except per share amounts\) \(Unaudited\) Low High Low High", text, re.I):
+        section = text[h.end():h.end()+900]
+        for m in re.finditer(rf"(?<![A-Za-z])((?:Adjusted )?EBITDA) \$({N}) \$({N}) \$({N}) \$({N})", section, re.I):
+            emit(f"FY{h[1]}", m[1], m[4], m[5], "million", f"{h.group()}; {m.group()}")
+
+    # A separate reported EPS range follows the adjusted-only forecast table.
+    for h in re.finditer(r"(20\d{2}) Guidance \(In millions, except per share amounts\) Previous Guidance \([A-Za-z]+ \d{1,2}, \1\) Revised Guidance \([A-Za-z]+ \d{1,2}, \1\)", text, re.I):
+        section = text[h.end():h.end()+800]
+        m = re.search(rf"Revised guidance is based on Net Income of {R} and (Net Income per Share) of {R}", section, re.I)
+        if m:
+            emit(f"FY{h[1]}", m[5], m[6], m[8], "", f"{h.group()}; {m.group()}")
 
     # Actual and guidance columns in a presentation, with row-specific units.
     for h in re.finditer(
@@ -255,6 +270,36 @@ def normalize_declared_layouts(document, *, rules_hash):
             if "ebitda" in m[1].lower():
                 authoritative.add((GuidanceMetric.EBITDA, f"FY{h[2]}"))
             authoritative.add((records[-1].metric, f"Q{q-1}FY{h[2]}"))
+
+    # Cash-flow burn is a negative cash-flow forecast. Its annual guidance
+    # heading supplies the year; a trailing historical comparison cannot.
+    for h in re.finditer(r"\b(20\d{2}) Guidance\b", text, re.I):
+        section = re.split(r"Webcast Information|Conference Call|Forward-Looking", text[h.end():h.end()+3000], flags=re.I)[0]
+        for m in re.finditer(rf"expects? (?:full-year )?(free cash flow burn) (?:to be in the range of|of) {R}(?: in (20\d{{2}}))?", section, re.I):
+            for year in set(re.findall(r"20\d{2}", h.group() + section)):
+                authoritative.add((GuidanceMetric.FCF, f"FY{year}"))
+            # Contradictory issuer dates are not silently corrected.
+            if m[6] and m[6] != h[1]:
+                continue
+            lo, hi = float(m[2].replace(",", "")), float(m[4].replace(",", ""))
+            if lo <= hi:
+                emit(f"FY{h[1]}", "free cash flow", str(-hi), str(-lo),
+                     (m[5] or m[3] or "").lower(), f"{h.group()}; {m.group()}")
+
+    # An explicitly excluded revenue stream means product guidance is not a
+    # consolidated total. Suppress generic rebinding when no total is stated.
+    for h in re.finditer(r"For the full year (20\d{2}), [^.]{0,60}anticipates:", text, re.I):
+        section = text[h.end():h.end()+450]
+        if re.search(r"Total product revenue of .{0,80}excluding .{0,80}revenue", section, re.I) and not re.search(r"(?:expected )?total revenue", section, re.I):
+            authoritative.add((GuidanceMetric.REVENUE, f"FY{h[1]}"))
+
+    # Explicit reported-results headings cannot supply forecast records for
+    # the same completed period, even when an outlook appears nearby.
+    for m in re.finditer(r"(?:Preliminary )?(First Quarter|Second Quarter|Third Quarter|Fourth Quarter|Full Year) (20\d{2}) (?:Consolidated |Financial )?Results", text, re.I):
+        q = {"first quarter": 1, "second quarter": 2, "third quarter": 3, "fourth quarter": 4}.get(m[1].lower())
+        period = f"Q{q}FY{m[2]}" if q else f"FY{m[2]}"
+        authoritative.update((metric, period) for metric in GuidanceMetric)
+        records = [r for r in records if r.fiscal_period != period]
 
     return records, authoritative
 

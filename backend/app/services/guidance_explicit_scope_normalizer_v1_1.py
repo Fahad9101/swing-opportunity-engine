@@ -18,18 +18,18 @@ from app.domain.soe_v1_1 import (
 from app.services.fact_extraction_service import html_to_text
 
 _NUM = r"\d+(?:,\d{3})*(?:\.\d+)?"
-_RANGE = rf"\$\s*({_NUM})\s*(million|billion)?\s*(?:to|and|[-–—])\s*\$?\s*({_NUM})\s*(million|billion)?"
+_RANGE = rf"\$\s*({_NUM})\s*((?:million|billion|M|B)\b)?\s*(?:to|and|[-–—])\s*\$?\s*({_NUM})\s*((?:million|billion|M|B)\b)?"
 _LABEL = r"(?:(?:non[- ]GAAP|adjusted|Adj\.?|GAAP)\s+)?(?:diluted\s+)?(?:net\s+)?(?:EPS|(?:net income|earnings) per (?:diluted )?share(?:, diluted)?|EBITDA(?: profit| loss)?|free cash flow|(?:consolidated |total )?(?:net sales|revenues?))"
 _ROW = re.compile(
-    rf"(?P<label>{_LABEL})(?:\s*\(\d\))*\s+(?:(?:is|are)\s+)?(?:now\s+)?(?:expected\s+to\s+(?:be\s+in\s+the\s+range\s+of|range\s+between|be\s+between)|(?:to\s+)?range\s+between|to\s+be\s+in\s+the\s+range\s+of|to\s+(?:now\s+)?be\s+between|between|of|(?:guidance\s+)?(?:raised|increased)\s+by\s+\${_NUM}\s+(?:million|billion)\s+to|(?:guidance\s+)?(?:raised|increased)\s+to|(?:guidance\s+)?(?:in\s+the\s+range\s+of|of|to\s+be\s+between|to\s+between|raised\s+to\s+a\s+range\s+of))\s+(?:approximately\s+)?{_RANGE}",
+    rf"(?P<label>{_LABEL})(?:\s*\(\d\)|\s*\d(?=\s+expected))*(?:\s+on a GAAP basis)?\s+(?:(?:is|are)\s+)?(?:now\s+)?(?:expected\s+to\s+(?:be\s+in\s+the\s+range\s+of|range\s+between|be\s+between|be)|projected\s+(?:in\s+the\s+range\s+of|at)|(?:to\s+)?range\s+between|to\s+be\s+in\s+the\s+range\s+of|to\s+(?:now\s+)?be\s+between|between|of\s+between|of|(?:guidance\s+)?(?:raised|increased)\s+by\s+\${_NUM}\s+(?:million|billion)\s+to|(?:guidance\s+)?(?:raised|increased)\s+to|(?:guidance\s+)?(?:in\s+the\s+range\s+of|of|to\s+be\s+between|to\s+between|raised\s+to\s+a\s+range\s+of))\s+(?:approximately\s+)?{_RANGE}",
     re.I,
 )
 _ANNUAL = re.compile(
-    r"\b(?:(?:full[- ]year|fiscal year)\s+(?:guidance for )?(20\d{2})|(20\d{2})\s+full year|(20\d{2})\s+guidance)\b",
+    r"\b(?:(?:full[- ]year|fiscal year)\s+(?:guidance for )?(20\d{2})|(20\d{2})\s+full[- ]year|(20\d{2})\s+guidance)\b",
     re.I,
 )
 _QUARTER = re.compile(
-    r"\b(first|second|third|fourth)\s+(?:fiscal\s+)?quarter(?:\s+ending\s+[A-Za-z]+\s+\d{1,2},|\s+(?:of\s+)?(?:fiscal(?: year)?\s+)?)\s*(20\d{2})\b",
+    r"\b(first|second|third|fourth)[- ]+(?:fiscal\s+)?quarter(?:\s+ending\s+[A-Za-z]+\s+\d{1,2},|\s+(?:of\s+)?(?:fiscal(?: year)?\s+)?)\s*(20\d{2})\b",
     re.I,
 )
 _END = re.compile(
@@ -63,7 +63,7 @@ def _record(document, rules_hash, period, label, low, high, scale, evidence):
     multiplier = (
         1
         if metric is GuidanceMetric.EPS
-        else {"million": 1e6, "billion": 1e9}.get(scale, 1)
+        else {"million": 1e6, "billion": 1e9, "m": 1e6, "b": 1e9}.get(scale, 1)
     )
     if metric is GuidanceMetric.OPERATING_MARGIN:
         multiplier = 0.01
@@ -196,9 +196,12 @@ def normalize_explicit_guidance_scopes(
         )
         if trailing:
             header += trailing.group()
+        forward_intro = re.match(r",?\s*we expect\s*:", text[end:], re.I)
+        if forward_intro:
+            header += forward_intro.group()
         # A reported-results year is never sufficient to open a guidance scope.
         if not re.search(
-            r"\b(?:guidance|outlook|expects?)\b",
+            r"\b(?:guidance|outlook|expects?|estimates?)\b",
             text[max(0, start - 80) : end + 130],
             re.I,
         ):
@@ -218,7 +221,7 @@ def normalize_explicit_guidance_scopes(
             rf"(non-GAAP operating margin) of ({_NUM})% (?:now expected )?at the midpoint",
             section, re.I,
         ):
-            if re.search(r"guidance|outlook|expects?", header + section[:margin.start()], re.I):
+            if re.search(r"guidance|outlook|expects?|estimates?", header + section[:margin.start()], re.I):
                 records.append(_record(
                     document, rules_hash, period, margin[1], margin[2], margin[2],
                     "fraction", f"{period} guidance; {header}; {margin.group()}",
@@ -238,19 +241,36 @@ def normalize_explicit_guidance_scopes(
         for row in _ROW.finditer(section):
             prefix = section[max(0, row.start() - 35) : row.start()]
             if re.search(
-                r"(?:product|segment|subscription|services?)\s+$", prefix, re.I
+                r"(?:product|segment|subscription|services?|screening)\s+$", prefix, re.I
             ):
                 continue
+            # Prior-range clauses can contain several metrics. Stop carrying
+            # that context at a sentence/semicolon, not at decimal points.
+            sentence_start = max(section.rfind(". ", 0, row.start()), section.rfind(";", 0, row.start()), 0)
+            comparison = section[max(sentence_start, row.start() - 250):row.start()]
+            if re.search(r"(?:versus|from|compared (?:to|with)) (?:the )?(?:prior|previous)(?: guidance)?", comparison, re.I):
+                continue
+            if re.search(r"(?:first|second) half\s+$", prefix, re.I):
+                continue
             label = row.group("label")
+            if label.lower() == "eps" and re.search(r"adjusted\s+$", text[max(0, start-30):start], re.I):
+                label = "Adjusted EPS"
+            if "eps" in label.lower() and ("on a gaap basis" in row.group().lower() or re.match(r"\s*on a GAAP basis", section[row.end():], re.I)):
+                label = "GAAP EPS"
             low, scale1, high, scale2 = row.group(2, 3, 4, 5)
-            if float(str(low).replace(",", "")) > float(str(high).replace(",", "")) or (
-                scale1 and scale2 and scale1.lower() != scale2.lower()
-            ):
+            if scale1 and scale2 and scale1.lower() != scale2.lower():
+                # Each endpoint declares its own unit, e.g. $980 million to
+                # $1 billion. Convert both before validating range order.
+                units = {"million": 1e6, "billion": 1e9, "m": 1e6, "b": 1e9}
+                low = str(float(low.replace(",", "")) * units[scale1.lower()])
+                high = str(float(high.replace(",", "")) * units[scale2.lower()])
+                scale1 = scale2 = ""
+            if float(str(low).replace(",", "")) > float(str(high).replace(",", "")):
                 continue
             # 'between/of' alone must be supported by an explicit forward verb
             # in the header or immediate clause, not a distant earnings headline.
             leading_action = re.search(
-                r"(?:expects?|guidance|outlook)[^.!?]{0,60}$",
+                r"(?:expects?|estimates?|guidance|outlook)[^.!?]{0,60}$",
                 text[max(0, start - 80) : start],
                 re.I,
             )
@@ -263,7 +283,7 @@ def normalize_explicit_guidance_scopes(
                 )
             )
             if not re.search(
-                r"expected|guidance|outlook|expects?", forward_context, re.I
+                r"expected|guidance|outlook|expects?|estimates?", forward_context, re.I
             ):
                 continue
             if "ebitda loss" in label.lower():
@@ -280,6 +300,38 @@ def normalize_explicit_guidance_scopes(
                     f"{period} guidance; {header}; {row.group()}",
                 )
             )
+
+        if re.search(r"guidance|outlook|expects?|estimates?", header + text[max(0,start-50):start], re.I):
+            for m in re.finditer(rf"(Non-GAAP net loss per share(?:, diluted)?) of \$\(({_NUM})\) to \$\(({_NUM})\)", section, re.I):
+                lo, hi = -float(m[2]), -float(m[3])
+                if lo <= hi:
+                    records.append(_record(document, rules_hash, period, "Non-GAAP EPS", lo, hi,
+                        "", f"{period} guidance; {header}; {m.group()}"))
+            for m in re.finditer(rf"(Adjusted EBITDA) is expected to be between breakeven and \$({_NUM}) (million|billion)", section, re.I):
+                records.append(_record(document, rules_hash, period, m[1], "0", m[2],
+                    m[3].lower(), f"{period} guidance; {header}; {m.group()}"))
+
+        # Colon-labelled rows under an explicit guidance heading.
+        if re.search(r"guidance|outlook", header, re.I):
+            for m in re.finditer(rf"({_LABEL})\s*:\s*{_RANGE}", section, re.I):
+                if float(m[2].replace(",", "")) <= float(m[4].replace(",", "")):
+                    records.append(_record(document, rules_hash, period, m[1], m[2], m[4],
+                        (m[5] or m[3] or "").lower(), f"{period} guidance; {header}; {m.group()}"))
+            for m in re.finditer(rf"((?:Adjusted |Non-GAAP )?operating margin)\s*:\s*({_NUM})% to ({_NUM})%", section, re.I):
+                if float(m[2]) <= float(m[3]):
+                    records.append(_record(document, rules_hash, period, m[1], m[2], m[3],
+                        "fraction", f"{period} guidance; {header}; {m.group()}"))
+
+        # Explicit forward operating-margin points/ranges stay inside the
+        # same already-bounded fiscal section as its other guidance rows.
+        for m in re.finditer(
+            rf"((?:Non-GAAP |Adjusted |GAAP )?operating margin) is expected to be "
+            rf"(?:in the range of )?({_NUM})%(?: to ({_NUM})%)?", section, re.I,
+        ):
+            lo, hi = m[2], m[3] or m[2]
+            if float(lo) <= float(hi):
+                records.append(_record(document, rules_hash, period, m[1], lo, hi,
+                    "fraction", f"{period} guidance; {header}; {m.group()}"))
 
         # Explicitly stated margin corresponding to the forward income range.
         for margin in re.finditer(
@@ -300,6 +352,19 @@ def normalize_explicit_guidance_scopes(
                     f"{period} guidance; {header}; {margin.group()}",
                 )
             )
+
+    # Point forecasts carry their own fiscal year; historical changes and
+    # qualitative "slightly positive" language cannot supply a numeric value.
+    for m in re.finditer(
+        rf"(Adjusted EBITDA) of (?:approximately )?\$({_NUM}) (million|billion) for (?:the )?full year (20\d{{2}})", text, re.I,
+    ):
+        prefix = text[max(0, m.start()-350):m.start()]
+        if re.search(r"(?i:expects?)(?:(?![.!?]\s+[A-Z]).){0,340}$", prefix):
+            records.append(_record(document, rules_hash, f"FY{m[4]}", m[1], m[2], m[2], m[3].lower(), m.group()))
+    for m in re.finditer(
+        rf"anticipates (revenue) of \$({_NUM}) (million|billion) during (20\d{{2}})", text, re.I,
+    ):
+        records.append(_record(document, rules_hash, f"FY{m[4]}", m[1], m[2], m[2], m[3].lower(), m.group()))
 
     # Single metric point guidance with its own explicit year. Do not borrow the
     # following reported fiscal year (e.g. an annual-results highlights heading).
