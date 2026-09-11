@@ -20,7 +20,7 @@ from app.services.phase_1_1e_run85_repairs_v1_1 import (
     normalize_distress_companyfacts_run85,
     promote_scoring_ready_event_run85,
 )
-from app.services.phase_1_1e_run88_guidance_repairs_v1_1 import extract_guidance_facts_run88
+from app.services.phase_1_1e_run89_guidance_repairs_v1_1 import extract_guidance_facts_run89
 
 
 _original_numeric_range = fact_extraction_service._numeric_range
@@ -152,8 +152,8 @@ def install_guards() -> None:
     fact_extraction_service._numeric_range = _guard_numeric_range
     shadow_enrichment_service.index_submissions_payload = _safe_index_submissions_payload
 
-    # Run-85/87/88 repair batches: evidence normalization only.
-    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_run88
+    # Run-85/87/88/89 repair batches: evidence normalization only.
+    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_run89
     shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records_table_normalized
     shadow_enrichment_service.normalize_distress_companyfacts = normalize_distress_companyfacts_run85
     shadow_enrichment_service.ShadowStructuralEnricher.assess_earnings_catalysts = (
