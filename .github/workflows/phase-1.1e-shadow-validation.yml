@@ -77,12 +77,16 @@ jobs:
   growth-enrichment:
     needs: capture
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    # Run 93 proved that six ~73-name shards can exceed the old 90-minute cap
+    # after the full-population SEC guidance preflight hardening. Split the same
+    # deterministic population into twelve smaller shards and retain a timeout
+    # backstop. This changes orchestration only, not SOE rules or evidence logic.
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       max-parallel: 4
       matrix:
-        chunk: [0, 1, 2, 3, 4, 5]
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     env:
       DATABASE_URL: sqlite+pysqlite:///./soe_phase_1_1e.db
       PROVIDER_NAME: free_public
@@ -118,7 +122,7 @@ jobs:
           PYTHONPATH=backend python -m app.cli_shadow_growth_chunk \
             --capture-meta validation-results/milestone-1.1e/capture_meta.json \
             --chunk-index ${{ matrix.chunk }} \
-            --chunk-count 6 \
+            --chunk-count 12 \
             --output validation-results/milestone-1.1e/chunks/growth-${{ matrix.chunk }}.json
 
       - name: Upload growth chunk
