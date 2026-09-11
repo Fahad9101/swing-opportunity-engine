@@ -32,6 +32,16 @@ _SCALE_MARKER = re.compile(
     r"phase_1_1e_run88_inherited_table_scale=(?P<scale>\d+(?:\.\d+)?(?:e[+-]?\d+)?)",
     re.I,
 )
+_RUN90_SCALE_MARKER = re.compile(
+    r"phase_1_1e_run90_scale_applied=(?P<scale>\d+(?:\.\d+)?(?:e[+-]?\d+)?)",
+    re.I,
+)
+_RAW_MONEY_RANGE = re.compile(
+    r"(?P<d1>\$)?\s*(?P<lo>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?:to|through|and|-|–|—)\s*"
+    r"(?P<d2>\$)?\s*(?P<hi>\d[\d,]*(?:\.\d+)?)",
+    re.I,
+)
 _EXPLICIT_SCALE = re.compile(
     r"(?:\(\s*\$?\s*in\s+|\b\$?\s*in\s+)"
     r"(?P<scale>thousands?|millions?|billions?)\s*\)?",
@@ -131,12 +141,50 @@ def _with_evidence(record: GuidanceMetricRecord, prefix: str, **updates) -> Guid
     return record.model_copy(update=updates)
 
 
+def _nearly_equal(left: float, right: float) -> bool:
+    return abs(left - right) <= max(1e-9, abs(right) * 1e-9)
+
+
 def _apply_scale(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
-    """Apply explicit inherited table scale exactly once."""
+    """Apply explicit inherited table scale exactly once, even after re-deduping.
+
+    Older evidence hardening can reconstruct an unscaled numeric range from the
+    preserved source span on a later dedupe pass.  The Run-90 marker therefore
+    cannot by itself prove that the current numeric values are still scaled.
+    When a prior scale marker exists, compare the current values with raw dollar
+    ranges retained in the immutable evidence.  Reapply only when the current
+    values match a raw range; leave them unchanged when they already match the
+    scaled range.  If neither relationship can be proven, fail closed by keeping
+    the current record unchanged.
+    """
     if record.metric not in _MONEY_METRICS or record.unit != "USD" or not _numeric(record):
         return record
     evidence = _record_evidence(record)
-    if _RUN90_SCALE in evidence:
+
+    applied = _RUN90_SCALE_MARKER.search(evidence)
+    if applied:
+        scale = float(applied.group("scale"))
+        if scale == 1:
+            return record
+        for match in _RAW_MONEY_RANGE.finditer(evidence):
+            if not (match.group("d1") or match.group("d2")):
+                continue
+            raw_low = float(match.group("lo").replace(",", ""))
+            raw_high = float(match.group("hi").replace(",", ""))
+            if raw_low > raw_high:
+                continue
+            scaled_low = raw_low * scale
+            scaled_high = raw_high * scale
+            if _nearly_equal(record.low, scaled_low) and _nearly_equal(record.high, scaled_high):
+                return record
+            if _nearly_equal(record.low, raw_low) and _nearly_equal(record.high, raw_high):
+                return record.model_copy(
+                    update={
+                        "low": scaled_low,
+                        "high": scaled_high,
+                        "midpoint": (scaled_low + scaled_high) / 2.0,
+                    }
+                )
         return record
 
     scale: float | None = None
