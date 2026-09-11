@@ -458,9 +458,12 @@ def dedupe_guidance_records_run90(
     records: list[GuidanceMetricRecord],
 ) -> list[GuidanceMetricRecord]:
     """Population-level guidance ledger sanitizer."""
-    normalized = dedupe_guidance_records_table_normalized(
-        [_restore_parenthesized_eps(_apply_scale(r)) for r in records]
-    )
+    # Preserve the established Round-8/table authority semantics first. The
+    # Run-90 transforms intentionally prepend audit markers, so applying them
+    # before the established deduper could hide the original structured-record
+    # prefix and make valid evidence look generic.
+    established = dedupe_guidance_records_table_normalized(records)
+    normalized = [_restore_parenthesized_eps(_apply_scale(r)) for r in established]
 
     prelim: list[GuidanceMetricRecord] = []
     for record in normalized:

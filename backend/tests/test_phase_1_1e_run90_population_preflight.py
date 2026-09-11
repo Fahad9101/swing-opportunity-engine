@@ -25,13 +25,26 @@ def record(
     period: str = "FY2026",
     basis: str = "UNSPECIFIED",
     timestamp: datetime = NOW,
-    evidence: str = "Full-year 2026 guidance expects this range.",
+    evidence: str | None = None,
     action: GuidanceAction = GuidanceAction.NONE,
     unit: str | None = None,
 ):
     if unit is None:
         unit = "fraction" if metric in {GuidanceMetric.GROSS_MARGIN, GuidanceMetric.OPERATING_MARGIN} else (
             "USD/share" if metric is GuidanceMetric.EPS else "USD"
+        )
+    if evidence is None:
+        label = {
+            GuidanceMetric.REVENUE: "revenue",
+            GuidanceMetric.EBITDA: "adjusted EBITDA",
+            GuidanceMetric.FCF: "free cash flow",
+            GuidanceMetric.EPS: "EPS",
+            GuidanceMetric.GROSS_MARGIN: "gross margin",
+            GuidanceMetric.OPERATING_MARGIN: "operating margin",
+        }[metric]
+        evidence = (
+            f"normalized_explicit_guidance_scope; {period} {label} guidance "
+            f"is {low} to {high}."
         )
     return GuidanceMetricRecord(
         rules_hash="run90-test",
@@ -64,7 +77,7 @@ def test_inherited_scale_marker_is_executed_exactly_once():
         226.0,
         evidence=(
             "phase_1_1e_run88_inherited_table_scale=1e+06; "
-            "Full-year 2026 guidance. Net sales (in millions) $221 - $226."
+            "FY2026 revenue guidance is $221 - $226 (in millions)."
         ),
     )
     first = dedupe_guidance_records_run90([raw])
@@ -112,28 +125,13 @@ def test_conflicting_same_scope_ranges_fail_closed():
 
 def test_same_range_assigned_to_two_metrics_fails_closed():
     revenue = record(GuidanceMetric.REVENUE, 130_000_000, 150_000_000)
-    ebitda = record(
-        GuidanceMetric.EBITDA,
-        130_000_000,
-        150_000_000,
-        basis="ADJUSTED",
-    )
+    ebitda = record(GuidanceMetric.EBITDA, 130_000_000, 150_000_000, basis="ADJUSTED")
     assert dedupe_guidance_records_run90([revenue, ebitda]) == []
 
 
 def test_impossible_annual_value_not_allowed_to_equal_quarter_value():
-    quarter = record(
-        GuidanceMetric.REVENUE,
-        370_000_000,
-        390_000_000,
-        period="Q3FY2026",
-    )
-    annual = record(
-        GuidanceMetric.REVENUE,
-        370_000_000,
-        390_000_000,
-        period="FY2026",
-    )
+    quarter = record(GuidanceMetric.REVENUE, 370_000_000, 390_000_000, period="Q3FY2026")
+    annual = record(GuidanceMetric.REVENUE, 370_000_000, 390_000_000, period="FY2026")
     cleaned = dedupe_guidance_records_run90([quarter, annual])
     assert [(r.fiscal_period, r.low, r.high) for r in cleaned] == [
         ("Q3FY2026", 370_000_000, 390_000_000)
@@ -153,7 +151,7 @@ def test_explicit_lower_action_survives_basis_collision_guard():
         6.52,
         basis="GAAP",
         action=GuidanceAction.LOWER,
-        evidence="FY2026 guidance lowered GAAP EPS to at least $6.52.",
+        evidence="normalized_explicit_guidance_scope; FY2026 guidance lowered GAAP EPS to at least $6.52.",
     )
     adjusted = record(
         GuidanceMetric.EPS,
@@ -161,7 +159,7 @@ def test_explicit_lower_action_survives_basis_collision_guard():
         9.00,
         basis="ADJUSTED",
         action=GuidanceAction.REAFFIRM,
-        evidence="FY2026 guidance reaffirmed adjusted EPS at least $9.00.",
+        evidence="normalized_explicit_guidance_scope; FY2026 guidance reaffirmed adjusted EPS at least $9.00.",
     )
     cleaned = dedupe_guidance_records_run90([gaap, adjusted])
     assert len(cleaned) == 2
@@ -191,8 +189,8 @@ def test_scope_change_sensitive_pair_returns_no_comparison():
         3_400_000_000,
         timestamp=NOW - timedelta(days=90),
         evidence=(
-            "phase_1_1e_run90_scope_change_sensitive; "
-            "Full-year 2026 guidance includes expected contribution from discontinued operations."
+            "normalized_explicit_guidance_scope; phase_1_1e_run90_scope_change_sensitive; "
+            "Full-year 2026 revenue guidance includes expected contribution from discontinued operations."
         ),
     )
     current = record(
@@ -200,7 +198,7 @@ def test_scope_change_sensitive_pair_returns_no_comparison():
         2_660_000_000,
         2_710_000_000,
         timestamp=NOW,
-        evidence="Full-year 2026 guidance after the separation.",
+        evidence="normalized_explicit_guidance_scope; Full-year 2026 revenue guidance after the separation.",
     )
     ledger = GuidanceLedgerRun90([prior, current])
     current_rows, prior_rows = ledger.current_and_prior("TEST", as_of=NOW)
@@ -210,12 +208,7 @@ def test_scope_change_sensitive_pair_returns_no_comparison():
 
 def test_clean_simple_guidance_survives():
     revenue = record(GuidanceMetric.REVENUE, 600_000_000, 640_000_000)
-    ebitda = record(
-        GuidanceMetric.EBITDA,
-        118_000_000,
-        132_000_000,
-        basis="ADJUSTED",
-    )
+    ebitda = record(GuidanceMetric.EBITDA, 118_000_000, 132_000_000, basis="ADJUSTED")
     cleaned = dedupe_guidance_records_run90([revenue, ebitda])
     assert {(r.metric, r.low, r.high) for r in cleaned} == {
         (GuidanceMetric.REVENUE, 600_000_000, 640_000_000),
