@@ -23,7 +23,7 @@ jobs:
           python-version: '3.12'
           cache: pip
       - name: Apply semantic repair batch
-        run: python scripts/phase_1_1e_semantic_repair_v4.py
+        run: python scripts/phase_1_1e_semantic_repair_v5.py
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
       - name: Run complete deterministic test suite
