@@ -114,3 +114,45 @@ def test_directional_word_in_risk_factor_prose_cannot_create_guidance():
 
     assert not extraction.facts
     assert all(fact.explicit_action is not GuidanceAction.LOWER for fact in extraction.facts)
+
+
+def test_bullet_plain_revenue_remains_company_scope():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "BULLET",
+            "Fiscal Year 2026 Outlook: o Revenue is expected to be between $648 million and $652 million.",
+        )
+    )
+    revenue = next(fact for fact in extraction.facts if fact.metric.value == "revenue")
+    assert revenue.scope_kind is GuidanceScopeKind.COMPANY
+
+
+def test_issuer_name_and_guidance_verbs_do_not_become_revenue_scope():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "ISSUER",
+            "ACM is maintaining its full-year 2026 revenue guidance range of $1.08 billion to $1.175 billion. "
+            "We are raising our full-year 2026 revenue guidance to $1.10 billion to $1.20 billion.",
+        )
+    )
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    assert revenue
+    assert all(fact.scope_kind is GuidanceScopeKind.COMPANY for fact in revenue)
+
+
+def test_explicit_category_revenue_qualifiers_are_non_company():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "CATEGORIES",
+            "Third Quarter 2026 Outlook: Service revenue is expected to be $500 million to $520 million. "
+            "Third Quarter 2026 Outlook: U.S. commercial revenue is expected to be $300 million to $320 million. "
+            "Third Quarter 2026 Outlook: Product revenue is expected to be $100 million to $110 million.",
+        )
+    )
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    service = next(fact for fact in revenue if fact.low == 500.0)
+    commercial = next(fact for fact in revenue if fact.low == 300.0)
+    product = next(fact for fact in revenue if fact.low == 100.0)
+    assert service.scope_kind is GuidanceScopeKind.SEGMENT
+    assert commercial.scope_kind is GuidanceScopeKind.SEGMENT
+    assert product.scope_kind is GuidanceScopeKind.PRODUCT
