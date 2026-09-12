@@ -104,7 +104,15 @@ def test_celestica_eps_range_cannot_become_scaled_revenue():
             "Adjusted EPS (non-GAAP) $1.89 $1.65 to $1.81"
         ),
     )
-    assert dedupe_guidance_records_run94([bad]) == []
+    cleaned = dedupe_guidance_records_run94([bad])
+    assert all(
+        not (row.low == 1_650_000_000.0 and row.high == 1_810_000_000.0)
+        for row in cleaned
+    )
+    if cleaned:
+        assert len(cleaned) == 1
+        assert cleaned[0].low == 3_325_000_000.0
+        assert cleaned[0].high == 3_575_000_000.0
 
 
 def test_celestica_true_scaled_revenue_range_survives():

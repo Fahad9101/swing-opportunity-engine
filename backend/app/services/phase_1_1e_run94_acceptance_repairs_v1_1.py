@@ -199,10 +199,12 @@ def _scaled_table_metric_locality_clean(record: GuidanceMetricRecord) -> bool:
 def _sanitize_after_run90(
     records: Iterable[GuidanceMetricRecord],
 ) -> tuple[list[GuidanceMetricRecord], list[dict]]:
-    established = dedupe_guidance_records_run90(list(records))
-    accepted: list[GuidanceMetricRecord] = []
+    # Repair explicit issuer period scope before the established Run-90 deduper.
+    # The old table deduper can otherwise discard a mis-rebound row before the
+    # stronger source-period evidence has a chance to restore it.
+    pre_repaired: list[GuidanceMetricRecord] = []
     rejected: list[dict] = []
-    for original in established:
+    for original in records:
         record, period_reason = _repair_period(original)
         if record is None:
             rejected.append(
@@ -215,6 +217,12 @@ def _sanitize_after_run90(
                 }
             )
             continue
+        pre_repaired.append(record)
+
+    established = dedupe_guidance_records_run90(pre_repaired)
+    accepted: list[GuidanceMetricRecord] = []
+    for record in established:
+        period_reason = None
         if not _scaled_table_metric_locality_clean(record):
             rejected.append(
                 {
