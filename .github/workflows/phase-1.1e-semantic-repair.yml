@@ -1,6 +1,7 @@
-name: Phase 1.1E Semantic Repair
+name: Phase 1.1E Minimal V5 Acceptance
 
-# Diagnostic-only v13 corpus run. Never publishes extractor changes.
+# Candidate-only acceptance run. Applies the minimal repair in the runner working tree.
+# It never publishes extractor changes; publication requires separate semantic adjudication.
 on:
   push:
     branches:
@@ -11,13 +12,13 @@ permissions:
   actions: read
 
 jobs:
-  semantic-repair:
-    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E semantic repair') }}
+  minimal-v5-acceptance:
+    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E minimal v5 acceptance') }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
       SOURCE_ARTIFACT_ID: '10296727219'
-      SEC_USER_AGENT: 'SOE-SemanticRepair/1.0 (soe-validation@example.com)'
+      SEC_USER_AGENT: 'SOE-MinimalV5Acceptance/1.0 (soe-validation@example.com)'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,13 +28,13 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - name: Apply v13 diagnostic repair in working tree
-        run: python scripts/phase_1_1e_semantic_repair_v13.py
+      - name: Apply evidence-minimal v5 repair in working tree
+        run: python scripts/phase_1_1e_v5_minimal_acceptance_repair.py
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
       - name: Run complete deterministic test suite
         env:
-          DATABASE_URL: sqlite+pysqlite:///./soe_semantic_repair.db
+          DATABASE_URL: sqlite+pysqlite:///./soe_minimal_v5_acceptance.db
           PROVIDER_NAME: fixture
         run: python -m pytest -q
       - name: Download immutable acceptance artifact
@@ -53,15 +54,15 @@ jobs:
         run: |
           python -m app.cli_guidance_raw_replay_differential \
             semantic-replay-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json \
-            --output semantic-repair-v13-diagnostic.json \
+            --output semantic-minimal-v5-acceptance.json \
             --min-interval 0.15 \
             --retries 3
-      - name: Print diagnostic metrics
+      - name: Enforce source-integrity gate and print semantic metrics
         run: |
           python - <<'PY'
           import json
-          r=json.load(open('semantic-repair-v13-diagnostic.json'))
-          print(json.dumps({
+          r=json.load(open('semantic-minimal-v5-acceptance.json'))
+          summary={
             'documents_verified': f"{r['verified_source_count']}/{r['source_manifest_count']}",
             'fetch_failures': r['fetch_failure_count'],
             'hash_mismatches': r['hash_mismatch_count'],
@@ -71,10 +72,18 @@ jobs:
             'canonical_facts': r['canonical_fact_count'],
             'quarantined': r['quarantined_fact_count'],
             'classification_divergences': r['classification_divergence_count'],
-          }, indent=2))
+            'divergence_tickers': [d['ticker'] for d in r.get('classification_divergences', [])],
+          }
+          print(json.dumps(summary, indent=2))
+          assert r['source_manifest_count'] == 305
+          assert r['verified_source_count'] == 305
+          assert r['fetch_failure_count'] == 0
+          assert r['hash_mismatch_count'] == 0
+          assert r.get('extraction_error_count', 0) == 0
+          assert r['complete_ticker_count'] == r['tickers_with_guidance_payload'] == 109
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: semantic-repair-v13-diagnostic
-          path: semantic-repair-v13-diagnostic.json
+          name: phase-1.1e-minimal-v5-acceptance
+          path: semantic-minimal-v5-acceptance.json
           if-no-files-found: error
