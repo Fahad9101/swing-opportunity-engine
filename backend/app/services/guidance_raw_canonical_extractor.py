@@ -53,13 +53,17 @@ _CANONICAL_QUARTER = [
 _QUARTER_WORD = {"first": "1", "second": "2", "third": "3", "fourth": "4"}
 _BARE_YEAR = re.compile(r"\b(20\d{2})\b")
 
-_SCOPE_CONTEXT_WORDS = {
-    "a", "an", "and", "approximately", "about", "company", "companywide", "company-wide",
-    "consolidated", "current", "expects", "expect", "expected", "forecast", "for", "full",
-    "fiscal", "first", "fourth", "guidance", "is", "its", "maintains", "management", "net",
-    "now", "of", "our", "outlook", "prior", "previous", "projects", "projected", "quarter",
-    "reaffirms", "second", "the", "third", "to", "total", "we", "will", "year",
-}
+# Scope is fail-closed only on explicit economic qualifiers immediately bound
+# to the revenue noun. Generic verbs, issuer names, bullets, or table labels are
+# never treated as segment identity.
+_SEGMENT_REVENUE_QUALIFIER = re.compile(
+    r"(?:\b(?:cloud\s+subscriptions?|subscriptions?|services?|licensing|commercial|"
+    r"government|enterprise|consumer|advertising|international|domestic|platform|"
+    r"software|hardware|maintenance|support|professional\s+services|"
+    r"u\.?s\.?\s+commercial|u\.?s\.?\s+government)\s+)$",
+    re.I,
+)
+_PRODUCT_REVENUE_QUALIFIER = re.compile(r"\bproduct\s+$", re.I)
 
 
 def _explicit_forward_context(text: str) -> bool:
@@ -220,30 +224,30 @@ def _canonical_scope(clause: str, anchor: int, mention) -> tuple[GuidanceScopeKi
 
     label = mention.text.strip()
     lower = label.lower()
-    if "total product revenue" in lower or "total revenue" in lower or "consolidated revenue" in lower or "net sales" in lower:
+    if (
+        "total product revenue" in lower
+        or "total revenue" in lower
+        or "consolidated revenue" in lower
+        or "net sales" in lower
+    ):
         return GuidanceScopeKind.COMPANY, label
     if "segment revenue" in lower:
         return GuidanceScopeKind.SEGMENT, label
-    if "product revenue" in lower:
+    if "product revenue" in lower and "total product revenue" not in lower:
         return GuidanceScopeKind.PRODUCT, label
 
-    # For a plain "revenue" token, inspect only its immediate noun phrase.
-    # Qualified measures such as "cloud subscriptions revenue" must not be
-    # promoted into company-wide total revenue merely because the lexical metric
-    # matcher returned the terminal word "revenue".
-    prefix = clause[max(0, anchor - 80):anchor]
-    prefix = re.split(r"[.;:•|]", prefix)[-1]
-    words = re.findall(r"[A-Za-z][A-Za-z0-9&'/-]*", prefix)[-4:]
-    meaningful = [
-        word for word in words
-        if word.lower() not in _SCOPE_CONTEXT_WORDS and not re.fullmatch(r"20\d{2}", word)
-    ]
-    if not meaningful:
-        return GuidanceScopeKind.COMPANY, None
-    qualifier = " ".join(meaningful)
-    if any(word.lower() == "product" for word in meaningful):
-        return GuidanceScopeKind.PRODUCT, qualifier
-    return GuidanceScopeKind.SEGMENT, qualifier
+    # The generic metric matcher can return only the terminal word "revenue".
+    # In that case, inspect a very short adjacent noun phrase and recognize only
+    # explicit business-category qualifiers. Bullets, issuer names and verbs do
+    # not establish non-company scope.
+    prefix = clause[max(0, anchor - 55):anchor]
+    prefix = re.split(r"[.;:•|\n\r]", prefix)[-1].strip()
+    if _PRODUCT_REVENUE_QUALIFIER.search(prefix):
+        return GuidanceScopeKind.PRODUCT, prefix
+    segment_match = _SEGMENT_REVENUE_QUALIFIER.search(prefix)
+    if segment_match:
+        return GuidanceScopeKind.SEGMENT, segment_match.group(0).strip()
+    return GuidanceScopeKind.COMPANY, None
 
 
 def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTypedGuidanceExtraction:
