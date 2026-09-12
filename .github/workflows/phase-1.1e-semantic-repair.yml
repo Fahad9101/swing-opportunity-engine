@@ -1,0 +1,341 @@
+name: Phase 1.1E Semantic Repair
+
+on:
+  push:
+    branches:
+      - phase-1.1e-canonical-guidance
+
+permissions:
+  contents: write
+
+jobs:
+  semantic-repair:
+    if: github.event.head_commit.message == 'Begin Phase 1.1E semantic acceptance repair'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Apply systemic raw-guidance semantic repairs
+        working-directory: .
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          canonical_path = Path('backend/app/services/guidance_raw_canonical_extractor.py')
+          s = canonical_path.read_text()
+
+          old = '''_ACTUAL_VALUE = re.compile(
+              r"\\b(?:was|were|totaled|reported|generated|delivered|achieved|realized|"
+              r"for\\s+the\\s+quarter\\s+ended|for\\s+the\\s+year\\s+ended|year[- ]to[- ]date)\\b",
+              re.I,
+          )'''
+          new = '''_ACTUAL_VALUE = re.compile(
+              r"\\b(?:was|were|totaled|reports?|reported|generated|delivered|achieved|realized|"
+              r"(?:increased|decreased|grew|declined|rose|fell)(?:\\s+\\d+(?:\\.\\d+)?%)?\\s+to|"
+              r"for\\s+the\\s+quarter\\s+ended|for\\s+the\\s+year\\s+ended|year[- ]to[- ]date)\\b",
+              re.I,
+          )'''
+          assert old in s, 'actual-value block changed upstream'
+          s = s.replace(old, new, 1)
+
+          old = '''            r"(?:EPS|earnings\\s+per\\s+(?:common\\s+)?share)\\b",'''
+          new = '''            r"(?:EPS|earnings\\s+per\\s+(?:common\\s+)?share|per\\s+diluted\\s+share)\\b",'''
+          assert old in s, 'EPS owner pattern changed upstream'
+          s = s.replace(old, new, 1)
+
+          old = '''    ("repurchase", re.compile(r"\\b(?:share|stock)\\s+repurchase\\b", re.I)),'''
+          new = '''    ("repurchase", re.compile(r"\\b(?:(?:share|stock)\\s+repurchase|repurchas(?:e|es|ed|ing))\\b", re.I)),'''
+          assert old in s, 'repurchase owner pattern changed upstream'
+          s = s.replace(old, new, 1)
+
+          old = '''    ("contract_value", re.compile(r"\\b(?:contract\\s+wins?|contracts?\\s+valued|transaction\\s+consideration)\\b", re.I)),'''
+          new = '''    (
+              "contract_value",
+              re.compile(
+                  r"\\b(?:contract\\s+wins?|contracts?\\s+valued|transaction\\s+consideration|"
+                  r"contracts?\\b[^.;]{0,100}\\b(?:valued|combined\\s+annual\\s+revenues?))\\b",
+                  re.I,
+              ),
+          ),'''
+          assert old in s, 'contract owner pattern changed upstream'
+          s = s.replace(old, new, 1)
+
+          old = '''def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> bool:
+              current_start = anchor
+              current_end = anchor + len(mention.text)
+              current_gap = _span_gap(current_start, current_end, value.start, value.end)
+              nearest_other: tuple[int, GuidanceMetric | str] | None = None
+              for owner, pattern in _VALUE_OWNER_PATTERNS:
+                  for match in pattern.finditer(clause):
+                      if owner is mention.metric and not (match.end() <= current_start or match.start() >= current_end):
+                          continue
+                      gap = _span_gap(match.start(), match.end(), value.start, value.end)
+                      if nearest_other is None or gap < nearest_other[0]:
+                          nearest_other = (gap, owner)
+              if nearest_other is None:
+                  return True
+              other_gap, other_owner = nearest_other
+              if other_owner is mention.metric:
+                  return True
+              return current_gap < other_gap
+          '''
+          new = '''def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> bool:
+              current_start = anchor
+              current_end = anchor + len(mention.text)
+              current_gap = _span_gap(current_start, current_end, value.start, value.end)
+              nearest_other: tuple[int, GuidanceMetric | str] | None = None
+              current_basis = (
+                  "ADJUSTED" if re.search(r"\\b(?:adjusted|non[- ]GAAP)\\b", mention.text, re.I)
+                  else "GAAP" if re.search(r"(?<!non[- ])\\bGAAP\\b", mention.text, re.I)
+                  else None
+              )
+              for owner, pattern in _VALUE_OWNER_PATTERNS:
+                  for match in pattern.finditer(clause):
+                      overlaps_current = not (match.end() <= current_start or match.start() >= current_end)
+                      if owner is mention.metric and overlaps_current:
+                          continue
+                      owner_is_effectively_other = owner is not mention.metric
+                      if owner is mention.metric and value.end <= current_start:
+                          owner_text = match.group(0)
+                          owner_basis = (
+                              "ADJUSTED" if re.search(r"\\b(?:adjusted|non[- ]GAAP)\\b", owner_text, re.I)
+                              else "GAAP" if re.search(r"(?<!non[- ])\\bGAAP\\b", owner_text, re.I)
+                              else None
+                          )
+                          owner_is_effectively_other = bool(
+                              current_basis and owner_basis and current_basis != owner_basis
+                          )
+                      if not owner_is_effectively_other:
+                          continue
+                      gap = _span_gap(match.start(), match.end(), value.start, value.end)
+                      if value.end <= current_start and match.end() <= value.start:
+                          prior_gap = value.start - match.end()
+                          if prior_gap <= 120 and prior_gap <= current_gap + 80:
+                              return False
+                      if nearest_other is None or gap < nearest_other[0]:
+                          nearest_other = (gap, owner)
+              if nearest_other is None:
+                  return True
+              other_gap, _ = nearest_other
+              return current_gap < other_gap
+          '''
+          assert old in s, 'value-owner function changed upstream'
+          s = s.replace(old, new, 1)
+
+          old = '''def _value_is_historical_actual(clause: str, anchor: int, value) -> bool:
+              if value is None:
+                  return False
+              before = clause[max(0, min(anchor, value.start) - 40):value.start]
+              actuals = list(_ACTUAL_VALUE.finditer(before))
+              if not actuals:
+                  return False
+              latest_actual = actuals[-1]
+              after_actual = before[latest_actual.end():]
+              if _FORWARD_SIGNAL.search(after_actual):
+                  return False
+              return len(before) - latest_actual.end() <= 90
+          '''
+          new = '''def _value_is_historical_actual(clause: str, anchor: int, value) -> bool:
+              if value is None:
+                  return False
+              before = clause[max(0, min(anchor, value.start) - 120):value.start]
+              actuals = list(_ACTUAL_VALUE.finditer(before))
+              if not actuals:
+                  return False
+              latest_actual = actuals[-1]
+              marker_context = before[max(0, latest_actual.start() - 80):latest_actual.end()]
+              if re.search(r"\\b(?:guidance|outlook|forecast)\\b", marker_context, re.I):
+                  return False
+              after_actual = before[latest_actual.end():]
+              if _FORWARD_SIGNAL.search(after_actual):
+                  return False
+              return len(before) - latest_actual.end() <= 120
+          '''
+          assert old in s, 'historical-actual function changed upstream'
+          s = s.replace(old, new, 1)
+
+          old = '''    best_by_key: dict[tuple, int] = {}
+          '''
+          new = '''    # Suppress unscaled shadow fragments when the same raw endpoints are
+              # present in an explicitly scaled observation at the same semantic identity.
+              # Common SEC text examples are "$8.150-$8.158 billion" and "$485-$510 million".
+              scaled_units = {GuidanceUnit.USD_THOUSAND, GuidanceUnit.USD_MILLION, GuidanceUnit.USD_BILLION}
+              for i, fact in enumerate(items):
+                  if i in remove or fact.low is None or fact.high is None or fact.unit is not GuidanceUnit.USD:
+                      continue
+                  for j, other in enumerate(items):
+                      if i == j or j in remove or other.unit not in scaled_units:
+                          continue
+                      if not _same_economic_identity(fact, other):
+                          continue
+                      if fact.low == other.low and fact.high == other.high:
+                          remove.add(i)
+                          rejected.append({
+                              "reason": "unscaled_shadow_fragment",
+                              "metric": fact.metric.value,
+                              "period": fact.fiscal_period,
+                              "value": [fact.low, fact.high],
+                          })
+                          break
+
+              best_by_key: dict[tuple, int] = {}
+          '''
+          assert old in s, 'fragment suppression insertion point changed upstream'
+          s = s.replace(old, new, 1)
+
+          old = '''            if period is None:
+                      rejected.append({"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]}); continue
+                  if value is None and local_action not in {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM, GuidanceAction.WITHDRAW}:
+          '''
+          new = '''            if period is None:
+                      rejected.append({"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]}); continue
+                  if value is not None and value.end <= period.start <= anchor:
+                      rejected.append({
+                          "reason": "value_crosses_period_boundary",
+                          "metric": mention.metric.value,
+                          "value_text": value.text,
+                          "period": period.period,
+                          "evidence": clause[:500],
+                      }); continue
+                  if value is None and local_action not in {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM, GuidanceAction.WITHDRAW}:
+          '''
+          assert old in s, 'period-boundary insertion point changed upstream'
+          s = s.replace(old, new, 1)
+
+          s = s.replace('"raw_document_extractor": "guidance-canonical-raw-v4"', '"raw_document_extractor": "guidance-canonical-raw-v5"')
+          canonical_path.write_text(s)
+
+          typed_path = Path('backend/app/services/guidance_raw_typed_extractor.py')
+          s = typed_path.read_text()
+          old = '''        eps_single = re.compile(r"\\$\\s*(?P<value>-?\\d+(?:\\.\\d+)?)(?!\\s*%)")'''
+          new = '''        eps_single = re.compile(r"\\$\\s*(?P<value>-?\\d+(?:\\.\\d+)?)(?![\\d,]|\\s*%)")'''
+          assert old in s, 'EPS single parser changed upstream'
+          s = s.replace(old, new, 1)
+          typed_path.write_text(s)
+
+          replay_path = Path('backend/app/services/guidance_raw_replay_differential_service.py')
+          s = replay_path.read_text()
+          old = '''                "rejected_candidate_count": len(rejected),
+                      }
+                  )
+          '''
+          new = '''                "rejected_candidate_count": len(rejected),
+                          "accepted_facts": [_fact_summary(fact) for fact in canonical.accepted],
+                          "quarantined_facts": [_quarantine_summary(item) for item in canonical.quarantined],
+                      }
+                  )
+          '''
+          assert old in s, 'complete ticker-report block changed upstream'
+          s = s.replace(old, new, 1)
+          replay_path.write_text(s)
+
+          test_path = Path('backend/tests/test_guidance_raw_canonical_extractor.py')
+          tests = test_path.read_text()
+          marker = 'def test_semantic_acceptance_cross_metric_owner_regressions():'
+          if marker not in tests:
+              tests += r'''
+
+
+def test_semantic_acceptance_cross_metric_owner_regressions():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "OWNER2",
+            "Fiscal year 2027 guidance: Revenue of between $630 million and $650 million; "
+            "Non-GAAP adjusted EBITDA of between $135 million and $145 million. "
+            "Full year 2026 guidance: net cash provided by operating activities to range between "
+            "$2.90 billion and $3.40 billion and free cash flow to range between $2.00 billion and $2.50 billion.",
+        )
+    )
+    ebitda = [fact for fact in extraction.facts if fact.metric.value == "ebitda"]
+    fcf = [fact for fact in extraction.facts if fact.metric.value == "fcf"]
+    assert all((fact.low, fact.high) != (630.0, 650.0) for fact in ebitda)
+    assert all((fact.low, fact.high) != (2.90, 3.40) for fact in fcf)
+    assert any((fact.low, fact.high) == (135.0, 145.0) for fact in ebitda)
+    assert any((fact.low, fact.high) == (2.00, 2.50) for fact in fcf)
+
+
+def test_semantic_acceptance_period_heading_blocks_prior_value_binding():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "HEADING",
+            "Adjusted restaurant-level profit is expected to be approximately $208 million to $212 million in FY25. "
+            "Initial Fiscal 2026 Financial Guidance: Total revenue of $1.6 billion to $1.7 billion.",
+        )
+    )
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    assert any(fact.fiscal_period == "FY2026" and (fact.low, fact.high) == (1.6, 1.7) for fact in revenue)
+    assert all((fact.low, fact.high) != (208.0, 212.0) for fact in revenue)
+
+
+def test_semantic_acceptance_scale_shadow_is_suppressed():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "SCALE",
+            "For full year 2026, we are raising our revenue guidance to between $8.150 - $8.158 billion.",
+        )
+    )
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    observed = {(fact.low, fact.high, fact.unit.value) for fact in revenue}
+    assert (8.15, 8.158, "USD_BILLION") in observed
+    assert (8.15, 8.158, "USD") not in observed
+
+
+def test_semantic_acceptance_result_headline_is_not_forward_guidance():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "ACTUAL2",
+            "Humana Reports Second Quarter 2026 Financial Results; Affirms Full Year 2026 Adjusted Financial Guidance. "
+            "Reports 2Q26 earnings per share (EPS) of $5.73 on a GAAP basis, Adjusted EPS of $7.61. "
+            "FY 2026 Adjusted EPS guidance is at least $9.00.",
+        )
+    )
+    eps = [fact for fact in extraction.facts if fact.metric.value == "eps"]
+    assert all(fact.low not in {5.73, 7.61} for fact in eps)
+    assert any(fact.low == 9.0 for fact in eps)
+
+
+def test_semantic_acceptance_eps_does_not_truncate_comma_dollar_amount():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "COMMA",
+            "FY 2026 Adjusted EPS guidance is at least $9.00. Adjusted net income $2,263 million.",
+        )
+    )
+    eps = [fact for fact in extraction.facts if fact.metric.value == "eps"]
+    assert all(fact.low != 2.0 for fact in eps)
+'''
+              test_path.write_text(tests)
+          PY
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run semantic repair regression tests
+        run: |
+          pytest -q \
+            tests/test_guidance_raw_canonical_extractor.py \
+            tests/test_guidance_canonical.py \
+            tests/test_guidance_intelligence.py
+
+      - name: Publish validated repair
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/app/services/guidance_raw_canonical_extractor.py \
+                  backend/app/services/guidance_raw_typed_extractor.py \
+                  backend/app/services/guidance_raw_replay_differential_service.py \
+                  backend/tests/test_guidance_raw_canonical_extractor.py
+          git diff --cached --check
+          git commit -m "Phase 1.1E: repair raw guidance semantic binding [semantic-repair]"
+          git push origin HEAD:phase-1.1e-canonical-guidance
