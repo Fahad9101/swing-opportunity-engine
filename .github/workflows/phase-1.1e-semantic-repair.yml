@@ -1,6 +1,6 @@
 name: Phase 1.1E Semantic Repair
 
-# Trigger v11 semantic acceptance repair with full deterministic and immutable replay gates.
+# Diagnostic run for the final v11 historical-result binding failure.
 on:
   push:
     branches:
@@ -31,8 +31,8 @@ jobs:
         run: python scripts/phase_1_1e_semantic_repair_v11.py
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
-      - name: Print targeted semantic diagnostics
-        run: python scripts/phase_1_1e_semantic_debug.py
+      - name: Print value-coordinate diagnostic
+        run: python scripts/phase_1_1e_value_coordinate_debug.py
       - name: Run complete deterministic test suite
         env:
           DATABASE_URL: sqlite+pysqlite:///./soe_semantic_repair.db
@@ -63,7 +63,7 @@ jobs:
           python - <<'PY'
           import json
           report = json.load(open('semantic-repair-v11-replay.json'))
-          summary = {
+          print(json.dumps({
               'documents_verified': f"{report['verified_source_count']}/{report['source_manifest_count']}",
               'fetch_failures': report['fetch_failure_count'],
               'hash_mismatches': report['hash_mismatch_count'],
@@ -73,8 +73,7 @@ jobs:
               'canonical_facts': report['canonical_fact_count'],
               'quarantined': report['quarantined_fact_count'],
               'classification_divergences': report['classification_divergence_count'],
-          }
-          print(json.dumps(summary, indent=2))
+          }, indent=2))
           assert report['source_manifest_count'] == 305
           assert report['verified_source_count'] == 305
           assert report['fetch_failure_count'] == 0
