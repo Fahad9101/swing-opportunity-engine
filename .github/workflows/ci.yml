@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, milestone-2.5b-free-data-enrichment]
   pull_request:
-    branches: [main]
+    branches: [main, phase-1.1e-shadow-validation]
 
 permissions:
   contents: read
