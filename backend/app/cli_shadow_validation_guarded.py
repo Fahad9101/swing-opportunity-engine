@@ -13,10 +13,10 @@ from app.services.phase_1_1e_run85_repairs_v1_1 import (
     normalize_distress_companyfacts_run85,
     promote_scoring_ready_event_run85,
 )
-from app.services.phase_1_1e_run90_population_preflight_v1_1 import (
-    GuidanceLedgerRun90,
-    dedupe_guidance_records_run90,
-    extract_guidance_facts_run90,
+from app.services.phase_1_1e_run94_acceptance_repairs_v1_1 import (
+    GuidanceLedgerRun94,
+    dedupe_guidance_records_run94,
+    extract_guidance_facts_run94,
 )
 
 _original_numeric_range = fact_extraction_service._numeric_range
@@ -114,9 +114,9 @@ def install_guards() -> None:
     install_binding_patch()
     fact_extraction_service._numeric_range = _guard_numeric_range
     shadow_enrichment_service.index_submissions_payload = _safe_index_submissions_payload
-    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_run90
-    shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records_run90
-    shadow_enrichment_service.GuidanceLedger = GuidanceLedgerRun90
+    shadow_enrichment_service.extract_guidance_facts = extract_guidance_facts_run94
+    shadow_enrichment_service._dedupe_guidance = dedupe_guidance_records_run94
+    shadow_enrichment_service.GuidanceLedger = GuidanceLedgerRun94
     shadow_enrichment_service.normalize_distress_companyfacts = normalize_distress_companyfacts_run85
     shadow_enrichment_service.ShadowStructuralEnricher.assess_earnings_catalysts = assess_earnings_catalysts_run85
     shadow_validation_service.promote_scoring_ready_event = promote_scoring_ready_event_run85
