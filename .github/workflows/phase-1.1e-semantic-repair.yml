@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   semantic-repair:
-    if: ${{ github.event.head_commit.message == 'Trigger Phase 1.1E semantic repair' }}
+    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E semantic repair') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Apply semantic repair batch
-        run: python scripts/phase_1_1e_semantic_repair.py
+        run: python scripts/phase_1_1e_semantic_repair_v2.py
       - name: Install dependencies
         working-directory: backend
         run: pip install -r requirements.txt
