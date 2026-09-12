@@ -2,7 +2,7 @@ name: SOE CI
 
 on:
   push:
-    branches: [main, milestone-2.5b-free-data-enrichment]
+    branches: [main, milestone-2.5b-free-data-enrichment, phase-1.1e-canonical-guidance]
   pull_request:
     branches: [main, phase-1.1e-shadow-validation]
 
