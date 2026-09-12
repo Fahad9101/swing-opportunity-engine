@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 from datetime import UTC, datetime
 
-from app.domain.guidance_canonical_v1 import GuidanceScopeKind
+from app.domain.guidance_canonical_v1 import GuidanceFactRole, GuidanceScopeKind
 from app.domain.soe_v1_1 import GuidanceAction, SourceDocument
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
 
@@ -156,3 +156,71 @@ def test_explicit_category_revenue_qualifiers_are_non_company():
     assert service.scope_kind is GuidanceScopeKind.SEGMENT
     assert commercial.scope_kind is GuidanceScopeKind.SEGMENT
     assert product.scope_kind is GuidanceScopeKind.PRODUCT
+
+
+def test_quarter_ending_phrase_outranks_later_full_year_section():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "PERIOD",
+            "Alkami is providing guidance for its first quarter ending March 31, 2026 of: "
+            "Total revenue in the range of $120 million to $125 million. "
+            "Alkami is providing guidance for its fiscal year ending December 31, 2026 of: "
+            "Total revenue in the range of $500 million to $520 million.",
+        )
+    )
+    observed = {(fact.fiscal_period, fact.low, fact.high) for fact in extraction.facts if fact.metric.value == "revenue"}
+    assert ("Q1FY2026", 120.0, 125.0) in observed
+    assert ("FY2026", 500.0, 520.0) in observed
+    assert ("FY2026", 120.0, 125.0) not in observed
+
+
+def test_value_cannot_bind_across_a_closer_metric_owner():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "OWNER",
+            "Second quarter 2026 guidance: revenue guidance of $109 million to $111 million, "
+            "and adjusted EBITDA guidance of $9 million to $10 million.",
+        )
+    )
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    assert revenue
+    assert all((fact.low, fact.high) != (9.0, 10.0) for fact in revenue)
+
+
+def test_actual_result_before_guidance_heading_is_rejected():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "ACTUAL",
+            "Adjusted EBITDA was $58.4 million in the first quarter. Raising Full Year 2026 Guidance. "
+            "Adjusted EBITDA is expected to be $220 million to $230 million for full-year 2026.",
+        )
+    )
+    ebitda = [fact for fact in extraction.facts if fact.metric.value == "ebitda"]
+    assert any((fact.low, fact.high) == (220.0, 230.0) for fact in ebitda)
+    assert all((fact.low, fact.high) != (58.4, 58.4) for fact in ebitda)
+    assert any(item["reason"] == "historical_actual" for item in extraction.rejected_candidates)
+
+
+def test_prior_guidance_value_gets_quoted_prior_role_only_locally():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "PRIOR",
+            "Full-year 2026 outlook: Adjusted EBITDA is expected to be $225 million to $230 million. "
+            "This outlook reflects an increase from our prior Adjusted EBITDA outlook of $195 million to $210 million.",
+        )
+    )
+    ebitda = [fact for fact in extraction.facts if fact.metric.value == "ebitda"]
+    assert any(fact.role is GuidanceFactRole.CURRENT and (fact.low, fact.high) == (225.0, 230.0) for fact in ebitda)
+    assert any(fact.role is GuidanceFactRole.QUOTED_PRIOR and (fact.low, fact.high) == (195.0, 210.0) for fact in ebitda)
+
+
+def test_parallel_quarter_and_full_year_table_fails_closed():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "TABLE",
+            "TABLE II RECONCILIATION OF NON-GAAP GUIDANCE Three months ending March 31, 2026 "
+            "Year ending December 31, 2026 GAAP operating margin 2.7% 3.2%.",
+        )
+    )
+    assert not extraction.facts
+    assert any(item["reason"] == "ambiguous_parallel_period_table" for item in extraction.rejected_candidates)
