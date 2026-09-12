@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 from datetime import UTC, datetime
 
+from app.domain.guidance_canonical_v1 import GuidanceScopeKind
 from app.domain.soe_v1_1 import GuidanceAction, SourceDocument
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
 
@@ -67,3 +68,49 @@ def test_directional_segment_action_is_never_inherited_past_another_metric():
 
     assert revenue.explicit_action is GuidanceAction.LOWER
     assert ebitda.explicit_action is not GuidanceAction.LOWER
+
+
+def test_explicit_quarter_and_full_year_outlook_do_not_collapse_to_bare_year():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "MIXED",
+            "Third Quarter and Fiscal Year 2026 Outlook. "
+            "Third Quarter 2026 Outlook: Revenue is expected to be between $164 million and $166 million. "
+            "Fiscal Year 2026 Outlook: Revenue is expected to be between $648 million and $652 million.",
+        )
+    )
+
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    observed = {(fact.fiscal_period, fact.low, fact.high) for fact in revenue}
+    assert ("Q3FY2026", 164.0, 166.0) in observed
+    assert ("FY2026", 648.0, 652.0) in observed
+    assert ("FY2026", 164.0, 166.0) not in observed
+
+
+def test_qualified_revenue_is_non_company_while_total_revenue_is_company():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "SCOPE",
+            "Third Quarter 2026 Outlook: Cloud subscriptions revenue is expected to be between $133 million and $135 million. "
+            "Third Quarter 2026 Outlook: Total revenue is expected to be between $214 million and $218 million.",
+        )
+    )
+
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    cloud = next(fact for fact in revenue if fact.low == 133.0)
+    total = next(fact for fact in revenue if fact.low == 214.0)
+    assert cloud.scope_kind is GuidanceScopeKind.SEGMENT
+    assert total.scope_kind is GuidanceScopeKind.COMPANY
+
+
+def test_directional_word_in_risk_factor_prose_cannot_create_guidance():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "RISK",
+            "Adverse economic conditions, including reduced information technology and network infrastructure spending, "
+            "could contribute to volatility in our revenue and operating results.",
+        )
+    )
+
+    assert not extraction.facts
+    assert all(fact.explicit_action is not GuidanceAction.LOWER for fact in extraction.facts)
