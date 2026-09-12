@@ -1,13 +1,13 @@
 name: Phase 1.1E Semantic Repair
 
-# Trigger v13 metric-action/audit-order repair with full deterministic and immutable replay gates.
+# Diagnostic-only v13 corpus run. Never publishes extractor changes.
 on:
   push:
     branches:
       - phase-1.1e-canonical-guidance
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - name: Apply metric-ownership semantic repair
+      - name: Apply v13 diagnostic repair in working tree
         run: python scripts/phase_1_1e_semantic_repair_v13.py
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
@@ -53,44 +53,28 @@ jobs:
         run: |
           python -m app.cli_guidance_raw_replay_differential \
             semantic-replay-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json \
-            --output semantic-repair-v13-replay.json \
+            --output semantic-repair-v13-diagnostic.json \
             --min-interval 0.15 \
             --retries 3
-      - name: Enforce non-regression acceptance gate
+      - name: Print diagnostic metrics
         run: |
           python - <<'PY'
           import json
-          report = json.load(open('semantic-repair-v13-replay.json'))
+          r=json.load(open('semantic-repair-v13-diagnostic.json'))
           print(json.dumps({
-              'documents_verified': f"{report['verified_source_count']}/{report['source_manifest_count']}",
-              'fetch_failures': report['fetch_failure_count'],
-              'hash_mismatches': report['hash_mismatch_count'],
-              'extraction_errors': report.get('extraction_error_count', 0),
-              'complete_tickers': f"{report['complete_ticker_count']}/{report['tickers_with_guidance_payload']}",
-              'raw_typed_facts': report['raw_typed_fact_count'],
-              'canonical_facts': report['canonical_fact_count'],
-              'quarantined': report['quarantined_fact_count'],
-              'classification_divergences': report['classification_divergence_count'],
+            'documents_verified': f"{r['verified_source_count']}/{r['source_manifest_count']}",
+            'fetch_failures': r['fetch_failure_count'],
+            'hash_mismatches': r['hash_mismatch_count'],
+            'extraction_errors': r.get('extraction_error_count', 0),
+            'complete_tickers': f"{r['complete_ticker_count']}/{r['tickers_with_guidance_payload']}",
+            'raw_typed_facts': r['raw_typed_fact_count'],
+            'canonical_facts': r['canonical_fact_count'],
+            'quarantined': r['quarantined_fact_count'],
+            'classification_divergences': r['classification_divergence_count'],
           }, indent=2))
-          assert report['source_manifest_count'] == 305
-          assert report['verified_source_count'] == 305
-          assert report['fetch_failure_count'] == 0
-          assert report['hash_mismatch_count'] == 0
-          assert report.get('extraction_error_count', 0) == 0
-          assert report['complete_ticker_count'] == report['tickers_with_guidance_payload'] == 109
-          assert report['quarantined_fact_count'] <= 165
-          assert report['classification_divergence_count'] <= 13
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: semantic-repair-v13-prepublish-replay
-          path: semantic-repair-v13-replay.json
+          name: semantic-repair-v13-diagnostic
+          path: semantic-repair-v13-diagnostic.json
           if-no-files-found: error
-      - name: Publish repair batch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add backend/app/services/guidance_raw_canonical_extractor.py backend/tests/test_guidance_raw_canonical_extractor.py
-          git diff --cached --check
-          git commit -m "Phase 1.1E: finalize metric ownership semantics [semantic-repair-v13]"
-          git push origin HEAD:phase-1.1e-canonical-guidance
