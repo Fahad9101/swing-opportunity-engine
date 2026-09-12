@@ -11,9 +11,9 @@ from app.services.phase_1_1e_run90_population_preflight_v1_1 import (
 )
 
 
-# Run-94 final-acceptance evidence repair. This layer is deliberately limited to
-# evidence integrity. It does not change any SOE threshold, score, scanner,
-# ranking/classification rule, frozen SOE-1.0.0 rule, or IEE v1.7.2 logic.
+# Run-94 final-acceptance evidence repair. Evidence integrity only: no SOE
+# threshold, score, scanner, ranking/classification rule, frozen SOE-1.0.0 rule,
+# or IEE v1.7.2 logic is changed.
 _REBIND = re.compile(
     r"phase_1_1e_run88_period_rebind;\s*from=(?P<from>[^;]+);\s*to=(?P<to>[^;]+);\s*",
     re.I,
@@ -100,28 +100,26 @@ def _explicit_periods(text: str) -> set[str]:
 
 
 def _repair_period(record: GuidanceMetricRecord) -> tuple[GuidanceMetricRecord | None, str | None]:
-    """Make explicit issuer period language authoritative; otherwise fail closed.
+    """Make a single explicit issuer period authoritative; otherwise fail closed.
 
-    Once a single explicit issuer period is proven, any older Run-88 rebind
-    marker is stale derived metadata. It is removed before the legacy dedupe
-    stack sees the record, so the old heuristic cannot overwrite the stronger
-    issuer statement on a later pass.
+    Crucially, once issuer authority is established, the old Run-88 source and
+    target period tokens are removed from downstream evidence. Keeping a stale
+    quarter token in an audit prefix lets the legacy scope binder see it again
+    and can undo the correction on the next dedupe pass.
     """
     text = _evidence(record)
     explicit = _explicit_periods(text)
     if len(explicit) == 1:
         authoritative = next(iter(explicit))
         cleaned_source = _REBIND.sub("", record.evidence_span or "").strip()
-        if authoritative == record.fiscal_period and cleaned_source == (record.evidence_span or "").strip():
+        marker = f"phase_1_1e_run94_explicit_period_authority={authoritative}; "
+        if authoritative == record.fiscal_period and not _REBIND.search(record.evidence_span or ""):
             return record, None
         return (
             record.model_copy(
                 update={
                     "fiscal_period": authoritative,
-                    "evidence_span": (
-                        f"phase_1_1e_run94_explicit_period_authority; "
-                        f"from={record.fiscal_period}; to={authoritative}; {cleaned_source}"
-                    )[:1000],
+                    "evidence_span": f"{marker}{cleaned_source}"[:1000],
                 }
             ),
             None,
@@ -165,7 +163,7 @@ def _nearest_metric_before(text: str, position: int, *, max_distance: int = 260)
 
 
 def _scaled_table_metric_locality_clean(record: GuidanceMetricRecord) -> bool:
-    """Verify that a scaled table range belongs to the record's own metric."""
+    """Require a scaled table range to be locally owned by its stored metric."""
     if record.metric not in _MONEY or record.low is None or record.high is None:
         return True
     scale = _scale(record)
@@ -177,18 +175,19 @@ def _scaled_table_metric_locality_clean(record: GuidanceMetricRecord) -> bool:
     if scale != 1:
         candidates.append((record.low / scale, record.high / scale))
 
-    matched_range = False
     for match in _RAW_RANGE.finditer(text):
         low = float(match.group("lo").replace(",", ""))
         high = float(match.group("hi").replace(",", ""))
         if low > high:
             continue
-        if not any(_nearly_equal(low, want_low) and _nearly_equal(high, want_high) for want_low, want_high in candidates):
+        if not any(
+            _nearly_equal(low, want_low) and _nearly_equal(high, want_high)
+            for want_low, want_high in candidates
+        ):
             continue
-        matched_range = True
         if _nearest_metric_before(text, match.start()) is record.metric:
             return True
-    return not matched_range and False
+    return False
 
 
 def _sanitize_after_run90(
