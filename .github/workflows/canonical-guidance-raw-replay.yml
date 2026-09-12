@@ -17,6 +17,10 @@ on:
         required: false
         default: '10296727219'
 
+concurrency:
+  group: canonical-guidance-raw-replay-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   actions: read
@@ -63,6 +67,7 @@ jobs:
               'documents_verified': f"{report['verified_source_count']}/{report['source_manifest_count']}",
               'fetch_failures': report['fetch_failure_count'],
               'hash_mismatches': report['hash_mismatch_count'],
+              'extraction_errors': report.get('extraction_error_count', 0),
               'complete_tickers': f"{report['complete_ticker_count']}/{report['tickers_with_guidance_payload']}",
               'raw_typed_facts': report['raw_typed_fact_count'],
               'canonical_facts': report['canonical_fact_count'],
