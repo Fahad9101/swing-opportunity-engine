@@ -23,7 +23,11 @@ _MILLION_HEADER = re.compile(r"\b(?:USD|\$)\s*(?:in\s+)?millions?\b|\bin\s+milli
 _BILLION_HEADER = re.compile(r"\b(?:USD|\$)\s*(?:in\s+)?billions?\b|\bin\s+billions?\b", re.I)
 _THOUSAND_HEADER = re.compile(r"\b(?:USD|\$)\s*(?:in\s+)?thousands?\b|\bin\s+thousands?\b", re.I)
 _NON_COMPANY_REVENUE = re.compile(
-    r"\b(annual\s+recurring|subscription|segment|product|service|services)\s+revenue\b",
+    r"\b(?P<label>(?:annual\s+recurring|subscription|segment|product|service|services)\s+revenue)\b",
+    re.I,
+)
+_COMPANY_REVENUE = re.compile(
+    r"\b(?P<label>(?:total|consolidated|company[- ]wide)\s+(?:net\s+)?revenues?|net\s+sales)\b",
     re.I,
 )
 
@@ -61,22 +65,59 @@ def _source_unit(fact) -> GuidanceUnit:
     return unit
 
 
-def _scope(fact) -> tuple[GuidanceScopeKind, str | None]:
+def _nearest_revenue_scope(fact) -> tuple[GuidanceScopeKind, str | None]:
+    """Bind revenue scope to the phrase that owns the selected numeric value.
+
+    Metric normalization deliberately collapses phrases such as "net product
+    revenue" to the REVENUE metric. Scope is therefore recovered independently
+    from the nearest source phrase before the bound value. Specific non-company
+    phrases win over generic revenue; an explicit total/consolidated/net-sales
+    phrase can win only when it is closer to the value.
+    """
     if fact.metric is not GuidanceMetric.REVENUE:
         return GuidanceScopeKind.COMPANY, None
-    provenance = fact.provenance[0]
-    evidence = provenance.evidence
-    metric_text = evidence.metric_text or ""
-    local = metric_text
-    if evidence.metric_start is not None and evidence.metric_end is not None:
-        local = evidence.full_text[max(0, evidence.metric_start - 60): min(len(evidence.full_text), evidence.metric_end + 60)]
-    match = _NON_COMPANY_REVENUE.search(local)
-    if not match:
+
+    evidence = fact.provenance[0].evidence
+    anchor = evidence.value_start
+    if anchor is None:
+        # Qualitative revenue guidance has no value anchor. Use the local metric
+        # phrase only; ambiguity remains company scope until the raw extractor
+        # emits explicit scope directly.
+        local = evidence.metric_text or ""
+        match = _NON_COMPANY_REVENUE.search(local)
+        if not match:
+            return GuidanceScopeKind.COMPANY, None
+        label = match.group("label")
+        kind = GuidanceScopeKind.SEGMENT if "segment" in label.lower() else GuidanceScopeKind.PRODUCT
+        return kind, label
+
+    left = max(0, anchor - 260)
+    prefix = evidence.full_text[left:anchor]
+    candidates: list[tuple[int, int, GuidanceScopeKind, str]] = []
+
+    for match in _NON_COMPANY_REVENUE.finditer(prefix):
+        label = match.group("label")
+        kind = GuidanceScopeKind.SEGMENT if "segment" in label.lower() else GuidanceScopeKind.PRODUCT
+        distance = len(prefix) - match.end()
+        # Priority 0 means a specific scope phrase wins a tie with a company
+        # phrase ending at the same "revenue" token.
+        candidates.append((distance, 0, kind, label))
+
+    for match in _COMPANY_REVENUE.finditer(prefix):
+        label = match.group("label")
+        distance = len(prefix) - match.end()
+        candidates.append((distance, 1, GuidanceScopeKind.COMPANY, label))
+
+    if not candidates:
         return GuidanceScopeKind.COMPANY, None
-    label = match.group(0)
-    if "segment" in label.lower():
-        return GuidanceScopeKind.SEGMENT, label
-    return GuidanceScopeKind.PRODUCT, label
+
+    distance, _, kind, label = min(candidates, key=lambda item: (item[0], item[1]))
+    # Do not let a remote phrase elsewhere in a flattened filing assign scope to
+    # an unrelated value. 180 characters covers ordinary guidance table/copy
+    # constructions while failing safely on distant context.
+    if distance > 180:
+        return GuidanceScopeKind.COMPANY, None
+    return kind, label
 
 
 def typed_fact_from_legacy_record_for_migration(record: GuidanceMetricRecord):
@@ -90,7 +131,7 @@ def typed_fact_from_legacy_record_for_migration(record: GuidanceMetricRecord):
     evidence = fact.provenance[0].evidence
     raw_low, raw_high = _raw_bound_values(evidence.value_text)
     unit = _source_unit(fact)
-    scope_kind, scope_label = _scope(fact)
+    scope_kind, scope_label = _nearest_revenue_scope(fact)
 
     updates = {
         "unit": unit,
