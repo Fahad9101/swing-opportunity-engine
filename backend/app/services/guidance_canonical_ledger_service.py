@@ -23,6 +23,22 @@ from app.services.guidance_canonical_service import canonicalize_legacy_records
 from app.services.guidance_classifier import classify_guidance
 
 
+_EXPLICIT_ACTIONS = {
+    GuidanceAction.RAISE,
+    GuidanceAction.LOWER,
+    GuidanceAction.REAFFIRM,
+    GuidanceAction.WITHDRAW,
+}
+_ACTION_PRIORITY = {
+    GuidanceAction.NONE: 0,
+    GuidanceAction.INITIATE: 1,
+    GuidanceAction.REAFFIRM: 2,
+    GuidanceAction.RAISE: 3,
+    GuidanceAction.LOWER: 3,
+    GuidanceAction.WITHDRAW: 4,
+}
+
+
 @dataclass(frozen=True)
 class CanonicalGuidanceObservation:
     """One point-in-time observation of one canonical guidance fact.
@@ -40,11 +56,6 @@ class CanonicalGuidanceObservation:
     @property
     def comparison_key(self) -> tuple[str, str, str, str, str, str, str]:
         fact = self.fact
-        # Company-wide wording such as "total revenue" or "total product
-        # revenue" is descriptive provenance, not a distinct economic scope.
-        # Retain scope labels for non-company facts so product/segment identity
-        # remains discriminating if such facts are ever inspected before the
-        # invariant gate quarantines them.
         scope_label = (
             ""
             if fact.scope_kind is GuidanceScopeKind.COMPANY
@@ -107,6 +118,35 @@ def _point_in_time_observations(facts: Iterable[CanonicalGuidanceFact]) -> list[
     return sorted(observations, key=_observation_sort_key)
 
 
+def _observations_conflict(rows: Iterable[CanonicalGuidanceObservation]) -> bool:
+    rows = list(rows)
+    numeric_values = {(row.fact.low, row.fact.high) for row in rows}
+    if len(numeric_values) > 1:
+        return True
+
+    explicit_actions = {
+        row.fact.explicit_action
+        for row in rows
+        if row.fact.explicit_action in _EXPLICIT_ACTIONS
+    }
+    return len(explicit_actions) > 1
+
+
+def _choose_consistent_observation(
+    rows: Iterable[CanonicalGuidanceObservation],
+) -> CanonicalGuidanceObservation | None:
+    rows = list(rows)
+    if not rows or _observations_conflict(rows):
+        return None
+    return sorted(
+        rows,
+        key=lambda item: (
+            _ACTION_PRIORITY.get(item.fact.explicit_action, 0),
+            _observation_sort_key(item),
+        ),
+    )[-1]
+
+
 def _same_snapshot_conflicts(
     observations: Iterable[CanonicalGuidanceObservation],
 ) -> list[str]:
@@ -116,15 +156,7 @@ def _same_snapshot_conflicts(
 
     conflicts: list[str] = []
     for (available_at, key, role), rows in grouped.items():
-        semantic_values = {
-            (
-                row.fact.low,
-                row.fact.high,
-                row.fact.explicit_action.value,
-            )
-            for row in rows
-        }
-        if len(semantic_values) > 1:
+        if _observations_conflict(rows):
             conflicts.append(
                 f"conflicting canonical facts at {available_at.isoformat()} "
                 f"for key={key} role={role}"
@@ -140,9 +172,6 @@ def _legacy_unit(fact: CanonicalGuidanceFact) -> str:
     if fact.unit is GuidanceUnit.FRACTION:
         return "fraction"
     if fact.unit is GuidanceUnit.UNKNOWN and fact.low is None and fact.high is None:
-        # Qualitative RAISE/LOWER/REAFFIRM/WITHDRAW facts intentionally have no
-        # numeric unit. The frozen classifier can consume them because it uses
-        # action/metric/period, not unit arithmetic. Numeric UNKNOWN is rejected.
         return "UNKNOWN"
     raise ValueError(f"Canonical unit {fact.unit.value} is not comparator-compatible")
 
@@ -245,11 +274,10 @@ class CanonicalGuidanceLedger:
         current: list[CanonicalGuidanceObservation] = []
         prior: list[CanonicalGuidanceObservation] = []
         for key, rows in current_by_key.items():
-            if len({(row.fact.low, row.fact.high, row.fact.explicit_action.value) for row in rows}) > 1:
+            chosen_current = _choose_consistent_observation(rows)
+            if chosen_current is None:
                 conflicts.append(f"conflicting current canonical values for key={key}")
                 continue
-
-            chosen_current = sorted(rows, key=_observation_sort_key)[-1]
             current.append(chosen_current)
 
             older = [
@@ -260,10 +288,11 @@ class CanonicalGuidanceLedger:
             if older:
                 prior_ts = max(item.available_at for item in older)
                 prior_rows = [item for item in older if item.available_at == prior_ts]
-                if len({(row.fact.low, row.fact.high, row.fact.explicit_action.value) for row in prior_rows}) > 1:
+                chosen_prior = _choose_consistent_observation(prior_rows)
+                if chosen_prior is None:
                     conflicts.append(f"conflicting prior canonical values for key={key}")
                 else:
-                    prior.append(sorted(prior_rows, key=_observation_sort_key)[-1])
+                    prior.append(chosen_prior)
                 continue
 
             quoted = [
@@ -274,10 +303,11 @@ class CanonicalGuidanceLedger:
                 and item.comparison_key == key
             ]
             if quoted:
-                if len({(row.fact.low, row.fact.high, row.fact.explicit_action.value) for row in quoted}) > 1:
+                chosen_quoted = _choose_consistent_observation(quoted)
+                if chosen_quoted is None:
                     conflicts.append(f"conflicting quoted-prior canonical values for key={key}")
                 else:
-                    prior.append(sorted(quoted, key=_observation_sort_key)[-1])
+                    prior.append(chosen_quoted)
 
         return CanonicalGuidanceView(
             ticker=ticker,
