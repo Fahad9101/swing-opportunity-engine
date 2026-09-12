@@ -9,6 +9,7 @@ from app.domain.guidance_canonical_v1 import (
     CanonicalGuidanceFact,
     GuidanceFactRole,
     GuidanceProvenance,
+    GuidanceScopeKind,
     GuidanceUnit,
 )
 from app.domain.soe_v1_1 import (
@@ -39,12 +40,22 @@ class CanonicalGuidanceObservation:
     @property
     def comparison_key(self) -> tuple[str, str, str, str, str, str, str]:
         fact = self.fact
+        # Company-wide wording such as "total revenue" or "total product
+        # revenue" is descriptive provenance, not a distinct economic scope.
+        # Retain scope labels for non-company facts so product/segment identity
+        # remains discriminating if such facts are ever inspected before the
+        # invariant gate quarantines them.
+        scope_label = (
+            ""
+            if fact.scope_kind is GuidanceScopeKind.COMPANY
+            else (fact.scope_label or "")
+        )
         return (
             fact.metric.value,
             fact.fiscal_period,
             fact.accounting_basis,
             fact.scope_kind.value,
-            fact.scope_label or "",
+            scope_label,
             fact.value_kind.value,
             fact.unit.value,
         )
