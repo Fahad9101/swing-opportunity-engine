@@ -258,6 +258,9 @@ def _period_binding(segment: str, mention: _MetricMention) -> _PeriodBinding | N
     for match in _YEAR_NEAR_FORWARD.finditer(local):
         absolute_start = local_left + match.start()
         absolute_end = local_left + match.end()
+        direct_prefix = segment[max(0, absolute_start - 8):absolute_start]
+        if re.search(r"Q[1-4]\s*(?:FY)?\s*'?\s*$", direct_prefix, re.I):
+            continue
         around = segment[max(0, absolute_start - 100): min(len(segment), mention.end + 100)]
         if not _GUIDANCE.search(around):
             continue
@@ -295,7 +298,12 @@ def _scope(mention: _MetricMention) -> tuple[GuidanceScopeKind, str | None]:
 def _basis(segment: str, mention: _MetricMention) -> str:
     if mention.metric is GuidanceMetric.REVENUE:
         return "UNSPECIFIED"
-    local = segment[max(0, mention.start - 45): min(len(segment), mention.end + 50)]
+    label = mention.text
+    if re.search(r"\b(?:adjusted|non[- ]GAAP)\b", label, re.I):
+        return "ADJUSTED"
+    if re.search(r"(?<!non[- ])\bGAAP\b", label, re.I):
+        return "GAAP"
+    local = segment[max(0, mention.start - 35): min(len(segment), mention.end + 35)]
     if re.search(r"\b(?:adjusted|non[- ]GAAP)\b", local, re.I):
         return "ADJUSTED"
     if re.search(r"(?<!non[- ])\bGAAP\b", local, re.I):
@@ -422,10 +430,10 @@ def _bind_value(clause: str, mention: _MetricMention, anchor: int) -> _ValueBind
     if not candidates:
         return None
 
-    ranges = [item for item in candidates if item.low != item.high]
-    pool = ranges or candidates
-    forward = [item for item in pool if item.end >= anchor]
-    pool = forward or pool
+    forward = [item for item in candidates if item.end >= anchor]
+    pool = forward or candidates
+    ranges = [item for item in pool if item.low != item.high]
+    pool = ranges or pool
     pool.sort(key=lambda item: (abs(item.start - anchor), item.start))
     return pool[0]
 
@@ -438,7 +446,7 @@ def _local_forward_context(clause: str, anchor: int, mention: _MetricMention) ->
 def extract_typed_guidance_facts(document: SourceDocument) -> RawTypedGuidanceExtraction:
     """Extract typed guidance facts directly from immutable SEC source content.
 
-    This shadow-only extractor never creates a legacy GuidanceMetricRecord and
+    This shadow-only extractor never creates a legacy guidance ledger row and
     never invokes the historical Phase-1.1E repair stack. Ambiguous raw evidence
     is rejected here or quarantined later by GuidanceInvariantValidator.
     """
