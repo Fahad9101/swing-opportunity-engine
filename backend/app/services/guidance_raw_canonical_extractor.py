@@ -57,13 +57,13 @@ _BARE_YEAR = re.compile(r"\b(20\d{2})\b")
 # to the revenue noun. Generic verbs, issuer names, bullets, or table labels are
 # never treated as segment identity.
 _SEGMENT_REVENUE_QUALIFIER = re.compile(
-    r"(?:\b(?:cloud\s+subscriptions?|subscriptions?|services?|licensing|commercial|"
+    r"\b(?:cloud\s+subscriptions?|subscriptions?|services?|licensing|commercial|"
     r"government|enterprise|consumer|advertising|international|domestic|platform|"
     r"software|hardware|maintenance|support|professional\s+services|"
-    r"u\.?s\.?\s+commercial|u\.?s\.?\s+government)\s+)$",
+    r"u\.?s\.?\s+commercial|u\.?s\.?\s+government)\s*$",
     re.I,
 )
-_PRODUCT_REVENUE_QUALIFIER = re.compile(r"\bproduct\s+$", re.I)
+_PRODUCT_REVENUE_QUALIFIER = re.compile(r"\bproduct\s*$", re.I)
 
 
 def _explicit_forward_context(text: str) -> bool:
