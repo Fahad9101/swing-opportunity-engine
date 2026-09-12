@@ -1,5 +1,6 @@
 name: Canonical Guidance Raw SEC Replay
 
+# Acceptance replay trigger: post-semantic-repair validation.
 on:
   push:
     branches: [phase-1.1e-canonical-guidance]
