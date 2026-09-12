@@ -18,6 +18,7 @@ from app.domain.soe_v1_1 import GuidanceAction, GuidanceClassification, Guidance
 from app.services.guidance_canonical_ledger_service import CanonicalGuidanceLedger
 
 
+T0 = datetime(2025, 10, 1, tzinfo=UTC)
 T1 = datetime(2026, 1, 1, tzinfo=UTC)
 T2 = datetime(2026, 4, 1, tzinfo=UTC)
 RULES_HASH = "canonical-ledger-test"
@@ -57,7 +58,7 @@ def fact(
         ticker=ticker,
         metric=metric,
         fiscal_period=period,
-        period_kind=GuidancePeriodKind.FULL_YEAR,
+        period_kind=GuidancePeriodKind.QUARTER if period.startswith("Q") else GuidancePeriodKind.FULL_YEAR,
         accounting_basis=basis,
         scope_kind=GuidanceScopeKind.COMPANY,
         value_kind=GuidanceValueKind.ABSOLUTE_LEVEL,
@@ -146,6 +147,67 @@ def test_same_snapshot_quoted_prior_supports_comparison():
         "TEST", rules(), rules_hash=RULES_HASH, as_of=T2
     )
     assert assessment.classification is GuidanceClassification.DETERIORATED
+
+
+def test_stale_unselected_historical_conflict_does_not_poison_latest_view():
+    stale_a = fact(period="FY2025", low=90.0, high=90.0, ts=T0)
+    stale_b = fact(period="FY2025", low=80.0, high=80.0, ts=T0)
+    current = fact(period="FY2026", low=110.0, high=110.0, ts=T2)
+
+    assessment = CanonicalGuidanceLedger([stale_a, stale_b, current]).assess(
+        "TEST", rules(), rules_hash=RULES_HASH, as_of=T2
+    )
+    assert assessment.rule_path != "guidance_v1_1.canonical_conflict"
+
+
+def test_conflict_in_selected_immediate_prior_still_fails_closed():
+    prior_a = fact(low=100.0, high=100.0, ts=T1)
+    prior_b = fact(low=90.0, high=90.0, ts=T1)
+    current = fact(low=110.0, high=110.0, ts=T2)
+
+    assessment = CanonicalGuidanceLedger([prior_a, prior_b, current]).assess(
+        "TEST", rules(), rules_hash=RULES_HASH, as_of=T2
+    )
+    assert assessment.classification is GuidanceClassification.UNKNOWN
+    assert assessment.rule_path == "guidance_v1_1.canonical_conflict"
+
+
+def test_same_snapshot_explicit_raise_resolves_one_directionally_consistent_prior_value():
+    old_value = fact(low=100.0, high=100.0, ts=T2, action=GuidanceAction.NONE)
+    raised = fact(low=110.0, high=110.0, ts=T2, action=GuidanceAction.RAISE)
+
+    view = CanonicalGuidanceLedger([old_value, raised]).current_and_prior("TEST", as_of=T2)
+    assert not view.conflicts
+    assert len(view.current) == 1
+    assert len(view.prior) == 1
+    assert view.current[0].fact.low == 110.0
+    assert view.prior[0].fact.low == 100.0
+
+    assessment = CanonicalGuidanceLedger([old_value, raised]).assess(
+        "TEST", rules(), rules_hash=RULES_HASH, as_of=T2
+    )
+    assert assessment.classification is GuidanceClassification.NOT_DETERIORATED
+
+
+def test_same_snapshot_explicit_lower_resolves_one_directionally_consistent_prior_value():
+    old_value = fact(low=100.0, high=100.0, ts=T2, action=GuidanceAction.NONE)
+    lowered = fact(low=90.0, high=90.0, ts=T2, action=GuidanceAction.LOWER)
+
+    assessment = CanonicalGuidanceLedger([old_value, lowered]).assess(
+        "TEST", rules(), rules_hash=RULES_HASH, as_of=T2
+    )
+    assert assessment.classification is GuidanceClassification.DETERIORATED
+
+
+def test_same_snapshot_directional_action_with_inconsistent_value_fails_closed():
+    old_value = fact(low=100.0, high=100.0, ts=T2, action=GuidanceAction.NONE)
+    impossible_raise = fact(low=90.0, high=90.0, ts=T2, action=GuidanceAction.RAISE)
+
+    assessment = CanonicalGuidanceLedger([old_value, impossible_raise]).assess(
+        "TEST", rules(), rules_hash=RULES_HASH, as_of=T2
+    )
+    assert assessment.classification is GuidanceClassification.UNKNOWN
+    assert assessment.rule_path == "guidance_v1_1.canonical_conflict"
 
 
 def test_no_accepted_canonical_guidance_is_unknown():
