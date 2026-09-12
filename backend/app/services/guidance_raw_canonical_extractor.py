@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import re
+from collections import defaultdict
+from typing import Iterable
 
 from app.domain.guidance_canonical_v1 import (
     EvidenceBinding,
@@ -18,6 +20,7 @@ from app.services.guidance_raw_typed_extractor import (
     RawTypedGuidanceExtraction,
     _ACTION_PATTERNS,
     _PeriodBinding,
+    _ValueBinding,
     _action,
     _basis,
     _bind_value,
@@ -31,23 +34,25 @@ from app.services.guidance_raw_typed_extractor import (
 _EXPLICIT_FORWARD = re.compile(
     r"\b(?:guidance|outlook|forecast|expects?|expected|anticipat(?:e|es|ed|ing)|"
     r"project(?:s|ed|ing)|provid(?:e|es|ed|ing)\s+(?:guidance|outlook)|"
-    r"issu(?:e|es|ed|ing)\s+(?:guidance|outlook))\b",
+    r"issu(?:e|es|ed|ing)\s+(?:guidance|outlook)|"
+    r"reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b",
     re.I,
 )
 _FORWARD_SIGNAL = re.compile(
     r"\b(?:guidance|outlook|forecast|expects?|expected|anticipat(?:e|es|ed|ing)|"
     r"project(?:s|ed|ing)|rais(?:e|es|ed|ing)|lower(?:s|ed|ing)?|"
+    r"reduc(?:e|es|ed|ing)|cut(?:s|ting)?|boost(?:s|ed|ing)?|"
     r"reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b",
     re.I,
 )
 _ACTUAL_VALUE = re.compile(
-    r"\b(?:was|were|totaled|reported|generated|delivered|grew|increased|decreased|"
-    r"for\s+the\s+quarter\s+ended|year[- ]to[- ]date)\b",
+    r"\b(?:was|were|totaled|reported|generated|delivered|achieved|realized|"
+    r"for\s+the\s+quarter\s+ended|for\s+the\s+year\s+ended|year[- ]to[- ]date)\b",
     re.I,
 )
 
 _CANONICAL_FULL_YEAR = [
-    re.compile(r"\b(?:FY|fiscal\s+year|full[- ]year)\s*'?((?:20)?\d{2})\b", re.I),
+    re.compile(r"\b(?:FY|fiscal(?:\s+year)?|full[- ]year)\s*'?((?:20)?\d{2})\b", re.I),
     re.compile(r"\b(20\d{2})\s+(?:full[- ]year|fiscal\s+year|annual)\b", re.I),
     re.compile(r"\byear\s+ending\s+[A-Za-z]+\s+\d{1,2},?\s*(20\d{2})\b", re.I),
 ]
@@ -68,9 +73,6 @@ _CANONICAL_QUARTER = [
 _QUARTER_WORD = {"first": "1", "second": "2", "third": "3", "fourth": "4"}
 _BARE_YEAR = re.compile(r"\b(20\d{2})\b")
 
-# Scope is fail-closed only on explicit economic qualifiers immediately bound
-# to the revenue noun. Generic verbs, issuer names, bullets, or table labels are
-# never treated as segment identity.
 _SEGMENT_REVENUE_QUALIFIER = re.compile(
     r"\b(?:cloud\s+subscriptions?|subscriptions?|services?|licensing|commercial|"
     r"government|enterprise|consumer|advertising|international|domestic|platform|"
@@ -79,6 +81,13 @@ _SEGMENT_REVENUE_QUALIFIER = re.compile(
     re.I,
 )
 _PRODUCT_REVENUE_QUALIFIER = re.compile(r"\bproduct\s*$", re.I)
+_NON_COMPANY_CONTRIBUTION = re.compile(
+    r"(?:\b(?:acquisitions?|segments?|products?|divisions?|business\s+units?)\b"
+    r"[^.;]{0,120}\b(?:contribut(?:e|es|ed|ing)|contribution|portion|component)\b"
+    r"|\b(?:contribut(?:e|es|ed|ing)|contribution|portion|component)\b"
+    r"[^.;]{0,120}\b(?:from|of)\s+(?:the\s+)?(?:acquisitions?|segments?|products?|divisions?|business\s+units?)\b)",
+    re.I,
+)
 
 _VALUE_OWNER_PATTERNS: list[tuple[GuidanceMetric | str, re.Pattern[str]]] = [
     (
@@ -89,10 +98,7 @@ _VALUE_OWNER_PATTERNS: list[tuple[GuidanceMetric | str, re.Pattern[str]]] = [
         GuidanceMetric.OPERATING_MARGIN,
         re.compile(r"\b(?:(?:adj(?:usted)?|non[- ]GAAP)\s+)?operating\s+margin\b", re.I),
     ),
-    (
-        GuidanceMetric.FCF,
-        re.compile(r"\b(?:free\s+cash\s+flow|FCF)\b", re.I),
-    ),
+    (GuidanceMetric.FCF, re.compile(r"\b(?:free\s+cash\s+flow|FCF)\b", re.I)),
     (
         GuidanceMetric.EPS,
         re.compile(
@@ -114,10 +120,57 @@ _VALUE_OWNER_PATTERNS: list[tuple[GuidanceMetric | str, re.Pattern[str]]] = [
         "operating_cash",
         re.compile(r"\b(?:net\s+cash\s+provided\s+by\s+operating\s+activities|operating\s+cash\s+flow)\b", re.I),
     ),
+    ("cash_balance", re.compile(r"\b(?:cash(?:\s+and\s+cash\s+equivalents?)?|liquidity)\b", re.I)),
     ("capex", re.compile(r"\b(?:capital\s+expenditures?|capex)\b", re.I)),
+    ("stock_comp", re.compile(r"\bstock[- ]based\s+compensation(?:\s+expense)?\b", re.I)),
+    ("operating_expense", re.compile(r"\b(?:operating|interest)\s+expense\b", re.I)),
     ("repurchase", re.compile(r"\b(?:share|stock)\s+repurchase\b", re.I)),
+    ("shares", re.compile(r"\b(?:weighted[- ]average\s+)?shares?\s+outstanding\b", re.I)),
     ("contract_value", re.compile(r"\b(?:contract\s+wins?|contracts?\s+valued|transaction\s+consideration)\b", re.I)),
 ]
+
+_MONEY_SCALE_UNITS = {
+    "b": GuidanceUnit.USD_BILLION,
+    "bn": GuidanceUnit.USD_BILLION,
+    "billion": GuidanceUnit.USD_BILLION,
+    "m": GuidanceUnit.USD_MILLION,
+    "mm": GuidanceUnit.USD_MILLION,
+    "million": GuidanceUnit.USD_MILLION,
+    "thousand": GuidanceUnit.USD_THOUSAND,
+}
+_MONEY_UNIT_SCALE = {
+    GuidanceUnit.USD: 1.0,
+    GuidanceUnit.USD_THOUSAND: 1_000.0,
+    GuidanceUnit.USD_MILLION: 1_000_000.0,
+    GuidanceUnit.USD_BILLION: 1_000_000_000.0,
+}
+
+_FROM_TO_MONEY = re.compile(
+    r"\bfrom\s+(?P<d1>\$)?\s*(?P<old>-?\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s1>billion|million|thousand|bn|mm|m|b)?\s+"
+    r"(?:to|through)\s+(?P<d2>\$)?\s*(?P<new>-?\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s2>billion|million|thousand|bn|mm|m|b)?\b",
+    re.I,
+)
+_BY_TO_MONEY = re.compile(
+    r"\bby\s+(?P<d1>\$)?\s*(?P<delta>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s1>billion|million|thousand|bn|mm|m|b)?\s*,?\s*"
+    r"(?:to|bringing\s+(?:the\s+)?(?:guidance|outlook)\s+to)\s+"
+    r"(?P<d2>\$)?\s*(?P<target>-?\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s2>billion|million|thousand|bn|mm|m|b)?\b",
+    re.I,
+)
+_FROM_TO_PERCENT = re.compile(
+    r"\bfrom\s+(?P<old>\d{1,3}(?:\.\d+)?)\s*%\s+(?:to|through)\s+"
+    r"(?P<new>\d{1,3}(?:\.\d+)?)\s*%",
+    re.I,
+)
+_BY_TO_PERCENT = re.compile(
+    r"\bby\s+(?P<delta>\d{1,3}(?:\.\d+)?)\s*(?:percentage\s+points?|%)\s*,?\s*"
+    r"(?:to|bringing\s+(?:the\s+)?(?:guidance|outlook)\s+to)\s+"
+    r"(?P<target>\d{1,3}(?:\.\d+)?)\s*%",
+    re.I,
+)
 
 
 def _explicit_forward_context(text: str) -> bool:
@@ -125,11 +178,9 @@ def _explicit_forward_context(text: str) -> bool:
 
 
 def _owned_directional_action(clause: str, anchor: int, metric_text: str, metric) -> GuidanceAction:
-    """Bind a directional action only when the metric owns that verb."""
     mentions = _metric_mentions(clause)
     candidates = [
-        item
-        for item in mentions
+        item for item in mentions
         if item.metric is metric and item.text.lower() == metric_text.lower()
     ]
     if not candidates:
@@ -143,16 +194,14 @@ def _owned_directional_action(clause: str, anchor: int, metric_text: str, metric
                 gap = current.start - match.end()
                 if gap > 120:
                     continue
-                intervening = [item for item in mentions if match.end() <= item.start < current.start]
-                if intervening:
+                if any(match.end() <= item.start < current.start for item in mentions):
                     continue
                 owned.append((gap, action))
             elif match.start() >= current.end:
                 gap = match.start() - current.end
                 if gap > 120:
                     continue
-                intervening = [item for item in mentions if current.end < item.start <= match.start()]
-                if intervening:
+                if any(current.end < item.start <= match.start() for item in mentions):
                     continue
                 owned.append((gap, action))
             else:
@@ -184,87 +233,80 @@ def _metric_action(segment: str, clause: str, anchor: int, mention) -> GuidanceA
     return GuidanceAction.NONE
 
 
-def _canonical_period_binding(segment: str, mention) -> _PeriodBinding | None:
-    """Bind explicit quarter/FY authority before considering a bare year.
+def _admissible_period_candidate(clause: str, anchor: int, binding: _PeriodBinding) -> bool:
+    markers = list(_FORWARD_SIGNAL.finditer(clause[: max(anchor + 1, binding.end + 1)]))
+    if not markers:
+        return True
+    latest = markers[-1]
+    if binding.end >= latest.start() - 48:
+        return True
+    return min(abs(binding.end - anchor), abs(binding.start - anchor)) <= 70
 
-    Any explicit preceding quarter/FY expression in the current bounded segment
-    outranks a following expression. This prevents a later full-year section from
-    relabeling an earlier quarterly block. Following authority is considered only
-    when no preceding explicit period exists and remains distance-limited.
-    """
-    explicit: list[tuple[int, int, int, _PeriodBinding]] = []
+
+def _canonical_period_binding(clause: str, anchor: int, mention) -> _PeriodBinding | None:
+    mention_end = anchor + len(mention.text)
+    explicit: list[tuple[int, int, _PeriodBinding]] = []
 
     def add(binding: _PeriodBinding) -> None:
-        if binding.end <= mention.start:
+        if not _admissible_period_candidate(clause, anchor, binding):
+            return
+        if binding.end <= anchor:
             direction = 0
-            distance = mention.start - binding.end
-        elif binding.start >= mention.end:
+            distance = anchor - binding.end
+        elif binding.start >= mention_end:
             direction = 1
-            distance = binding.start - mention.end
+            distance = binding.start - mention_end
         else:
             direction = 0
             distance = 0
-        explicit.append((direction, distance, -binding.end, binding))
+        explicit.append((direction, distance, binding))
 
     for pattern in _CANONICAL_FULL_YEAR:
-        for match in pattern.finditer(segment):
+        for match in pattern.finditer(clause):
             year = _normalize_year(match.group(1))
             add(_PeriodBinding(f"FY{year}", GuidancePeriodKind.FULL_YEAR, match.group(0), match.start(), match.end()))
 
     for pattern in _CANONICAL_QUARTER:
-        for match in pattern.finditer(segment):
+        for match in pattern.finditer(clause):
             token = match.group(1)
             q = token if token.isdigit() else _QUARTER_WORD[token.lower()]
             year = _normalize_year(match.group(2))
             add(_PeriodBinding(f"Q{q}FY{year}", GuidancePeriodKind.QUARTER, match.group(0), match.start(), match.end()))
 
     if explicit:
-        preceding = [item for item in explicit if item[0] == 0 and item[3].end <= mention.start]
-        if preceding:
-            preceding.sort(key=lambda item: (item[1], item[2]))
-            best = preceding[0]
-            tied = [item for item in preceding if item[1] == best[1]]
-            periods = {item[3].period for item in tied}
-            return best[3] if len(periods) == 1 else None
+        preceding = [item for item in explicit if item[0] == 0 and item[2].end <= anchor]
+        pool = preceding or [item for item in explicit if item[0] == 1 and item[1] <= 240]
+        if pool:
+            pool.sort(key=lambda item: (item[0], item[1], -item[2].end))
+            best_distance = pool[0][1]
+            tied = [item for item in pool if item[0] == pool[0][0] and item[1] == best_distance]
+            periods = {item[2].period for item in tied}
+            return tied[0][2] if len(periods) == 1 else None
 
-        following = [item for item in explicit if item[0] == 1 and item[1] <= 320]
-        if following:
-            following.sort(key=lambda item: (item[1], item[2]))
-            best = following[0]
-            tied = [item for item in following if item[1] == best[1]]
-            periods = {item[3].period for item in tied}
-            return best[3] if len(periods) == 1 else None
-
-    # Bare-year fallback is deliberately local and weaker than every explicit
-    # quarter/FY expression.
-    left = max(0, mention.start - 180)
-    right = min(len(segment), mention.end + 140)
-    local = segment[left:right]
+    left = max(0, anchor - 150)
+    right = min(len(clause), mention_end + 120)
+    local = clause[left:right]
     bare: list[tuple[int, int, _PeriodBinding]] = []
     for match in _BARE_YEAR.finditer(local):
         start, end = left + match.start(), left + match.end()
-        around = segment[max(0, start - 100): min(len(segment), end + 140)]
-        if not _explicit_forward_context(around):
+        prefix = clause[max(0, start - 14):start]
+        if re.search(r"(?:Q[1-4]|[1-4]Q)\s*(?:FY)?\s*'?\s*$", prefix, re.I):
             continue
-        direct_prefix = segment[max(0, start - 12):start]
-        if re.search(r"(?:Q[1-4]|[1-4]Q)\s*(?:FY)?\s*'?\s*$", direct_prefix, re.I):
+        around = clause[max(0, start - 90): min(len(clause), end + 110)]
+        if not _FORWARD_SIGNAL.search(around):
             continue
-        binding = _PeriodBinding(
-            f"FY{int(match.group(1))}",
-            GuidancePeriodKind.FULL_YEAR,
-            match.group(0),
-            start,
-            end,
-        )
-        if end <= mention.start:
-            bare.append((0, mention.start - end, binding))
+        binding = _PeriodBinding(f"FY{int(match.group(1))}", GuidancePeriodKind.FULL_YEAR, match.group(0), start, end)
+        if not _admissible_period_candidate(clause, anchor, binding):
+            continue
+        if end <= anchor:
+            bare.append((0, anchor - end, binding))
         else:
-            bare.append((1, max(0, start - mention.end), binding))
+            bare.append((1, max(0, start - mention_end), binding))
 
     if not bare:
         return None
     preceding = [item for item in bare if item[0] == 0]
-    pool = preceding or [item for item in bare if item[1] <= 120]
+    pool = preceding or [item for item in bare if item[1] <= 100]
     if not pool:
         return None
     pool.sort(key=lambda item: (item[0], item[1], -item[2].end))
@@ -283,11 +325,9 @@ def _span_gap(a_start: int, a_end: int, b_start: int, b_end: int) -> int:
 
 
 def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> bool:
-    """Reject a value when another economic metric is closer than its owner."""
     current_start = anchor
     current_end = anchor + len(mention.text)
     current_gap = _span_gap(current_start, current_end, value.start, value.end)
-
     nearest_other: tuple[int, GuidanceMetric | str] | None = None
     for owner, pattern in _VALUE_OWNER_PATTERNS:
         for match in pattern.finditer(clause):
@@ -296,7 +336,6 @@ def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> b
             gap = _span_gap(match.start(), match.end(), value.start, value.end)
             if nearest_other is None or gap < nearest_other[0]:
                 nearest_other = (gap, owner)
-
     if nearest_other is None:
         return True
     other_gap, other_owner = nearest_other
@@ -305,25 +344,18 @@ def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> b
     return current_gap < other_gap
 
 
-def _historical_value_before_guidance(clause: str, anchor: int, mention, value) -> bool:
-    """Prevent a reported result immediately before a guidance header from leaking in."""
+def _value_is_historical_actual(clause: str, anchor: int, value) -> bool:
     if value is None:
         return False
-
-    before_value = clause[max(0, value.start - 180):value.start]
-    after_value = clause[value.end:min(len(clause), value.end + 180)]
-    actual_before = _ACTUAL_VALUE.search(before_value)
-    if actual_before is None:
+    before = clause[max(0, min(anchor, value.start) - 40):value.start]
+    actuals = list(_ACTUAL_VALUE.finditer(before))
+    if not actuals:
         return False
-
-    # A true forecast such as "EBITDA is expected to be $58.4m" has its forward
-    # signal before the value and must survive. A historical sentence such as
-    # "EBITDA was $58.4m. Raising 2026 guidance..." has an actual verb before the
-    # value and its first forward signal only after it, so it is rejected.
-    tail_after_actual = before_value[actual_before.end():]
-    if _FORWARD_SIGNAL.search(tail_after_actual):
+    latest_actual = actuals[-1]
+    after_actual = before[latest_actual.end():]
+    if _FORWARD_SIGNAL.search(after_actual):
         return False
-    return bool(_FORWARD_SIGNAL.search(after_value))
+    return len(before) - latest_actual.end() <= 90
 
 
 def _ambiguous_parallel_period_table(clause: str) -> bool:
@@ -344,13 +376,17 @@ def _ambiguous_current_prior_table(clause: str) -> bool:
 def _fact_role(clause: str, value) -> GuidanceFactRole:
     if value is None:
         return GuidanceFactRole.CURRENT
-    before = clause[max(0, value.start - 150):value.start]
+    before = clause[max(0, value.start - 180):value.start]
     if re.search(
-        r"\b(?:from\s+(?:our\s+)?)?prior(?:\s+[A-Za-z0-9*.-]+){0,4}\s+(?:guidance|outlook)\b",
+        r"\b(?:from\s+(?:our\s+)?)?prior(?:\s+[A-Za-z0-9*.-]+){0,5}\s+(?:guidance|outlook|forecast)\b",
         before,
         re.I,
     ) or re.search(
-        r"\bprevious(?:\s+[A-Za-z0-9*.-]+){0,4}\s+(?:guidance|outlook)\b",
+        r"\bprevious(?:\s+[A-Za-z0-9*.-]+){0,5}\s+(?:guidance|outlook|forecast)\b",
+        before,
+        re.I,
+    ) or re.search(
+        r"\bpreviously(?:\s+(?:expected|forecast|guided|provided|stated))?\b",
         before,
         re.I,
     ):
@@ -358,7 +394,14 @@ def _fact_role(clause: str, value) -> GuidanceFactRole:
     return GuidanceFactRole.CURRENT
 
 
-def _canonical_scope(clause: str, anchor: int, mention) -> tuple[GuidanceScopeKind, str | None]:
+def _canonical_scope(clause: str, anchor: int, mention, value) -> tuple[GuidanceScopeKind, str | None]:
+    value_end = value.end if value is not None else anchor + len(mention.text)
+    local_context = clause[max(0, anchor - 100): min(len(clause), value_end)]
+    contribution = _NON_COMPANY_CONTRIBUTION.search(local_context)
+    if contribution:
+        kind = GuidanceScopeKind.PRODUCT if re.search(r"\bproducts?\b", contribution.group(0), re.I) else GuidanceScopeKind.SEGMENT
+        return kind, contribution.group(0).strip()
+
     if mention.metric is not GuidanceMetric.REVENUE:
         return GuidanceScopeKind.COMPANY, None
 
@@ -383,15 +426,230 @@ def _canonical_scope(clause: str, anchor: int, mention) -> tuple[GuidanceScopeKi
     segment_match = _SEGMENT_REVENUE_QUALIFIER.search(prefix)
     if segment_match:
         return GuidanceScopeKind.SEGMENT, segment_match.group(0).strip()
-
-    contribution_context = clause[max(0, anchor - 180):anchor]
-    if re.search(r"\bacquisitions?\b.{0,120}\bcontribut(?:e|es|ed|ing)\b", contribution_context, re.I):
-        return GuidanceScopeKind.SEGMENT, "acquisition contribution"
     return GuidanceScopeKind.COMPANY, None
 
 
+def _unit_from_scale(scale: str | None, metric: GuidanceMetric, *, dollar: bool) -> GuidanceUnit:
+    if metric is GuidanceMetric.EPS:
+        return GuidanceUnit.USD_PER_SHARE
+    if scale:
+        return _MONEY_SCALE_UNITS.get(scale.lower(), GuidanceUnit.UNKNOWN)
+    return GuidanceUnit.USD if dollar else GuidanceUnit.UNKNOWN
+
+
+def _directional_value_pair(
+    clause: str,
+    anchor: int,
+    mention,
+    action: GuidanceAction,
+) -> tuple[_ValueBinding | None, _ValueBinding | None]:
+    if action not in {GuidanceAction.RAISE, GuidanceAction.LOWER}:
+        return None, None
+
+    if mention.metric in {GuidanceMetric.GROSS_MARGIN, GuidanceMetric.OPERATING_MARGIN}:
+        by_match = _BY_TO_PERCENT.search(clause)
+        if by_match:
+            target = float(by_match.group("target"))
+            return (
+                _ValueBinding(
+                    target, target, GuidanceUnit.PERCENT, GuidanceValueKind.ABSOLUTE_LEVEL,
+                    by_match.group("target") + "%", by_match.start("target"), by_match.end("target") + 1,
+                ),
+                None,
+            )
+        ft = _FROM_TO_PERCENT.search(clause)
+        if ft:
+            old, new = float(ft.group("old")), float(ft.group("new"))
+            return (
+                _ValueBinding(new, new, GuidanceUnit.PERCENT, GuidanceValueKind.ABSOLUTE_LEVEL, ft.group("new") + "%", ft.start("new"), ft.end("new") + 1),
+                _ValueBinding(old, old, GuidanceUnit.PERCENT, GuidanceValueKind.ABSOLUTE_LEVEL, ft.group("old") + "%", ft.start("old"), ft.end("old") + 1),
+            )
+        return None, None
+
+    if mention.metric not in {GuidanceMetric.REVENUE, GuidanceMetric.EBITDA, GuidanceMetric.FCF, GuidanceMetric.EPS}:
+        return None, None
+
+    by_match = _BY_TO_MONEY.search(clause)
+    if by_match:
+        scale = by_match.group("s2") or by_match.group("s1")
+        dollar = bool(by_match.group("d2") or by_match.group("d1"))
+        unit = _unit_from_scale(scale, mention.metric, dollar=dollar)
+        if unit is not GuidanceUnit.UNKNOWN:
+            target = float(by_match.group("target").replace(",", ""))
+            return (
+                _ValueBinding(target, target, unit, GuidanceValueKind.ABSOLUTE_LEVEL, by_match.group("target"), by_match.start("target"), by_match.end("target")),
+                None,
+            )
+
+    ft = _FROM_TO_MONEY.search(clause)
+    if ft and not re.search(r"\brange\s*$", clause[max(0, ft.start() - 24):ft.start()], re.I):
+        common_scale = ft.group("s2") or ft.group("s1")
+        dollar = bool(ft.group("d1") or ft.group("d2"))
+        old_unit = _unit_from_scale(ft.group("s1") or common_scale, mention.metric, dollar=dollar)
+        new_unit = _unit_from_scale(ft.group("s2") or common_scale, mention.metric, dollar=dollar)
+        if old_unit is not GuidanceUnit.UNKNOWN and new_unit is not GuidanceUnit.UNKNOWN:
+            old = float(ft.group("old").replace(",", ""))
+            new = float(ft.group("new").replace(",", ""))
+            return (
+                _ValueBinding(new, new, new_unit, GuidanceValueKind.ABSOLUTE_LEVEL, ft.group("new"), ft.start("new"), ft.end("new")),
+                _ValueBinding(old, old, old_unit, GuidanceValueKind.ABSOLUTE_LEVEL, ft.group("old"), ft.start("old"), ft.end("old")),
+            )
+    return None, None
+
+
+def _money_base(value: float | None, unit: GuidanceUnit) -> float | None:
+    if value is None:
+        return None
+    scale = _MONEY_UNIT_SCALE.get(unit)
+    return value * scale if scale is not None else None
+
+
+def _same_economic_identity(left: TypedGuidanceFact, right: TypedGuidanceFact) -> bool:
+    company_label_left = "" if left.scope_kind is GuidanceScopeKind.COMPANY else (left.scope_label or "")
+    company_label_right = "" if right.scope_kind is GuidanceScopeKind.COMPANY else (right.scope_label or "")
+    return (
+        left.ticker,
+        left.metric,
+        left.fiscal_period,
+        left.accounting_basis,
+        left.scope_kind,
+        company_label_left,
+        left.role,
+        left.value_kind,
+    ) == (
+        right.ticker,
+        right.metric,
+        right.fiscal_period,
+        right.accounting_basis,
+        right.scope_kind,
+        company_label_right,
+        right.role,
+        right.value_kind,
+    )
+
+
+def _suppress_document_fragments(facts: Iterable[TypedGuidanceFact], rejected: list[dict]) -> list[TypedGuidanceFact]:
+    items = list(facts)
+    remove: set[int] = set()
+    for i, fact in enumerate(items):
+        if i in remove or fact.low is None or fact.high is None or fact.low == fact.high:
+            continue
+        for j, other in enumerate(items):
+            if i == j or j in remove or not _same_economic_identity(fact, other):
+                continue
+            if other.low is None or other.high is None or other.low != other.high:
+                continue
+            if fact.unit in _MONEY_UNIT_SCALE and other.unit in _MONEY_UNIT_SCALE:
+                lo = _money_base(fact.low, fact.unit)
+                hi = _money_base(fact.high, fact.unit)
+                point = _money_base(other.low, other.unit)
+            elif fact.unit == other.unit:
+                lo, hi, point = fact.low, fact.high, other.low
+            else:
+                continue
+            if lo is None or hi is None or point is None:
+                continue
+            tolerance = max(1e-8, abs(point) * 1e-8)
+            if abs(point - lo) <= tolerance or abs(point - hi) <= tolerance:
+                remove.add(j)
+                rejected.append({"reason": "same_document_range_endpoint_fragment", "metric": other.metric.value, "period": other.fiscal_period, "value": point})
+
+    best_by_key: dict[tuple, int] = {}
+    for i, fact in enumerate(items):
+        if i in remove:
+            continue
+        low = _money_base(fact.low, fact.unit) if fact.unit in _MONEY_UNIT_SCALE else fact.low
+        high = _money_base(fact.high, fact.unit) if fact.unit in _MONEY_UNIT_SCALE else fact.high
+        key = (
+            fact.ticker, fact.metric.value, fact.fiscal_period, fact.accounting_basis,
+            fact.scope_kind.value, "" if fact.scope_kind is GuidanceScopeKind.COMPANY else (fact.scope_label or ""),
+            fact.role.value, fact.value_kind.value, low, high, fact.explicit_action.value,
+        )
+        prior = best_by_key.get(key)
+        if prior is None:
+            best_by_key[key] = i
+            continue
+        prior_fact = items[prior]
+        score = (fact.low != fact.high, fact.unit in {GuidanceUnit.USD_MILLION, GuidanceUnit.USD_BILLION, GuidanceUnit.USD_THOUSAND})
+        prior_score = (prior_fact.low != prior_fact.high, prior_fact.unit in {GuidanceUnit.USD_MILLION, GuidanceUnit.USD_BILLION, GuidanceUnit.USD_THOUSAND})
+        if score > prior_score:
+            remove.add(prior)
+            best_by_key[key] = i
+        else:
+            remove.add(i)
+    return [fact for idx, fact in enumerate(items) if idx not in remove]
+
+
+def _build_fact(
+    *,
+    document: SourceDocument,
+    mention,
+    period: _PeriodBinding,
+    basis: str,
+    scope_kind: GuidanceScopeKind,
+    scope_label: str | None,
+    role: GuidanceFactRole,
+    action: GuidanceAction,
+    value: _ValueBinding | None,
+    clause: str,
+    anchor: int,
+) -> TypedGuidanceFact:
+    low = high = None
+    unit = GuidanceUnit.UNKNOWN
+    value_kind = GuidanceValueKind.QUALITATIVE
+    value_text = None
+    value_start = value_end = None
+    if value is not None:
+        low, high = value.low, value.high
+        unit, value_kind = value.unit, value.value_kind
+        value_text = value.text
+        value_start, value_end = value.start, value.end
+
+    evidence = EvidenceBinding(
+        full_text=clause,
+        metric_text=mention.text,
+        value_text=value_text,
+        period_text=period.text,
+        action_text=action.value if action is not GuidanceAction.NONE else None,
+        metric_start=anchor,
+        metric_end=anchor + len(mention.text),
+        value_start=value_start,
+        value_end=value_end,
+        period_start=period.start,
+        period_end=period.end,
+    )
+    provenance = GuidanceProvenance(
+        document_id=document.document_id,
+        source=document.source,
+        source_url=document.source_url,
+        source_accession=document.accession,
+        source_timestamp=document.source_timestamp,
+        source_document_hash=document.content_hash,
+        evidence=evidence,
+    )
+    return TypedGuidanceFact(
+        ticker=document.ticker,
+        metric=mention.metric,
+        raw_metric_label=mention.raw_label,
+        fiscal_period=period.period,
+        authoritative_period=period.period,
+        period_kind=period.kind,
+        accounting_basis=basis,
+        scope_kind=scope_kind,
+        scope_label=scope_label,
+        value_kind=value_kind,
+        role=role,
+        low=low,
+        high=high,
+        unit=unit,
+        explicit_action=action,
+        extraction_method=ExtractionMethod.DETERMINISTIC_TEXT,
+        provenance=[provenance],
+        metadata={"raw_document_extractor": "guidance-canonical-raw-v4", "source_form": document.form},
+    )
+
+
 def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTypedGuidanceExtraction:
-    """Raw SEC -> typed facts with fail-closed binding and no repair stack."""
     text = html_to_text(document.content or "")
     facts: list[TypedGuidanceFact] = []
     rejected: list[dict] = []
@@ -401,161 +659,75 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
         mentions = _metric_mentions(segment)
         if not mentions:
             continue
-
         for index, mention in enumerate(mentions):
             clause, anchor = _metric_clause(segment, mentions, index)
             local = clause[max(0, anchor - 140): min(len(clause), anchor + len(mention.text) + 160)]
             explicit_forward = _explicit_forward_context(local)
             local_action = _metric_action(segment, clause, anchor, mention)
-
             if not explicit_forward and local_action is GuidanceAction.NONE:
                 continue
-
             if _ambiguous_parallel_period_table(clause):
-                rejected.append(
-                    {"reason": "ambiguous_parallel_period_table", "metric": mention.metric.value, "evidence": clause[:500]}
-                )
+                rejected.append({"reason": "ambiguous_parallel_period_table", "metric": mention.metric.value, "evidence": clause[:500]})
                 continue
             if _ambiguous_current_prior_table(clause):
-                rejected.append(
-                    {"reason": "ambiguous_current_prior_table", "metric": mention.metric.value, "evidence": clause[:500]}
-                )
+                rejected.append({"reason": "ambiguous_current_prior_table", "metric": mention.metric.value, "evidence": clause[:500]})
                 continue
 
-            value = _bind_value(clause, mention, anchor)
+            directional_value, directional_prior = _directional_value_pair(clause, anchor, mention, local_action)
+            value = directional_value or _bind_value(clause, mention, anchor)
             if value is not None and value.low > value.high:
-                rejected.append(
-                    {
-                        "reason": "invalid_reversed_range",
-                        "metric": mention.metric.value,
-                        "value_text": value.text,
-                        "evidence": clause[:500],
-                    }
-                )
+                rejected.append({"reason": "invalid_reversed_range", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]})
                 continue
             if value is not None and not _value_has_local_metric_owner(clause, anchor, mention, value):
-                rejected.append(
-                    {
-                        "reason": "metric_value_locality",
-                        "metric": mention.metric.value,
-                        "value_text": value.text,
-                        "evidence": clause[:500],
-                    }
-                )
+                rejected.append({"reason": "metric_value_locality", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]})
                 continue
-            if value is not None and _historical_value_before_guidance(clause, anchor, mention, value):
-                rejected.append(
-                    {
-                        "reason": "historical_actual",
-                        "metric": mention.metric.value,
-                        "value_text": value.text,
-                        "evidence": clause[:500],
-                    }
-                )
+            if value is not None and _value_is_historical_actual(clause, anchor, value):
+                rejected.append({"reason": "historical_actual", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]})
                 continue
 
-            period = _canonical_period_binding(segment, mention)
+            period = _canonical_period_binding(clause, anchor, mention)
             if period is None:
-                rejected.append(
-                    {"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]}
-                )
+                rejected.append({"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]})
+                continue
+            if value is None and local_action not in {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM, GuidanceAction.WITHDRAW}:
+                rejected.append({"reason": "missing_bound_value", "metric": mention.metric.value, "evidence": clause[:500]})
                 continue
 
-            if value is None and local_action not in {
-                GuidanceAction.RAISE,
-                GuidanceAction.LOWER,
-                GuidanceAction.REAFFIRM,
-                GuidanceAction.WITHDRAW,
-            }:
-                rejected.append(
-                    {"reason": "missing_bound_value", "metric": mention.metric.value, "evidence": clause[:500]}
-                )
-                continue
-
-            scope_kind, scope_label = _canonical_scope(clause, anchor, mention)
+            scope_kind, scope_label = _canonical_scope(clause, anchor, mention, value)
             basis = _basis(segment, mention)
             role = _fact_role(clause, value)
-
-            low = high = None
-            unit = GuidanceUnit.UNKNOWN
-            value_kind = GuidanceValueKind.QUALITATIVE
-            value_text = None
-            value_start = value_end = None
-            if value is not None:
-                low, high = value.low, value.high
-                unit, value_kind = value.unit, value.value_kind
-                value_text = value.text
-                value_start, value_end = value.start, value.end
-
-            clause_left = mention.start - anchor
-            period_start = period.start - clause_left if clause_left <= period.start < clause_left + len(clause) else None
-            period_end = period.end - clause_left if clause_left < period.end <= clause_left + len(clause) else None
-            evidence = EvidenceBinding(
-                full_text=clause,
-                metric_text=mention.text,
-                value_text=value_text,
-                period_text=period.text,
-                action_text=local_action.value if local_action is not GuidanceAction.NONE else None,
-                metric_start=anchor,
-                metric_end=anchor + len(mention.text),
-                value_start=value_start,
-                value_end=value_end,
-                period_start=period_start,
-                period_end=period_end,
+            fact = _build_fact(
+                document=document, mention=mention, period=period, basis=basis,
+                scope_kind=scope_kind, scope_label=scope_label, role=role,
+                action=local_action, value=value, clause=clause, anchor=anchor,
             )
-            provenance = GuidanceProvenance(
-                document_id=document.document_id,
-                source=document.source,
-                source_url=document.source_url,
-                source_accession=document.accession,
-                source_timestamp=document.source_timestamp,
-                source_document_hash=document.content_hash,
-                evidence=evidence,
-            )
-
             key = (
-                document.ticker,
-                mention.metric.value,
-                period.period,
-                basis,
-                scope_kind.value,
-                scope_label or "",
-                role.value,
-                low,
-                high,
-                unit.value,
-                value_kind.value,
-                local_action.value,
+                fact.ticker, fact.metric.value, fact.fiscal_period, fact.accounting_basis,
+                fact.scope_kind.value, fact.scope_label or "", fact.role.value,
+                fact.low, fact.high, fact.unit.value, fact.value_kind.value, fact.explicit_action.value,
             )
-            if key in seen:
-                continue
-            seen.add(key)
-            facts.append(
-                TypedGuidanceFact(
-                    ticker=document.ticker,
-                    metric=mention.metric,
-                    raw_metric_label=mention.raw_label,
-                    fiscal_period=period.period,
-                    authoritative_period=period.period,
-                    period_kind=period.kind,
-                    accounting_basis=basis,
-                    scope_kind=scope_kind,
-                    scope_label=scope_label,
-                    value_kind=value_kind,
-                    role=role,
-                    low=low,
-                    high=high,
-                    unit=unit,
-                    explicit_action=local_action,
-                    extraction_method=ExtractionMethod.DETERMINISTIC_TEXT,
-                    provenance=[provenance],
-                    metadata={
-                        "raw_document_extractor": "guidance-canonical-raw-v3",
-                        "source_form": document.form,
-                    },
-                )
-            )
+            if key not in seen:
+                seen.add(key)
+                facts.append(fact)
 
+            if directional_prior is not None:
+                prior_fact = _build_fact(
+                    document=document, mention=mention, period=period, basis=basis,
+                    scope_kind=scope_kind, scope_label=scope_label,
+                    role=GuidanceFactRole.QUOTED_PRIOR, action=GuidanceAction.NONE,
+                    value=directional_prior, clause=clause, anchor=anchor,
+                )
+                prior_key = (
+                    prior_fact.ticker, prior_fact.metric.value, prior_fact.fiscal_period,
+                    prior_fact.accounting_basis, prior_fact.scope_kind.value, prior_fact.scope_label or "",
+                    prior_fact.role.value, prior_fact.low, prior_fact.high, prior_fact.unit.value,
+                    prior_fact.value_kind.value, prior_fact.explicit_action.value,
+                )
+                if prior_key not in seen:
+                    seen.add(prior_key)
+                    facts.append(prior_fact)
+
+    facts = _suppress_document_fragments(facts, rejected)
     return RawTypedGuidanceExtraction(
         ticker=document.ticker,
         document_id=document.document_id,
