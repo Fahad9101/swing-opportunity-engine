@@ -397,7 +397,7 @@ def _bind_value(clause: str, mention: _MetricMention, anchor: int) -> _ValueBind
             r"\$?\s*(?P<lo>-?\d+(?:\.\d+)?)\s*(?:to|through|-|–|—)\s*\$?\s*(?P<hi>-?\d+(?:\.\d+)?)(?!\s*%)",
             re.I,
         )
-        eps_single = re.compile(r"\$\s*(?P<value>-?\d+(?:\.\d+)?)(?!\s*%)")
+        eps_single = re.compile(r"\$\s*(?P<value>-?\d+(?:\.\d+)?)(?![\d,]|\s*%)")
         for match in eps_range.finditer(clause):
             candidates.append(_ValueBinding(float(match.group("lo")), float(match.group("hi")), GuidanceUnit.USD_PER_SHARE, GuidanceValueKind.ABSOLUTE_LEVEL, match.group(0), match.start(), match.end()))
         for match in eps_single.finditer(clause):

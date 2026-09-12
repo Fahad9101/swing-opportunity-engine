@@ -224,3 +224,73 @@ def test_parallel_quarter_and_full_year_table_fails_closed():
     )
     assert not extraction.facts
     assert any(item["reason"] == "ambiguous_parallel_period_table" for item in extraction.rejected_candidates)
+
+
+
+def test_semantic_acceptance_cross_metric_owner_regressions():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "OWNER2",
+            "Fiscal year 2027 guidance: Revenue of between $630 million and $650 million; "
+            "Non-GAAP adjusted EBITDA of between $135 million and $145 million. "
+            "Full year 2026 guidance: net cash provided by operating activities to range between "
+            "$2.90 billion and $3.40 billion and free cash flow to range between $2.00 billion and $2.50 billion.",
+        )
+    )
+    ebitda = [fact for fact in extraction.facts if fact.metric.value == "ebitda"]
+    fcf = [fact for fact in extraction.facts if fact.metric.value == "fcf"]
+    assert all((fact.low, fact.high) != (630.0, 650.0) for fact in ebitda)
+    assert all((fact.low, fact.high) != (2.90, 3.40) for fact in fcf)
+    assert any((fact.low, fact.high) == (135.0, 145.0) for fact in ebitda)
+    assert any((fact.low, fact.high) == (2.00, 2.50) for fact in fcf)
+
+
+def test_semantic_acceptance_period_heading_blocks_prior_value_binding():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "HEADING",
+            "Adjusted restaurant-level profit is expected to be approximately $208 million to $212 million in FY25. "
+            "Initial Fiscal 2026 Financial Guidance: Total revenue of $1.6 billion to $1.7 billion.",
+        )
+    )
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    assert any(fact.fiscal_period == "FY2026" and (fact.low, fact.high) == (1.6, 1.7) for fact in revenue)
+    assert all((fact.low, fact.high) != (208.0, 212.0) for fact in revenue)
+
+
+def test_semantic_acceptance_scale_shadow_is_suppressed():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "SCALE",
+            "For full year 2026, we are raising our revenue guidance to between $8.150 - $8.158 billion.",
+        )
+    )
+    revenue = [fact for fact in extraction.facts if fact.metric.value == "revenue"]
+    observed = {(fact.low, fact.high, fact.unit.value) for fact in revenue}
+    assert (8.15, 8.158, "USD_BILLION") in observed
+    assert (8.15, 8.158, "USD") not in observed
+
+
+def test_semantic_acceptance_result_headline_is_not_forward_guidance():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "ACTUAL2",
+            "Humana Reports Second Quarter 2026 Financial Results; Affirms Full Year 2026 Adjusted Financial Guidance. "
+            "Reports 2Q26 earnings per share (EPS) of $5.73 on a GAAP basis, Adjusted EPS of $7.61. "
+            "FY 2026 Adjusted EPS guidance is at least $9.00.",
+        )
+    )
+    eps = [fact for fact in extraction.facts if fact.metric.value == "eps"]
+    assert all(fact.low not in {5.73, 7.61} for fact in eps)
+    assert any(fact.low == 9.0 for fact in eps)
+
+
+def test_semantic_acceptance_eps_does_not_truncate_comma_dollar_amount():
+    extraction = extract_canonical_typed_guidance_facts(
+        _document(
+            "COMMA",
+            "FY 2026 Adjusted EPS guidance is at least $9.00. Adjusted net income $2,263 million.",
+        )
+    )
+    eps = [fact for fact in extraction.facts if fact.metric.value == "eps"]
+    assert all(fact.low != 2.0 for fact in eps)

@@ -46,7 +46,8 @@ _FORWARD_SIGNAL = re.compile(
     re.I,
 )
 _ACTUAL_VALUE = re.compile(
-    r"\b(?:was|were|totaled|reported|generated|delivered|achieved|realized|"
+    r"\b(?:was|were|totaled|reports?|reported|generated|delivered|achieved|realized|"
+    r"(?:increased|decreased|grew|declined|rose|fell)(?:\s+\d+(?:\.\d+)?%)?\s+to|"
     r"for\s+the\s+quarter\s+ended|for\s+the\s+year\s+ended|year[- ]to[- ]date)\b",
     re.I,
 )
@@ -103,7 +104,7 @@ _VALUE_OWNER_PATTERNS: list[tuple[GuidanceMetric | str, re.Pattern[str]]] = [
         GuidanceMetric.EPS,
         re.compile(
             r"\b(?:(?:adj(?:usted)?|non[- ]GAAP|GAAP)\s+)?(?:diluted\s+)?"
-            r"(?:EPS|earnings\s+per\s+(?:common\s+)?share)\b",
+            r"(?:EPS|earnings\s+per\s+(?:common\s+)?share|per\s+diluted\s+share)\b",
             re.I,
         ),
     ),
@@ -124,9 +125,17 @@ _VALUE_OWNER_PATTERNS: list[tuple[GuidanceMetric | str, re.Pattern[str]]] = [
     ("capex", re.compile(r"\b(?:capital\s+expenditures?|capex)\b", re.I)),
     ("stock_comp", re.compile(r"\bstock[- ]based\s+compensation(?:\s+expense)?\b", re.I)),
     ("operating_expense", re.compile(r"\b(?:operating|interest)\s+expense\b", re.I)),
-    ("repurchase", re.compile(r"\b(?:share|stock)\s+repurchase\b", re.I)),
+    ("repurchase", re.compile(r"\b(?:(?:share|stock)\s+repurchase|repurchas(?:e|es|ed|ing))\b", re.I)),
     ("shares", re.compile(r"\b(?:weighted[- ]average\s+)?shares?\s+outstanding\b", re.I)),
-    ("contract_value", re.compile(r"\b(?:contract\s+wins?|contracts?\s+valued|transaction\s+consideration)\b", re.I)),
+    (
+        "contract_value",
+        re.compile(
+            r"\b(?:contract\s+wins?|contracts?\s+valued|transaction\s+consideration|"
+            r"contracts?\b[^.;]{0,100}\b(?:valued|combined\s+annual\s+revenues?))\b",
+            re.I,
+        ),
+    ),
+
 ]
 
 _MONEY_SCALE_UNITS = {
@@ -350,25 +359,46 @@ def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> b
     current_end = anchor + len(mention.text)
     current_gap = _span_gap(current_start, current_end, value.start, value.end)
     nearest_other: tuple[int, GuidanceMetric | str] | None = None
+    current_basis = (
+        "ADJUSTED" if re.search(r"\b(?:adjusted|non[- ]GAAP)\b", mention.text, re.I)
+        else "GAAP" if re.search(r"(?<!non[- ])\bGAAP\b", mention.text, re.I)
+        else None
+    )
     for owner, pattern in _VALUE_OWNER_PATTERNS:
         for match in pattern.finditer(clause):
-            if owner is mention.metric and not (match.end() <= current_start or match.start() >= current_end):
+            overlaps_current = not (match.end() <= current_start or match.start() >= current_end)
+            if owner is mention.metric and overlaps_current:
+                continue
+            owner_is_effectively_other = owner is not mention.metric
+            if owner is mention.metric and value.end <= current_start:
+                owner_text = match.group(0)
+                owner_basis = (
+                    "ADJUSTED" if re.search(r"\b(?:adjusted|non[- ]GAAP)\b", owner_text, re.I)
+                    else "GAAP" if re.search(r"(?<!non[- ])\bGAAP\b", owner_text, re.I)
+                    else None
+                )
+                owner_is_effectively_other = bool(
+                    current_basis and owner_basis and current_basis != owner_basis
+                )
+            if not owner_is_effectively_other:
                 continue
             gap = _span_gap(match.start(), match.end(), value.start, value.end)
+            if value.end <= current_start and match.end() <= value.start:
+                prior_gap = value.start - match.end()
+                if prior_gap <= 120 and prior_gap <= current_gap + 80:
+                    return False
             if nearest_other is None or gap < nearest_other[0]:
                 nearest_other = (gap, owner)
     if nearest_other is None:
         return True
-    other_gap, other_owner = nearest_other
-    if other_owner is mention.metric:
-        return True
+    other_gap, _ = nearest_other
     return current_gap < other_gap
 
 
 def _value_is_historical_actual(clause: str, anchor: int, value) -> bool:
     if value is None:
         return False
-    before = clause[max(0, min(anchor, value.start) - 40):value.start]
+    before = clause[max(0, min(anchor, value.start) - 120):value.start]
     actuals = list(_ACTUAL_VALUE.finditer(before))
     if not actuals:
         return False
@@ -376,7 +406,7 @@ def _value_is_historical_actual(clause: str, anchor: int, value) -> bool:
     after_actual = before[latest_actual.end():]
     if _FORWARD_SIGNAL.search(after_actual):
         return False
-    return len(before) - latest_actual.end() <= 90
+    return len(before) - latest_actual.end() <= 120
 
 
 def _ambiguous_parallel_period_table(clause: str) -> bool:
@@ -539,6 +569,33 @@ def _suppress_document_fragments(facts: Iterable[TypedGuidanceFact], rejected: l
             if abs(point - lo) <= tolerance or abs(point - hi) <= tolerance:
                 remove.add(j)
                 rejected.append({"reason": "same_document_range_endpoint_fragment", "metric": other.metric.value, "period": other.fiscal_period, "value": point})
+    # Suppress an unscaled shadow fragment when exactly the same raw endpoints
+    # also exist in a scaled money observation for the same economic identity.
+    scaled_units = {
+        GuidanceUnit.USD_THOUSAND,
+        GuidanceUnit.USD_MILLION,
+        GuidanceUnit.USD_BILLION,
+    }
+    for i, fact in enumerate(items):
+        if i in remove or fact.low is None or fact.high is None or fact.unit is not GuidanceUnit.USD:
+            continue
+        for j, other in enumerate(items):
+            if i == j or j in remove or other.unit not in scaled_units:
+                continue
+            if not _same_economic_identity(fact, other):
+                continue
+            if fact.low == other.low and fact.high == other.high:
+                remove.add(i)
+                rejected.append(
+                    {
+                        "reason": "unscaled_shadow_fragment",
+                        "metric": fact.metric.value,
+                        "period": fact.fiscal_period,
+                        "value": [fact.low, fact.high],
+                    }
+                )
+                break
+
     best_by_key: dict[tuple, int] = {}
     for i, fact in enumerate(items):
         if i in remove:
@@ -566,7 +623,7 @@ def _build_fact(*, document: SourceDocument, mention, period: _PeriodBinding, ba
         low, high, unit, value_kind, value_text, value_start, value_end = value.low, value.high, value.unit, value.value_kind, value.text, value.start, value.end
     evidence = EvidenceBinding(full_text=clause, metric_text=mention.text, value_text=value_text, period_text=period.text, action_text=action.value if action is not GuidanceAction.NONE else None, metric_start=anchor, metric_end=anchor + len(mention.text), value_start=value_start, value_end=value_end, period_start=period.start, period_end=period.end)
     provenance = GuidanceProvenance(document_id=document.document_id, source=document.source, source_url=document.source_url, source_accession=document.accession, source_timestamp=document.source_timestamp, source_document_hash=document.content_hash, evidence=evidence)
-    return TypedGuidanceFact(ticker=document.ticker, metric=mention.metric, raw_metric_label=mention.raw_label, fiscal_period=period.period, authoritative_period=period.period, period_kind=period.kind, accounting_basis=basis, scope_kind=scope_kind, scope_label=scope_label, value_kind=value_kind, role=role, low=low, high=high, unit=unit, explicit_action=action, extraction_method=ExtractionMethod.DETERMINISTIC_TEXT, provenance=[provenance], metadata={"raw_document_extractor": "guidance-canonical-raw-v4", "source_form": document.form})
+    return TypedGuidanceFact(ticker=document.ticker, metric=mention.metric, raw_metric_label=mention.raw_label, fiscal_period=period.period, authoritative_period=period.period, period_kind=period.kind, accounting_basis=basis, scope_kind=scope_kind, scope_label=scope_label, value_kind=value_kind, role=role, low=low, high=high, unit=unit, explicit_action=action, extraction_method=ExtractionMethod.DETERMINISTIC_TEXT, provenance=[provenance], metadata={"raw_document_extractor": "guidance-canonical-raw-v5", "source_form": document.form})
 
 
 def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTypedGuidanceExtraction:
@@ -605,6 +662,16 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
                 period = _unique_explicit_period_from_segment(segment)
             if period is None:
                 rejected.append({"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]}); continue
+            if value is not None and value.end <= period.start <= anchor:
+                rejected.append(
+                    {
+                        "reason": "value_crosses_period_boundary",
+                        "metric": mention.metric.value,
+                        "value_text": value.text,
+                        "period": period.period,
+                        "evidence": clause[:500],
+                    }
+                ); continue
             if value is None and local_action not in {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM, GuidanceAction.WITHDRAW}:
                 rejected.append({"reason": "missing_bound_value", "metric": mention.metric.value, "evidence": clause[:500]}); continue
             scope_kind, scope_label = _canonical_scope(clause, anchor, mention, value)
