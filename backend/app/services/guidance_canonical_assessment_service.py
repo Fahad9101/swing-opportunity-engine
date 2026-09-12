@@ -6,6 +6,7 @@ from app.domain.guidance_canonical_v1 import (
     CanonicalizationResult,
     GuidanceFactRole,
     GuidanceInvariantCode,
+    GuidanceScopeKind,
 )
 from app.domain.soe_v1_1 import GuidanceAssessment, GuidanceClassification
 from app.services.guidance_canonical_ledger_service import CanonicalGuidanceLedger
@@ -17,6 +18,11 @@ _NON_BLOCKING_QUARANTINE = {
     GuidanceInvariantCode.LONG_TERM_TARGET,
 }
 
+_SUPPLEMENTARY_VALUE_QUARANTINE = {
+    GuidanceInvariantCode.NON_ABSOLUTE_VALUE,
+    GuidanceInvariantCode.UNIT_METRIC_MISMATCH,
+}
+
 
 def _latest_accepted_timestamp(result: CanonicalizationResult, ticker: str) -> datetime | None:
     timestamps = [
@@ -26,6 +32,43 @@ def _latest_accepted_timestamp(result: CanonicalizationResult, ticker: str) -> d
         for provenance in fact.provenance
     ]
     return max(timestamps) if timestamps else None
+
+
+def _fact_identity(fact) -> tuple:
+    scope_label = "" if fact.scope_kind is GuidanceScopeKind.COMPANY else (fact.scope_label or "")
+    return (
+        fact.metric.value,
+        fact.fiscal_period,
+        fact.accounting_basis,
+        fact.scope_kind.value,
+        scope_label,
+    )
+
+
+def _has_same_snapshot_absolute_replacement(
+    result: CanonicalizationResult,
+    ticker: str,
+    quarantined_fact,
+    timestamp: datetime,
+) -> bool:
+    """Return true only when the same economic guidance identity is accepted.
+
+    Raw filings can state both an absolute level and a supplementary growth/bps
+    expression for the same metric/period in the same release. The supplementary
+    expression remains quarantined, but it must not force UNKNOWN when a valid
+    absolute fact for that exact economic identity is authoritative at the same
+    timestamp. Newer unsupported guidance with no same-snapshot absolute fact
+    remains blocking, preventing stale fallback.
+    """
+    identity = _fact_identity(quarantined_fact)
+    for fact in result.accepted:
+        if fact.ticker != ticker or fact.role is not GuidanceFactRole.CURRENT:
+            continue
+        if _fact_identity(fact) != identity:
+            continue
+        if any(provenance.source_timestamp == timestamp for provenance in fact.provenance):
+            return True
+    return False
 
 
 def _blocking_quarantines(result: CanonicalizationResult, ticker: str):
@@ -53,10 +96,9 @@ def assess_canonicalization_result(
 ) -> GuidanceAssessment:
     """Assess accepted canonical facts without falling back past unresolved evidence.
 
-    If a newer (or same-snapshot) guidance candidate is quarantined for a
-    blocking invariant failure, classification is UNKNOWN rather than silently
-    reverting to an older clean guidance snapshot. Non-company, historical, and
-    long-term evidence is intentionally irrelevant and does not block.
+    A newer unresolved candidate blocks stale fallback. Supplementary growth/bps
+    representations are the sole exception when a valid absolute fact for the
+    same metric/period/scope/basis is accepted at that exact source timestamp.
     """
     as_of = as_of or datetime.now(UTC)
     accepted_latest = _latest_accepted_timestamp(result, ticker)
@@ -72,6 +114,13 @@ def assess_canonicalization_result(
         if not timestamps:
             continue
         latest = max(timestamps)
+        codes = {violation.code for violation in violations}
+        if (
+            codes
+            and codes.issubset(_SUPPLEMENTARY_VALUE_QUARANTINE)
+            and _has_same_snapshot_absolute_replacement(result, ticker, item.fact, latest)
+        ):
+            continue
         if accepted_latest is None or latest >= accepted_latest:
             active_blocked.append((latest, item, violations))
 
