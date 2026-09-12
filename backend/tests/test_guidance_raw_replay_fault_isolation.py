@@ -15,7 +15,7 @@ def _rules() -> dict:
         return yaml.safe_load(handle)
 
 
-def test_malformed_raw_document_is_reported_without_aborting_population_replay():
+def test_reversed_range_is_rejected_without_aborting_or_marking_extraction_failure():
     content = b"Full-year 2026 guidance. Adjusted EPS $5.00 to $4.00."
     url = "https://www.sec.gov/Archives/edgar/data/1/bad.htm"
     digest = hashlib.sha256(content).hexdigest()
@@ -63,10 +63,11 @@ def test_malformed_raw_document_is_reported_without_aborting_population_replay()
         {url: VerifiedDocumentContent(content=content.decode(), content_hash=digest)},
         rules_hash="candidate-hash",
     )
-    assert report["extraction_error_count"] == 1
-    assert report["complete_ticker_count"] == 0
-    assert report["incomplete_ticker_count"] == 1
+    assert report["extraction_error_count"] == 0
+    assert report["complete_ticker_count"] == 1
+    assert report["incomplete_ticker_count"] == 0
     assert report["classification_divergence_count"] == 0
+    assert report["rejected_candidate_count"] >= 1
     ticker = report["ticker_reports"][0]
-    assert ticker["status"] == "INCOMPLETE_EXTRACTION_REPLAY"
-    assert ticker["extraction_error_count"] == 1
+    assert ticker["status"] == "COMPLETE"
+    assert ticker["rejected_candidate_count"] >= 1
