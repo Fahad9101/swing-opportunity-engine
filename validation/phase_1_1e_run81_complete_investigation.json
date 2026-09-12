@@ -1,0 +1,2310 @@
+{
+  "run_id": 34168937582,
+  "artifact_id": 10037117050,
+  "audited_code_sha": "35f8877c448c357661f13bb4362bc1a29cbc4897",
+  "snapshot_fingerprint": "e69c0cd1cf6b9e1471b578be8318a7b5e09f59533f37c8a121f2aff220c3f996",
+  "decision": "FAIL",
+  "investigation_items": 100,
+  "source_references_pending_download": 0,
+  "manual_acceptance_concordance": null,
+  "method": "All 100 queue entries investigated; no early stop. This report distinguishes confirmed extraction defects, independent arithmetic checks, and same-implementation source replay. It does not turn limited-scope checks into manual acceptance sign-off.",
+  "domain_counts": {
+    "guidance": 14,
+    "balance_sheet_distress": 38,
+    "catalyst_surprise": 28,
+    "catalyst_materiality": 20
+  },
+  "confirmed_extraction_defect_items": 10,
+  "baseline_rules_hash": "59cc7ffe14472434bfbb92b07b89b0b48293d0c5762d5270769bce3b494550ac",
+  "candidate_rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "items": [
+    {
+      "index": 1,
+      "ticker": "ROCK",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/912562/000091256225000033/exhibit991q22025earningsre.htm",
+          "sha256": "78f6e05df7e8bd249902c770656b56b80f6e2e85714ac7a39566d2abceba0f73"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/912562/000091256225000052/exhibit991q32025earningsre.htm",
+          "sha256": "d8644d44c9abbf80f98efbf8cbdaa148ef0e1fe1670fed9800861351d00380c7"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "annual_scope_and_basis",
+      "notes": "Revenue FY2025 midpoint falls 1.06383%; GAAP EPS 3.67\u20133.91 to 3.67\u20133.77 and adjusted EPS 4.20\u20134.45 to 4.20\u20134.30 were omitted. Revenue plus EPS meets the existing multi-metric small-cut rule. Run81 NOT_DETERIORATED is wrong.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 2,
+      "ticker": "ARCB",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000894405.json",
+          "sha256": "84141652d5409a0e7b0f86f2c3f0e81cc0cfbe8678d2e0610541e4fbd868aa1a"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/894405/000110465926088612/arcb-20260630x10q.htm",
+          "sha256": "d702cef1e975e97cecba0f95d31515121b4f6bdfd041591536915af41a439b35"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 2,
+        "ticker": "ARCB",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000894405.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "84141652d5409a0e7b0f86f2c3f0e81cc0cfbe8678d2e0610541e4fbd868aa1a",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 3,
+      "ticker": "ALLE",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1579241/000157924126000026/exhibit991-pressreleasedat.htm",
+          "sha256": "5c2b941e4557a41b8aeea8b066306b6d44058b81410ee8bceb0bb438dabe1c22"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 4,
+      "ticker": "AMZN",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+          "sha256": "d07b8a88fa442c2c55bd65b3f1d336ca16e7d1e9fda831e1063d24adea60e4eb"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 5,
+      "ticker": "BCPC",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/9326/000000932626000026/exhibit991-q22026.htm",
+          "sha256": "1e70a58f33cbdbda728cb87b738b256da5da67b9bf4acf2ebbcc4d24a5aadc1d"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 6,
+      "ticker": "ALLE",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1579241/000157924126000026/exhibit991-pressreleasedat.htm",
+          "sha256": "5c2b941e4557a41b8aeea8b066306b6d44058b81410ee8bceb0bb438dabe1c22"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 7,
+      "ticker": "KRMN",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2040127/000095017025052081/ck0002040127-ex99_1.htm",
+          "sha256": "e2fc286266464b8c03d32d2ed05943f8691c0ac22788eb2a0791c418201ee66d"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2040127/000119312526017985/krmn-ex99_2.htm",
+          "sha256": "a47d8adfcba88a22d59f45b3d5965c4e75734b8f0f44998651b83ccef2378199"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "multiple_year_columns",
+      "notes": "FY2025 updated revenue 470\u2013471m and EBITDA 144.5\u2013144.9m; FY2026 revenue 700\u2013715m and EBITDA 205\u2013215m. The latter EBITDA was incorrectly attached to FY2025.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 8,
+      "ticker": "AXSM",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001579428.json",
+          "sha256": "bb534249e79901f14ef56a7cde4d7cfc00d4e7cc31cc09f237146d8a497ea5fc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1579428/000119312526342360/axsm-20260630.htm",
+          "sha256": "7784e649dbee773538107cafea3d7fdf58d9f24afe13c017b73bf18c7ca950e4"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 8,
+        "ticker": "AXSM",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001579428.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "bb534249e79901f14ef56a7cde4d7cfc00d4e7cc31cc09f237146d8a497ea5fc",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 9,
+      "ticker": "WEAV",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.negative_fcf_runway_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001609151.json",
+          "sha256": "0f47eccc1c8617ddea4411d00c23f5e2a51916c27a4aea5702fc53738d7c3344"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1609151/000160915126000074/weav-20260630.htm",
+          "sha256": "e3585be5a1869e4812cf37391c285ac3ad022229a1c6c9764675f943a7b95f71"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1609151/000160915126000083/weav-20260818.htm",
+          "sha256": "eab441d50e6edb8ee51c33a4859fc1e0b616147f14aa1bc15b5949f1ae13d444"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1609151/000160915126000100/weav-20260818.htm",
+          "sha256": "01f6c715943f76808d7057243af1c90adca1cd7c5405d86933f0ab68dae2e162"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 9,
+        "ticker": "WEAV",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001609151.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "0f47eccc1c8617ddea4411d00c23f5e2a51916c27a4aea5702fc53738d7c3344",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 10,
+      "ticker": "IVZ",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/914208/000091420826000235/ivz-20260630.htm",
+          "sha256": "4b6ef2f80e2a1e8613980751346af73d0997641e4c58fee8b032cefc3ba2400b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 11,
+      "ticker": "ITGR",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1114483/000117184326005137/exh_991.htm",
+          "sha256": "729b7d43881fe44d1ebae0a1e10a7033f92fb554cc17394c2a88a8cf5d4245f3"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 12,
+      "ticker": "SAIL",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002030781.json",
+          "sha256": "1cc73ff0862e85f80928f443213c92def17005aaecc8e1bcf8c9f390e13c394d"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2030781/000203078126000011/sail-20260430.htm",
+          "sha256": "a649b7f5f416442f20ae8a5c46d14d1ffb8d8cb9ad70f8b6be914f056526908e"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2030781/000203078126000015/sail-20260608.htm",
+          "sha256": "87ed40ede95cdd5e9d9bfd06460f85f2f311a55e2e23be1d29f62dda16fd8cf3"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 12,
+        "ticker": "SAIL",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002030781.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "1cc73ff0862e85f80928f443213c92def17005aaecc8e1bcf8c9f390e13c394d",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 13,
+      "ticker": "RGEN",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/730272/000119312526318853/rgen-ex99_1.htm",
+          "sha256": "c932b0b17448734a754d20d54061fa93cd8f63971caa99a02b07998fbe59675b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 14,
+      "ticker": "BRZE",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1676238/000167623826000011/a20260131-brazeincxfy26ear.htm",
+          "sha256": "90ac5d578180eda4cf00b3f1a282c1e7c866b0bc62d8cc716750a176ec39b964"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 15,
+      "ticker": "AGYS",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/78749/000119312526318081/agys-20260630.htm",
+          "sha256": "a2bb2bc09b3c55f9cd862efac7b379599f58b98a98afc2ff7563d761a3614970"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 16,
+      "ticker": "LB",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526209075/lb-ex99_1.htm",
+          "sha256": "90fe057df990dc764fe139a8ab826360657c3a76db8503435742a2098d32ab30"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526335296/lb-ex99_1.htm",
+          "sha256": "0344cdd57943086a632f704d9584971b512f03fb3cf2197d924b20d748df44fd"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "annual_scope_and_basis",
+      "notes": "Annual FY2026 EBITDA 210\u2013230m is reaffirmed. Prior release also generated a spurious Q1FY2026 duplicate of this annual range.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 17,
+      "ticker": "ANAB",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1370053/000119312526219500/anab-ex99_1.htm",
+          "sha256": "79996e8e0afdafc8aec0b3643f87eec7482aff70fd9c793a467381d05f8213bd"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 18,
+      "ticker": "DK",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001694426.json",
+          "sha256": "96f2724024281b1275c6f4947339b397d8e629317812cd20d159a4e23ea43e97"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1694426/000162828026053106/dk-20260630.htm",
+          "sha256": "0093e5c4be22714d4ec6ef815be491bcc9d52c0ba792672f2c98c3b393075823"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 18,
+        "ticker": "DK",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001694426.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "96f2724024281b1275c6f4947339b397d8e629317812cd20d159a4e23ea43e97",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 19,
+      "ticker": "CDNA",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1217234/000110465926050317/tm2611749d3_ex99-1.htm",
+          "sha256": "1ea35996f9969a69d4e912b85e5a41324aa4ab2f754230ec6f63242447d14d6a"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723426000015/cdna-2026224_earningsrelea.htm",
+          "sha256": "aee40ba79bc6ea36caa472160c564d05950ed1cbdd28bc2cf1231400204f2e01"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "annual_scope_and_basis",
+      "notes": "February FY2026 revenue 420\u2013444m and EBITDA 30\u201345m increase in the May release to 447\u2013465m and 43\u201357m. EBITDA was omitted. Source URLs are not chronological.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 20,
+      "ticker": "INFQ",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2007825/000119312526147667/d56454dex991.htm",
+          "sha256": "83136bbb63fd670019c4340f920e77a8d9af31e462f6fe5e65f591c2c43df6f8"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2007825/000162828026056222/infq-20260630xex991.htm",
+          "sha256": "e72514bb65f12f40e069cd99062126acb2450344eac52c47be5cc84dc65c23c8"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "point_guidance_year",
+      "notes": "Explicit FY2026 revenue guidance of 40m was bound to the following reported FY2025 heading. Latest FY2026 outlook is 43m.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 21,
+      "ticker": "AMRX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1723128/000172312826000025/amrx-q22026ex991.htm",
+          "sha256": "99e004cbbd8cf3dd4910985519026a39c5831b6c018db8478960f3adabbb7557"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 22,
+      "ticker": "LRCX",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000707549.json",
+          "sha256": "5669585890b736938e937b858b2e62156a2cb4f3cb74845d8270eeee42689f90"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/lrcx-20260628.htm",
+          "sha256": "1efe9ac795b5bcd16a163133d86dec15fcbb0be34c1ea5004bc912eda66658cc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000043/lrcx-20260824.htm",
+          "sha256": "f8072085c2b18161df4cdbfa2486995fb52e124e08472a3214e80a7a2a378e99"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 22,
+        "ticker": "LRCX",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000707549.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "5669585890b736938e937b858b2e62156a2cb4f3cb74845d8270eeee42689f90",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 23,
+      "ticker": "VSH",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000103730.json",
+          "sha256": "ac48d84cb6d7b4cadc4ffdbc5476e2d546c607a85a5acfce8ad4a67ed1f9e289"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/103730/000010373026000065/form10q.htm",
+          "sha256": "bfe79dd557ef15323306bd3317e11980a2a537821dd1d1b8bf1e560865f3fe4f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/103730/000010373026000068/vsh-20260812.htm",
+          "sha256": "b2062b276d73e64c1aaede2bc0dd3aeb6019618aa7b604f9eaa141231d4da60c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 23,
+        "ticker": "VSH",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000103730.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "ac48d84cb6d7b4cadc4ffdbc5476e2d546c607a85a5acfce8ad4a67ed1f9e289",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 24,
+      "ticker": "STLD",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1022671/000110465926085277/tm2620920d1_ex99-1.htm",
+          "sha256": "59b896b69e784048e3e000c3c998e119702d377cf176676a03644bc576897165"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 25,
+      "ticker": "NAVN",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001639723.json",
+          "sha256": "dad570a3f34a6b2deab236b8f5f1583d0934c220f352ec7a46428402161e3b28"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1639723/000162828026042552/navn-20260430.htm",
+          "sha256": "b5a1749ce6bf746e41e047a4c4dd6ea47e22c4335ba8444ae8cec935243aa753"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1639723/000162828026045797/navn-20260625.htm",
+          "sha256": "f2cfa660ff9bc4cf1ae3d9a224573f70e9157993d1b95d6c458bb184cd8bb1dd"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 25,
+        "ticker": "NAVN",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001639723.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "dad570a3f34a6b2deab236b8f5f1583d0934c220f352ec7a46428402161e3b28",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 26,
+      "ticker": "FIG",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1579878/000162828026035087/q126pressrelease.htm",
+          "sha256": "bc0995bdb3ee9e4150751dc1727ad48d89e17e41cd2fd5a77dddebc47013cdc7"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1579878/000162828026053331/q226pressrelease.htm",
+          "sha256": "ac4e894ec66ad06ab3c4918f1547f280239a61de97078da3338ee4a372b5b275"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "annual_scope_and_basis",
+      "notes": "Annual revenue increases from 1.422\u20131.428bn to 1.463\u20131.467bn; stated non-GAAP operating margin remains 9%. Preserve that margin and distinguish Q2/Q3 guidance from FY2026.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 27,
+      "ticker": "KALU",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/811596/000119312526314580/kalu-20260630.htm",
+          "sha256": "6edff2f2f405dfeaad948f55634f203211f89e9ef3061aa6d9744796df74911f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 28,
+      "ticker": "BRZE",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1676238/000167623826000011/a20260131-brazeincxfy26ear.htm",
+          "sha256": "90ac5d578180eda4cf00b3f1a282c1e7c866b0bc62d8cc716750a176ec39b964"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1676238/000167623826000024/a20260430-brazeincxq127ear.htm",
+          "sha256": "b879c1fdab1d737595c512efafd3b0bc441868eec0a30998fc15e92bfd3f483f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "quarter_annual_columns_units",
+      "notes": "Annual FY2027 revenue is 884\u2013889m then 895\u2013899m, with adjusted EPS 0.61\u20130.65 unchanged. Prior extraction treated quarter-column 204.5\u2013205.5 and 219.5\u2013220.5 as annual revenue in unscaled dollars and omitted EPS.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 29,
+      "ticker": "V",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1403161/000140316126000103/q32026earningsrelease.htm",
+          "sha256": "a6d07085a0cd87852dcaf401be224fa9b03a7cc349d4465af82477faa889d485"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 30,
+      "ticker": "NEO",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1077183/000107718326000058/a99-106302026earningsrelea.htm",
+          "sha256": "00515ec594310ef197528d3a8a38e6de98ce8e15898d76d51b407b29b2310b2c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 31,
+      "ticker": "STX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1137789/000113778926000159/stx-20260703.htm",
+          "sha256": "6cedd637977ed921cee5b4153a7a2b16c5edf36e609ab0cafe86e8ad811cecd7"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 32,
+      "ticker": "SXT",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/310142/000114036126029501/ef20078569_ex99-1.htm",
+          "sha256": "b78115f5cc01914cc9cb7c04901a05f59b26f4327f742658e675e4e166b579ce"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 33,
+      "ticker": "ALB",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000915913.json",
+          "sha256": "5cd3ca4cf5c31719acb1e076eff8056e414212076adbd68b05da1b6bd65b57d2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/915913/000091591326000102/alb-20260630.htm",
+          "sha256": "14cec6cc6e6082d0635624636f1bbed350a37350d64aa48fe823025e8bdecb12"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/915913/000091591326000107/alb-20260819.htm",
+          "sha256": "bce08881b8809175bd12efd8af804832482c3de9ed9138123f11bdf1e01b0b34"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/915913/000114036126035623/ef20081522_8k.htm",
+          "sha256": "b6a55779ac57175cbbae7e73befd7325e5e7b8a1ec1d5158d96da529623d2167"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 33,
+        "ticker": "ALB",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000915913.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "5cd3ca4cf5c31719acb1e076eff8056e414212076adbd68b05da1b6bd65b57d2",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 34,
+      "ticker": "CAH",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/721371/000072137126000037/a26q4_x063026xex991xnewsre.htm",
+          "sha256": "85ef7cda879031a90569f3596cf469b0d41faf4c4581c558287551ba655edfe5"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 35,
+      "ticker": "HUM",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000049071.json",
+          "sha256": "3de80abe289855e19c6a0e9391e064ac0ab98360cd394d602873a0ae9ae2d326"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000050/hum-20260630.htm",
+          "sha256": "d82bb9da7911aa6f98bfd0ec006c0a0a08f85b601c95e8bb331d33b32f5c13cb"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000052/hum-20260901.htm",
+          "sha256": "0d88fa08e65f5f612912a3ae4eebb2cbd084c22f51e5a82217cce7270e40778e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 35,
+        "ticker": "HUM",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000049071.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "3de80abe289855e19c6a0e9391e064ac0ab98360cd394d602873a0ae9ae2d326",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 36,
+      "ticker": "FTI",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1681459/000168145926000040/technipfmc2026630-8kerex.htm",
+          "sha256": "6343af223b1cb718337bf8c74532ceabc11bf1235cf02b376bf992f863fd1214"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 37,
+      "ticker": "RSG",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1060391/000106039126000275/rsg-20260630.htm",
+          "sha256": "ed621f431975615ad1a087ca728b662b7b95ef1aef29d07f3343052636c4fdb0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 38,
+      "ticker": "FDMT",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001650648.json",
+          "sha256": "e13317843a7e5752807cc6e3a08cd101e2ba7eb8e534589a5e1ddf9a838c1244"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1650648/000119312526349173/fdmt-20260630.htm",
+          "sha256": "ae1cfc86531ad1ba4b4502e29d08a5678d0f9c0067a92a68a0953ddc1acde68b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 38,
+        "ticker": "FDMT",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001650648.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "e13317843a7e5752807cc6e3a08cd101e2ba7eb8e534589a5e1ddf9a838c1244",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 39,
+      "ticker": "TRU",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1552033/000155203326000043/exhibit9926302026final.htm",
+          "sha256": "cd8f10e14ab390e86fcf52bb68360a5235827a8cb16fabd0626f3ae2a007b21e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 40,
+      "ticker": "GDDY",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1609711/000160971126000087/gddyex991-20260630xq2earni.htm",
+          "sha256": "b067f6d77fa0ef1474ca51204441caec243364c3d8b91f90605b7f8890216191"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 41,
+      "ticker": "ANDG",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002065708.json",
+          "sha256": "cf40f826e9b6cd0ae2c7c0a36790f8049aa6862ea26009c5093d6730413a229c"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2065708/000119312526346921/d67081d10q.htm",
+          "sha256": "c1e4d746c2c82476837123c97ec70875b26fbe37f229c36f9ecb653beabdce59"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 41,
+        "ticker": "ANDG",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002065708.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "cf40f826e9b6cd0ae2c7c0a36790f8049aa6862ea26009c5093d6730413a229c",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 42,
+      "ticker": "FN",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1408710/000140871026000006/fn-2026202xex991q226.htm",
+          "sha256": "f44477ba31b4a8b4b2ba58c948acd3370218a6ac9db42666bbbe082ae57c9c2d"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1408710/000140871026000014/fn-2026504xex991q326.htm",
+          "sha256": "2da258c26331d0471c7a093878b9896031dd3248057116076480fd2f84946a43"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "quarter_period_binding",
+      "notes": "The cited releases guide Q3FY2026 and Q4FY2026. Revenue was compared as FY2025. Explicit fiscal-quarter references confirm the date/year mapping; these releases alone do not form a same-period comparable pair.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 43,
+      "ticker": "HPE",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001645590.json",
+          "sha256": "e2800dcac4b3530c289f7494e3fcf9be38378fba1ef9172483f50976ae0568d1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1645590/000164559026000080/hpe-20260731.htm",
+          "sha256": "b7b3c51586a132ea9a80a1e0240395eeb64c9584cbd4b0f6b4f376380a7d0bb7"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 43,
+        "ticker": "HPE",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001645590.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "e2800dcac4b3530c289f7494e3fcf9be38378fba1ef9172483f50976ae0568d1",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 44,
+      "ticker": "CXT",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/25445/000002544526000015/exhibit991-pressreleasexq1.htm",
+          "sha256": "1d9c86f129e9e11b2709155db55519ada00021234fe3ef9b6534ddb26c7b1a79"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/25445/000002544526000032/exhibit991-pressreleasexq2.htm",
+          "sha256": "d88269cb05617c93bb623c3e8ae02fea6687f72dac88f77af568c74b99f4cafe"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": null,
+      "notes": "FY2026 adjusted EPS 4.10\u20134.40 becomes 4.22\u20134.42; the comparative table supports the persisted non-deterioration result.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 45,
+      "ticker": "IESC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048268.json",
+          "sha256": "6519f676e62bc2f1a26dae4731e67d2fc07d4d6e79a62ae370c98575bf89d1c2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1048268/000104826826000130/iesc-20260630.htm",
+          "sha256": "e31d4d962edfaaa80bd44cfa80b055c5213e205aa291cf05d78e160b6704a414"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1048268/000149315226036976/form8-k.htm",
+          "sha256": "32b9bb50d169c714878eea681b98bb6621b0739f1799de3c549e74f2b7ec3e17"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 45,
+        "ticker": "IESC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048268.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "6519f676e62bc2f1a26dae4731e67d2fc07d4d6e79a62ae370c98575bf89d1c2",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 46,
+      "ticker": "LPTH",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.negative_fcf_runway_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000889971.json",
+          "sha256": "dabeb5a1fd5fdd3ced65f6778183f44a398680037762683bd3e3b0c7e4721f22"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/889971/000143774926015594/lpth20260331_10q.htm",
+          "sha256": "a11ffc278e64c1cf0b1328aefb6a726c22e8ad54afd3cf8b5944b5ead6a8df9c"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/889971/000143774926019435/lpth20260602_8k.htm",
+          "sha256": "59bb35bf665b870dfcda3a2f5eb33c0da4ff698a187a8b2eaa2e4d6641aef539"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/889971/000143774926024234/lpth20260722_8k.htm",
+          "sha256": "ea016ca3adc9500b1d1ba9b194e7bd88a0dffce39cc963e644199d2044f866cb"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 46,
+        "ticker": "LPTH",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000889971.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "dabeb5a1fd5fdd3ced65f6778183f44a398680037762683bd3e3b0c7e4721f22",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 47,
+      "ticker": "RCUS",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1724521/000172452126000042/a2026q28kexhibit991.htm",
+          "sha256": "43e296605a3059d746451cc8c8f11b013e22fcfc941fb1107b08af1f06b4022d"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 48,
+      "ticker": "CAKE",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926089840/cake-20260630x10q.htm",
+          "sha256": "ae6430e3da173664d288f50f9bc2e7439cdcfe1e420b134069143bbd0739cd9f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 49,
+      "ticker": "DXCM",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000142/dxcm06302026-exhibit991.htm",
+          "sha256": "c1943819c80bc532af1a6512efa87d92d823e01e502d733c606f0ec66abeb78e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 50,
+      "ticker": "ZBRA",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/877212/000162828026033877/zbraex99120260404.htm",
+          "sha256": "ec6fe872fe8ad75e7f95f4117516c0287d22ad6174a905cbf2c1aa368964ae8e"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/877212/000162828026052158/zbraex99120260704.htm",
+          "sha256": "87f166b132d7a8d6d207fd7595c448e8551afe71961de58976749887248247e5"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "quarter_period_binding",
+      "notes": "Prior annual adjusted EPS is 18.30\u201318.70, then 20.75\u201321.25. Adjacent next-quarter ranges 4.20\u20134.50 and 4.70\u20134.90 were incorrectly compared as annual, unspecified-basis EPS.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 51,
+      "ticker": "TIC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002032966.json",
+          "sha256": "1b30ebb463478e2df3b60558b05ba3bfad3ad1fdca1131421ffdec80dcdf2f13"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026053831/tic-20260630.htm",
+          "sha256": "43d1bb56374968021fd156e5a2a380fae935cd92b7f875660f63e0bb83663503"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 51,
+        "ticker": "TIC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002032966.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "1b30ebb463478e2df3b60558b05ba3bfad3ad1fdca1131421ffdec80dcdf2f13",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 52,
+      "ticker": "UBER",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001543151.json",
+          "sha256": "e2cc54efd327e0a9f0ce24b6e14f90cf96f6a2f9191ffc8b505b22f062b080f2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1543151/000154315126000032/uber-20260630.htm",
+          "sha256": "5aa56769ca3e3d8735d1122e85269a5b9cd68fcb4bd2fa58fa6b19b65b019ffa"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1543151/000155278126000414/e26328_uber-8k.htm",
+          "sha256": "8230c8e29782673ecc40bceb1bd39c51f3e6fd0826966cd7bd4d4b8ae8a638ab"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 52,
+        "ticker": "UBER",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001543151.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "e2cc54efd327e0a9f0ce24b6e14f90cf96f6a2f9191ffc8b505b22f062b080f2",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 53,
+      "ticker": "RELY",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001782170.json",
+          "sha256": "44b15cdbf09b11596c6e35cdba78da66c3a32f7e72dcfaf8474e12d2ce3c69bf"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1782170/000162828026053424/rely-20260630.htm",
+          "sha256": "6bb474b99822c523aa86ae754fbeed1244b6483e46648e803b3b9982156316e0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 53,
+        "ticker": "RELY",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001782170.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "44b15cdbf09b11596c6e35cdba78da66c3a32f7e72dcfaf8474e12d2ce3c69bf",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 54,
+      "ticker": "AMD",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000002488.json",
+          "sha256": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000123/amd-20260627.htm",
+          "sha256": "1050bc4dcf2b23a3a07ff62279451637e3893f15564e719d82bd8e76772899b7"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000163/amd-20260817.htm",
+          "sha256": "b7bceb4ae36c1daa5b0606bb1f6c41556758d76aae7a5af2996e07724a4fc499"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2488/000119312526354029/d142696d8k.htm",
+          "sha256": "952a034953d2dfee4ac06bea6f6ec7ff5f2405cfb907b61291f971454525c132"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 54,
+        "ticker": "AMD",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000002488.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 55,
+      "ticker": "AGIO",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1439222/000143922226000115/agio-73026xfyxex991earning.htm",
+          "sha256": "995eb0564ed6ed294c78d5088ae23662815a6ba48f3f920313d7393d2ddefe7c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 56,
+      "ticker": "SHAK",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001620533.json",
+          "sha256": "36c3d4653b0bfe26c36060ca46612d9d4e77e6e4288167a43353d08e25bf9eff"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1620533/000162053326000034/shak-20260701.htm",
+          "sha256": "e5d2f989e4a0ef4bd37cbe18c10620f3fccb4c4ba24587808e3c0b710e96ecdd"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 56,
+        "ticker": "SHAK",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001620533.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "36c3d4653b0bfe26c36060ca46612d9d4e77e6e4288167a43353d08e25bf9eff",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 57,
+      "ticker": "DNOW",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001599617.json",
+          "sha256": "39acec88efc413b77502dc3ebec77084a800dbb5834deea467e10d17157bb05f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1599617/000119312526338381/dnow-20260630.htm",
+          "sha256": "d242ea2a2a78364f5440db4f2ee7be6a391494af9413ebc7a4c9f3a0b1a6b4ac"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 57,
+        "ticker": "DNOW",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001599617.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "39acec88efc413b77502dc3ebec77084a800dbb5834deea467e10d17157bb05f",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 58,
+      "ticker": "VICR",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.negative_fcf_runway_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000751978.json",
+          "sha256": "8cf4370906dc0b5912db452010d03a0065a6b7e8d9d0f5e207c3b26a3043ccb1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/751978/000119312526322462/vicr-20260630.htm",
+          "sha256": "24e8a71dcfeeabb86cdea465edd402607d3a68e96f228577894eb46cf9cc98c2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/751978/000119312526370420/d161606d8k.htm",
+          "sha256": "5a2d67fa4a8a403abaa03dd9a37b84de932e61e0e0793452d69fb2b8d9c575cc"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 58,
+        "ticker": "VICR",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000751978.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "8cf4370906dc0b5912db452010d03a0065a6b7e8d9d0f5e207c3b26a3043ccb1",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 59,
+      "ticker": "NMAX",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2026478/000202647826000046/nmax_q12026earningsrelease.htm",
+          "sha256": "2ec2e55cc20014412bd08a426420600948a2fbd0e8fa05ceef9d0369fb17e379"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2026478/000202647826000060/nmax_q22026earningsrelease.htm",
+          "sha256": "cdebdeeb5e1afffaee640f2228f583459d0a54e353042b12643110a149155d0e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": null,
+      "notes": "FY2026 revenue 212\u2013216m is reaffirmed. Verified that the repair does not truncate this range to a 212m point.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 60,
+      "ticker": "ICHR",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001652535.json",
+          "sha256": "8b2d15933e8091bff706ac9054fdb3977f247c63e103d22e7da9def0db9b30dd"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1652535/000165253526000069/ichr-20260626.htm",
+          "sha256": "9a0b74f226eec0bc8038451445b70c415e0fc9fc86c88e5fc3cd122e951f9697"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 60,
+        "ticker": "ICHR",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001652535.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "8b2d15933e8091bff706ac9054fdb3977f247c63e103d22e7da9def0db9b30dd",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 61,
+      "ticker": "TTAN",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1638826/000163882626000044/ttan-ex99_1.htm",
+          "sha256": "02ddcf2f58faded31b139644a04089d96432fa9eded1c59d55be6b9ff002e8f0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 62,
+      "ticker": "TPC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000077543.json",
+          "sha256": "c59c72cef0d4fa67a1328fd0b9938f894503500d8bab32fc914d8eb5a2b73951"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/77543/000007754326000186/tpc-20260630.htm",
+          "sha256": "777e5ef1dfdb1c731115d754fb566c2c721fe9e0e7f70409be6183fd0f60b20b"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/77543/000007754326000193/tpc-20260811.htm",
+          "sha256": "ad94c700903d2e3b2637c8a8a69d3e91d4ab9013481275df315acd0ca3e70565"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 62,
+        "ticker": "TPC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000077543.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "c59c72cef0d4fa67a1328fd0b9938f894503500d8bab32fc914d8eb5a2b73951",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 63,
+      "ticker": "SCCO",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001001838.json",
+          "sha256": "33a223ac527140a2381608b7b1114c410a79ca9441c5b5f2c659ef392b9af132"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1001838/000110465926089169/scco-20260630x10q.htm",
+          "sha256": "e6d523150cc0f4104ee9094f4b421fd20ef9d6bd77633c4c432a30d1825f8f69"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 63,
+        "ticker": "SCCO",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001001838.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "33a223ac527140a2381608b7b1114c410a79ca9441c5b5f2c659ef392b9af132",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 64,
+      "ticker": "WERN",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/793074/000079307426000140/wern-20260630.htm",
+          "sha256": "2c9244553328ebdbbca34301762f29d215b9ddaf2d4b6a197e0611b1fa8769a0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 65,
+      "ticker": "QNST",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001117297.json",
+          "sha256": "5091826db05d58c7fc5ca116b69847409c04bb5f24bfe0648daf4d8ba1170e4a"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1117297/000119312526367160/qnst-20260630.htm",
+          "sha256": "91382aec27a0d5e7c2ee6ba3f9f8daff8869bec5580385e3ba4e0dc3f34f98b7"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 65,
+        "ticker": "QNST",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001117297.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "5091826db05d58c7fc5ca116b69847409c04bb5f24bfe0648daf4d8ba1170e4a",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 66,
+      "ticker": "PYPL",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001633917.json",
+          "sha256": "1e4bee2c3cd8df25384bb009f13c01a0f8ee8ba8b545c84102672c7004555999"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1633917/000163391726000082/pypl-20260630.htm",
+          "sha256": "985b4f2293108227c664fc45cf26ba4c46e01ac46f2e4fbdeafd885b1ad36074"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 66,
+        "ticker": "PYPL",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001633917.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "1e4bee2c3cd8df25384bb009f13c01a0f8ee8ba8b545c84102672c7004555999",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 67,
+      "ticker": "AXTI",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1051627/000143774926025061/ex_974537.htm",
+          "sha256": "49ee5b8458c4bd320855f3cf4e4b63673d9873a10723e1707b9ccddf6eaf47db"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 68,
+      "ticker": "KDP",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1418135/000141813526000051/kdp-20260630.htm",
+          "sha256": "69837cfe16ffcd79b3aa8a108b53c6003359a3bdbd16353b5e03331566998d0d"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 69,
+      "ticker": "MYRG",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000700923.json",
+          "sha256": "6604527a677585a1e0db5b88d7fa459301c051fb72ab93b289ccf56c960b274d"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/700923/000070092326000042/myrg-20260630.htm",
+          "sha256": "d407af779806f8bd77ea3fbaca4b3f94c3a7165c52b74c420fce3ef80efb13f8"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/700923/000070092326000044/myrg-20260807.htm",
+          "sha256": "fe999af9204646a4b0048b7615dc5c8af5d442fede8cb7c2086c51f95fb8c25e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 69,
+        "ticker": "MYRG",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000700923.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "6604527a677585a1e0db5b88d7fa459301c051fb72ab93b289ccf56c960b274d",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 70,
+      "ticker": "ESTC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001707753.json",
+          "sha256": "bf67dc8bc9dd23758c9e2dc067477dca9ae9f8041beaa79a7143ad61919b1e29"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1707753/000170775326000054/estc-20260731.htm",
+          "sha256": "263ce015c839115efe9a3642b15cd697f8787574b6c868c854b5b2fdfd6c0ce1"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 70,
+        "ticker": "ESTC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001707753.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "bf67dc8bc9dd23758c9e2dc067477dca9ae9f8041beaa79a7143ad61919b1e29",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 71,
+      "ticker": "KWR",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/81362/000162828026051098/kwr2026q2ex-991.htm",
+          "sha256": "de1e06f6a0a34b4ac0115176421015471c7935c7af9036742394af892412be6f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 72,
+      "ticker": "ENTG",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1101302/000110130226000150/entg-20260627.htm",
+          "sha256": "1f4b96b3826b4fd83b404b07e4d03381fb7480f616d8d3b9fa35fc13bb7f8aec"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 73,
+      "ticker": "AN",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/350698/000162828026051209/anearningsrelease63026ex991.htm",
+          "sha256": "6185db5ea9dc47e3d45ac57758315ee87a34cc3fe54d5d3de4a75f8f58e2ebd5"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 74,
+      "ticker": "AXTI",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1051627/000143774926025061/ex_974537.htm",
+          "sha256": "49ee5b8458c4bd320855f3cf4e4b63673d9873a10723e1707b9ccddf6eaf47db"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 75,
+      "ticker": "DAR",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/916540/000091654026000019/exh991-pressreleaseq22026.htm",
+          "sha256": "ab5e114d17ee306a733cfee9cc4bb446dd7014764c308321d5a533bff3d4b0bc"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 76,
+      "ticker": "CRAI",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1053706/000105370626000021/crai-20260704.htm",
+          "sha256": "983bcdeaca88c7815a13bacc1cc5902d34d0a90806644ecf94ded9bc1c3bc3fe"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 77,
+      "ticker": "PTCT",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1070081/000107008126000011/tmb-20260507xex99d1.htm",
+          "sha256": "52700b315ec9ae6216c162e67b2f40320976e2469a7d0c95f48d72d143413b9b"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1070081/000107008126000016/tmb-20260728xex99d1.htm",
+          "sha256": "8c67d53bd07a98556288a7aa396d13c15972abda3e36b69bf0a65e96726ac78c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": "primary_metric_inline_text",
+      "notes": "Primary total revenue is 1.08\u20131.18bn then 1.18\u20131.28bn. Product revenue 750\u2013850m and 850\u2013950m was incorrectly treated as company-level revenue. Inline HTML styling split digits in the total-revenue range.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 78,
+      "ticker": "CRGY",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001866175.json",
+          "sha256": "620fd1ea7613640761f439b56f0c4ce81ae96906e60a695ce4efe94ac82646f7"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1866175/000186617526000114/crgy-20260630.htm",
+          "sha256": "b03b9ab401373080e968f6460ed5d5b3021347f439f49565c2778643f73e9e6a"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 78,
+        "ticker": "CRGY",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001866175.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "620fd1ea7613640761f439b56f0c4ce81ae96906e60a695ce4efe94ac82646f7",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 79,
+      "ticker": "AMRX",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1723128/000172312826000025/amrx-q22026ex991.htm",
+          "sha256": "99e004cbbd8cf3dd4910985519026a39c5831b6c018db8478960f3adabbb7557"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 80,
+      "ticker": "AXTI",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001051627.json",
+          "sha256": "76220cf02b2c4e2067fa257d2096ea62192d03eae8641ef5a6dadf6ff5361216"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1051627/000143774926027677/axti20260630_10q.htm",
+          "sha256": "c7238e7e10ecd099696e5bf724664f5c03e285090fe15e293983b87cc59abd2a"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 80,
+        "ticker": "AXTI",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001051627.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "76220cf02b2c4e2067fa257d2096ea62192d03eae8641ef5a6dadf6ff5361216",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 81,
+      "ticker": "BRZE",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1676238/000167623826000011/a20260131-brazeincxfy26ear.htm",
+          "sha256": "90ac5d578180eda4cf00b3f1a282c1e7c866b0bc62d8cc716750a176ec39b964"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 82,
+      "ticker": "KMX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1170010/000117001026000055/kmx-20260531.htm",
+          "sha256": "5f4b10c95468053f6b3bfad7bf369b740d6e46ddfa7739773245b266e2ffac0b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 83,
+      "ticker": "REGN",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000872589.json",
+          "sha256": "8ac8537cd8b5e571e7f527aae3e223c6a7cdab1260fd8035e278ac184b4901b4"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/872589/000087258926000025/regn-20260630.htm",
+          "sha256": "99a3276fe91fb55f26d1ef7d10fc3596ec0641306829eac2435e269c3e006b53"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 83,
+        "ticker": "REGN",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000872589.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "8ac8537cd8b5e571e7f527aae3e223c6a7cdab1260fd8035e278ac184b4901b4",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 84,
+      "ticker": "BX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1393818/000119312526340208/d158269d10q.htm",
+          "sha256": "4d4aea27abb772673b7d2b9445e9ec4a67f5fa4a59c42ee429430c6867a65c23"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 85,
+      "ticker": "ABNB",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001559720.json",
+          "sha256": "86979df28e9390d23997206029e608296c823a806980453bde2915719a38b2fc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1559720/000155972026000027/abnb-20260630.htm",
+          "sha256": "1369d236b787c4c5bb7d46fddaee0979cfc416492f5e88e009a311008b6ef0a7"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 85,
+        "ticker": "ABNB",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001559720.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "86979df28e9390d23997206029e608296c823a806980453bde2915719a38b2fc",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 86,
+      "ticker": "NRIX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1549595/000154959526000038/nrix-20260709xexx991.htm",
+          "sha256": "2a925a1c52b1c4827b862be77fd391a9e6991c83306a8734f475629e2d55ae82"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 87,
+      "ticker": "DORM",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/868780/000086878026000039/dorm-20260627.htm",
+          "sha256": "33b100f6c9c85f3da73fdd971a05acd7661e403755c17307a84c0adbc9eff162"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 88,
+      "ticker": "XNCR",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326732.json",
+          "sha256": "63f41ab1a2a1663b69f2ad50e04b3e7d85ca6fa2ac063b990cf334a282da51f5"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1326732/000132673226000056/xncr-20260630.htm",
+          "sha256": "bb63c1cad4d183fb042c136410ca78547652d9c7ef2fabe945ecf15038376529"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 88,
+        "ticker": "XNCR",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326732.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "63f41ab1a2a1663b69f2ad50e04b3e7d85ca6fa2ac063b990cf334a282da51f5",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 89,
+      "ticker": "CCC",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1818201/000119312526324886/ccc-ex99_1.htm",
+          "sha256": "e608e40823d6a66bb0b645ee73c8a762e8fc08dde0f35a8fbdadff6252eb9078"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 90,
+      "ticker": "CLMT",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002013745.json",
+          "sha256": "eb1d4a075ba32bea491187a801337fc2683ff5522710870b5d07c606ca6a424f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2013745/000201374526000024/clmt-20260630.htm",
+          "sha256": "a78e92a5443bc4f1b841464ab117a8e389a3dce975501f0057389a37f03164f7"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2013745/000201374526000029/clmt-20260828.htm",
+          "sha256": "e6a0885d6f4115aee73a2c187ec4bcc6220ff3c08bc7ca6f3b86f64cbea50842"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 90,
+        "ticker": "CLMT",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002013745.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "eb1d4a075ba32bea491187a801337fc2683ff5522710870b5d07c606ca6a424f",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 91,
+      "ticker": "APH",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/820313/000110465926087904/aph-20260729xex99d1.htm",
+          "sha256": "32d93637592a363293634e170a4716d6c822ae80bf506dc8aebc6c6b0aecc953"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 92,
+      "ticker": "INSM",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001104506.json",
+          "sha256": "22b8a34fc320451b3699d8330d59e6b2a073b8e2a90625f1c4fddaf0d3c93f47"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1104506/000110450626000041/insm-20260630.htm",
+          "sha256": "64eaf2a94d3a3197f5acadf3bf8fe1cc916d7b1425e7adb1d149e88c1332c1d2"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 92,
+        "ticker": "INSM",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001104506.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "22b8a34fc320451b3699d8330d59e6b2a073b8e2a90625f1c4fddaf0d3c93f47",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 93,
+      "ticker": "BG",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1996862/000162828026028079/epr03312026.htm",
+          "sha256": "beba4c750176d5362c43430797ec9efbd5391c1122a30c660454c21585ba9a2f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1996862/000162828026050334/epr06302026.htm",
+          "sha256": "8126cf951b0793db98fd1835dbb59a9f808dc807f3006357c0ca67a58caed494"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": null,
+      "notes": "FY2026 adjusted EPS increases from 9.00\u20139.50 to 9.25\u20139.75; no discrepancy in the cited comparison.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 94,
+      "ticker": "CTAS",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/723254/000072325426000028/ctas-20260531.htm",
+          "sha256": "6bd67f0822ee615dca7753aeb028f6f36e1203479ed8fffab0b4539e338c24a8"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 95,
+      "ticker": "EXPE",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001324424.json",
+          "sha256": "4af44d83f624debf00c30657f3e7753ec05806b108029432edbdcf291c18d163"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1324424/000132442426000053/expe-20260630.htm",
+          "sha256": "40de0e82279a330a7f6e4858ad7fd4a0623a699e67106a72927d68d1fcb11df2"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 95,
+        "ticker": "EXPE",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001324424.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "4af44d83f624debf00c30657f3e7753ec05806b108029432edbdcf291c18d163",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 96,
+      "ticker": "LYB",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1489393/000148939326000061/lyb-20260630.htm",
+          "sha256": "925c69d2827f3020076b90587c49f246edde40b6d41bda5553be5a5a7fb98427"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 97,
+      "ticker": "EE",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1888447/000119312526209187/ee-ex99_1.htm",
+          "sha256": "d683d928afe88a413681359959d47efa749862b43d772f946ad232023e5b8d94"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1888447/000119312526335279/ee-ex99_1.htm",
+          "sha256": "8d9bf1c2c54b4f656fce11a7395059fff9cb45c6fca9f45a0bb247afa6d06ad6"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "finding_group": null,
+      "notes": "FY2026 adjusted EBITDA increases from 480\u2013510m to 490\u2013515m; capex ranges are separate metrics and are not substituted.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 98,
+      "ticker": "RCUS",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1724521/000172452126000042/a2026q28kexhibit991.htm",
+          "sha256": "43e296605a3059d746451cc8c8f11b013e22fcfc941fb1107b08af1f06b4022d"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 99,
+      "ticker": "ALHC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001832466.json",
+          "sha256": "78667c0e82f5a4715fd300711debeb77e5005998510fdb3f25dfd7ac2e11e3d7"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1832466/000162828026051060/alhc-20260630.htm",
+          "sha256": "419434aacdcdfd0071fa41214575d76ac18e3ad84cd3b7c187bd95e8e412c363"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 99,
+        "ticker": "ALHC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001832466.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "78667c0e82f5a4715fd300711debeb77e5005998510fdb3f25dfd7ac2e11e3d7",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Fresh companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 100,
+      "ticker": "IVZ",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/914208/000091420826000235/ivz-20260630.htm",
+          "sha256": "4b6ef2f80e2a1e8613980751346af73d0997641e4c58fee8b032cefc3ba2400b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    }
+  ]
+}

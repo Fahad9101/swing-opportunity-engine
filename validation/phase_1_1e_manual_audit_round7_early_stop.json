@@ -1,0 +1,30 @@
+{
+  "phase": "1.1E",
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "run_id": 33961113688,
+  "head_sha": "b71198c171d94a8e01c2b6a5321f18f2f13ce857",
+  "audit_round": 7,
+  "status": "FAIL",
+  "early_stop": true,
+  "sample_completed": false,
+  "numerical_concordance": null,
+  "systematic_error": true,
+  "blocking_domain": "guidance",
+  "blocking_ticker": "INSM",
+  "engine_classification": "NOT_DETERIORATED",
+  "engine_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+  "engine_comparable_pairs": 1,
+  "manual_classification": "UNKNOWN_ABSENT_SAME_PERIOD_COMPARABLE_PAIR",
+  "defect_family": "cross_fiscal_year_guidance_pair_admitted_as_comparable",
+  "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/1104506/000114036125039789/ef20057768_ex99-1.htm",
+    "https://www.sec.gov/Archives/edgar/data/1104506/000114036126006116/ef20066055_ex99-1.htm"
+  ],
+  "verified_economic_fact": "The older source provides FY2025 ARIKAYCE revenue guidance of $420M-$430M; the newer source provides FY2026 ARIKAYCE revenue guidance of $450M-$470M. Different fiscal years must not share a comparison key.",
+  "governance": {
+    "active_model": "SOE-1.0.0",
+    "promote_candidate": false,
+    "merge_pr_16": false,
+    "milestone_3_unlocked": false
+  }
+}

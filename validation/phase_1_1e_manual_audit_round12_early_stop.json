@@ -1,0 +1,92 @@
+{
+  "phase": "1.1E",
+  "audit_round": 12,
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "workflow_run_id": 34129172850,
+  "workflow_run_number": 78,
+  "artifact_id": 10025030851,
+  "branch": "phase-1.1e-shadow-validation",
+  "audited_head_sha": "19fbd729e5f8d29352a4c4ab66ff89667a369348",
+  "captured_snapshot_fingerprint": "dc6e8624ebb3bf21f5de6f9c47bcb2762f74a02cf5e912cbfe62176a1d87cb2e",
+  "baseline_scan_run_id": "058c0b69-c2b4-403d-a837-9559cf6b3b16",
+  "baseline_rules_hash": "59cc7ffe14472434bfbb92b07b89b0b48293d0c5762d5270769bce3b494550ac",
+  "candidate_rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "automated_gate_count": 9,
+  "automated_gates_passed": 9,
+  "automated_decision": "PENDING_MANUAL_AUDIT",
+  "required_sample": 100,
+  "available_sample": 100,
+  "minimum_rule_concordance": 0.95,
+  "status": "FAIL_EARLY_STOP",
+  "decision": "FAIL",
+  "early_stop": true,
+  "audit_position": 9,
+  "audited_prefix_count": 9,
+  "concordant_before_blocker": 8,
+  "numerical_concordance": null,
+  "systematic_error_detected": true,
+  "blocking_domain": "guidance",
+  "blocking_ticker": "INSM",
+  "engine_classification": "NOT_DETERIORATED",
+  "manual_classification": "UNKNOWN",
+  "engine_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+  "manual_rule_path": "guidance_v1_1.no_comparable_prior",
+  "manual_reason": "The $420-$430 million range is FY2025 ARIKAYCE guidance, while $450-$470 million is FY2026 guidance. The latter borrowed FY2025 from the following total-company reported-results row. No same-period comparable pair exists.",
+  "root_cause_family": "following_actual_fiscal_period_binding",
+  "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/1104506/000114036125039789/ef20057768_ex99-1.htm",
+    "https://www.sec.gov/Archives/edgar/data/1104506/000114036126006116/ef20066055_ex99-1.htm"
+  ],
+  "audited_prefix_domains": {
+    "balance_sheet_distress": {
+      "sample": 2,
+      "concordant": 2
+    },
+    "catalyst_materiality": {
+      "sample": 2,
+      "concordant": 2
+    },
+    "catalyst_surprise": {
+      "sample": 3,
+      "concordant": 3
+    },
+    "guidance": {
+      "sample": 2,
+      "concordant": 1,
+      "discordant": 1
+    }
+  },
+  "full_market_summary": {
+    "universe_count": 5151,
+    "universal_survivors": 2316,
+    "growth_structural_targets": 434,
+    "catalyst_enrichment_targets": 113,
+    "guidance_coverage_pct": 97.4,
+    "distress_coverage_pct": 100.0,
+    "materiality_coverage_pct": 100.0,
+    "surprise_coverage_pct": 100.0,
+    "fully_scored_baseline": 0,
+    "fully_scored_candidate": 78,
+    "baseline_provider_errors": 3,
+    "enrichment_errors": 12
+  },
+  "additional_observed_repairs": [
+    {
+      "ticker": "BFLY",
+      "issue": "A revenue range was also bound to the following adjusted-EBITDA label.",
+      "official_audit_position_adjudicated": false
+    },
+    {
+      "ticker": "TEX",
+      "issue": "Reconciliation-table scalar cells were persisted as free-cash-flow guidance and produced a false material cut.",
+      "official_audit_position_adjudicated": false
+    }
+  ],
+  "governance": {
+    "soe_1_0_active": true,
+    "soe_1_1_promoted": false,
+    "milestone_3_unlocked": false,
+    "pr_16_merge_allowed": false
+  },
+  "required_next_step": "Enforce fiscal-period, metric, and scalar-value locality; protect INSM, BFLY, and TEX with regressions; then run a fresh full-market validation and a brand-new independent audit."
+}

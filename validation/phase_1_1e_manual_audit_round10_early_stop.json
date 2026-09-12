@@ -1,0 +1,80 @@
+{
+  "phase": "1.1E",
+  "audit_round": 10,
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "workflow_run_id": 33988186112,
+  "workflow_run_number": 76,
+  "artifact_id": 9977263615,
+  "branch": "phase-1.1e-shadow-validation",
+  "audited_head_sha": "4308d7423d180f7dd708ba1c26efce6f3473bfd2",
+  "captured_snapshot_fingerprint": "b96be4abf3cf2275be22de6f27a516d3ce5446b68fecbc7c5e34122139e952b5",
+  "baseline_scan_run_id": "04dd1c5d-80a8-42a4-ae58-3b9d9fe2f37d",
+  "baseline_rules_hash": "59cc7ffe14472434bfbb92b07b89b0b48293d0c5762d5270769bce3b494550ac",
+  "candidate_rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "automated_gate_count": 9,
+  "automated_gates_passed": 9,
+  "automated_decision": "PENDING_MANUAL_AUDIT",
+  "required_sample": 100,
+  "available_sample": 100,
+  "minimum_rule_concordance": 0.95,
+  "status": "FAIL_EARLY_STOP",
+  "decision": "FAIL",
+  "early_stop": true,
+  "audit_position": 35,
+  "audited_prefix_count": 35,
+  "concordant_before_blocker": 34,
+  "numerical_concordance": null,
+  "systematic_error_detected": true,
+  "blocking_domain": "guidance",
+  "blocking_ticker": "ETN",
+  "engine_classification": "NOT_DETERIORATED",
+  "manual_classification": "DETERIORATED",
+  "engine_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+  "manual_rule_path": "guidance_v1_1.material_numeric_cut",
+  "manual_reason": "FY2026 GAAP EPS midpoint fell 11.51% from $11.82 ($11.57-$12.07) to $10.46 ($10.36-$10.56). The engine mislabeled the prior GAAP row as adjusted and omitted/rejected the current GAAP row.",
+  "root_cause_family": "adjacent_eps_accounting_basis_binding",
+  "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/1551182/000155118226000002/etn12312025exhibit99.htm",
+    "https://www.sec.gov/Archives/edgar/data/1551182/000155118226000027/etn06302026exhibit99.htm"
+  ],
+  "audited_prefix_domains": {
+    "balance_sheet_distress": {
+      "sample": 13,
+      "concordant": 13
+    },
+    "catalyst_materiality": {
+      "sample": 7,
+      "concordant": 7
+    },
+    "catalyst_surprise": {
+      "sample": 7,
+      "concordant": 7
+    },
+    "guidance": {
+      "sample": 8,
+      "concordant": 7,
+      "discordant": 1
+    }
+  },
+  "full_market_summary": {
+    "universe_count": 5151,
+    "universal_survivors": 2316,
+    "growth_structural_targets": 431,
+    "catalyst_enrichment_targets": 107,
+    "guidance_coverage_pct": 98.68,
+    "distress_coverage_pct": 100.0,
+    "materiality_coverage_pct": 100.0,
+    "surprise_coverage_pct": 100.0,
+    "fully_scored_baseline": 0,
+    "fully_scored_candidate": 72,
+    "baseline_provider_errors": 3,
+    "enrichment_errors": 12
+  },
+  "governance": {
+    "soe_1_0_active": true,
+    "soe_1_1_promoted": false,
+    "milestone_3_unlocked": false,
+    "pr_16_merge_allowed": false
+  },
+  "required_next_step": "Bind EPS ranges to their local adjusted or unqualified label, protect ETN and the valid adjusted-EPS path with regressions, then run a fresh full-market validation and a brand-new independent audit."
+}

@@ -1,0 +1,3102 @@
+{
+  "run_id": 34219223992,
+  "artifact_id": 10057882884,
+  "audited_code_sha": "5ec53e54b04448381a8b56c448a346398994def4",
+  "snapshot_fingerprint": "bb10701e0098217f3835f182082f933ebf4e9bf80f3a201cc4b21920d5aa2453",
+  "decision": "FAIL",
+  "investigation_items": 100,
+  "source_references_pending_download": 0,
+  "manual_acceptance_concordance": null,
+  "method": "All 100 queue entries investigated; no early stop. This report distinguishes confirmed extraction defects, independent arithmetic checks, and same-implementation source replay. It does not turn limited-scope checks into manual acceptance sign-off.",
+  "domain_counts": {
+    "catalyst_materiality": 24,
+    "balance_sheet_distress": 31,
+    "catalyst_surprise": 26,
+    "guidance": 19
+  },
+  "confirmed_extraction_defect_items": 13,
+  "baseline_rules_hash": "59cc7ffe14472434bfbb92b07b89b0b48293d0c5762d5270769bce3b494550ac",
+  "candidate_rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "provider_status": {
+    "baseline_provider_errors": 16,
+    "catalyst_enrichment_targets": 112,
+    "catalyst_primary_evidence_denominator": 110,
+    "decision": "PENDING_MANUAL_AUDIT",
+    "distress_classified": 113,
+    "distress_coverage_pct": 100.0,
+    "distress_sufficient_denominator": 113,
+    "enrichment_errors": 13,
+    "fully_scored_baseline": 0,
+    "fully_scored_candidate": 78,
+    "growth_newly_qualified": 10,
+    "growth_structural_targets": 434,
+    "guidance_classified": 92,
+    "guidance_comparable_denominator": 93,
+    "guidance_coverage_pct": 98.92,
+    "manual_audit_population": 426,
+    "manual_audit_required": 100,
+    "manual_audit_sample_size": 100,
+    "materiality_coverage_pct": 100.0,
+    "materiality_scored": 110,
+    "surprise_coverage_pct": 100.0,
+    "surprise_scored": 110,
+    "universal_survivors": 2316,
+    "universe_count": 5150
+  },
+  "automated_gates": {
+    "baseline_replay_concordance": true,
+    "catalyst_materiality_coverage": true,
+    "catalyst_surprise_coverage": true,
+    "frozen_rule_equivalence": true,
+    "guidance_coverage": true,
+    "manual_audit_sample_available": true,
+    "nonfinancial_distress_coverage": true,
+    "scanner_delta_integrity": true,
+    "universal_gate_equality": true
+  },
+  "replay_limitation": "Diagnostic source timestamps are placeholders. This replay checks metric, period, basis and value binding only, not chronology or point-in-time classification.",
+  "items": [
+    {
+      "index": 1,
+      "ticker": "MYE",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/69488/000119312526324876/mye-20260630.htm",
+          "sha256": "482172f4a89602371932fa8bed6aa266fd34c41b58a1f4ccdac94b07077ef3d7"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "ticeLetterMember 2011-10-01 2026-06-30 xbrli:pure iso4217:USD xbrli:shares xbrli:shares iso4217:USD UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 Form 10-Q \u2611 Quarterly report pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 For the quarterly period ended June 30, 2026 OR \u2610 Transition report pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 For the transition period from to Commission File Number 001-08524 Myers Industries, Inc. (Exact name of registrant as ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 2,
+      "ticker": "RELY",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001782170.json",
+          "sha256": "44b15cdbf09b11596c6e35cdba78da66c3a32f7e72dcfaf8474e12d2ce3c69bf"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1782170/000162828026053424/rely-20260630.htm",
+          "sha256": "6bb474b99822c523aa86ae754fbeed1244b6483e46648e803b3b9982156316e0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 2,
+        "ticker": "RELY",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001782170.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "44b15cdbf09b11596c6e35cdba78da66c3a32f7e72dcfaf8474e12d2ce3c69bf",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 3,
+      "ticker": "W",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1616707/000161670726000147/a2026-08x04ex991.htm",
+          "sha256": "f0ec1d832f8921c35e33c68ac808dbd004bdcf0fa3f71798e9c285fe4e08153e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 a2026-08x04ex991.htm EX-99.1 Document Exhibit 99.1 Wayfair Announces Second Quarter 2026 Results, Reports Strongest Free Cash Flow Since 2020 Q2 Net Revenue of $3.5 billion with 21.7 million Active Customers BOSTON, MA \u2014 August 4, 2026 \u2014 Wayfair Inc. (\u201cWayfair,\u201d \u201cwe,\u201d or \u201cour\u201d) (NYSE: W), the destination for all things home, today reported financial results for its second quarter ended June 30, 2026. Second Quarter 2026 Financial Highlights \u2022 Total net revenue of $3.5 billion, increas",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 4,
+      "ticker": "CRSP",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674416.json",
+          "sha256": "bb57dd5f2b124e21e027bdcf9d925a06e9aa25cb8b2e84515ef679c3b5c3c413"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1674416/000119312526330672/crsp-20260630.htm",
+          "sha256": "730cb1fdc664855835479faab84cf80082da5361f77d2a9a3a57fa6f88bd33ce"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 4,
+        "ticker": "CRSP",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674416.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "bb57dd5f2b124e21e027bdcf9d925a06e9aa25cb8b2e84515ef679c3b5c3c413",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 5,
+      "ticker": "LECO",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/59527/000005952726000021/leco-20260730xex99d1.htm",
+          "sha256": "fe6f0280269fa3a586fc6e56264755da7d9b9c9e9094032317476b0f0ba2a0fd"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "vestor Relations: Amanda Butler (216) 383-2534 Amanda_Butler@lincolnelectric.com \u200b LINCOLN ELECTRIC REPORTS SECOND QUARTER 2026 RESULTS \u200b \u200b \u200b Second Quarter 2026 Highlights \u200b \u25fe Net sales increase 12.0% to a record $1,220 million; organic sales increase 10.1% \u25fe Operating income margin of 18.1%; adjusted operating income margin of 18.4% \u25fe EPS of $2.88; adjusted EPS of $2.93 \u25fe Cash flows from operations of $254 million; 138% cash conversion \u25fe Returned $120 million to shareholders through dividends and share repurchases \u200b \u200b CLEV",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 6,
+      "ticker": "ARVN",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001655759.json",
+          "sha256": "dc8e3d0e0b5a7a8a5da4c545b281ab37d03723bc5dcb04324dcd502ebde901b2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1655759/000162828026052554/arvn-20260630.htm",
+          "sha256": "76794d68f6a659a8c5fe82d870659bbceb3b5958e811e93c1e556cfa24c5e2fe"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 6,
+        "ticker": "ARVN",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001655759.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "dc8e3d0e0b5a7a8a5da4c545b281ab37d03723bc5dcb04324dcd502ebde901b2",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 7,
+      "ticker": "CXT",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/25445/000002544526000015/exhibit991-pressreleasexq1.htm",
+          "sha256": "1d9c86f129e9e11b2709155db55519ada00021234fe3ef9b6534ddb26c7b1a79"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/25445/000002544526000032/exhibit991-pressreleasexq2.htm",
+          "sha256": "d88269cb05617c93bb623c3e8ae02fea6687f72dac88f77af568c74b99f4cafe"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/25445/000002544526000015/exhibit991-pressreleasexq1.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 4.1,
+              "high": 4.4
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/25445/000002544526000032/exhibit991-pressreleasexq2.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 4.22,
+              "high": 4.42
+            }
+          ]
+        }
+      ],
+      "finding_group": null,
+      "notes": "FY2026 adjusted EPS 4.10\u20134.40 increases to 4.22\u20134.42; no discrepancy in the checked comparison.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 8,
+      "ticker": "RARE",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1515673/000119312526206368/rare-ex99_1.htm",
+          "sha256": "c60e96a6ad6a4683c0a84fe2d3e42cfbf5f443fa155c7a70d178b285f93e6eac"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1515673/000119312526332802/rare-ex99_1.htm",
+          "sha256": "90d6eff59cf752a4f244c72f4a8e0ebc8c7d0af944be9d87b528541c59a475b8"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1515673/000119312526206368/rare-ex99_1.htm",
+          "records": [
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 730000000.0,
+              "high": 760000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1515673/000119312526332802/rare-ex99_1.htm",
+          "records": [
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 730000000.0,
+              "high": 760000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "primary_metric_binding",
+      "notes": "Total FY2026 revenue guidance remains 730\u2013760m. Product Dojolvi revenue 100\u2013110m was substituted for total revenue. Repair selects explicitly consolidated/total revenue over named-product rows.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 9,
+      "ticker": "RBRK",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000041/rubrikinc-991pressrelease4.htm",
+          "sha256": "85c8707600f0ba57b4598cf69f2023563f3c06be44424229eaa06919701d18ba"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000055/rubrikinc-991pressrelease7.htm",
+          "sha256": "dde91722cd830efaee460a4e01ad8a76e5f5d7083fafddbb630895fc4c99c9d6"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000041/rubrikinc-991pressrelease4.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2027",
+              "basis": "ADJUSTED",
+              "low": 0.25,
+              "high": 0.35
+            },
+            {
+              "metric": "eps",
+              "period": "Q2FY2027",
+              "basis": "ADJUSTED",
+              "low": 0.03,
+              "high": 0.05
+            },
+            {
+              "metric": "fcf",
+              "period": "FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 293000000.0,
+              "high": 303000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 1638000000.0,
+              "high": 1648000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "Q2FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 395000000.0,
+              "high": 397000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000055/rubrikinc-991pressrelease7.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2027",
+              "basis": "ADJUSTED",
+              "low": 0.47,
+              "high": 0.53
+            },
+            {
+              "metric": "eps",
+              "period": "Q3FY2027",
+              "basis": "ADJUSTED",
+              "low": 0.07,
+              "high": 0.09
+            },
+            {
+              "metric": "fcf",
+              "period": "FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 323000000.0,
+              "high": 333000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 1685000000.0,
+              "high": 1693000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "Q3FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 429000000.0,
+              "high": 431000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "quarter_annual_scope",
+      "notes": "Quarter revenue 395\u2013397m and 429\u2013431m was labeled FY2027. Annual revenue is 1,638\u20131,648m then 1,685\u20131,693m; adjusted EPS 0.25\u20130.35 then 0.47\u20130.53; FCF 293\u2013303m then 323\u2013333m. Separate quarter scopes and retain all primary annual rows.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 10,
+      "ticker": "STX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1137789/000113778926000159/stx-20260703.htm",
+          "sha256": "6cedd637977ed921cee5b4153a7a2b16c5edf36e609ab0cafe86e8ad811cecd7"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "37789 stx:GianlucaRomanoMember 2026-04-04 2026-07-03 0001137789 stx:GianlucaRomanoMember 2026-07-03 UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 FORM 10-K _________________________________________________ \u2612 ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the fiscal year ended July 3 , 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transition period from: to Commission File Number 001-31560 SEAGATE T",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 11,
+      "ticker": "CAKE",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/887596/000110465926089840/cake-20260630x10q.htm",
+          "sha256": "ae6430e3da173664d288f50f9bc2e7439cdcfe1e420b134069143bbd0739cd9f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "iso4217:USD xbrli:pure cake:item iso4217:USD xbrli:shares xbrli:shares cake:D Table of Contents \u200b \u200b UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 \u200b FORM 10-Q \u200b \u200b \u200b \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 \u200b For the quarterly period ended June 30, 2026 \u200b or \u200b \u200b \u200b \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 \u200b Commission File Number: 0-20574 \u200b THE CHEESECAKE FACTORY INCORPORATED \u200b (Exact name of registrant a",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 12,
+      "ticker": "BRZE",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1676238/000167623826000011/a20260131-brazeincxfy26ear.htm",
+          "sha256": "90ac5d578180eda4cf00b3f1a282c1e7c866b0bc62d8cc716750a176ec39b964"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 a20260131-brazeincxfy26ear.htm EX-99.1 Document BRAZE REPORTS FISCAL YEAR AND FOURTH QUARTER 2026 RESULTS Delivers 28% revenue growth in the fourth quarter, 24% for the full fiscal year 2026 Trailing twelve month dollar-based net retention rises to 109% in the fourth quarter Announces a $100 million share repurchase authorization including a $50 million accelerated buyback Realizes strong operating leverage in the fourth quarter and fiscal 2026 NEW YORK -- (BUSINESSWIRE) -- March 24, 2026 -- Braze (Nasdaq: BRZ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 13,
+      "ticker": "XNCR",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326732.json",
+          "sha256": "63f41ab1a2a1663b69f2ad50e04b3e7d85ca6fa2ac063b990cf334a282da51f5"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1326732/000132673226000056/xncr-20260630.htm",
+          "sha256": "bb63c1cad4d183fb042c136410ca78547652d9c7ef2fabe945ecf15038376529"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 13,
+        "ticker": "XNCR",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326732.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "63f41ab1a2a1663b69f2ad50e04b3e7d85ca6fa2ac063b990cf334a282da51f5",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 14,
+      "ticker": "FAST",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/815556/000081555626000041/fast-20260630.htm",
+          "sha256": "f8a36baa68a6c0be62021b9579c30af9b79b7ffdd9f6d5af349b09be85da730b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " us-gaap:ReportableSegmentAggregationBeforeOtherOperatingSegmentMember 2025-12-31 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 FORM 10-Q (Mark One) \u2612 Quarterly report pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 For the quarterly period ended June 30, 2026 , or \u2610 Transition report pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 For the transition period from __________ to __________ Commission file number 0-16125 FASTENAL CO MPANY (",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 15,
+      "ticker": "AMD",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000002488.json",
+          "sha256": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000123/amd-20260627.htm",
+          "sha256": "1050bc4dcf2b23a3a07ff62279451637e3893f15564e719d82bd8e76772899b7"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000163/amd-20260817.htm",
+          "sha256": "b7bceb4ae36c1daa5b0606bb1f6c41556758d76aae7a5af2996e07724a4fc499"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2488/000119312526354029/d142696d8k.htm",
+          "sha256": "952a034953d2dfee4ac06bea6f6ec7ff5f2405cfb907b61291f971454525c132"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 15,
+        "ticker": "AMD",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000002488.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "21a29c75076d90fced568785d855fc427a15c7458bc0bb153a9dedd88ad3349e",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 16,
+      "ticker": "ACMR",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026031688/acmr-q12026xearningsreleas.htm",
+          "sha256": "d6fd3ad2bdeda666824f3ca12adcb50d5b7c4426b24f500df0dcfaac0fcab8a9"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026054581/acmr-q22026xearningsreleas.htm",
+          "sha256": "6c3c737d92f0bba77c2eeba88de9d5d980a0339bc4a1b26e44f5c56f28c62412"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026031688/acmr-q12026xearningsreleas.htm",
+          "records": [
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1080000000.0,
+              "high": 1175000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026054581/acmr-q22026xearningsreleas.htm",
+          "records": [
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1125000000.0,
+              "high": 1175000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": null,
+      "notes": "FY2026 revenue increases from 1.080\u20131.175bn to 1.125\u20131.175bn; no discrepancy in the checked comparison.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 17,
+      "ticker": "LYB",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1489393/000148939326000061/lyb-20260630.htm",
+          "sha256": "925c69d2827f3020076b90587c49f246edde40b6d41bda5553be5a5a7fb98427"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "scontinuedOperationsMember lyb:EuropeanPOJointVentureMember 2025-03-01 2025-03-31 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 Form 10-Q \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended June 30, 2026 or \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transition period from to Commission file number: 001-34726 LYONDELLBASELL INDUSTRIES N.V. (Exact name of regis",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 18,
+      "ticker": "ENTG",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1101302/000110130226000150/entg-20260627.htm",
+          "sha256": "1f4b96b3826b4fd83b404b07e4d03381fb7480f616d8d3b9fa35fc13bb7f8aec"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "hierMember 2026-03-29 2026-06-27 0001101302 entg:OlivierBlachierMember 2026-06-27 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 ____________________________________________ FORM 10-Q ______________________________________________ (Mark One) \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended June 27, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transiti",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 19,
+      "ticker": "DK",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001694426.json",
+          "sha256": "96f2724024281b1275c6f4947339b397d8e629317812cd20d159a4e23ea43e97"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1694426/000162828026053106/dk-20260630.htm",
+          "sha256": "0093e5c4be22714d4ec6ef815be491bcc9d52c0ba792672f2c98c3b393075823"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 19,
+        "ticker": "DK",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001694426.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "96f2724024281b1275c6f4947339b397d8e629317812cd20d159a4e23ea43e97",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 20,
+      "ticker": "PRCH",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.high_leverage_low_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001784535.json",
+          "sha256": "c98647850469db3c4b0ef77b830857987025e165ca8a782afbaa02926f446767"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1784535/000178453526000048/prch-20260630.htm",
+          "sha256": "b8f6a1850aafd58f64b683e7037697e293b6fbae26f2c21064a079bc738f7484"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 20,
+        "ticker": "PRCH",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001784535.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "c98647850469db3c4b0ef77b830857987025e165ca8a782afbaa02926f446767",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 21,
+      "ticker": "ATI",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1018963/000162828026054233/ati-20260628.htm",
+          "sha256": "605985a1778b65c174ccdde0d2e9688ed4bb0276ae396ec51febec23684de74c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "tesPayableOtherPayablesMember us-gaap:SubsequentEventMember ati:ATI2027SeniorNotesMember 2026-07-08 UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 FORM 10-Q \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the Quarterly Period Ended June 28, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the Transition Period From to Commission File Number 1-12001 ATI Inc. (Exact name of registrant as specified in its",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 22,
+      "ticker": "EXPE",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001324424.json",
+          "sha256": "4af44d83f624debf00c30657f3e7753ec05806b108029432edbdcf291c18d163"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1324424/000132442426000053/expe-20260630.htm",
+          "sha256": "40de0e82279a330a7f6e4858ad7fd4a0623a699e67106a72927d68d1fcb11df2"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 22,
+        "ticker": "EXPE",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001324424.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "4af44d83f624debf00c30657f3e7753ec05806b108029432edbdcf291c18d163",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 23,
+      "ticker": "BX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1393818/000119312526340208/d158269d10q.htm",
+          "sha256": "4d4aea27abb772673b7d2b9445e9ec4a67f5fa4a59c42ee429430c6867a65c23"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "d as collateral offset derivative counterparty risk exposure, but do not reduce net exposure to the Condensed Consolidated Statement of Financial Condition. Represents the Revolving Credit Facility of Blackstone, through Blackstone Holdings Finance Co. L.L.C. Interest on the borrowings is based on an adjusted Secured Overnight Finance Rate (\u201cSOFR\u201d) or alternate base rate, in each case plus a margin, and undrawn commitments bear a commitment fee of 0.06%. The margin above adjusted SOFR used to calculate interest on borrowings",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 24,
+      "ticker": "FORM",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001039399.json",
+          "sha256": "8264c9718cf7a7acdf51bdce420deadc3b74d468483cdd5d77ec2227f8eb2d54"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1039399/000103939926000033/form-20260627.htm",
+          "sha256": "1f4254961ac8fe571d86157f991053f3bc022984376677610c068a478ff7fc3c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 24,
+        "ticker": "FORM",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001039399.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "8264c9718cf7a7acdf51bdce420deadc3b74d468483cdd5d77ec2227f8eb2d54",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 25,
+      "ticker": "FAST",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/815556/000081555626000041/fast-20260630.htm",
+          "sha256": "f8a36baa68a6c0be62021b9579c30af9b79b7ffdd9f6d5af349b09be85da730b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " us-gaap:ReportableSegmentAggregationBeforeOtherOperatingSegmentMember 2025-12-31 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 FORM 10-Q (Mark One) \u2612 Quarterly report pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 For the quarterly period ended June 30, 2026 , or \u2610 Transition report pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 For the transition period from __________ to __________ Commission file number 0-16125 FASTENAL CO MPANY (",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 26,
+      "ticker": "SPXC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000088205.json",
+          "sha256": "78ab7fbb475a7dfbaa1a33d6c6d52baa7e520fa8410e53804a2bf171a7567b8f"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/88205/000008820526000053/spxc-20260627.htm",
+          "sha256": "a7810d3e0ffa5437a288d3f03e43427b02094438c22cb1e9c452e04f0d331b86"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 26,
+        "ticker": "SPXC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000088205.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "78ab7fbb475a7dfbaa1a33d6c6d52baa7e520fa8410e53804a2bf171a7567b8f",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 27,
+      "ticker": "AMKR",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001047127.json",
+          "sha256": "1c9a7192b60eeabd66a3f53489954678db525ef17d2c720bef70aee6b95fd730"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1047127/000104712726000046/amkr-20260630.htm",
+          "sha256": "56aa16684b1106c863aabe995a9aae81889a875361b8cda57df99f36f3106a32"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 27,
+        "ticker": "AMKR",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001047127.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "1c9a7192b60eeabd66a3f53489954678db525ef17d2c720bef70aee6b95fd730",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 28,
+      "ticker": "ALKS",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1520262/000119312526318844/alks-ex99_1.htm",
+          "sha256": "cb894e5bf837420ebe50201f77b64e3ba7d5657e7faf69ab37454cb0fd488ff0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "ts: For Investors: Sandy Coombs +1 781 609 6377 For Media: Katie Joyce +1 781 249 8927 Alkermes plc Reports Second Quarter 2026 Financial Results \u2014 Second Quarter Revenues of $496.0 Million \u2014 \u2014 GAAP Net Income of $0.5 Million and Adjusted EBITDA of $139.2 Million \u2014 \u2014 Blair Jackson to Assume Chief Executive Officer Role on August 1, 2026; Richard Pops to Continue as Chairman of the Board of Directors \u2014 DUBLIN, July 28, 2026 \u2014 Alkermes plc (Nasdaq: ALKS) today reported financial results for the second quarter of 2026. \u201cThe sec",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 29,
+      "ticker": "TTAN",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001638826.json",
+          "sha256": "821bb92ce37c1836a7836b065cb62489d204b9cb07a5a0d8698cbd4fe1f65988"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1638826/000163882626000047/ttan-20260430.htm",
+          "sha256": "25a4e6b10c6bf2094423ede3ab7cc4a0730140a7b681a26c154bd18606c47884"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1638826/000163882626000067/ttan-20260617.htm",
+          "sha256": "acd1205ac4df87e053838cdff256bff16ea82e679c725283636eda41224a1006"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 29,
+        "ticker": "TTAN",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001638826.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "821bb92ce37c1836a7836b065cb62489d204b9cb07a5a0d8698cbd4fe1f65988",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 30,
+      "ticker": "CAH",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/721371/000072137126000037/a26q4_x063026xex991xnewsre.htm",
+          "sha256": "85ef7cda879031a90569f3596cf469b0d41faf4c4581c558287551ba655edfe5"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "ex991xnewsre.htm EX-99.1 Document Exhibit 99.1 FOR IMMEDIATE RELEASE Cardinal Health Reports Fourth Quarter and Fiscal Year 2026 Results and Provides Fiscal Year 2027 Guidance \u2022 Fourth quarter revenue increased 6% to $63.7 billion \u2022 Fourth quarter GAAP 1 diluted EPS increased 70% to $1.70 \u2022 Excluding a one-time positive impact of $0.31 from the recognition of the IEEPA tariff refund, fourth quarter non-GAAP diluted EPS increased 25% to $2.60, with reported fourth quarter non-GAAP diluted EPS increasing 40% to $2.91 \u2022 For fis",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 31,
+      "ticker": "VKTX",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1607678/000119312526191487/vktx-ex99_1.htm",
+          "sha256": "c0f90b757f2ca163e25cb877ecde9e7dec1e04ceda5c5c37f5dbfd6dc4a44f30"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 vktx-ex99_1.htm EX-99.1 EX-99.1 Exhibit 99.1 Viking Therapeutics Reports First Quarter 2026 Financial Results and Provides Corporate Update Conference call scheduled for 4:30 p.m. ET today -- Phase 3 VANQUISH Trials for Subcutaneous VK2735 in Obesity Advance; VANQUISH-1 and VANQUISH-2 Trials Fully Enrolled -- -- Initiation of Phase 3 Oral VK2735 Trial for Obesity Expected 4Q26 -- -- VK2735 Maintenance Dosing Study Ongoing; Data Expected 3Q26 -- -- IND Filed for Novel Amylin Agonist VK3019; ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 32,
+      "ticker": "BKSY",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001753539.json",
+          "sha256": "4db6c254753656f3a5987a4b9eb2b9c4e5f0bc14a9a69b5832ec03343d27a708"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1753539/000175353926000124/bksy-20260630.htm",
+          "sha256": "ea282967bf3855d6d8922459d57380f258d0da60696461fc3b295551040d821b"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1753539/000175353926000128/bksy-20260807.htm",
+          "sha256": "38a2bdc1c4b4a9f893e572f76fb2fed4ea49142b82491bda3854be2bd6ac97cb"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 32,
+        "ticker": "BKSY",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001753539.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "4db6c254753656f3a5987a4b9eb2b9c4e5f0bc14a9a69b5832ec03343d27a708",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 33,
+      "ticker": "APAM",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1517302/000151730226000085/artisan1q26earningsrelease.htm",
+          "sha256": "a9bb78fccd1f344cdcae81dc59144fae0ec2b33f8dbd39357a31da99c0513291"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "PARTNERS ASSET MANAGEMENT INC. DATED APRIL 28, 2026 Document Artisan Partners Asset Management Inc. Reports 1Q26 Results and Quarterly Dividend Milwaukee, WI - April 28, 2026 - Artisan Partners Asset Management Inc. (NYSE: APAM) (the \u201cCompany\u201d or \u201cArtisan Partners\u201d) today reported its results for the quarter ended March 31, 2026, and declared a quarterly dividend. Chief Executive Officer Jason Gottlieb said: \"Our first quarter results demonstrated continued progress on our strategic initiatives, the resilience of our busines",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 34,
+      "ticker": "CBRE",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1138118/000113811826000021/cbre-20260723x8kexx991.htm",
+          "sha256": "1d0d6f3c23d4c5eb2f40ac4b5704793d6688121b3388f23dafebf75b18dffafe"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "aco - Media 212.984.8113 212.984.6535 Chandni.Luthra@cbre.com Steven.Iaco@cbre.com CBRE GROUP, INC. REPORTS FINANCIAL RESULTS FOR Q2 2026 Dallas \u2013 July 29, 2026 \u2014 CBRE Group, Inc. (NYSE: CBRE) today reported financial results for the second quarter ended June 30, 2026. Key Highlights: \u2022 GAAP EPS of $0.69 and Core EPS of $1.56 \u2022 Revenue up 16% to $11.2 billion \u2022 Resilient Businesses (1) revenue up 15% \u2022 Transactional Businesses (1) revenue up 19% \u2022 Cash flow from operations of nearly $1.4 billion and free cash flow of nearly ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 35,
+      "ticker": "ECG",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2015845/000201584525000039/a2025q1ex99-ecg.htm",
+          "sha256": "15c06c5d689bf89b339c5402c63c004246cd15efeb6eda69547ba16b7aba6e01"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2015845/000201584525000052/exhibit991investorpresen.htm",
+          "sha256": "447a5e5713ad1e33ca3410c17dd36b7214fa81fad0b8067eff80dcde62474562"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2015845/000201584525000039/a2025q1ex99-ecg.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2025",
+              "basis": "UNSPECIFIED",
+              "low": 210000000.0,
+              "high": 225000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2025",
+              "basis": "UNSPECIFIED",
+              "low": 3000000000.0,
+              "high": 3100000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2015845/000201584525000052/exhibit991investorpresen.htm",
+          "records": []
+        }
+      ],
+      "finding_group": "explicit_historical_republication",
+      "notes": "May 13 2025 forecast revenue 3.0\u20133.1bn and EBITDA 210\u2013225m. Later presentation explicitly says guidance is neither being reaffirmed nor updated today. It cannot create a new update under its filing timestamp. Repair excludes the republished period with rejection evidence and restores EBITDA in the original forecast.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 36,
+      "ticker": "BWA",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/908255/000090825526000049/a20260630ex991pressrelease.htm",
+          "sha256": "c1d0c40d630d7f9eff905028d77aea3767216579fcff0b448d9d41fee17e607c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": ".htm EX-99.1 Document Exhibit 99.1 Immediate Release Contact: Patrick Nolan 248.754.0884 BorgWarner Reports Strong Second Quarter 2026 Results Increases 2026 Adjusted EPS Guidance and Share Repurchase Authorization By $1 Billion Announces 7 Awards Across Portfolio to Support Long-Term Profitable Growth Auburn Hills, Michigan, August 5, 2026 \u2013 BorgWarner Inc. (NYSE: BWA) today reported second quarter results for 2026. Second Quarter Results and Business Update \u2022 BorgWarner\u2019s (the \u201cCompany\u201d) U.S. GAAP net sales increased appro",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 37,
+      "ticker": "MSCI",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1408198/000140819826000032/earningsrelease-20260331xe.htm",
+          "sha256": "c7343412c00785073d8c5d2c8dfc83c8d1fbaff9e38a63d1ae6e75f9effdfed1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1408198/000140819826000044/exhibit991earningsrelease-.htm",
+          "sha256": "a5a88855b4e6ecdd536ba3c67d6e70237004409e4d75b083779fb3e72c3b81e8"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1408198/000140819826000032/earningsrelease-20260331xe.htm",
+          "records": [
+            {
+              "metric": "fcf",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1470000000.0,
+              "high": 1530000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1408198/000140819826000044/exhibit991earningsrelease-.htm",
+          "records": [
+            {
+              "metric": "fcf",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1485000000.0,
+              "high": 1545000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "adjacent_metric_rows",
+      "notes": "Operating Expense was mislabeled EBITDA and operating cash flow was mislabeled FCF. Adjusted EBITDA Expense is not EBITDA earnings. Actual FCF guidance 1,470\u20131,530m becomes 1,485\u20131,545m. Repair binds the current-column range directly to its complete metric label and excludes the expense metric.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 38,
+      "ticker": "TEM",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1717115/000119312526206317/tem-ex99_1.htm",
+          "sha256": "0841fd0338a190eb3ff8a410a56433872ef0a8d9d03aff9a58beeafbbea9859e"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1717115/000119312526326083/tem-ex99_1.htm",
+          "sha256": "f4749fdf39ac4a2933ac491caee5dc9caa75d3bbd6c8abf0a070eb383df2de2b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1717115/000119312526206317/tem-ex99_1.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 65000000.0,
+              "high": 65000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1590000000.0,
+              "high": 1600000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1717115/000119312526326083/tem-ex99_1.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 65000000.0,
+              "high": 65000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1595000000.0,
+              "high": 1605000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "omitted_primary_metric",
+      "notes": "FY2026 revenue increases from 1.590\u20131.600bn to 1.595\u20131.605bn. Both releases explicitly expect adjusted EBITDA of approximately 65m; this point was omitted. Repair retains the forward point under its explicit year.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 39,
+      "ticker": "AGCO",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/880266/000088026626000066/a2026earningsreleaseq2.htm",
+          "sha256": "9647dba677bbeb85ec61a5e2ff451a0954d7b6d7d827e7f78e0143de43c25820"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "cations Officer 404-403-6042 678-654-7719 greg.peterson@agcocorp.com rachel.potts@agcocorp.com AGCO REPORTS SECOND-QUARTER RESULTS \u2022 Net sales of $2.6 billion, down 1.0% year-over-year \u2022 Reported earnings per share of $1.08 and adjusted earnings per share (1) of $1.43 \u2022 Full-year adjusted earnings per share outlook of approximately $5.50 - $5.75 DULUTH, GA \u2013 July 30 \u2013 AGCO (NYSE: AGCO) reported net sales of $2.6 billion for the second quarter ended June 30, 2026, a decrease of 1.0% compared to the second quarter of 2025. Rep",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 40,
+      "ticker": "IBRX",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.universal_hard_override",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326110.json",
+          "sha256": "d59606b59d6c96ee6b6e8c010479393fd4be764b67f4119ef70d3cefa5bfbc2d"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1326110/000132611026000079/ibrx-20260630.htm",
+          "sha256": "0763eb03257854ac1f3a30ec16c79fdd8a3ed9d9af11a80f95cf68d443484863"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 40,
+        "ticker": "IBRX",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326110.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "d59606b59d6c96ee6b6e8c010479393fd4be764b67f4119ef70d3cefa5bfbc2d",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 41,
+      "ticker": "NAVN",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1639723/000162828026042552/navn-20260430.htm",
+          "sha256": "b5a1749ce6bf746e41e047a4c4dd6ea47e22c4335ba8444ae8cec935243aa753"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "3 navn:SAFEWarrantsMember 2025-02-01 2025-04-30 0001639723 us-gaap:SubsequentEventMember 2026-05-31 UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 FORM 10-Q (Mark One) \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended April 30, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transition period from ________ to ________ Commission File Number: 001-42922 NAVAN, INC. (Exact na",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 42,
+      "ticker": "WERN",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/793074/000079307426000140/wern-20260630.htm",
+          "sha256": "2c9244553328ebdbbca34301762f29d215b9ddaf2d4b6a197e0611b1fa8769a0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "portationServicesSegmentMember wern:BaylorTruckingIncMember 2025-01-01 2025-06-30 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 FORM 10-Q [Mark one] \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended June 30, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 Commission File Number: 0-14690 WERNER ENTERPRISES, INC. (Exact name of registrant as specified in its chart",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 43,
+      "ticker": "MWH",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2065636/000119312526115127/d31700dex991.htm",
+          "sha256": "4c3971e943f43d1895e30d77305285d76853c2a2df948074da7af8d43d8af72a"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2065636/000119312526218154/d13275dex991.htm",
+          "sha256": "4296d0312d8073b61be5990df1dcd97f650fc01eb177e860b7b1cd73951dc6a2"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2065636/000119312526115127/d31700dex991.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 400000000.0,
+              "high": 420000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 3720000000.0,
+              "high": 3820000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2065636/000119312526218154/d13275dex991.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 435000000.0,
+              "high": 455000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 3720000000.0,
+              "high": 3820000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": null,
+      "notes": "FY2026 revenue 3.720\u20133.820bn is unchanged; adjusted EBITDA increases from 400\u2013420m to 435\u2013455m. Gross margin is a distinct non-primary metric and is not substituted for operating margin.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 44,
+      "ticker": "LH",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/920148/000092014826000162/form8-kexhibit9912q26.htm",
+          "sha256": "3d46d95ee7e0a9ca6903530e722cbccb413b9205fbd8d1d2faca67a86ea4509b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "ct: Dewey Steadman - Investors Racquel White - Media Investor@labcorp.com Media@labcorp.com Labcorp Announces 2026 Second Quarter Results; Raises Full Year 2026 Guidance \u2022 Results from operations for second quarter 2026 versus second quarter 2025: \u25e6 Revenue: $3.73 billion vs. $3.53 billion, up 5.8% \u25e6 Diluted EPS: $3.64 vs. $2.84, up 28.5% \u25e6 Adjusted EPS: $4.99 vs. $4.35, up 14.9% \u2022 Raised full-year enterprise revenue growth and adjusted EPS guidance: \u25e6 Annual revenue growth guidance of 5.4% to 6.3%; up 30 basis points at the",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 45,
+      "ticker": "LRCX",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000707549.json",
+          "sha256": "5669585890b736938e937b858b2e62156a2cb4f3cb74845d8270eeee42689f90"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000037/lrcx-20260628.htm",
+          "sha256": "1efe9ac795b5bcd16a163133d86dec15fcbb0be34c1ea5004bc912eda66658cc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/707549/000070754926000043/lrcx-20260824.htm",
+          "sha256": "f8072085c2b18161df4cdbfa2486995fb52e124e08472a3214e80a7a2a378e99"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 45,
+        "ticker": "LRCX",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000707549.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "5669585890b736938e937b858b2e62156a2cb4f3cb74845d8270eeee42689f90",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 46,
+      "ticker": "TTAN",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1638826/000163882626000044/ttan-ex99_1.htm",
+          "sha256": "02ddcf2f58faded31b139644a04089d96432fa9eded1c59d55be6b9ff002e8f0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 ttan-ex99_1.htm EX-99.1 EX-99.1 Exhibit 99.1 ServiceTitan Announces Fiscal First Quarter Financial Results LOS ANGELES \u2013 June 4, 2026 \u2013 ServiceTitan (NASDAQ: TTAN), the software platform that powers the trades, today announced financial results for the fiscal first quarter ended April 30, 2026. \u201cOur customers are off to a strong start in fiscal year 2027,\u201d said Ara Mahdessian, Co-Founder and CEO. \u201cWe continue to execute on our core multi-year growth vectors, we\u2019re delivering the Agen",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 47,
+      "ticker": "ZETA",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001851003.json",
+          "sha256": "767e1177d4be699f52323ededeb59ec4e51d9d5cf3dbd9e0bea55003b842c742"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1851003/000119312526333902/zeta-20260630.htm",
+          "sha256": "d2b105f27f0e431aba5a2921fe3cb2a160e807ad7f723ce90d2ebd1975d68ab8"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 47,
+        "ticker": "ZETA",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001851003.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "767e1177d4be699f52323ededeb59ec4e51d9d5cf3dbd9e0bea55003b842c742",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 48,
+      "ticker": "FSS",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/277509/000162828026050993/fss-20260630.htm",
+          "sha256": "cfa716f01a064ea026b4f193e0f85e64bb009d2963c3275c4d5d8e793fe14c7c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "9 fss:WesternTechnologyMember us-gaap:SubsequentEventMember 2026-07-01 2026-07-01 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 ___________________________________ FORM 10-Q (Mark One) \u2611 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended June 30, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transition period from to Commission file number: 1-6003 _______",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 49,
+      "ticker": "V",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1403161/000140316126000103/q32026earningsrelease.htm",
+          "sha256": "a6d07085a0cd87852dcaf401be224fa9b03a7cc349d4465af82477faa889d485"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 q32026earningsrelease.htm EXHIBIT 99.1 Document Visa Reports Fiscal Third Quarter 2026 Results San Francisco, CA, July 28, 2026 \u2013 Visa (NYSE: V) \u2022 GAAP net income of $5.6B or $2.97 per share and non-GAAP net income of $6.3B or $3.32 per share \u2022 Net revenue of $11.6B, an increase of 14%, or 13% on a constant-dollar basis \u2022 Growth in payments volume, cross-border volume and processed transactions was strong \u2022 Share repurchases and dividends of $6.2B Income Statement Summary In bil",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 50,
+      "ticker": "STLD",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1022671/000110465926085277/tm2620920d1_ex99-1.htm",
+          "sha256": "59b896b69e784048e3e000c3c998e119702d377cf176676a03644bc576897165"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "xhibit 99.1 Press Release July 20, 2026 7575 W. Jefferson Blvd. Fort Wayne, IN 46804 Steel Dynamics Reports Second Quarter 2026 Results FORT WAYNE, INDIANA, July 20, 2026 / PRNewswire / Second Quarter 2026 Performance Highlights: \u00a7 Record steel shipments of 3.7 million tons \u00a7 Continued commissioning and increased production from aluminum flat rolled sheet operations \u00a7 Net sales of $6.1 billion, operating income of $700 million, and net income of $534 million \u00a7 Adjusted EBITDA of $921 million and cash flow from operations of ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 51,
+      "ticker": "BE",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1664703/000162828026050150/ex991_q226financialresults.htm",
+          "sha256": "5d66bc051f5d5fb1d6deb76ba1b59d8d32e5b126289281463373e0898255c6db"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " 2 ex991_q226financialresults.htm EX-99.1 Document PRESS RELEASE Bloom Energy Reports Record Second Quarter 2026 Financial Results and Raises Full Year 2026 Guidance \u2022 Achieved record quarterly revenue of $1.065 billion, surpassing $1 billion for the first time \u2022 Delivered 166% year-over-year revenue growth, driven by 215% product revenue growth \u2022 Raises full year 2026 revenue guidance to $3.9 billion \u2013 4.2 billion, representing 100% year-over-year growth at the midpoint SAN JOSE, Calif., July 28, 2026\u2014Bloom Energy Corporati",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 52,
+      "ticker": "GHM",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.negative_fcf_short_runway",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000716314.json",
+          "sha256": "f00f46d3e22c4bff785f138255eb304386077f7e1a104da7ce8f652b039fc314"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/716314/000119312526336752/ghm-20260630.htm",
+          "sha256": "ace66f63cf1bd237b8934c8b948ece6e609e1fa28d804ea2cb403b126442223a"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/716314/000119312526369611/d131891d8k.htm",
+          "sha256": "fc9adf09780771d17e2d0ef7bd11f56d5c7710532b8dc6623bc3bcaac3417c8c"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 52,
+        "ticker": "GHM",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000716314.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "f00f46d3e22c4bff785f138255eb304386077f7e1a104da7ce8f652b039fc314",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 53,
+      "ticker": "ECL",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/31462/000162828026053886/ecl-20260630.htm",
+          "sha256": "e7f4323d48165a47f7c7ab2b70ae495d9399c43a1315be65c0917e91bdc39266"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "2-06-01 0000031462 2022-06-01 0000031462 ecl:NalcoHoldingCompanyMember 2022-06-01 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 FORM 10-Q (Mark One) x QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended June 30, 2026 OR o TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transition period from to Commission File No. 1-9328 ECOLAB INC. (Exact name of registrant as specif",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 54,
+      "ticker": "TVTX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1438533/000143853326000062/a2026q2_8-kxex991.htm",
+          "sha256": "c2f51f61236e23ab4b03dec15b0a1630c622ef8fe66c454fc1f5b45b1a52c3b0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "rs: Media: 888-969-7879 888-969-7879 IR@travere.com mediarelations@travere.com Travere Therapeutics Reports Second Quarter 2026 Financial Results Strong FSGS launch and continued IgAN growth drive robust FILSPARI demand; 2,012 new PSFs received during the second quarter U.S. net product sales of FILSPARI grew 96% year-over-year to $141 million Enrollment of pegtibatinase Phase 3 HARMONY Study in HCU continues; Topline data expected in 2H 2027 In-licensing of civorebrutinib expands long-term growth opportunities in multiple i",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 55,
+      "ticker": "BKNG",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1075531/000107553126000036/q2-26bkngearningsrelease.htm",
+          "sha256": "4eb6358d0570eff0b0df1c6a5df36cd0f4db1f7d2e9aa4a50059fab4ce671bfa"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "ooking Holdings Inc. (NASDAQ: BKNG) (the \"Company,\" \"we,\" \"our,\" or \"us\") today reported its second quarter 2026 financial results. \u25cf Room nights grew 5% compared to the second quarter of 2025. \u25cf Gross bookings grew 9% compared to the second quarter of 2025, or approximately 8% on a constant currency basis. \u25cf Revenue grew 8% compared to the second quarter of 2025, or approximately 7% on a constant currency basis. \u25cf Net income, Adjusted Net income, and Adjusted EBITDA grew 118%, 8%, and 9%, respectively, compared to the secon",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 56,
+      "ticker": "VICR",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.negative_fcf_runway_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000751978.json",
+          "sha256": "8cf4370906dc0b5912db452010d03a0065a6b7e8d9d0f5e207c3b26a3043ccb1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/751978/000119312526322462/vicr-20260630.htm",
+          "sha256": "24e8a71dcfeeabb86cdea465edd402607d3a68e96f228577894eb46cf9cc98c2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/751978/000119312526370420/d161606d8k.htm",
+          "sha256": "5a2d67fa4a8a403abaa03dd9a37b84de932e61e0e0793452d69fb2b8d9c575cc"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 56,
+        "ticker": "VICR",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000751978.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "8cf4370906dc0b5912db452010d03a0065a6b7e8d9d0f5e207c3b26a3043ccb1",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 57,
+      "ticker": "KDP",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1418135/000141813526000051/kdp-20260630.htm",
+          "sha256": "69837cfe16ffcd79b3aa8a108b53c6003359a3bdbd16353b5e03331566998d0d"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "NotPrimaryBeneficiaryMember 2025-12-31 0001418135 kdp:OfficerOrDirectorMember 2026-04-01 2026-06-30 UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 FORM 10-Q \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 FOR THE QUARTERLY PERIOD ENDED JUNE 30, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 FOR THE TRANSITION PERIOD FROM TO Commission file number 001-33829 Keurig Dr Pepper Inc. (Exact name of registrant as s",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 58,
+      "ticker": "ONC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001651308.json",
+          "sha256": "e52f414c5378460828e658b33687af7af29160a9ee9f5cebae472b599520e827"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1651308/000162828026052878/bgne-20260630.htm",
+          "sha256": "17c7235ad7a56881358b70583552a3713257cbc1396c52d289337b6bf9063c98"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1651308/000165130826000025/bgne-20260826.htm",
+          "sha256": "8497acf3448d2e1feb8635dabd54b6ebdd983129a89d5300d019297813c9c68b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 58,
+        "ticker": "ONC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001651308.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "e52f414c5378460828e658b33687af7af29160a9ee9f5cebae472b599520e827",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 59,
+      "ticker": "RELY",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1782170/000162828026009031/rely4q25-earningspr.htm",
+          "sha256": "52611f1ffa976707b5a4d5499918c6a99e1403dcf78b916ca6c4ab19a051f443"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1782170/000162828026031305/rely1q26-earningspr.htm",
+          "sha256": "0575f0c3df3312db75d5a5e9a414d92dd542e274d37c5ca51f4ec3a1b0cc46ce"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1782170/000162828026009031/rely4q25-earningspr.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 340000000.0,
+              "high": 360000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1940000000.0,
+              "high": 1960000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "Q1FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 436000000.0,
+              "high": 438000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1782170/000162828026031305/rely1q26-earningspr.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 370000000.0,
+              "high": 385000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1960000000.0,
+              "high": 1975000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "Q2FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 483000000.0,
+              "high": 485000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "omitted_primary_metric",
+      "notes": "Current FY2026 revenue guidance of 1.960\u20131.975bn was omitted; prior is 1.940\u20131.960bn. EBITDA rises from 340\u2013360m to 370\u2013385m. Repair handles the explicit in-the-range-of clause and retains separate quarterly scope.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 60,
+      "ticker": "UBER",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001543151.json",
+          "sha256": "e2cc54efd327e0a9f0ce24b6e14f90cf96f6a2f9191ffc8b505b22f062b080f2"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1543151/000154315126000032/uber-20260630.htm",
+          "sha256": "5aa56769ca3e3d8735d1122e85269a5b9cd68fcb4bd2fa58fa6b19b65b019ffa"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1543151/000155278126000414/e26328_uber-8k.htm",
+          "sha256": "8230c8e29782673ecc40bceb1bd39c51f3e6fd0826966cd7bd4d4b8ae8a638ab"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 60,
+        "ticker": "UBER",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001543151.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "e2cc54efd327e0a9f0ce24b6e14f90cf96f6a2f9191ffc8b505b22f062b080f2",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 61,
+      "ticker": "MSI",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/68505/000006850526000018/msiq12026pressrelease.htm",
+          "sha256": "c969e996ff8b2f87c30384e870d00dd58f780037d12c880f15337bba98e98cf1"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/68505/000006850526000027/msiq22026pressrelease.htm",
+          "sha256": "4cf14bf9925f355cedce18604ea6ab2bb32f9ae2a9924274864305be88f3afc5"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/68505/000006850526000018/msiq12026pressrelease.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 16.87,
+              "high": 16.99
+            },
+            {
+              "metric": "eps",
+              "period": "Q2FY2026",
+              "basis": "ADJUSTED",
+              "low": 3.82,
+              "high": 3.88
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 12800000000.0,
+              "high": 12800000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/68505/000006850526000027/msiq22026pressrelease.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 17.62,
+              "high": 17.72
+            },
+            {
+              "metric": "eps",
+              "period": "Q3FY2026",
+              "basis": "ADJUSTED",
+              "low": 4.39,
+              "high": 4.44
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 12975000000.0,
+              "high": 12975000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "historical_comparison_year",
+      "notes": "Annual revenue 12.8bn to 12.975bn and adjusted EPS 16.87\u201316.99 to 17.62\u201317.72 are correct. Third-quarter 2026 EPS 4.39\u20134.44 was mislabeled Q3FY2025 by borrowing the year of the revenue growth comparison. Repair prevents that historical comparison from opening a forecast scope.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 62,
+      "ticker": "WMS",
+      "domain": "guidance",
+      "captured_classification": true,
+      "captured_rule_path": "guidance_v1_1.material_numeric_cut",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1604028/000160402826000014/wms-05212026x8kex991.htm",
+          "sha256": "3f0c8c36e9bc87d80762ca799c4b9867dccedfe8994c2f1ea359e29fc44f8d44"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1604028/000160402826000034/q1fy27earningspresentati.htm",
+          "sha256": "538041fa41cbfea84919c25e052d8e371943c4cd9f8609f85ee612c5e1a28863"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1604028/000160402826000014/wms-05212026x8kex991.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2027",
+              "basis": "ADJUSTED",
+              "low": 1000000000.0,
+              "high": 1050000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 3350000000.0,
+              "high": 3550000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1604028/000160402826000034/q1fy27earningspresentati.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2027",
+              "basis": "ADJUSTED",
+              "low": 1000000000.0,
+              "high": 1050000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2027",
+              "basis": "UNSPECIFIED",
+              "low": 3350000000.0,
+              "high": 3550000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "actual_guidance_columns_units",
+      "notes": "FY2027 revenue 3,350\u20133,550m and adjusted EBITDA 1,000\u20131,050m are unchanged. Later presentation revenue was unscaled 3,350\u20133,550 dollars, causing a false material_numeric_cut. Repair uses the declared actual/guidance columns and row-specific million-dollar units.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 63,
+      "ticker": "ABG",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1144980/000114498026000089/a2026q2ex991.htm",
+          "sha256": "c0433d85488ff2fa372a0f39a0b1352674e6d5bfa19a222c2e62fbea64c00454"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "Joe Sorice Sr. Manager, Investor Relations (770) 418-8211 ir@asburyauto.com Asbury Automotive Group Reports Second Quarter Results \u2022 Revenue of $4.4 billion \u2022 Gross Profit of $753 million \u2022 Used Retail Gross Profit per Unit of $2,002, growth of 16% \u2022 EPS of $6.25 per diluted share; adjusted EPS, a non-GAAP measure, of $6.82 per diluted share \u2022 Net income of $115 million; adjusted net income, a non-GAAP measure, of $125 million \u2022 Repurchased approximately 668,000 shares for $131 million \u2022 70% of stores converted to Tekion as ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 64,
+      "ticker": "GRMN",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1121788/000119312526056025/grmn-ex99_1.htm",
+          "sha256": "4fede7255017bc2895b1391231821750ea2749575aff506fb74e13f68f8e3497"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1121788/000119312526322113/grmn-ex99_1.htm",
+          "sha256": "7325e35367ad3b687f8e8c8d152f68cece12e7aa6223ff8b0a3f955bae73b08f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1121788/000119312526056025/grmn-ex99_1.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 9.35,
+              "high": 9.35
+            },
+            {
+              "metric": "operating_margin",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 0.255,
+              "high": 0.255
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 7900000000.0,
+              "high": 7900000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1121788/000119312526322113/grmn-ex99_1.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 10.0,
+              "high": 10.0
+            },
+            {
+              "metric": "operating_margin",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 0.27,
+              "high": 0.27
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 8050000000.000001,
+              "high": 8050000000.000001
+            }
+          ]
+        }
+      ],
+      "finding_group": "omitted_primary_metric",
+      "notes": "FY2026 revenue 7.9bn to 8.05bn was captured, but operating margin 25.5% to 27.0% and pro forma EPS 9.35 to 10.00 were omitted. The issuer expressly defines pro forma net income (earnings) per share as non-GAAP. Repair uses that explicit definition for adjusted EPS; it does not infer accounting basis from pro forma alone.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 65,
+      "ticker": "DT",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1773383/000162828025049224/q2fy26-earningsreleaseex991.htm",
+          "sha256": "cfc566523850197e73f6b015e63a4e2ccec6f3547962a83c7bb1a2c65c128b03"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1773383/000177338325000153/fy26q1-earningsreleaseex991.htm",
+          "sha256": "6c2b331ba5bc588dd8dfbc5d11b9863cc831918be6f326483fccab719c189117"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1773383/000162828025049224/q2fy26-earningsreleaseex991.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 1.62,
+              "high": 1.64
+            },
+            {
+              "metric": "fcf",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 505000000.0,
+              "high": 515000000.0
+            },
+            {
+              "metric": "operating_margin",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 0.29,
+              "high": 0.29
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1985000000.0,
+              "high": 1995000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1773383/000177338325000153/fy26q1-earningsreleaseex991.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 1.58,
+              "high": 1.61
+            },
+            {
+              "metric": "fcf",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 505000000.0,
+              "high": 515000000.0
+            },
+            {
+              "metric": "operating_margin",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 0.29,
+              "high": 0.29
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 1970000000.0,
+              "high": 1985000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "adjacent_metric_rows",
+      "notes": "Revenue constant-currency growth of 14\u201315% and 15\u201315.5% was mislabeled operating margin. Actual annual non-GAAP operating margin is 29% in both filings. Current annual revenue, EPS and FCF are restored from their own rows. August precedes November; source URL order is not chronology.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 66,
+      "ticker": "FTI",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1681459/000168145926000040/technipfmc2026630-8kerex.htm",
+          "sha256": "6343af223b1cb718337bf8c74532ceabc11bf1235cf02b376bf992f863fd1214"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 technipfmc2026630-8kerex.htm EX-99.1 Document Press Release TechnipFMC Announces Second-Quarter 2026 Results \u2022 Total Company inbound of $2.7 billion; Subsea orders of $2.5 billion \u2022 Cash flow from operations of $548 million; free cash flow of $488 million \u2022 Total shareholder distributions of $440 million, representing 90% of free cash flow \u2022 Subsea revenue, adjusted EBITDA margin both tracking toward high end of guidance ranges NEWCASTLE & HOUSTON, July 30, 2026 \u2014 TechnipFMC plc (NYSE: FTI) (the ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 67,
+      "ticker": "MYRG",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000700923.json",
+          "sha256": "6604527a677585a1e0db5b88d7fa459301c051fb72ab93b289ccf56c960b274d"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/700923/000070092326000042/myrg-20260630.htm",
+          "sha256": "d407af779806f8bd77ea3fbaca4b3f94c3a7165c52b74c420fce3ef80efb13f8"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/700923/000070092326000044/myrg-20260807.htm",
+          "sha256": "fe999af9204646a4b0048b7615dc5c8af5d442fede8cb7c2086c51f95fb8c25e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 67,
+        "ticker": "MYRG",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000700923.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "6604527a677585a1e0db5b88d7fa459301c051fb72ab93b289ccf56c960b274d",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 68,
+      "ticker": "KGS",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1767042/000176704226000009/kgsq42025earningsrelease.htm",
+          "sha256": "bd09487ed49a896ba7477a8e0177f5819b2f0a3cf87d8068417af9695f9447bd"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1767042/000176704226000041/kgsq12026earningsrelease.htm",
+          "sha256": "0e208bc35f02d807599567d9ad713af1166f3cdc14a3e463a5d5117d5ea72b95"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1767042/000176704226000009/kgsq42025earningsrelease.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 750000000.0,
+              "high": 780000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1767042/000176704226000041/kgsq12026earningsrelease.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 820000000.0,
+              "high": 860000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": null,
+      "notes": "FY2026 adjusted EBITDA 750\u2013780m increases to 820\u2013860m. Discretionary cash flow is not automatically mapped to the primary FCF metric.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 69,
+      "ticker": "SDRL",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001737706.json",
+          "sha256": "c6c883077d7c0c7c976fcfccdf41d9bd7d5d4c6f22edb6e602414ee02ba7def5"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1737706/000173770626000026/sdrl-20260630.htm",
+          "sha256": "ec6e41ff81da1232d3fc1f78595710bcc17b5de86b85d7136e37e18be9408624"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 69,
+        "ticker": "SDRL",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001737706.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "c6c883077d7c0c7c976fcfccdf41d9bd7d5d4c6f22edb6e602414ee02ba7def5",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 70,
+      "ticker": "INSM",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001104506.json",
+          "sha256": "22b8a34fc320451b3699d8330d59e6b2a073b8e2a90625f1c4fddaf0d3c93f47"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1104506/000110450626000041/insm-20260630.htm",
+          "sha256": "64eaf2a94d3a3197f5acadf3bf8fe1cc916d7b1425e7adb1d149e88c1332c1d2"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 70,
+        "ticker": "INSM",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001104506.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "22b8a34fc320451b3699d8330d59e6b2a073b8e2a90625f1c4fddaf0d3c93f47",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 71,
+      "ticker": "RGEN",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000730272.json",
+          "sha256": "bd2d478eac88ec3e8a9d515f4560d1b9798ad6bae67a9a97fb330c10ebce8ca3"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/730272/000119312526323773/rgen-20260630.htm",
+          "sha256": "28f2b51e8875743e4cd414f6749e9b189d07f1ebb151f18da8c23c4dbccc7189"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 71,
+        "ticker": "RGEN",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000730272.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "bd2d478eac88ec3e8a9d515f4560d1b9798ad6bae67a9a97fb330c10ebce8ca3",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 72,
+      "ticker": "DIOD",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000029002.json",
+          "sha256": "bde17f3a1fcc3acb162f5e48be635566dd2dd7a6ba60cb905a326a8c049ab653"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/29002/000119312526335450/diod-20260630.htm",
+          "sha256": "8fbfa61a93ee2a81c601bb5126f4ee5804df76f5bd3049e9b5391a6073cac9e0"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/29002/000119312526345311/diod-20260805.htm",
+          "sha256": "42800f41db74976779c7c5dce769374599af26dbc4d27662f6efb4bab2e38884"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/29002/000119312526355410/diod-20260812.htm",
+          "sha256": "38087ca0ed21ce5fc7ef85daa9f23106bbb793e13506e5a98e6826ccff0ee44b"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/29002/000119312526371294/diod-20260827.htm",
+          "sha256": "d471c84006a82a30dfaf99908ca8534ef6eab1e463f9f0a3e3d3276d35d576bc"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 72,
+        "ticker": "DIOD",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000029002.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "bde17f3a1fcc3acb162f5e48be635566dd2dd7a6ba60cb905a326a8c049ab653",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 73,
+      "ticker": "BAX",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/10456/000162828026050795/bax-20260630xex991.htm",
+          "sha256": "d4d5bc2a6d90f484092ae9a35065992cac9b1efe581323267b7c93104c3af6d2"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 bax-20260630xex991.htm EX-99.1 Document Exhibit 99.1 FOR IMMEDIATE RELEASE BAXTER REPORTS SECOND-QUARTER 2026 RESULTS \u2022 Second-quarter sales of $2.96 billion increased 5% on both a reported and organic basis, 1,2 reflecting growth in all segments and divisions \u2022 Second-quarter U.S. GAAP 3 diluted earnings per share (EPS) of $0.26; adjusted diluted EPS of $0.56 \u2022 Company raises full-year 2026 financial outlook DEERFIELD, Ill., JULY 30, 2026 \u2013 Baxter International Inc. (NYSE:BAX), a global medtech leader, tod",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 74,
+      "ticker": "EXPO",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/851520/000117184326005081/exh_991.htm",
+          "sha256": "4380c223151e0070d2beb47dfae96ad881121cc3dc2c33af3915f71bce508f39"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 exh_991.htm PRESS RELEASE EdgarFiling EXHIBIT 99.1 Exponent Reports Second Quarter 2026 Financial Results MENLO PARK, Calif., July 30, 2026 (GLOBE NEWSWIRE) -- Exponent, Inc. (Nasdaq: EXPO) today reported financial results for the second quarter of fiscal year 2026 ended July 3, 2026. \u201cExponent delivered another strong quarter, with double-digit growth in revenues and earnings reflecting continued demand for our specialized expertise across industries,\u201d stated Dr. Catherine Corrigan, C",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 75,
+      "ticker": "HNI",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/48287/000004828726000125/hni-20260704.htm",
+          "sha256": "3a2a73c708b2979d52d04df78d62b068f070f5e0e269d6ad448a7bff1820563e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "ni:CostMethodInvesteeOtherMember 2026-07-04 0000048287 hni:CostMethodInvesteeOtherMember 2026-01-03 UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 FORM 10-Q \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended July 4, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the transition period from ____________to____________ Commission File Number: 1-14225 HNI Corporation Iowa (Exact na",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 76,
+      "ticker": "SPXC",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/88205/000008820526000052/q22026pressrelease.htm",
+          "sha256": "80047a3adae791543cb6f9e16d7bc2d4df462d232879c2da0534ed00ffbc74d8"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 q22026pressrelease.htm EX-99.1 Document Exhibit 99.1 SPX Reports Second Quarter 2026 Results Raises Full-year Guidance CHARLOTTE, N.C., July 30, 2026 (GLOBE NEWSWIRE) -- SPX Technologies, Inc. (NYSE:SPXC) (\u201cSPX\u201d, the \u201cCompany\u201d, \u201cwe\u201d or \u201cour\u201d) today reported results for the second quarter ended June 27, 2026. Second Quarter Highlights (amounts presented for continuing operations; all comparisons against the second quarter of 2025, unless otherwise noted) \u2022 Revenue of $679.0 million, ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 77,
+      "ticker": "GDDY",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1609711/000160971126000087/gddyex991-20260630xq2earni.htm",
+          "sha256": "b067f6d77fa0ef1474ca51204441caec243364c3d8b91f90605b7f8890216191"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 gddyex991-20260630xq2earni.htm EX-99.1 Document news release GoDaddy Reports Second Quarter 2026 Financial Results Company builds on its track record of profitable growth, strong cash generation and leadership in AI-driven innovation TEMPE, Ariz., July 30, 2026 - GoDaddy Inc. (NYSE: GDDY) today reported financial results for the second quarter ended June 30, 2026. \"GoDaddy is advancing a company-wide AI transformation with Airo at the center, creating an agentic operating system that helps our ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 78,
+      "ticker": "BAX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/10456/000162828026050795/bax-20260630xex991.htm",
+          "sha256": "d4d5bc2a6d90f484092ae9a35065992cac9b1efe581323267b7c93104c3af6d2"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 bax-20260630xex991.htm EX-99.1 Document Exhibit 99.1 FOR IMMEDIATE RELEASE BAXTER REPORTS SECOND-QUARTER 2026 RESULTS \u2022 Second-quarter sales of $2.96 billion increased 5% on both a reported and organic basis, 1,2 reflecting growth in all segments and divisions \u2022 Second-quarter U.S. GAAP 3 diluted earnings per share (EPS) of $0.26; adjusted diluted EPS of $0.56 \u2022 Company raises full-year 2026 financial outlook DEERFIELD, Ill., JULY 30, 2026 \u2013 Baxter International Inc. (NYSE:BAX), a global medtech leader, tod",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 79,
+      "ticker": "TIC",
+      "domain": "balance_sheet_distress",
+      "captured_classification": true,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.absolute_interest_coverage",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002032966.json",
+          "sha256": "1b30ebb463478e2df3b60558b05ba3bfad3ad1fdca1131421ffdec80dcdf2f13"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026053831/tic-20260630.htm",
+          "sha256": "43d1bb56374968021fd156e5a2a380fae935cd92b7f875660f63e0bb83663503"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 79,
+        "ticker": "TIC",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0002032966.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": true,
+        "source_sha256": "1b30ebb463478e2df3b60558b05ba3bfad3ad1fdca1131421ffdec80dcdf2f13",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 80,
+      "ticker": "VRNS",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1361113/000117184326004948/exh_991.htm",
+          "sha256": "5935856014be2e049c77191bfd0d9c2a0aca2a170e37ae2d718c6133f433ceb9"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 exh_991.htm PRESS RELEASE EdgarFiling EXHIBIT 99.1 Varonis Announces Second Quarter 2026 Financial Results SaaS ARR, excluding conversions increased 25% year-over-year Total SaaS ARR was $726.0 million, up 52% year-over-year MIAMI, July 28, 2026 (GLOBE NEWSWIRE) -- Varonis Systems, Inc. (Nasdaq: VRNS), the data and AI security leader, today announced financial results for the second quarter ended June 30, 2026. Yaki Faitelson, Varonis CEO, said, \u201cOur Q2 results were highlighted by Saa",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 81,
+      "ticker": "TRU",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1552033/000155203326000043/exhibit9926302026final.htm",
+          "sha256": "cd8f10e14ab390e86fcf52bb68360a5235827a8cb16fabd0626f3ae2a007b21e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "owth 2 3@ Copyright 2026 Tran Union, its ubsidiaries and/or affiliates. All Rights Reserved. Second quarter 2026 financial results3 Third quarter and full-year 2026 guidance 4 4\u00a9 2026 TransUnion, its subsidiaries and/or affiliates. All Rights Reserved. *Revenue growth figures referenced above are organic constant currency. For additional information, refer to the \u201cNon-GAAP Financial Information\u201d section on slide 2 and the Appendix at the back of this investor presentation. International revenue +6%*, led by reacceleration in",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 82,
+      "ticker": "CTNM",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1855175/000162828026051051/q220268kex991.htm",
+          "sha256": "a3bc110693b27e783b3a07b13e6fe8d90f2b7c0852bbe37dcd6a039d20ce54fd"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 q220268kex991.htm EX-99.1 Document Exhibit 99.1 CONTINEUM THERAPEUTICS REPORTS SECOND-QUARTER 2026 FINANCIAL RESULTS; AFFIRMS KEY CLINICAL DEVELOPMENT MILESTONES SAN DIEGO \u2013 July 30, 2026 \u2013 Contineum Therapeutics, Inc. (NASDAQ: CTNM) (Contineum or the Company), a clinical-stage biopharmaceutical company pioneering differentiated small molecule therapies for inflammatory and fibrotic diseases with significant unmet need, today reported its second-quarter 2026 financial results and affirmed its key",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 83,
+      "ticker": "GVA",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.leverage_coverage_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000861459.json",
+          "sha256": "b0fdabbe8bdb5a546bb2362868942e8ad3b153b90b2d1ad0addab53a30c0071a"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/861459/000086145926000029/gva-20260630.htm",
+          "sha256": "284832a9b993ea9c9ee4023f8090b07b2c588514c17fb9ff3b10a8322ab083dc"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/861459/000086145926000032/gva-20260804.htm",
+          "sha256": "9198efa41c14a8951b6b83674cc4d886cd5e542e4f966a2d9d266e1bf880cb1a"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/861459/000086145926000034/gva-20260805.htm",
+          "sha256": "7144e4d4d19c37cfd2c6372259208ed07bcd5cf35be8ccbd40e64133f7aadfe4"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/861459/000086145926000036/gva-20260811.htm",
+          "sha256": "034899d5fa1d710c2ac66293b366b222d01638523821024060222d4e5e211860"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 83,
+        "ticker": "GVA",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000861459.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "b0fdabbe8bdb5a546bb2362868942e8ad3b153b90b2d1ad0addab53a30c0071a",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 84,
+      "ticker": "CTAS",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/723254/000072325426000028/ctas-20260531.htm",
+          "sha256": "6bd67f0822ee615dca7753aeb028f6f36e1203479ed8fffab0b4539e338c24a8"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "orCreditLossMember 2025-06-01 2026-05-31 0000723254 us-gaap:AllowanceForCreditLossMember 2026-05-31 UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 FORM 10-K \u2611 ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the fiscal year ended May 31 , 2026 \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 Commission file number 0-11399 Cintas Corporation (Exact name of registrant as specified in its charter) Washington 31-1188630 (St",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 85,
+      "ticker": "OPLN",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1395942/000139594226000018/q12026openlaneearningssl.htm",
+          "sha256": "04ed1d195987337e370257650c2a49b2ee765599c4b1decc9a059f7f52ed07e9"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1395942/000139594226000030/q22026openlaneearningssl.htm",
+          "sha256": "d6f75c4c63205af9fa4507e04e065c63e4c3ee2decd78429ddbdd3da71826f7e"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1395942/000139594226000018/q12026openlaneearningssl.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 365000000.0,
+              "high": 385000000.0
+            },
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 1.28,
+              "high": 1.42
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1395942/000139594226000030/q22026openlaneearningssl.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 385000000.0,
+              "high": 400000000.0
+            },
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 1.4,
+              "high": 1.5
+            }
+          ]
+        }
+      ],
+      "finding_group": "prior_revised_columns_units",
+      "notes": "Revised FY2026 EBITDA is 365\u2013385m then 385\u2013400m, not the prior-column ranges in unscaled dollars. Operating adjusted EPS is 1.28\u20131.42 then 1.40\u20131.50. Repair reads the declared revised column and million-dollar units except per share.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 86,
+      "ticker": "HUM",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000005/hum-2025q4xex99x2detailedx.htm",
+          "sha256": "e5ad6c6fd1be8449f080b1da184bc9c9faaec7f18be44bb0e9bfe06114d73cea"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000045/a2q2026humanaincpostedrema.htm",
+          "sha256": "0214e436de2d75bfaf8ca096ae94cd2a82b43ec16e7dc076dd7fcc4b617a3e91"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000005/hum-2025q4xex99x2detailedx.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 9.0,
+              "high": 9.0
+            },
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "GAAP",
+              "low": 8.89,
+              "high": 8.89
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/49071/000004907126000045/a2q2026humanaincpostedrema.htm",
+          "records": [
+            {
+              "metric": "eps",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 9.0,
+              "high": 9.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "accounting_basis_binding",
+      "notes": "Prior FY2026 GAAP EPS floor is 8.89 and adjusted EPS floor is 9.00. Extraction incorrectly used 8.89 for both bases. Current adjusted floor remains 9.00. Repair binds each explicit basis to its own value while preserving existing lower-bound representation.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 87,
+      "ticker": "RSG",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1060391/000106039126000275/rsg-20260630.htm",
+          "sha256": "ed621f431975615ad1a087ca728b662b7b95ef1aef29d07f3343052636c4fdb0"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "2026-01-01 2026-06-30 0001060391 rsg:OtherServiceLineMember 2025-01-01 2025-06-30 Table of Contents UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 _________________________________________________________ FORM 10-Q _________________________________________________________ (Mark One) \u2611 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the quarterly period ended June 30, 2026 or \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 88,
+      "ticker": "HRMY",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001802665.json",
+          "sha256": "219edd9966de4e2fe15281e20a5bcff1b5a72701848577e42a293ddf6617aa3e"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1802665/000110465926090090/hrmy-20260630x10q.htm",
+          "sha256": "d446c1ac380140e1e7c2eb22380cb7807970efbc28dae180adff1b2f8effd88f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 88,
+        "ticker": "HRMY",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001802665.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "219edd9966de4e2fe15281e20a5bcff1b5a72701848577e42a293ddf6617aa3e",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 89,
+      "ticker": "KWR",
+      "domain": "catalyst_surprise",
+      "captured_classification": 2,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/81362/000162828026051098/kwr2026q2ex-991.htm",
+          "sha256": "de1e06f6a0a34b4ac0115176421015471c7935c7af9036742394af892412be6f"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "stor Relations investor@quakerhoughton.com T. 1.610.684.7822 For Release: Immediate QUAKER HOUGHTON ANNOUNCES SECOND QUARTER 2026 RESULTS \u2022 Q2\u201926 net sales of $532.6 million , an increase of 10% Y/Y \u2022 Q2\u201926 net income of $26.8 million and earnings per diluted share of $1.55 \u2022 Sales volumes increased 7% Y/Y primarily driven by new business wins across all segments \u2022 Q2\u201926 non-GAAP net income of $37.9 million and non-GAAP earnings per diluted share of $2.19, a 28% increase Y/Y \u2022 Delivered Q2\u201926 adjusted EBITDA of $85.2 million",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 2,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 90,
+      "ticker": "AN",
+      "domain": "catalyst_surprise",
+      "captured_classification": 3,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/350698/000162828026051209/anearningsrelease63026ex991.htm",
+          "sha256": "6185db5ea9dc47e3d45ac57758315ee87a34cc3fe54d5d3de4a75f8f58e2ebd5"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": "ation.com Media Contact: Lisa Rhodes Ryans (954) 769-4120 publicrelations@autonation.com AutoNation Reports Second Quarter 2026 Results \u2022 Q2 2026 EPS $5.39 and Adjusted EPS $5.56 \u2022 Sixth consecutive quarter of Adjusted EPS growth \u2022 Record After-Sales gross profit; Customer Pay growth 7% \u2022 CFS gross profit per unit up 3% \u2022 AN Finance portfolio growth 50%+, YTD profit up 10X \u2022 Acquired four dealerships, adding attractive scale ($600M revenue), brands, and density \u2022 First half 2026 share repurchases of $457 million, 6%+ reducti",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 3,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 91,
+      "ticker": "SN",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001957132.json",
+          "sha256": "243ade3efbe7e46b2a7c2206bc768dcfc990ddb7893062e6001b1fc2a1dc8e5d"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1957132/000195713226000048/sharkninja-20260630.htm",
+          "sha256": "765fb619d08e87c59d4a22f51214f105a5f687c15f54d30d034e78d94c99febe"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 91,
+        "ticker": "SN",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001957132.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "243ade3efbe7e46b2a7c2206bc768dcfc990ddb7893062e6001b1fc2a1dc8e5d",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 92,
+      "ticker": "PGY",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1883085/000188308526000027/earningspressreleasefina.htm",
+          "sha256": "c8a282fc0983c614b66d4ba9b5c45b7055f1f48d54dd7d443ef14f58db5f635c"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1883085/000188308526000052/earningspressreleasefina.htm",
+          "sha256": "464e02878ad621919981bd753ff002982ebfee1de8d9e8a136e0e0219770bb24"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1883085/000188308526000027/earningspressreleasefina.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 420000000.0,
+              "high": 460000000.0
+            },
+            {
+              "metric": "ebitda",
+              "period": "Q2FY2026",
+              "basis": "ADJUSTED",
+              "low": 100000000.0,
+              "high": 115000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1883085/000188308526000052/earningspressreleasefina.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 460000000.0,
+              "high": 490000000.0
+            },
+            {
+              "metric": "ebitda",
+              "period": "Q3FY2026",
+              "basis": "ADJUSTED",
+              "low": 120000000.0,
+              "high": 130000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": null,
+      "notes": "FY2026 adjusted EBITDA 420\u2013460m increases to 460\u2013490m; quarterly EBITDA belongs to Q2 and Q3 respectively. Total Revenue and Other Income is a combined metric and is not reinterpreted as pure revenue.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 93,
+      "ticker": "KMX",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1170010/000117001026000055/kmx-20260531.htm",
+          "sha256": "5f4b10c95468053f6b3bfad7bf369b740d6e46ddfa7739773245b266e2ffac0b"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " 0001170010 2023-03-01 2023-05-31 0001170010 2023-06-01 2023-08-31 0001170010 2025-12-01 2026-02-28 UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 FORM 10-Q \u2612 QUARTERLY REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 For the Quarterly Period Ended May 31, 2026 OR \u2610 TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 Commission File Number: 1-31420 CARMAX, INC. (Exact name of registrant as specified in its charter) Virginia 54-1821055 ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 94,
+      "ticker": "ITGR",
+      "domain": "catalyst_materiality",
+      "captured_classification": 8,
+      "captured_rule_path": "catalyst_v1_1.materiality.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1114483/000117184326005137/exh_991.htm",
+          "sha256": "729b7d43881fe44d1ebae0a1e10a7033f92fb554cc17394c2a88a8cf5d4245f3"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 exh_991.htm PRESS RELEASE EdgarFiling EXHIBIT 99.1 Integer Holdings Corporation Reports Second Quarter 2026 Results PLANO, Texas, Aug. 03, 2026 (GLOBE NEWSWIRE) -- Integer Holdings Corporation (NYSE:ITGR) today announced results for the three months ended July 3, 2026. Second Quarter 2026 Highlights (compared to Second Quarter 2025, except as noted) Sales decreased 2.6% to $464 million. Organic sales decreased 1.5%. GAAP operating income from continuing operations totaled $35 million, a decrease of $25 mi",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 8,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 95,
+      "ticker": "IRTC",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000038/irtcq12026ex991pressrelease.htm",
+          "sha256": "79dce8fbe3d61e62d29e12052a5eebca1cc9659f6834b5589d94dda20ca9d581"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000070/irtcq22026ex991pressrelease.htm",
+          "sha256": "3e58df7cf1afaa7c20f52910feb3ba4131163e9e57c8001129f9997d5fbd63fe"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000038/irtcq12026ex991pressrelease.htm",
+          "records": [
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 875000000.0,
+              "high": 885000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000070/irtcq22026ex991pressrelease.htm",
+          "records": [
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 880000000.0,
+              "high": 890000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": null,
+      "notes": "FY2026 revenue 875\u2013885m increases to 880\u2013890m. Adjusted EBITDA margin is distinct from operating margin; it is not substituted.",
+      "investigation_result": "NO_DISCREPANCY_IN_CHECKED_COMPARISON"
+    },
+    {
+      "index": 96,
+      "ticker": "ALSN",
+      "domain": "guidance",
+      "captured_classification": false,
+      "captured_rule_path": "guidance_v1_1.comparable_set_within_tolerance",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1411207/000119312526063975/d105532dex991.htm",
+          "sha256": "040ecbbf0a9d33a2c5b62671d497900ed6a7601d59ede7a1f57f3a9b66cab9f7"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1411207/000119312526330544/d95413dex992.htm",
+          "sha256": "4085d3dba67823aad6b8116ed9625eb98733b5943a90a83f24402ebba637082a"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "diagnostic_replay": [
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1411207/000119312526063975/d105532dex991.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 1365000000.0,
+              "high": 1515000000.0
+            },
+            {
+              "metric": "fcf",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 655000000.0,
+              "high": 805000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 5575000000.0,
+              "high": 5925000000.0
+            }
+          ]
+        },
+        {
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1411207/000119312526330544/d95413dex992.htm",
+          "records": [
+            {
+              "metric": "ebitda",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 1465000000.0,
+              "high": 1575000000.0
+            },
+            {
+              "metric": "fcf",
+              "period": "FY2026",
+              "basis": "ADJUSTED",
+              "low": 745000000.0,
+              "high": 865000000.0
+            },
+            {
+              "metric": "revenue",
+              "period": "FY2026",
+              "basis": "UNSPECIFIED",
+              "low": 5800000000.0,
+              "high": 6000000000.0
+            }
+          ]
+        }
+      ],
+      "finding_group": "omitted_primary_metric",
+      "notes": "Prior FY2026 consolidated EBITDA 1,365\u20131,515m and adjusted FCF 655\u2013805m were omitted. Current values are 1,465\u20131,575m and 745\u2013865m. Revenue 5,575\u20135,925m increases to 5,800\u20136,000m. Repair preserves comma-formatted ranges and all consolidated primary rows within the guidance section.",
+      "investigation_result": "EXTRACTION_DEFECT"
+    },
+    {
+      "index": 97,
+      "ticker": "BLBD",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001589526.json",
+          "sha256": "6f4bc4a43bf09a6e561cd5eb086d140cdec564762b584e3eb39f55bea1a3aeda"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1589526/000158952626000049/blbd-20260627.htm",
+          "sha256": "b72add17d5c608d641265d396e1fab5f1935bbc91dc2dd1818292303bf42f460"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 97,
+        "ticker": "BLBD",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001589526.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "6f4bc4a43bf09a6e561cd5eb086d140cdec564762b584e3eb39f55bea1a3aeda",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    },
+    {
+      "index": 98,
+      "ticker": "MTDR",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1520006/000152000626000036/a20260630mtdr8ker-ex991.htm",
+          "sha256": "d8f5407aa3f064cf97b84a32bb6f4a20eeeae8c14792240f28b588c367b24c25"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 a20260630mtdr8ker-ex991.htm EX-99.1 Document Exhibit 99.1 MATADOR RESOURCES COMPANY REPORTS SECOND QUARTER 2026 RESULTS AND INCREASES FULL-YEAR 2026 PRODUCTION GUIDANCE DALLAS, Texas, August 5, 2026 -- Matador Resources Company (NYSE: MTDR) (\u201cMatador\u201d or the \u201cCompany\u201d) today reported financial and operating results for the second quarter of 2026, updated full-year 2026 production guidance and provided an update on the four strategic catalysts, which were executed during and shortly after the quarter. A slide ",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 99,
+      "ticker": "CCC",
+      "domain": "catalyst_surprise",
+      "captured_classification": 4,
+      "captured_rule_path": "catalyst_v1_1.surprise_re_rating.scored",
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1818201/000119312526324886/ccc-ex99_1.htm",
+          "sha256": "e608e40823d6a66bb0b645ee73c8a762e8fc08dde0f35a8fbdadff6252eb9078"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "source_excerpt": " EX-99.1 2 ccc-ex99_1.htm EX-99.1 EX-99.1 Exhibit 99.1 CCC Intelligent Solutions Holdings Inc. Announces Second Quarter 2026 Financial Results July 30, 2026 \u2013 CCC Intelligent Solutions Holdings Inc. (\u201cCCC\u201d or the \u201cCompany\u201d) (NASDAQ: CCC), a leading SaaS and AI platform provider for the multi-trillion-dollar insurance economy, today announced its financial results for the three months ended June 30, 2026. \u201cCCC delivered another quarter of solid execution, with second quarter revenue growth of 10% and adjusted EBITDA marg",
+      "investigation_result": "SCORE_ARITHMETIC_MATCH",
+      "independent_score": 4,
+      "notes": "Completed earnings release, results presentation, or periodic financial filing checked as primary evidence. Score arithmetic agrees with frozen earnings components. This does not independently verify the future Nasdaq calendar date or the captured consensus inputs."
+    },
+    {
+      "index": 100,
+      "ticker": "REGN",
+      "domain": "balance_sheet_distress",
+      "captured_classification": false,
+      "captured_rule_path": "balance_sheet_distress_v1_1.corporate.net_cash_safe",
+      "sources": [
+        {
+          "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000872589.json",
+          "sha256": "8ac8537cd8b5e571e7f527aae3e223c6a7cdab1260fd8035e278ac184b4901b4"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/872589/000087258926000025/regn-20260630.htm",
+          "sha256": "99a3276fe91fb55f26d1ef7d10fc3596ec0641306829eac2435e269c3e006b53"
+        }
+      ],
+      "acceptance_signed_off": false,
+      "investigation_result": "PERSISTED_RULE_AND_SOURCE_REPLAY_MATCH",
+      "checks": {
+        "index": 100,
+        "ticker": "REGN",
+        "source": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000872589.json",
+        "rule_input_check": true,
+        "expected_on_persisted_inputs": false,
+        "source_sha256": "8ac8537cd8b5e571e7f527aae3e223c6a7cdab1260fd8035e278ac184b4901b4",
+        "source_replay_differences": {}
+      },
+      "notes": "Rule arithmetic checked independently against persisted inputs. Same-day downloaded companyfacts replay matches debt, net cash, leverage and interest coverage. Replay uses the production normalizer; it is not an independent XBRL derivation. Captured FCF/runway, sector routing and complete hard-flag coverage are not independently certified by this arithmetic check."
+    }
+  ]
+}

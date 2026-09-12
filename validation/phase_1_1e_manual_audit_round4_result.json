@@ -1,0 +1,43 @@
+{
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "run_id": 33906976599,
+  "head_sha": "6f325745c9689c31d31f0d8729a4875a728081e5",
+  "sample_size": 100,
+  "concordant": 98,
+  "concordance_pct": 98.0,
+  "minimum_required_pct": 95.0,
+  "numeric_gate_met": true,
+  "systematic_errors_present": true,
+  "decision": "FAIL",
+  "activation_blocked": true,
+  "domains": {
+    "balance_sheet_distress": {"concordant": 30, "sample": 30, "pct": 100.0},
+    "catalyst_materiality": {"concordant": 30, "sample": 30, "pct": 100.0},
+    "catalyst_surprise": {"concordant": 16, "sample": 16, "pct": 100.0},
+    "guidance": {"concordant": 22, "sample": 24, "pct": 91.6667}
+  },
+  "discrepancies": [
+    {
+      "ticker": "ATRO",
+      "domain": "guidance",
+      "engine": "NOT_DETERIORATED",
+      "manual": "NULL_NO_SAME_PERIOD_COMPARABLE_SET",
+      "root_cause": "fiscal_period_binding",
+      "detail": "FY2025 revenue guidance was compared with FY2026 revenue guidance as a comparable pair."
+    },
+    {
+      "ticker": "VG",
+      "domain": "guidance",
+      "engine": "DETERIORATED",
+      "manual": "NOT_DETERIORATED",
+      "root_cause": "current_prior_directional_binding",
+      "detail": "FY2026 adjusted EBITDA guidance was explicitly raised from 8.2-8.5B to 8.7-9.1B but the engine classified deterioration."
+    }
+  ],
+  "governance": {
+    "soe_1_0_active": true,
+    "soe_1_1_promoted": false,
+    "pr_16_merge_allowed": false,
+    "milestone_3_unlocked": false
+  }
+}

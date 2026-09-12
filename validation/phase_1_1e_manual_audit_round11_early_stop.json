@@ -1,0 +1,85 @@
+{
+  "phase": "1.1E",
+  "audit_round": 11,
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "workflow_run_id": 34010590821,
+  "workflow_run_number": 77,
+  "artifact_id": 9983597584,
+  "branch": "phase-1.1e-shadow-validation",
+  "audited_head_sha": "9bcc652b1c91b2ceba2fc28e1f37199d0e51966e",
+  "captured_snapshot_fingerprint": "a3b045b6941212e84a88092c280c52e53748070b1c04ba85d0622d433280c7eb",
+  "baseline_scan_run_id": "09992241-c310-4fcc-b9b1-df640a697b60",
+  "baseline_rules_hash": "59cc7ffe14472434bfbb92b07b89b0b48293d0c5762d5270769bce3b494550ac",
+  "candidate_rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "automated_gate_count": 9,
+  "automated_gates_passed": 9,
+  "automated_decision": "PENDING_MANUAL_AUDIT",
+  "required_sample": 100,
+  "available_sample": 100,
+  "minimum_rule_concordance": 0.95,
+  "status": "FAIL_EARLY_STOP",
+  "decision": "FAIL",
+  "early_stop": true,
+  "audit_position": 18,
+  "audited_prefix_count": 18,
+  "concordant_before_blocker": 17,
+  "numerical_concordance": null,
+  "systematic_error_detected": true,
+  "blocking_domain": "balance_sheet_distress",
+  "blocking_ticker": "SM",
+  "engine_classification": "DISTRESSED",
+  "manual_classification": "UNKNOWN",
+  "engine_rule_path": "balance_sheet_distress_v1_1.universal_hard_override",
+  "manual_rule_path": "balance_sheet_distress_v1_1.corporate.unknown",
+  "manual_reason": "The cited SEC passage says the company would be in default if it exceeded a covenant and describes remedies if it were in default. It does not state a current payment default. With the false hard flag removed, the persisted numeric evidence reaches neither a frozen distress nor safety path.",
+  "root_cause_family": "conditional_payment_default_binding",
+  "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/893538/000089353826000121/sm-20260630.htm"
+  ],
+  "audited_prefix_domains": {
+    "balance_sheet_distress": {
+      "sample": 6,
+      "concordant": 5,
+      "discordant": 1
+    },
+    "catalyst_materiality": {
+      "sample": 3,
+      "concordant": 3
+    },
+    "catalyst_surprise": {
+      "sample": 7,
+      "concordant": 7
+    },
+    "guidance": {
+      "sample": 2,
+      "concordant": 2
+    }
+  },
+  "full_market_summary": {
+    "universe_count": 5151,
+    "universal_survivors": 2316,
+    "growth_structural_targets": 431,
+    "catalyst_enrichment_targets": 107,
+    "guidance_coverage_pct": 98.68,
+    "distress_coverage_pct": 100.0,
+    "materiality_coverage_pct": 100.0,
+    "surprise_coverage_pct": 100.0,
+    "fully_scored_baseline": 0,
+    "fully_scored_candidate": 72,
+    "baseline_provider_errors": 3,
+    "enrichment_errors": 12
+  },
+  "additional_observed_repair": {
+    "ticker": "MOD",
+    "domain": "guidance",
+    "issue": "Interest-expense ranges crossed the financial row boundary and were bound to adjusted EBITDA.",
+    "official_audit_position_adjudicated": false
+  },
+  "governance": {
+    "soe_1_0_active": true,
+    "soe_1_1_promoted": false,
+    "milestone_3_unlocked": false,
+    "pr_16_merge_allowed": false
+  },
+  "required_next_step": "Reject conditional payment-default clauses while preserving genuine current defaults, treat non-target financial metrics as row boundaries, then run a fresh full-market validation and a brand-new independent audit."
+}

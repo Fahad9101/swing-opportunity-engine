@@ -1,0 +1,30 @@
+{
+  "phase": "1.1E",
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "run_id": 33967487517,
+  "head_sha": "79ad995889c6a1573a0010f9229af3ad2b7947ee",
+  "audit_round": 8,
+  "status": "FAIL",
+  "early_stop": true,
+  "sample_completed": false,
+  "numerical_concordance": null,
+  "systematic_error": true,
+  "blocking_domain": "guidance",
+  "blocking_ticker": "IOT",
+  "engine_classification": "DETERIORATED",
+  "engine_rule_path": "guidance_v1_1.material_numeric_cut",
+  "engine_metric": "revenue",
+  "manual_classification": "NOT_DETERIORATED",
+  "defect_family": "quarter_scope_collapsed_into_full_year_scope",
+  "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/1642896/000162828026040788/samsaraepr-q12027.htm",
+    "https://www.sec.gov/Archives/edgar/data/1642896/000162828026060438/samsaraepr-q22027.htm"
+  ],
+  "verified_economic_fact": "FY2027 revenue guidance increased from $2.005B-$2.013B to $2.043B-$2.047B; non-GAAP operating margin increased from 20% to 21%; non-GAAP EPS increased from $0.70-$0.72 to $0.76-$0.78. Quarterly Q2 and Q3 outlook ranges are different fiscal scopes and must not be collapsed into FY2027.",
+  "governance": {
+    "active_model": "SOE-1.0.0",
+    "promote_candidate": false,
+    "merge_pr_16": false,
+    "milestone_3_unlocked": false
+  }
+}

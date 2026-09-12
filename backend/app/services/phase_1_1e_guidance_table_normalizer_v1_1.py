@@ -1,0 +1,1172 @@
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from datetime import UTC, datetime
+
+from app.domain.soe_v1_1 import (
+    ExtractionMethod,
+    GuidanceAction,
+    GuidanceExtractionResult,
+    GuidanceMetric,
+    GuidanceMetricRecord,
+    SourceDocument,
+)
+from app.services.fact_extraction_service import html_to_text
+from app.services.guidance_explicit_scope_normalizer_v1_1 import normalize_explicit_guidance_scopes
+from app.services.guidance_declared_layout_normalizer_v1_1 import normalize_declared_layouts, historical_republication_periods
+from app.services.phase_1_1e_evidence_hygiene_round4_v1_1 import _action_consistent_history
+from app.services.phase_1_1e_guidance_scope_guard_round8_v1_1 import extract_guidance_facts_round8
+
+# Architectural evidence-layer normalization for comparative guidance tables.
+#
+# Primary-source presentations frequently flatten a table into text such as:
+#
+#   Full Year 2026 Guidance Update ($ in millions)
+#   Prior Guide Updated Guide
+#   $5,575 to $5,925 $5,800 to $6,000 Net Sales
+#   $5,750 Midpoint $5,900 Midpoint
+#   $600 to $750 $600 to $700 Net Income
+#   ...
+#
+# Generic prose extraction is unsafe here because:
+#   * row values inherit units from a table-level header; and
+#   * a metric label may sit after its two ranges, so a generic "range after
+#     metric" routine can bind the next row's values to the current metric.
+#
+# This module first normalizes the table into metric-scoped structured facts.
+# Those facts override conflicting generic records from the same document for
+# the same metric/fiscal scope before the Guidance Ledger sees them.
+#
+# No SOE threshold, score, weight, scanner, classifier, technical rule,
+# catalyst rule, market-regime rule, SOE-1.0.0 rule, or IEE logic is changed.
+
+_COMPARATIVE_HEADER_PRIOR_FIRST = re.compile(
+    r"\b(?:prior|previous)\s+(?:guide|guidance)\b.{0,140}?"
+    r"\b(?:updated|current|revised)\s+(?:guide|guidance)\b",
+    re.I | re.S,
+)
+_COMPARATIVE_HEADER_UPDATED_FIRST = re.compile(
+    r"\b(?:updated|current|revised)\s+(?:guide|guidance)\b.{0,140}?"
+    r"\b(?:prior|previous)\s+(?:guide|guidance)\b",
+    re.I | re.S,
+)
+_TABLE_SCALE = re.compile(
+    r"\$\s*(?:values?\s*)?(?:in\s+)?(thousands?|millions?|billions?)\b",
+    re.I,
+)
+_EXACT_DATE = re.compile(
+    r"\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
+    r"Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|"
+    r"Dec(?:ember)?)\.?\s+\d{1,2},?\s+20\d{2}\b",
+    re.I,
+)
+_QUARTER_SCOPE = re.compile(
+    r"\bQ([1-4])\s*(?:FY|fiscal(?:\s+year)?)?\s*'?((?:20)?\d{2})\b",
+    re.I,
+)
+_QUARTER_WORD_SCOPE = re.compile(
+    r"\b(first|second|third|fourth)\s+quarter(?:\s+of)?\s+"
+    r"(?:(?:FY|fiscal(?:\s+year)?)\s*)?'?((?:20)?\d{2})\b",
+    re.I,
+)
+_ANNUAL_SCOPE = re.compile(
+    r"\b(?:full[-\s]?year|fiscal(?:\s+year)?|FY)\s*'?((?:20)?\d{2})\b",
+    re.I,
+)
+_YEAR_ENDING_SCOPE = re.compile(
+    r"\byear\s+ending\s+[A-Za-z]+\s+\d{1,2},?\s*(20\d{2})\b",
+    re.I,
+)
+_ACTION_GUIDANCE_YEAR_SCOPE = re.compile(
+    r"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|rais(?:e|es|ed|ing)|"
+    r"increas(?:e|es|ed|ing)|maintain(?:s|ed|ing)?|updat(?:e|es|ed|ing)|"
+    r"provid(?:e|es|ed|ing)|expect(?:s|ed|ing)?)\s+(20\d{2})\s+"
+    r"(?:[A-Za-z][A-Za-z-]*\s+){0,5}(?:guidance|outlook)\b",
+    re.I,
+)
+_QUARTER_WORDS = {"first": 1, "second": 2, "third": 3, "fourth": 4}
+
+_SCALE = {
+    "thousand": 1_000.0,
+    "thousands": 1_000.0,
+    "million": 1_000_000.0,
+    "millions": 1_000_000.0,
+    "billion": 1_000_000_000.0,
+    "billions": 1_000_000_000.0,
+    "k": 1_000.0,
+    "m": 1_000_000.0,
+    "mm": 1_000_000.0,
+    "b": 1_000_000_000.0,
+    "bn": 1_000_000_000.0,
+}
+
+_METRIC_ALIASES: list[tuple[GuidanceMetric, tuple[str, ...]]] = [
+    (GuidanceMetric.FCF, ("adjusted free cash flow", "free cash flow", "fcf")),
+    (GuidanceMetric.OPERATING_MARGIN, ("adjusted operating margin", "operating margin")),
+    (GuidanceMetric.GROSS_MARGIN, ("adjusted gross margin", "gross margin")),
+    (GuidanceMetric.EBITDA, ("adjusted ebitda", "ebitda")),
+    (
+        GuidanceMetric.EPS,
+        (
+            "adjusted diluted earnings per share",
+            "adjusted earnings per share",
+            "diluted earnings per share",
+            "earnings per share",
+            "adjusted diluted eps",
+            "adjusted eps",
+            "diluted eps",
+            "eps",
+        ),
+    ),
+    (
+        GuidanceMetric.REVENUE,
+        (
+            "consolidated net revenues",
+            "consolidated net sales",
+            "total net revenues",
+            "total net sales",
+            "net revenues",
+            "net sales",
+            "total revenues",
+            "total revenue",
+            "revenues",
+            "revenue",
+        ),
+    ),
+]
+
+_DOLLAR_RANGE = re.compile(
+    r"(?P<d1>\$)?\s*(?P<low>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s1>billions?|millions?|thousands?|bn|mm|[bmk])?\s*"
+    r"(?:to|through|and|-|–|—)\s*"
+    r"(?P<d2>\$)?\s*(?P<high>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s2>billions?|millions?|thousands?|bn|mm|[bmk])?",
+    re.I,
+)
+_DOLLAR_SCALAR = re.compile(
+    r"(?P<dollar>\$)?\s*(?P<value>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<scale>billions?|millions?|thousands?|bn|mm|[bmk])?\b",
+    re.I,
+)
+_VALUE_BEFORE_GUIDANCE_ROW = re.compile(
+    r"(?P<d1>\$)?\s*(?P<low>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s1>billions?|millions?|thousands?|bn|mm|[bmk])?\s*"
+    r"(?:to|through|and|-|–|—)\s*"
+    r"(?P<d2>\$)?\s*(?P<high>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s2>billions?|millions?|thousands?|bn|mm|[bmk])?\s+"
+    r"(?P<year>20\d{2})\s+"
+    r"(?P<label>(?:adjusted\s+)?(?:net\s+)?(?:revenues?|sales|ebitda|eps|earnings\s+per\s+share|free\s+cash\s+flow))\s+"
+    r"(?:guidance|outlook)\b",
+    re.I,
+)
+_PERCENT_RANGE = re.compile(
+    r"(?P<low>\d{1,3}(?:\.\d+)?)\s*%\s*(?:to|through|and|-|–|—)\s*"
+    r"(?P<high>\d{1,3}(?:\.\d+)?)\s*%",
+    re.I,
+)
+
+_FINANCIAL_ROW_BOUNDARY = re.compile(
+    r"\b(?:gross\s+bookings|bookings|operating\s+profit|net\s+(?:income|loss)|"
+    r"interest\s+expense|(?:provision\s+for\s+)?income\s+tax(?:es)?|"
+    r"depreciation(?:\s+and\s+amortization)?|amortization|"
+    r"cash(?:\s+and\s+cash\s+equivalents)?\s+(?:provided\s+by|from)\s+operating\s+activities|"
+    r"capital\s+expenditures?|adjusted\s+ebitda|ebitda|free\s+cash\s+flow|fcf|"
+    r"total\s+revenues?|revenues?|net\s+sales|sales|adjusted\s+eps|diluted\s+eps|eps|"
+    r"gross\s+margin|operating\s+margin)\b",
+    re.I,
+)
+_TABLE_SECTION_END = re.compile(
+    r"\b(?:reconciliations?(?:\s+and\s+other)?|quarterly\s+revenue|"
+    r"GAAP\s+to\s+non[-\s]?GAAP|non[-\s]?GAAP\s+reconciliations?|"
+    r"forward[-\s]?looking\s+statements?|conference\s+call|quarterly\s+dividend|appendix)\b",
+    re.I,
+)
+
+
+@dataclass(frozen=True)
+class _Mention:
+    metric: GuidanceMetric
+    alias: str
+    start: int
+    end: int
+
+
+@dataclass(frozen=True)
+class _Range:
+    low: float
+    high: float
+    unit: str
+    start: int
+    end: int
+
+
+def _comparative_headers(text: str) -> list[tuple[re.Match[str], bool]]:
+    """Return comparative headers and whether updated/current columns come first."""
+    headers = [
+        *((match, False) for match in _COMPARATIVE_HEADER_PRIOR_FIRST.finditer(text)),
+        *((match, True) for match in _COMPARATIVE_HEADER_UPDATED_FIRST.finditer(text)),
+    ]
+    return sorted(headers, key=lambda item: item[0].start())
+
+
+def _normalize_year(token: str) -> int:
+    year = int(token)
+    return year + 2000 if year < 100 else year
+
+
+def _scopes(context: str) -> set[str]:
+    """Return every explicit quarter/annual fiscal scope in a table header."""
+    result: set[str] = set()
+    quarter_spans: list[tuple[int, int]] = []
+    for match in _QUARTER_SCOPE.finditer(context):
+        result.add(f"Q{match.group(1)}FY{_normalize_year(match.group(2))}")
+        quarter_spans.append(match.span())
+    for match in _QUARTER_WORD_SCOPE.finditer(context):
+        result.add(f"Q{_QUARTER_WORDS[match.group(1).lower()]}FY{_normalize_year(match.group(2))}")
+        quarter_spans.append(match.span())
+    for match in _ANNUAL_SCOPE.finditer(context):
+        if any(match.start() < end and match.end() > start for start, end in quarter_spans):
+            continue
+        result.add(f"FY{_normalize_year(match.group(1))}")
+    for match in _YEAR_ENDING_SCOPE.finditer(context):
+        result.add(f"FY{int(match.group(1))}")
+    for match in _ACTION_GUIDANCE_YEAR_SCOPE.finditer(context):
+        result.add(f"FY{int(match.group(1))}")
+    return result
+
+
+def _table_scale(context: str) -> float | None:
+    matches = list(_TABLE_SCALE.finditer(context))
+    if not matches:
+        return None
+    return _SCALE.get(matches[-1].group(1).lower())
+
+
+def _parse_exact_date(token: str, *, tzinfo) -> datetime | None:
+    cleaned = token.replace(".", "").replace(",", "")
+    for pattern in ("%B %d %Y", "%b %d %Y"):
+        try:
+            parsed = datetime.strptime(cleaned, pattern)
+            return parsed.replace(tzinfo=tzinfo or UTC)
+        except ValueError:
+            continue
+    return None
+
+
+def _comparative_dates(
+    context: str,
+    document_timestamp: datetime,
+    *,
+    updated_first: bool = False,
+) -> tuple[datetime, datetime] | None:
+    """Return verified prior/current table dates without inventing precision.
+
+    Comparative presentations often print two exact dates immediately around
+    the Prior Guide / Updated Guide headers.  The first date is accepted as the
+    prior effective date only when the second date agrees with the primary
+    document timestamp (allowing a short SEC filing delay).  Month-only or
+    otherwise ambiguous headers remain unpaired and therefore fail closed.
+    """
+    dates = [
+        parsed
+        for match in _EXACT_DATE.finditer(context)
+        if (parsed := _parse_exact_date(match.group(0), tzinfo=document_timestamp.tzinfo)) is not None
+    ]
+    if len(dates) < 2:
+        return None
+    first, second = dates[-2], dates[-1]
+    prior, updated = (second, first) if updated_first else (first, second)
+    if prior >= updated:
+        return None
+    if abs((updated.date() - document_timestamp.date()).days) > 7:
+        return None
+    return prior, updated
+
+
+def _metric_mentions(text: str) -> list[_Mention]:
+    raw: list[_Mention] = []
+    for metric, aliases in _METRIC_ALIASES:
+        for alias in sorted(aliases, key=len, reverse=True):
+            for match in re.finditer(rf"\b{re.escape(alias)}\b", text, re.I):
+                # Comparative table normalization intentionally ignores obvious
+                # segment/product revenue rows. The SOE guidance gate is company-level.
+                if metric is GuidanceMetric.REVENUE:
+                    local = text[max(0, match.start() - 55) : min(len(text), match.end() + 55)]
+                    if re.search(r"\b(?:segment|product|service)\b", local, re.I):
+                        continue
+                raw.append(_Mention(metric, alias, match.start(), match.end()))
+    raw.sort(key=lambda item: (item.start, -(item.end - item.start)))
+    result: list[_Mention] = []
+    for item in raw:
+        if any(not (item.end <= old.start or item.start >= old.end) for old in result):
+            continue
+        result.append(item)
+    return sorted(result, key=lambda item: item.start)
+
+
+def _amount(token: str, scale_token: str | None, table_scale: float | None) -> float:
+    value = float(token.replace(",", ""))
+    if scale_token:
+        value *= _SCALE.get(scale_token.lower(), 1.0)
+    elif table_scale is not None:
+        value *= table_scale
+    return value
+
+
+def _ranges(text: str, metric: GuidanceMetric, table_scale: float | None) -> list[_Range]:
+    result: list[_Range] = []
+    if metric in {GuidanceMetric.GROSS_MARGIN, GuidanceMetric.OPERATING_MARGIN}:
+        for match in _PERCENT_RANGE.finditer(text):
+            low = float(match.group("low")) / 100.0
+            high = float(match.group("high")) / 100.0
+            if low <= high:
+                result.append(_Range(low, high, "fraction", match.start(), match.end()))
+        return result
+
+    for match in _DOLLAR_RANGE.finditer(text):
+        # Require a dollar sign or an explicit scale. This avoids treating dates,
+        # year labels, and midpoint-to-midpoint prose as monetary ranges.
+        if not (match.group("d1") or match.group("d2") or match.group("s1") or match.group("s2")):
+            continue
+        if metric is GuidanceMetric.EPS:
+            low = float(match.group("low").replace(",", ""))
+            high = float(match.group("high").replace(",", ""))
+            if low <= high:
+                result.append(_Range(low, high, "USD/share", match.start(), match.end()))
+            continue
+
+        row_scale = table_scale
+        if match.group("s1") or match.group("s2"):
+            row_scale = None
+        low = _amount(match.group("low"), match.group("s1") or match.group("s2"), row_scale)
+        high = _amount(match.group("high"), match.group("s2") or match.group("s1"), row_scale)
+        # For company-level money metrics, an unscaled bare range is ambiguous.
+        if table_scale is None and not (match.group("s1") or match.group("s2")):
+            continue
+        if low <= high:
+            result.append(_Range(low, high, "USD", match.start(), match.end()))
+    return result
+
+
+def _table_scalar_ranges(
+    text: str,
+    metric: GuidanceMetric,
+    table_scale: float | None,
+) -> list[_Range]:
+    """Pair four flattened low/high cells into two comparative ranges.
+
+    Some SEC tables flatten ``Low High Low High`` cells without separators such
+    as ``to`` or a dash. This fallback runs only inside a verified comparative
+    guidance section and requires four explicit monetary cells.
+    """
+    if metric in {GuidanceMetric.GROSS_MARGIN, GuidanceMetric.OPERATING_MARGIN}:
+        return []
+    cells: list[_Range] = []
+    for match in _DOLLAR_SCALAR.finditer(text):
+        if not (match.group("dollar") or match.group("scale")):
+            continue
+        if metric is GuidanceMetric.EPS:
+            if match.group("scale"):
+                return []
+            value = float(match.group("value").replace(",", ""))
+            unit = "USD/share"
+        else:
+            if not match.group("scale") and table_scale is None:
+                return []
+            scale = None if match.group("scale") else table_scale
+            value = _amount(match.group("value"), match.group("scale"), scale)
+            unit = "USD"
+        cells.append(_Range(value, value, unit, match.start(), match.end()))
+
+    if len(cells) != 4:
+        return []
+    ranges: list[_Range] = []
+    for index in range(0, len(cells) - 1, 2):
+        low, high = cells[index], cells[index + 1]
+        if low.low <= high.low:
+            ranges.append(_Range(low.low, high.low, low.unit, low.start, high.end))
+    return ranges
+
+
+def _pair_for_metric(
+    text: str,
+    mentions: list[_Mention],
+    index: int,
+    table_scale: float | None,
+    *,
+    updated_first: bool = False,
+    preferred_layout: str | None = None,
+) -> tuple[_Range, _Range, str] | None:
+    mention = mentions[index]
+    previous_end = mentions[index - 1].end if index > 0 else 0
+    next_start = mentions[index + 1].start if index + 1 < len(mentions) else len(text)
+
+    prefix = text[previous_end : mention.start]
+    suffix = text[mention.end : next_start]
+    prefix_ranges = _ranges(prefix, mention.metric, table_scale)
+    suffix_ranges = _ranges(suffix, mention.metric, table_scale)
+    has_low_high_columns = bool(re.match(r"\s*Low\s+High\s+Low\s+High\b", text, re.I))
+    if len(prefix_ranges) < 2 and has_low_high_columns:
+        prefix_ranges = _table_scalar_ranges(prefix, mention.metric, table_scale)
+    if len(suffix_ranges) < 2 and has_low_high_columns:
+        suffix_ranges = _table_scalar_ranges(suffix, mention.metric, table_scale)
+
+    candidates: list[tuple[int, _Range, _Range, str]] = []
+    if len(prefix_ranges) >= 2:
+        prior, current = prefix_ranges[-2], prefix_ranges[-1]
+        distance = len(prefix) - current.end
+        candidates.append((distance, prior, current, "values_before_metric"))
+    if len(suffix_ranges) >= 2:
+        prior, current = suffix_ranges[0], suffix_ranges[1]
+        distance = prior.start
+        candidates.append((distance, prior, current, "values_after_metric"))
+
+    if not candidates:
+        return None
+    if preferred_layout is not None:
+        matching_layout = [item for item in candidates if item[3] == preferred_layout]
+        if matching_layout:
+            candidates = matching_layout
+    distance, first, second, layout = min(candidates, key=lambda item: item[0])
+    # Fail closed when the pair is not locally attached to the metric row.
+    if distance > 120:
+        return None
+    prior, current = (second, first) if updated_first else (first, second)
+    return prior, current, layout
+
+
+def _range_matches_record(candidate: _Range, record: GuidanceMetricRecord) -> bool:
+    if record.low is None or record.high is None:
+        return False
+    scale = max(abs(record.low), abs(record.high), abs(candidate.low), abs(candidate.high), 1.0)
+    tolerance = scale * 1e-9
+    return abs(candidate.low - record.low) <= tolerance and abs(candidate.high - record.high) <= tolerance
+
+
+def _unscaled_dollar_ranges(text: str) -> list[_Range]:
+    """Return explicit dollar ranges without guessing their economic scale.
+
+    These candidates are used only to validate whether a pre-existing prose
+    record crossed a metric-row boundary.  They are never emitted as guidance
+    facts, so matching raw values does not manufacture a unit or scale.
+    """
+    result: list[_Range] = []
+    for match in _DOLLAR_RANGE.finditer(text):
+        if not (match.group("d1") or match.group("d2")):
+            continue
+        if match.group("s1") or match.group("s2"):
+            continue
+        low = float(match.group("low").replace(",", ""))
+        high = float(match.group("high").replace(",", ""))
+        if low <= high:
+            result.append(_Range(low, high, "UNSCALED_USD", match.start(), match.end()))
+    return result
+
+
+def _scalar_amounts(text: str) -> list[_Range]:
+    """Return explicit monetary scalars for metric-locality validation only."""
+    result: list[_Range] = []
+    for match in _DOLLAR_SCALAR.finditer(text):
+        if not (match.group("dollar") or match.group("scale")):
+            continue
+        value = _amount(match.group("value"), match.group("scale"), None)
+        result.append(_Range(value, value, "SCALAR_USD", match.start(), match.end()))
+    return result
+
+
+def _metric_spans(text: str, metric: GuidanceMetric) -> list[tuple[int, int]]:
+    aliases = next(aliases for item, aliases in _METRIC_ALIASES if item is metric)
+    spans: list[tuple[int, int]] = []
+    for alias in sorted(aliases, key=len, reverse=True):
+        spans.extend(
+            (match.start(), match.end())
+            for match in re.finditer(rf"\b{re.escape(alias)}\b", text, re.I)
+        )
+    return sorted(spans)
+
+
+def _period_spans(text: str) -> list[tuple[int, int, str]]:
+    """Return non-overlapping explicit fiscal-period mentions with locations."""
+    raw: list[tuple[int, int, str, int]] = []
+    for match in _QUARTER_SCOPE.finditer(text):
+        raw.append((match.start(), match.end(), f"Q{match.group(1)}FY{_normalize_year(match.group(2))}", 0))
+    for match in _QUARTER_WORD_SCOPE.finditer(text):
+        raw.append(
+            (
+                match.start(),
+                match.end(),
+                f"Q{_QUARTER_WORDS[match.group(1).lower()]}FY{_normalize_year(match.group(2))}",
+                0,
+            )
+        )
+    for match in _ANNUAL_SCOPE.finditer(text):
+        raw.append((match.start(), match.end(), f"FY{_normalize_year(match.group(1))}", 1))
+    for match in _YEAR_ENDING_SCOPE.finditer(text):
+        raw.append((match.start(), match.end(), f"FY{int(match.group(1))}", 1))
+    for match in _ACTION_GUIDANCE_YEAR_SCOPE.finditer(text):
+        # Keep only the year token as the period span. The surrounding action,
+        # metric and ``guidance`` words establish annual scope but must remain
+        # available to the metric-to-value locality bridge below.
+        raw.append((match.start(1), match.end(1), f"FY{int(match.group(1))}", 1))
+    raw.sort(key=lambda item: (item[0], item[3], -(item[1] - item[0])))
+    chosen: list[tuple[int, int, str]] = []
+    for start, end, period, _ in raw:
+        if any(start < old_end and end > old_start for old_start, old_end, _ in chosen):
+            continue
+        chosen.append((start, end, period))
+    return sorted(chosen)
+
+
+def _metric_local_fiscal_period(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
+    """Bind a numeric record to the period attached to its own metric/range row.
+
+    Earnings-release headlines can place a forward FY2026 range immediately
+    before a different row such as "Total Company Revenues ... Full-Year 2025."
+    A nearest-period search can then borrow the following historical period.
+    Prefer a preceding period whose bridge contains the claimed metric; accept
+    a following period only when no intervening financial row begins.
+    """
+    if (
+        record.extraction_method is ExtractionMethod.STRUCTURED
+        or record.low is None
+        or record.high is None
+    ):
+        return record
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return record
+
+    numeric = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    if record.low == record.high:
+        numeric.extend(_scalar_amounts(text))
+    matching = [candidate for candidate in numeric if _range_matches_record(candidate, record)]
+    periods = _period_spans(text)
+    metric_spans = _metric_spans(text, record.metric)
+    local: list[tuple[int, int, str]] = []
+
+    for candidate in matching:
+        for start, end, period in periods:
+            if end <= candidate.start:
+                bridge = text[end:candidate.start]
+                contained_metrics = [span for span in metric_spans if span[0] >= end and span[1] <= candidate.start]
+                if not contained_metrics:
+                    continue
+                metric_end = max(span[1] for span in contained_metrics)
+                if _FINANCIAL_ROW_BOUNDARY.search(text[metric_end:candidate.start]):
+                    continue
+                distance = candidate.start - end
+                direction = 0
+            elif start >= candidate.end:
+                bridge = text[candidate.end:start]
+                if _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                    continue
+                preceding_metrics = [span for span in metric_spans if span[1] <= candidate.start]
+                if not preceding_metrics:
+                    continue
+                metric_end = max(span[1] for span in preceding_metrics)
+                if candidate.start - metric_end > 260:
+                    continue
+                if _FINANCIAL_ROW_BOUNDARY.search(text[metric_end:candidate.start]):
+                    continue
+                distance = start - candidate.end
+                direction = 1
+            else:
+                continue
+            if distance <= 320:
+                local.append((direction, distance, period))
+
+    if not local:
+        return record
+    period = min(local, key=lambda item: (item[0], item[1]))[2]
+    if period == record.fiscal_period:
+        return record
+    return record.model_copy(update={"fiscal_period": period})
+
+
+def _record_has_metric_local_period(record: GuidanceMetricRecord) -> bool:
+    """Require the persisted fiscal period to remain attached to its value row."""
+    if record.extraction_method is ExtractionMethod.STRUCTURED or record.low is None or record.high is None:
+        return True
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return True
+    periods = _period_spans(text)
+    if not periods:
+        return True
+    numeric = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    if record.low == record.high:
+        numeric.extend(_scalar_amounts(text))
+    matching = [candidate for candidate in numeric if _range_matches_record(candidate, record)]
+    if not matching:
+        return True
+    metric_spans = _metric_spans(text, record.metric)
+    for candidate in matching:
+        for start, end, period in periods:
+            if period != record.fiscal_period:
+                continue
+            if end <= candidate.start:
+                contained = [span for span in metric_spans if span[0] >= end and span[1] <= candidate.start]
+                if not contained:
+                    continue
+                metric_end = max(span[1] for span in contained)
+                if candidate.start - end <= 320 and not _FINANCIAL_ROW_BOUNDARY.search(
+                    text[metric_end:candidate.start]
+                ):
+                    return True
+            elif start >= candidate.end:
+                bridge = text[candidate.end:start]
+                preceding = [span for span in metric_spans if span[1] <= candidate.start]
+                if not preceding or _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                    continue
+                metric_end = max(span[1] for span in preceding)
+                if candidate.start - metric_end <= 260 and not _FINANCIAL_ROW_BOUNDARY.search(
+                    text[metric_end:candidate.start]
+                ):
+                    return True
+    return False
+
+
+def _metric_local_eps_basis(record: GuidanceMetricRecord) -> GuidanceMetricRecord:
+    """Bind an EPS range to its own adjusted or unqualified row label.
+
+    Some releases place GAAP and adjusted EPS guidance next to each other.  A
+    broad extraction window can see the word ``adjusted`` from the adjacent
+    row and assign it to the unqualified EPS range.  Rebind only when the exact
+    persisted range and a local EPS label make the basis deterministic.
+    """
+    if (
+        record.metric is not GuidanceMetric.EPS
+        or record.extraction_method is ExtractionMethod.STRUCTURED
+        or record.low is None
+        or record.high is None
+    ):
+        return record
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return record
+
+    adjusted_spans: list[tuple[int, int, str]] = []
+    for pattern in (
+        r"\badjusted\s+diluted\s+earnings\s+per\s+share\b",
+        r"\badjusted\s+earnings\s+per\s+share\b",
+        r"\badjusted\s+diluted\s+eps\b",
+        r"\badjusted\s+eps\b",
+    ):
+        adjusted_spans.extend(
+            (match.start(), match.end(), "ADJUSTED")
+            for match in re.finditer(pattern, text, re.I)
+        )
+
+    unqualified_spans: list[tuple[int, int, str]] = []
+    for pattern in (
+        r"\bdiluted\s+earnings\s+per\s+share\b",
+        r"\bearnings\s+per\s+share\b",
+        r"\bdiluted\s+eps\b",
+        r"\beps\b",
+    ):
+        for match in re.finditer(pattern, text, re.I):
+            if any(start <= match.start() and match.end() <= end for start, end, _ in adjusted_spans):
+                continue
+            unqualified_spans.append((match.start(), match.end(), "UNSPECIFIED"))
+
+    ranges = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    local: list[tuple[int, int, str]] = []
+    for candidate in ranges:
+        if not _range_matches_record(candidate, record):
+            continue
+        for start, end, basis in [*adjusted_spans, *unqualified_spans]:
+            if candidate.start >= end:
+                direction_priority = 0
+                distance = candidate.start - end
+                bridge = text[end:candidate.start]
+            elif start >= candidate.end:
+                direction_priority = 1
+                distance = start - candidate.end
+                bridge = text[candidate.end:start]
+            else:
+                direction_priority = 0
+                distance = 0
+                bridge = ""
+            if distance <= 260 and not _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                local.append((direction_priority, distance, basis))
+
+    if not local:
+        return record
+    # Prose guidance states the metric before its range.  Prefer that binding
+    # over a zero-distance label that begins immediately after the range and
+    # therefore belongs to the next flattened row.
+    basis = min(local, key=lambda item: (item[0], item[1]))[2]
+    if basis == record.accounting_basis:
+        return record
+    return record.model_copy(update={"accounting_basis": basis})
+
+
+def _record_has_metric_local_range(record: GuidanceMetricRecord) -> bool:
+    """Require a numeric record to stay inside its financial-metric row.
+
+    The prose extractor operates on bounded sliding windows so that flattened
+    SEC tables remain readable.  A window can still contain several rows.  A
+    range is admissible only when at least one occurrence of the claimed metric
+    reaches that exact range without crossing another financial row label.
+
+    Structured comparative-table records already have explicit row binding and
+    are validated separately by ``_pair_for_metric``.
+    """
+    if record.extraction_method is ExtractionMethod.STRUCTURED or record.low is None or record.high is None:
+        return True
+    text = (record.evidence_span or "").strip()
+    if not text:
+        return True
+
+    candidates = [*_ranges(text, record.metric, table_scale=None), *_unscaled_dollar_ranges(text)]
+    if record.low == record.high:
+        candidates.extend(_scalar_amounts(text))
+    matching_ranges = [
+        candidate
+        for candidate in candidates
+        if _range_matches_record(candidate, record)
+    ]
+    if not matching_ranges:
+        # A persisted monetary scalar must be visible in its own evidence span.
+        # Otherwise a distant reconciliation-table cell can become the value
+        # while the retained span shows only unrelated rows.
+        if record.low == record.high and record.metric in {
+            GuidanceMetric.REVENUE,
+            GuidanceMetric.EBITDA,
+            GuidanceMetric.FCF,
+            GuidanceMetric.EPS,
+        }:
+            return False
+        # Non-monetary scalar and qualitative records continue through the
+        # existing evidence-hygiene pipeline.
+        return True
+
+    spans = _metric_spans(text, record.metric)
+    for candidate in matching_ranges:
+        for start, end in spans:
+            if candidate.start >= end:
+                distance = candidate.start - end
+                bridge = text[end:candidate.start]
+            elif start >= candidate.end:
+                distance = start - candidate.end
+                bridge = text[candidate.end:start]
+                # If a following metric label has its own nearby number, that
+                # row owns the following value and cannot borrow this range.
+                following_values = [
+                    item
+                    for item in [*_ranges(text[end : end + 180], record.metric, None), *_scalar_amounts(text[end : end + 180])]
+                    if item.start <= 120
+                ]
+                if following_values:
+                    continue
+            else:
+                distance = 0
+                bridge = ""
+            if distance <= 260 and not _FINANCIAL_ROW_BOUNDARY.search(bridge):
+                return True
+    return False
+
+
+def _basis(metric: GuidanceMetric, alias: str) -> str:
+    if metric is GuidanceMetric.REVENUE:
+        return "UNSPECIFIED"
+    if "adjusted" in alias.lower():
+        return "ADJUSTED"
+    return "UNSPECIFIED"
+
+
+def _direction(prior: _Range, current: _Range) -> GuidanceAction:
+    prior_mid = (prior.low + prior.high) / 2.0
+    current_mid = (current.low + current.high) / 2.0
+    tolerance = max(abs(prior_mid), abs(current_mid), 1.0) * 1e-12
+    if current_mid > prior_mid + tolerance:
+        return GuidanceAction.RAISE
+    if current_mid < prior_mid - tolerance:
+        return GuidanceAction.LOWER
+    return GuidanceAction.REAFFIRM
+
+
+def _action_near(text: str, start: int) -> GuidanceAction:
+    context = text[max(0, start - 260) : start]
+    if re.search(r"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b", context, re.I):
+        return GuidanceAction.REAFFIRM
+    if re.search(r"\b(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing))\b", context, re.I):
+        return GuidanceAction.RAISE
+    if re.search(r"\b(?:lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)\b", context, re.I):
+        return GuidanceAction.LOWER
+    return GuidanceAction.NONE
+
+
+def normalize_value_before_guidance_rows(
+    document: SourceDocument,
+    *,
+    rules_hash: str,
+) -> list[GuidanceMetricRecord]:
+    """Normalize exact range/year/metric rows flattened value-first by SEC HTML.
+
+    Investor presentations can flatten a visual row as ``$1.0B-$1.04B 2026 NET
+    REVENUE GUIDANCE``. The generic prose extractor expects a metric before its
+    value, so this narrowly structured layout otherwise disappears.
+    """
+    text = re.sub(r"\s+", " ", html_to_text(document.content or "")).strip()
+    records: list[GuidanceMetricRecord] = []
+    seen: set[tuple[str, str, float, float]] = set()
+    for match in _VALUE_BEFORE_GUIDANCE_ROW.finditer(text):
+        if not (match.group("d1") or match.group("d2") or match.group("s1") or match.group("s2")):
+            continue
+        label = match.group("label").lower()
+        if "free cash flow" in label:
+            metric = GuidanceMetric.FCF
+        elif "ebitda" in label:
+            metric = GuidanceMetric.EBITDA
+        elif "eps" in label or "earnings per share" in label:
+            metric = GuidanceMetric.EPS
+        else:
+            metric = GuidanceMetric.REVENUE
+
+        if metric is GuidanceMetric.EPS:
+            if match.group("s1") or match.group("s2"):
+                continue
+            low = float(match.group("low").replace(",", ""))
+            high = float(match.group("high").replace(",", ""))
+            unit = "USD/share"
+        else:
+            if not (match.group("s1") or match.group("s2")):
+                continue
+            low = _amount(match.group("low"), match.group("s1") or match.group("s2"), None)
+            high = _amount(match.group("high"), match.group("s2") or match.group("s1"), None)
+            unit = "USD"
+        if low > high:
+            continue
+        period = f"FY{int(match.group('year'))}"
+        key = (metric.value, period, low, high)
+        if key in seen:
+            continue
+        seen.add(key)
+        evidence = text[max(0, match.start() - 260) : min(len(text), match.end() + 140)]
+        records.append(
+            GuidanceMetricRecord(
+                rules_hash=rules_hash,
+                ticker=document.ticker,
+                fiscal_period=period,
+                metric=metric,
+                accounting_basis="ADJUSTED" if "adjusted" in label else "UNSPECIFIED",
+                low=low,
+                high=high,
+                unit=unit,
+                source=document.source,
+                source_url=document.source_url,
+                source_accession=document.accession,
+                source_timestamp=document.source_timestamp,
+                explicit_action=_action_near(text, match.start()),
+                verified=True,
+                extraction_method=ExtractionMethod.STRUCTURED,
+                evidence_span=f"normalized_value_before_guidance_row; {evidence}"[:1000],
+                source_document_hash=document.content_hash,
+                as_of=document.source_timestamp,
+                fetched_at=document.fetched_at,
+                stale=document.stale,
+            )
+        )
+    return records
+
+
+def normalize_eps_reconciliation_guidance_rows(
+    document: SourceDocument,
+    *,
+    rules_hash: str,
+) -> list[GuidanceMetricRecord]:
+    """Read explicitly labeled GAAP/adjusted low-high EPS guidance rows.
+
+    Reconciliation adjustments are never emitted as EPS. Require an annual
+    guidance header and adjacent dollar-denominated low/high cells after an
+    explicit basis label; reported-results tables cannot enter this path.
+    """
+    text = re.sub(r"\s+", " ", html_to_text(document.content or "")).strip()
+    header_pattern = re.compile(
+        r"Reconciliation of GAAP vs Adjusted EPS Guidance\s*[-–—]\s*"
+        r"Full[- ]Year\s+(20\d{2})\s+\1\s+Full[- ]Year Guidance\s+Low\s+High\b",
+        re.I,
+    )
+    row_pattern = re.compile(
+        r"\bEPS from Continuing Operations\s*[-–—]\s*(GAAP|Adjusted)\s+"
+        r"\$\s*(\d+(?:\.\d+)?)\s+\$\s*(\d+(?:\.\d+)?)(?![\d.])",
+        re.I,
+    )
+    records: list[GuidanceMetricRecord] = []
+    for header in header_pattern.finditer(text):
+        section = text[header.end():header.end() + 1200]
+        section = re.split(r"\b(?:Note:|Forward[- ]Looking|Reconciliation)\b", section, maxsplit=1, flags=re.I)[0]
+        rows = list(row_pattern.finditer(section))
+        # Duplicate basis rows could indicate multiple scenarios or columns.
+        if len({row.group(1).upper() for row in rows}) != len(rows):
+            continue
+        for row in rows:
+            low, high = float(row.group(2)), float(row.group(3))
+            if low > high:
+                continue
+            records.append(GuidanceMetricRecord(
+                rules_hash=rules_hash, ticker=document.ticker,
+                fiscal_period=f"FY{header.group(1)}", metric=GuidanceMetric.EPS,
+                accounting_basis=row.group(1).upper(), low=low, high=high,
+                unit="USD/share", source=document.source, source_url=document.source_url,
+                source_accession=document.accession, source_timestamp=document.source_timestamp,
+                explicit_action=GuidanceAction.NONE, verified=True,
+                extraction_method=ExtractionMethod.STRUCTURED,
+                evidence_span=f"{header.group(0)}; {row.group(0)}",
+                source_document_hash=document.content_hash, as_of=document.source_timestamp,
+                fetched_at=document.fetched_at, stale=document.stale,
+            ))
+    return records
+
+
+def normalize_comparative_guidance_tables(
+    document: SourceDocument,
+    *,
+    rules_hash: str,
+) -> list[GuidanceMetricRecord]:
+    """Normalize primary-source prior-vs-updated guidance tables.
+
+    When the table supplies two verified exact dates, emit both the quoted prior
+    range and the updated range at the primary document's availability timestamp,
+    linking the updated record to the quoted prior through ``supersedes_record_id``.
+    The prior effective date remains explicit in evidence without back-dating a
+    fact to before the source document was available. If exact dates cannot be
+    verified, emit only the updated row and let the ledger fail closed unless an
+    independently dated prior primary-source record exists.
+    """
+    text = re.sub(r"\s+", " ", html_to_text(document.content or "")).strip()
+    if not text:
+        return []
+
+    normalized: list[GuidanceMetricRecord] = []
+    seen: set[tuple[str, str, str, datetime, float, float]] = set()
+
+    headers = _comparative_headers(text)
+    for header_index, (header, updated_first) in enumerate(headers):
+        context_start = max(0, header.start() - 360)
+        context = text[context_start : header.end()]
+        fiscal_scopes = _scopes(context)
+        # A single comparative header can include FY prior/current columns and
+        # a next-quarter column.  There is no deterministic two-column mapping
+        # in that shape, so do not normalize any row under an ambiguous scope.
+        if len(fiscal_scopes) != 1:
+            continue
+        fiscal_scope = next(iter(fiscal_scopes))
+        scale = _table_scale(context)
+
+        # Bound the table window. Stop at the next comparative header when one
+        # exists; otherwise use a conservative 2,400-character window.
+        table_end = min(len(text), header.end() + 2400)
+        if header_index + 1 < len(headers):
+            table_end = min(table_end, headers[header_index + 1][0].start())
+        section_end = _TABLE_SECTION_END.search(text, header.end(), table_end)
+        if section_end is not None:
+            table_end = section_end.start()
+        table = text[header.end() : table_end]
+        comparative_dates = _comparative_dates(
+            text[header.start() : min(table_end, header.end() + 260)],
+            document.source_timestamp,
+            updated_first=updated_first,
+        )
+        mentions = _metric_mentions(table)
+        if not mentions:
+            continue
+
+        table_layout: str | None = None
+        for index, mention in enumerate(mentions):
+            pair = _pair_for_metric(
+                table,
+                mentions,
+                index,
+                scale,
+                updated_first=updated_first,
+                preferred_layout=table_layout,
+            )
+            if pair is None:
+                continue
+            prior, current, layout = pair
+            table_layout = table_layout or layout
+            basis = _basis(mention.metric, mention.alias)
+            key = (
+                mention.metric.value,
+                fiscal_scope,
+                basis,
+                document.source_timestamp,
+                current.low,
+                current.high,
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+
+            row_start = max(0, mention.start - 220)
+            row_end = min(len(table), mention.end + 220)
+            # Preserve the actual primary-source table header in the evidence
+            # span. The unchanged GuidanceLedger requires explicit forward-
+            # guidance context for quantitative evidence; a synthetic metadata
+            # prefix alone must never be used to bypass that eligibility gate.
+            source_header = context[-420:]
+            source_row = table[row_start:row_end]
+            evidence = (
+                f"normalized_comparative_guidance_table; layout={layout}; "
+                f"scope={fiscal_scope}; table_scale={scale}; prior={prior.low}:{prior.high}; "
+                f"updated={current.low}:{current.high}; source_header={source_header}; "
+                f"source_row={source_row}"
+            )[:1000]
+
+            common = dict(
+                rules_hash=rules_hash,
+                ticker=document.ticker,
+                fiscal_period=fiscal_scope,
+                metric=mention.metric,
+                accounting_basis=basis,
+                unit=current.unit,
+                source=document.source,
+                source_url=document.source_url,
+                source_accession=document.accession,
+                verified=True,
+                extraction_method=ExtractionMethod.STRUCTURED,
+                source_document_hash=document.content_hash,
+                fetched_at=document.fetched_at,
+                stale=document.stale,
+            )
+
+            quoted_prior: GuidanceMetricRecord | None = None
+            if comparative_dates is not None:
+                prior_timestamp, updated_timestamp = comparative_dates
+                prior_key = (
+                    mention.metric.value,
+                    fiscal_scope,
+                    basis,
+                    document.source_timestamp,
+                    prior.low,
+                    prior.high,
+                )
+                if prior_key not in seen:
+                    seen.add(prior_key)
+                    prior_evidence = (
+                        f"normalized_comparative_guidance_table; row_version=prior; layout={layout}; "
+                        f"scope={fiscal_scope}; table_scale={scale}; prior_date={prior_timestamp.date()}; "
+                        f"updated_date={updated_timestamp.date()}; prior={prior.low}:{prior.high}; "
+                        f"updated={current.low}:{current.high}; source_header={source_header}; "
+                        f"source_row={source_row}"
+                    )[:1000]
+                    quoted_prior = GuidanceMetricRecord(
+                        **common,
+                        low=prior.low,
+                        high=prior.high,
+                        source_timestamp=document.source_timestamp,
+                        explicit_action=GuidanceAction.NONE,
+                        evidence_span=prior_evidence,
+                        as_of=document.source_timestamp,
+                    )
+                    normalized.append(quoted_prior)
+
+            normalized.append(
+                GuidanceMetricRecord(
+                    **common,
+                    low=current.low,
+                    high=current.high,
+                    source_timestamp=document.source_timestamp,
+                    explicit_action=_direction(prior, current),
+                    supersedes_record_id=quoted_prior.record_id if quoted_prior is not None else None,
+                    evidence_span=(
+                        evidence.replace(
+                            "normalized_comparative_guidance_table; ",
+                            "normalized_comparative_guidance_table; row_version=updated; ",
+                            1,
+                        )
+                    ),
+                    as_of=document.source_timestamp,
+                )
+            )
+
+    return sorted(
+        normalized,
+        key=lambda item: (item.source_timestamp, item.metric.value, item.fiscal_period, item.accounting_basis),
+    )
+
+
+def extract_guidance_facts_table_normalized(
+    document: SourceDocument,
+    *,
+    rules_hash: str,
+) -> GuidanceExtractionResult:
+    base = extract_guidance_facts_round8(document, rules_hash=rules_hash)
+    rejected = list(base.rejected_candidates)
+    base_records: list[GuidanceMetricRecord] = []
+    for original_record in base.records:
+        record = _metric_local_fiscal_period(original_record)
+        record = _metric_local_eps_basis(record)
+        if _record_has_metric_local_period(record) and _record_has_metric_local_range(record):
+            base_records.append(record)
+        else:
+            rejected.append(
+                {
+                    "reason": "cross_metric_or_period_row_binding",
+                    "metric": record.metric.value,
+                    "fiscal_period": record.fiscal_period,
+                    "source_url": record.source_url,
+                    "evidence": (record.evidence_span or "")[:400],
+                }
+            )
+
+    table_records = normalize_comparative_guidance_tables(document, rules_hash=rules_hash)
+    table_records.extend(normalize_value_before_guidance_rows(document, rules_hash=rules_hash))
+    table_records.extend(normalize_eps_reconciliation_guidance_rows(document, rules_hash=rules_hash))
+    scoped_records = normalize_explicit_guidance_scopes(document, rules_hash=rules_hash)
+    if scoped_records:
+        keys = {(r.metric, r.fiscal_period) for r in scoped_records}
+        values = {(r.metric, r.low, r.high) for r in scoped_records}
+        base_records = [r for r in base_records if (r.metric, r.fiscal_period) not in keys and (r.metric, r.low, r.high) not in values]
+        table_records = [r for r in table_records if (r.metric, r.fiscal_period) not in keys and (r.metric, r.low, r.high) not in values]
+        table_records.extend(scoped_records)
+    declared, declared_keys = normalize_declared_layouts(document, rules_hash=rules_hash)
+    base_records = [r for r in base_records if (r.metric, r.fiscal_period) not in declared_keys]
+    table_records = [r for r in table_records if (r.metric, r.fiscal_period) not in declared_keys]
+    table_records.extend(declared)
+    historical = historical_republication_periods(document)
+    if historical:
+        for r in [*base_records, *table_records]:
+            if r.fiscal_period in historical:
+                rejected.append({"reason": "explicitly_not_reaffirmed_or_updated", "metric": r.metric.value, "fiscal_period": r.fiscal_period, "source_url": r.source_url})
+        base_records = [r for r in base_records if r.fiscal_period not in historical]
+        table_records = [r for r in table_records if r.fiscal_period not in historical]
+    if not table_records:
+        policy = None if historical else base.policy_evidence
+        if any(item.midpoint is not None for item in base_records):
+            policy = None
+        return base.model_copy(
+            update={"records": base_records, "policy_evidence": policy, "rejected_candidates": rejected}
+        )
+
+    # The normalized comparative table is authoritative for the same document,
+    # metric and fiscal scope. Remove generic prose/table records that can have
+    # lost the table unit or crossed a flattened row boundary.
+    authoritative = {(item.metric, item.fiscal_period) for item in table_records}
+    records = [
+        item
+        for item in base_records
+        if (item.metric, item.fiscal_period) not in authoritative
+    ]
+    records.extend(table_records)
+    records = _action_consistent_history(records)
+    records = sorted(
+        records,
+        key=lambda item: (
+            item.source_timestamp,
+            item.metric.value,
+            item.fiscal_period,
+            item.accounting_basis,
+            item.source_url,
+        ),
+    )
+
+    policy = None if historical else base.policy_evidence
+    if any(item.midpoint is not None for item in records):
+        policy = None
+    return base.model_copy(
+        update={"records": records, "policy_evidence": policy, "rejected_candidates": rejected}
+    )

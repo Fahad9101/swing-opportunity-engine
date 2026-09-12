@@ -43,6 +43,12 @@ _FULL_YEAR_HEADER = re.compile(
     rf"\b(?:FY|fiscal\s+year|full[-\s]?year)\s*(20\d{{2}}).{{0,35}}\b{_GUIDANCE_HEADER}\b",
     re.I | re.S,
 )
+_ACTION_YEAR_GUIDANCE = re.compile(
+    rf"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|rais(?:e|es|ed|ing)|"
+    rf"increas(?:e|es|ed|ing)|maintain(?:s|ed|ing)?|updat(?:e|es|ed|ing)|"
+    rf"provid(?:e|es|ed|ing)|expect(?:s|ed|ing)?)\s+(20\d{{2}}).{{0,45}}\b{_GUIDANCE_HEADER}\b",
+    re.I | re.S,
+)
 _MIXED_GAAP_NON_GAAP = re.compile(r"\bGAAP\s*:.*\b(?:non[-\s]?GAAP|adjusted)\s*:", re.I | re.S)
 
 
@@ -75,6 +81,8 @@ def _explicit_guidance_periods(text: str) -> set[str]:
         prefix = text[max(0, match.start() - 36) : match.start()]
         if re.search(r"\b(?:first|second|third|fourth)\s+quarter\s*$|\bQ[1-4]\s*$", prefix, re.I):
             continue
+        periods.add(f"FY{int(match.group(1))}")
+    for match in _ACTION_YEAR_GUIDANCE.finditer(text):
         periods.add(f"FY{int(match.group(1))}")
     return periods
 
@@ -197,6 +205,11 @@ class GuidanceLedger:
         fiscal periods not repeated in the latest guidance update are excluded
         from the current set rather than lingering forever.
 
+        A structured comparative table may also carry a verified quoted-prior
+        row in the same source snapshot. In that case an explicit immutable
+        ``supersedes_record_id`` link supplies the prior/current relationship;
+        both records retain the document availability timestamp.
+
         A current numeric NONE-action key with no historical version is treated
         as an implicitly initiated metric/period *only in the assessment view*.
         The immutable ledger record is not changed. This mirrors the existing
@@ -215,6 +228,17 @@ class GuidanceLedger:
             return [], []
 
         current_raw = [item for item in eligible if item.source_timestamp == latest_ts]
+        latest_by_id = {item.record_id: item for item in current_raw}
+        linked_prior_ids = {
+            item.supersedes_record_id
+            for item in current_raw
+            if item.supersedes_record_id in latest_by_id
+        }
+        # A structured comparative table can publish a quoted prior range and
+        # its update in the same primary document.  Keep both at the document's
+        # availability timestamp to prevent look-ahead, and use the immutable
+        # supersession link to distinguish the quoted prior from the current row.
+        current_raw = [item for item in current_raw if item.record_id not in linked_prior_ids]
         current_by_key: dict[tuple[str, str, str], list[GuidanceMetricRecord]] = defaultdict(list)
         for item in current_raw:
             current_by_key[item.comparison_key].append(item)
@@ -230,6 +254,19 @@ class GuidanceLedger:
             if older:
                 prior_ts = max(item.source_timestamp for item in older)
                 prior.extend(item for item in older if item.source_timestamp == prior_ts)
+                current.extend(rows)
+                continue
+
+            linked_prior = [
+                linked
+                for item in rows
+                if item.supersedes_record_id is not None
+                and (linked := latest_by_id.get(item.supersedes_record_id)) is not None
+                and linked.comparison_key == key
+                and linked.midpoint is not None
+            ]
+            if linked_prior:
+                prior.extend(linked_prior)
                 current.extend(rows)
                 continue
 

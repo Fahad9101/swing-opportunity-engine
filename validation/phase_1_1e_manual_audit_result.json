@@ -1,0 +1,24 @@
+{
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "snapshot_fingerprint": "afcf5471f78d2a8946f5851108b8049b4ea282b3e2ba522f990f6f10362cd771",
+  "sample_size": 100,
+  "concordant": 90,
+  "discordant": 10,
+  "manual_rule_concordance": 0.9,
+  "required_rule_concordance": 0.95,
+  "systematic_error_found": true,
+  "final_decision": "FAIL",
+  "domain_results": {
+    "balance_sheet_distress": {"sample": 39, "concordant": 39, "discordant": 0},
+    "catalyst_materiality": {"sample": 11, "concordant": 11, "discordant": 0},
+    "catalyst_surprise": {"sample": 19, "concordant": 19, "discordant": 0},
+    "guidance": {"sample": 31, "concordant": 21, "discordant": 10}
+  },
+  "discordant_tickers": ["COCO", "WEAV", "CRS", "HNI", "MUX", "WDFC", "GH", "BB", "DXPE", "AMCR"],
+  "governance": {
+    "soe_1_1_activation_allowed": false,
+    "soe_1_0_remains_active": true,
+    "milestone_3_blocked": true,
+    "threshold_tuning_allowed": false
+  }
+}

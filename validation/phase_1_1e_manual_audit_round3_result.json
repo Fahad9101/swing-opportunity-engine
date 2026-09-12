@@ -1,0 +1,62 @@
+{
+  "phase": "1.1E",
+  "audit_round": 3,
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "workflow_run_id": 33894726477,
+  "artifact_id": 9948565137,
+  "branch": "phase-1.1e-shadow-validation",
+  "audited_head_sha": "977247c9eab54263fed4a052116a98244024a1db",
+  "captured_snapshot_fingerprint": "fbc73771af655b98668718c3f4a1cc84f946f5aa99f1d05dfef0cb30e17be1c8",
+  "baseline_rules_hash": "59cc7ffe14472434bfbb92b07b89b0b48293d0c5762d5270769bce3b494550ac",
+  "candidate_rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "sample_size": 100,
+  "minimum_rule_concordance": 0.95,
+  "concordant": 81,
+  "discordant": 19,
+  "concordance_pct": 81.0,
+  "systematic_errors_present": true,
+  "decision": "FAIL",
+  "domain_results": {
+    "guidance": {"sample": 46, "concordant": 29, "discordant": 17, "concordance_pct": 63.04},
+    "balance_sheet_distress": {"sample": 20, "concordant": 19, "discordant": 1, "concordance_pct": 95.0},
+    "catalyst_materiality": {"sample": 15, "concordant": 14, "discordant": 1, "concordance_pct": 93.33},
+    "catalyst_surprise": {"sample": 19, "concordant": 19, "discordant": 0, "concordance_pct": 100.0}
+  },
+  "governance": {
+    "soe_1_0_active": true,
+    "soe_1_1_promoted": false,
+    "milestone_3_unlocked": false,
+    "pr_16_merge_allowed": false
+  },
+  "root_cause_counts": {
+    "guidance_directional_current_prior_binding": 5,
+    "guidance_cross_quarter_comparison": 4,
+    "guidance_cross_fiscal_year_comparison": 3,
+    "guidance_historical_actual_contamination": 3,
+    "guidance_scope_horizon_mismatch": 1,
+    "guidance_invented_comparable_prior": 1,
+    "distress_covenant_context_binding": 1,
+    "catalyst_scheduling_notice_as_results": 1
+  },
+  "failures": [
+    {"ticker":"VOYG","domain":"guidance","engine":true,"manual_expected":null,"root_cause":"guidance_historical_actual_contamination","note":"Historical reported results were admitted as forward guidance."},
+    {"ticker":"CDNS","domain":"guidance","engine":true,"manual_expected":false,"root_cause":"guidance_directional_current_prior_binding","note":"Current FY2026 revenue and EPS guidance were raised versus prior same-period guidance."},
+    {"ticker":"TTMI","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_cross_quarter_comparison","note":"Q2 2026 and Q3 2026 outlooks were treated as comparable."},
+    {"ticker":"KMT","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_cross_fiscal_year_comparison","note":"FY2026 and FY2027 annual guidance were treated as comparable."},
+    {"ticker":"DUOL","domain":"guidance","engine":true,"manual_expected":false,"root_cause":"guidance_directional_current_prior_binding","note":"FY2026 revenue rose from about $1.205B to $1.207B and adjusted EBITDA from $310M to $320M."},
+    {"ticker":"KTB","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_scope_horizon_mismatch","note":"Consolidated annual guidance was compared with segment/long-term target evidence."},
+    {"ticker":"MYRG","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_historical_actual_contamination","note":"Historical earnings results were admitted as forward guidance."},
+    {"ticker":"TVTX","domain":"guidance","engine":true,"manual_expected":null,"root_cause":"guidance_historical_actual_contamination","note":"Historical product-sales/results evidence was treated as forward revenue guidance."},
+    {"ticker":"DASH","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_cross_quarter_comparison","note":"Q1 2026 and Q2 2026 outlooks were treated as comparable."},
+    {"ticker":"DY","domain":"balance_sheet_distress","engine":true,"manual_expected":false,"root_cause":"distress_covenant_context_binding","note":"Customer-contract default language was misclassified as a registrant covenant breach; filing states covenant compliance."},
+    {"ticker":"MIR","domain":"guidance","engine":true,"manual_expected":false,"root_cause":"guidance_directional_current_prior_binding","note":"FY2026 revenue/EBITDA/FCF were reaffirmed and EPS change remained below the frozen material threshold."},
+    {"ticker":"MWH","domain":"guidance","engine":true,"manual_expected":false,"root_cause":"guidance_directional_current_prior_binding","note":"Full-year revenue guidance increased from $3.72-3.82B to $3.87-3.97B."},
+    {"ticker":"CVNA","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_invented_comparable_prior","note":"Q2 introduced quantitative FY2026 adjusted EBITDA of $2.7-3.0B; prior FY2026 evidence was qualitative, so no verified quantitative prior existed."},
+    {"ticker":"ROKU","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_cross_fiscal_year_comparison","note":"Full-year 2025 and full-year 2026 guidance were treated as comparable."},
+    {"ticker":"ZG","domain":"guidance","engine":true,"manual_expected":null,"root_cause":"guidance_cross_quarter_comparison","note":"Q2 2026 and Q3 2026 outlooks were treated as comparable."},
+    {"ticker":"AUPH","domain":"guidance","engine":false,"manual_expected":null,"root_cause":"guidance_cross_fiscal_year_comparison","note":"FY2025 guidance was compared with initial FY2026 guidance."},
+    {"ticker":"BRZE","domain":"catalyst_materiality","engine":8,"manual_expected":null,"root_cause":"catalyst_scheduling_notice_as_results","note":"The SEC exhibit only announced that quarterly results would be released later; it was not completed earnings evidence."},
+    {"ticker":"DELL","domain":"guidance","engine":true,"manual_expected":false,"root_cause":"guidance_directional_current_prior_binding","note":"FY2027 revenue and GAAP/non-GAAP EPS guidance were raised materially."},
+    {"ticker":"ALAB","domain":"guidance","engine":true,"manual_expected":null,"root_cause":"guidance_cross_quarter_comparison","note":"Q2 FY2026 and Q3 FY2026 guidance were treated as same-period comparable evidence."}
+  ]
+}

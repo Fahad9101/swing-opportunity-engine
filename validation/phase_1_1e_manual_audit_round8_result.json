@@ -1,0 +1,30 @@
+{
+  "contract_id": "SOE-1.1E-SHADOW-V1",
+  "round": 8,
+  "run_id": 33973245276,
+  "head_sha": "7adf602f025aedc740b9d1a4a8fd94d46ad6f6e7",
+  "status": "FAIL_EARLY_STOP",
+  "decision": "FAIL",
+  "required_sample": 100,
+  "minimum_rule_concordance": 0.95,
+  "final_concordance": null,
+  "systematic_error_detected": true,
+  "blocking_domain": "guidance",
+  "blocking_ticker": "ALSN",
+  "engine_classification": "DETERIORATED",
+  "manual_classification": "NOT_DETERIORATED",
+  "engine_reason": "Comparable guidance reached the frozen material-cut threshold for revenue.",
+  "manual_reason": "FY2026 consolidated net sales guidance increased from $5.575B-$5.925B to $5.800B-$6.000B; the engine false cut is caused by comparative guidance table normalization/binding.",
+  "root_cause_family": "comparative_guidance_table_unit_and_row_binding",
+  "primary_sources": [
+    "https://www.sec.gov/Archives/edgar/data/1411207/000119312526063975/d105532dex991.htm",
+    "https://www.sec.gov/Archives/edgar/data/1411207/000119312526330544/d95413dex992.htm"
+  ],
+  "governance": {
+    "soe_1_0_active": true,
+    "soe_1_1_promoted": false,
+    "milestone_3_unlocked": false,
+    "pr_16_merge_allowed": false
+  },
+  "required_next_step": "Architectural normalized comparative-guidance-table evidence parser, followed by a new full-market validation and a brand-new independent >=100-name audit."
+}
