@@ -29,7 +29,7 @@ jobs:
           python-version: '3.12'
           cache: pip
       - name: Apply evidence-minimal v5 repair in working tree
-        run: python scripts/phase_1_1e_v5_minimal_acceptance_repair_v3.py
+        run: python scripts/phase_1_1e_v5_minimal_acceptance_repair_v4.py
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
       - name: Print bounded candidate diagnostics
