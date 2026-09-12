@@ -5,6 +5,7 @@ on:
     branches: [phase-1.1e-canonical-guidance]
     paths:
       - 'backend/app/services/guidance_raw_typed_extractor.py'
+      - 'backend/app/services/guidance_raw_canonical_extractor.py'
       - 'backend/app/services/guidance_raw_replay_differential_service.py'
       - 'backend/app/cli_guidance_raw_replay_differential.py'
       - 'backend/tests/fixtures/guidance_raw_extraction_corpus_v1.json'
