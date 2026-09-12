@@ -4,9 +4,9 @@ from collections import Counter
 from typing import Any, Iterable
 
 from app.domain.soe_v1_1 import GuidanceMetricRecord
-from app.services.guidance_canonical_ledger_service import (
-    CanonicalGuidanceLedger,
-    canonicalize_legacy_records_with_roles,
+from app.services.guidance_canonical_assessment_service import assess_canonicalization_result
+from app.services.guidance_canonical_migration_service import (
+    canonicalize_legacy_records_for_migration,
 )
 
 
@@ -54,7 +54,7 @@ def canonical_guidance_differential_report(
         records = [_record_from_payload(item) for item in raw_records]
         legacy_records += len(records)
 
-        canonical = canonicalize_legacy_records_with_roles(records)
+        canonical = canonicalize_legacy_records_for_migration(records)
         canonical_facts += len(canonical.accepted)
         quarantined_facts += len(canonical.quarantined)
 
@@ -77,7 +77,8 @@ def canonical_guidance_differential_report(
                 }
             )
 
-        assessment = CanonicalGuidanceLedger(canonical.accepted).assess(
+        assessment = assess_canonicalization_result(
+            canonical,
             ticker,
             rules,
             rules_hash=rules_hash,
@@ -101,9 +102,8 @@ def canonical_guidance_differential_report(
                 }
             )
 
-    # Divergences are not automatically labelled good or bad. Any classification
-    # drift is an adjudication item. This prevents the differential validator
-    # from hiding a regression simply because the canonical pipeline is newer.
+    # Divergences are never automatically labelled improvements. Every remaining
+    # classification drift is an explicit adjudication item before runtime use.
     return {
         "tickers_with_guidance_payload": tickers,
         "legacy_record_count": legacy_records,
