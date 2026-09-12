@@ -107,8 +107,6 @@ def _money_metric_margin_percent(clause: str, mention, value) -> bool:
 if "def _document_heading_period(" not in text:
     text = replace_once(text, helper_marker, "\n" + helper + helper_marker.lstrip("\n"), "insert v6 helpers")
 
-# Widen only the delta-lookback so phrases such as "raising the midpoint ... last quarter by $25m"
-# cannot become absolute revenue levels.
 old_delta_window = '    before = clause[max(0, value.start - 70):value.start]\n'
 new_delta_window = '    before = clause[max(0, value.start - 140):value.start]\n'
 text = replace_once(text, old_delta_window, new_delta_window, "widen delta lookback")
@@ -122,12 +120,11 @@ new_reversed_block = '''            if value is not None and value.low > value.h
 text = replace_once(text, old_reversed_block, new_reversed_block, "v6 value guards")
 
 old_period = '''            period = _canonical_period_binding(clause, anchor, mention)\n            section_period = _nearest_section_heading_period(segment, clause, anchor, mention)\n            if period is None:\n                period = section_period\n            elif section_period is not None and _selected_following_period_crosses_sentence(clause, anchor, mention, value, period):\n                period = section_period\n            if period is None and role is GuidanceFactRole.QUOTED_PRIOR:\n                period = _unique_explicit_period_from_segment(segment)\n            if period is None:\n                rejected.append({"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]}); continue\n'''
-new_period = '''            period = _canonical_period_binding(clause, anchor, mention)\n            section_period = _nearest_section_heading_period(segment, clause, anchor, mention)\n            if period is not None and _selected_following_period_crosses_sentence(clause, anchor, mention, value, period):\n                period = None\n            if period is None:\n                period = section_period\n            if period is None and local_action in {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM}:\n                period = _document_heading_period(text, segment, clause, anchor, mention)\n            if period is None and role is GuidanceFactRole.QUOTED_PRIOR:\n                period = _unique_explicit_period_from_segment(segment)\n            if period is None:\n                rejected.append({"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]}); continue\n'''
+new_period = '''            period = _canonical_period_binding(clause, anchor, mention)\n            section_period = _nearest_section_heading_period(segment, clause, anchor, mention)\n            if period is not None and _selected_following_period_crosses_sentence(clause, anchor, mention, value, period):\n                period = None\n            if period is None:\n                period = section_period\n            directional_section = {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM}\n            if period is None and (local_action in directional_section or segment_action in directional_section):\n                period = _document_heading_period(text, segment, clause, anchor, mention)\n            if period is None and role is GuidanceFactRole.QUOTED_PRIOR:\n                period = _unique_explicit_period_from_segment(segment)\n            if period is None:\n                rejected.append({"reason": "ambiguous_or_missing_period", "metric": mention.metric.value, "evidence": clause[:500]}); continue\n'''
 text = replace_once(text, old_period, new_period, "v6 document heading period recovery")
 
 path.write_text(text)
 
-# Focused regressions for residual HPE/ZETA corpus defects.
 test_path = ROOT / "backend/tests/test_guidance_v5_surgical_acceptance.py"
 with test_path.open("a") as fh:
     fh.write(r'''
@@ -139,7 +136,7 @@ def test_cross_sentence_eps_value_cannot_bind_to_fcf_v6():
         "Fiscal 2026 Full Year Outlook. HPE is raising its free cash flow guidance and now expects free cash flow to be at least $3.5 billion. The updated FY26 outlook ranges for non-GAAP diluted net EPS and free cash flow are higher than projected. The company had expected to generate at least $3.00 in non-GAAP diluted net EPS.",
     ))
     fcf = [f for f in ex.facts if f.metric.value == "fcf"]
-    assert any(f.fiscal_period == "FY2026" and f.low == 3.5 for f in fcf)
+    assert any(f.fiscal_period == "FY2026" and f.low == 3.5 for f in fcf), [(f.fiscal_period, f.low, f.high, f.unit.value, f.explicit_action.value) for f in fcf]
     assert not any(f.low == 3.0 for f in fcf)
 
 
@@ -149,7 +146,7 @@ def test_following_fy27_heading_cannot_capture_fy26_fcf_v6():
         "Fiscal 2026 Full Year Outlook. HPE is raising its free cash flow guidance and now expects free cash flow to be at least $3.75 billion. Fiscal 2027 Outlook Framework. The company is raising its growth framework for FY27 and expects free cash flow to be at least $5.0 billion.",
     ))
     fcf = [f for f in ex.facts if f.metric.value == "fcf"]
-    assert any(f.fiscal_period == "FY2026" and f.low == 3.75 for f in fcf)
+    assert any(f.fiscal_period == "FY2026" and f.low == 3.75 for f in fcf), [(f.fiscal_period, f.low, f.high, f.unit.value, f.explicit_action.value) for f in fcf]
     assert not any(f.fiscal_period == "FY2027" and f.low == 3.75 for f in fcf)
 
 
