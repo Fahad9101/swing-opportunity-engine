@@ -16,7 +16,6 @@ from app.domain.soe_v1_1 import ExtractionMethod, GuidanceAction, GuidanceMetric
 from app.services.fact_extraction_service import html_to_text
 from app.services.guidance_raw_typed_extractor import (
     RawTypedGuidanceExtraction,
-    _ACTUAL,
     _ACTION_PATTERNS,
     _PeriodBinding,
     _action,
@@ -35,6 +34,17 @@ _EXPLICIT_FORWARD = re.compile(
     r"issu(?:e|es|ed|ing)\s+(?:guidance|outlook))\b",
     re.I,
 )
+_FORWARD_SIGNAL = re.compile(
+    r"\b(?:guidance|outlook|forecast|expects?|expected|anticipat(?:e|es|ed|ing)|"
+    r"project(?:s|ed|ing)|rais(?:e|es|ed|ing)|lower(?:s|ed|ing)?|"
+    r"reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b",
+    re.I,
+)
+_ACTUAL_VALUE = re.compile(
+    r"\b(?:was|were|totaled|reported|generated|delivered|grew|increased|decreased|"
+    r"for\s+the\s+quarter\s+ended|year[- ]to[- ]date)\b",
+    re.I,
+)
 
 _CANONICAL_FULL_YEAR = [
     re.compile(r"\b(?:FY|fiscal\s+year|full[- ]year)\s*'?((?:20)?\d{2})\b", re.I),
@@ -49,6 +59,11 @@ _CANONICAL_QUARTER = [
         r"(?:fiscal(?:\s+year)?\s*)?(20\d{2})\b",
         re.I,
     ),
+    re.compile(
+        r"\b(first|second|third|fourth)\s+quarter\s+ending\s+"
+        r"[A-Za-z]+\s+\d{1,2},?\s*(20\d{2})\b",
+        re.I,
+    ),
 ]
 _QUARTER_WORD = {"first": "1", "second": "2", "third": "3", "fourth": "4"}
 _BARE_YEAR = re.compile(r"\b(20\d{2})\b")
@@ -59,11 +74,50 @@ _BARE_YEAR = re.compile(r"\b(20\d{2})\b")
 _SEGMENT_REVENUE_QUALIFIER = re.compile(
     r"\b(?:cloud\s+subscriptions?|subscriptions?|services?|licensing|commercial|"
     r"government|enterprise|consumer|advertising|international|domestic|platform|"
-    r"software|hardware|maintenance|support|professional\s+services|"
-    r"u\.?s\.?\s+commercial|u\.?s\.?\s+government)\s*$",
+    r"software|hardware|maintenance|support|professional\s+services|annualized|"
+    r"incremental|acquisition|u\.?s\.?\s+commercial|u\.?s\.?\s+government)\s*$",
     re.I,
 )
 _PRODUCT_REVENUE_QUALIFIER = re.compile(r"\bproduct\s*$", re.I)
+
+_VALUE_OWNER_PATTERNS: list[tuple[GuidanceMetric | str, re.Pattern[str]]] = [
+    (
+        GuidanceMetric.GROSS_MARGIN,
+        re.compile(r"\b(?:(?:adj(?:usted)?|non[- ]GAAP)\s+)?gross(?:\s+profit)?\s+margin\b", re.I),
+    ),
+    (
+        GuidanceMetric.OPERATING_MARGIN,
+        re.compile(r"\b(?:(?:adj(?:usted)?|non[- ]GAAP)\s+)?operating\s+margin\b", re.I),
+    ),
+    (
+        GuidanceMetric.FCF,
+        re.compile(r"\b(?:free\s+cash\s+flow|FCF)\b", re.I),
+    ),
+    (
+        GuidanceMetric.EPS,
+        re.compile(
+            r"\b(?:(?:adj(?:usted)?|non[- ]GAAP|GAAP)\s+)?(?:diluted\s+)?"
+            r"(?:EPS|earnings\s+per\s+(?:common\s+)?share)\b",
+            re.I,
+        ),
+    ),
+    (
+        GuidanceMetric.EBITDA,
+        re.compile(r"\b(?:(?:adj(?:usted)?|non[- ]GAAP)\s+)?EBITDA\b(?!\s+margin)", re.I),
+    ),
+    (
+        GuidanceMetric.REVENUE,
+        re.compile(r"\b(?:total\s+(?:product\s+)?revenue|consolidated\s+revenue|net\s+sales|revenues?)\b", re.I),
+    ),
+    ("net_income", re.compile(r"\b(?:(?:adjusted|GAAP)\s+)?net\s+(?:income|loss)\b", re.I)),
+    (
+        "operating_cash",
+        re.compile(r"\b(?:net\s+cash\s+provided\s+by\s+operating\s+activities|operating\s+cash\s+flow)\b", re.I),
+    ),
+    ("capex", re.compile(r"\b(?:capital\s+expenditures?|capex)\b", re.I)),
+    ("repurchase", re.compile(r"\b(?:share|stock)\s+repurchase\b", re.I)),
+    ("contract_value", re.compile(r"\b(?:contract\s+wins?|contracts?\s+valued|transaction\s+consideration)\b", re.I)),
+]
 
 
 def _explicit_forward_context(text: str) -> bool:
@@ -118,17 +172,12 @@ def _metric_action(segment: str, clause: str, anchor: int, mention) -> GuidanceA
 
     directional = _owned_directional_action(clause, anchor, mention.text, mention.metric)
     if directional is not GuidanceAction.NONE:
-        # Words such as "reduced" in risk-factor prose must never create a
-        # guidance action by themselves. Directional actions require an
-        # independently explicit forward-guidance context.
         return directional if has_forward_context else GuidanceAction.NONE
 
     local_action = _action(local)
     if local_action is GuidanceAction.INITIATE and has_forward_context:
         return local_action
 
-    # Header-wide initiation is non-directional and may be inherited only when
-    # the candidate clause itself retains explicit forward context.
     segment_action = _action(segment)
     if segment_action is GuidanceAction.INITIATE and _explicit_forward_context(clause):
         return segment_action
@@ -138,14 +187,11 @@ def _metric_action(segment: str, clause: str, anchor: int, mention) -> GuidanceA
 def _canonical_period_binding(segment: str, mention) -> _PeriodBinding | None:
     """Bind explicit quarter/FY authority before considering a bare year.
 
-    Explicit quarter and full-year phrases have equal authority. The nearest
-    preceding explicit phrase wins; a following phrase is considered only when
-    there is no preceding explicit phrase. A bare year is a last-resort fallback
-    and can never override an explicit quarter/FY expression.
+    Any explicit preceding quarter/FY expression in the current bounded segment
+    outranks a following expression. This prevents a later full-year section from
+    relabeling an earlier quarterly block. Following authority is considered only
+    when no preceding explicit period exists and remains distance-limited.
     """
-    left = max(0, mention.start - 360)
-    right = min(len(segment), mention.end + 240)
-    local = segment[left:right]
     explicit: list[tuple[int, int, int, _PeriodBinding]] = []
 
     def add(binding: _PeriodBinding) -> None:
@@ -161,31 +207,39 @@ def _canonical_period_binding(segment: str, mention) -> _PeriodBinding | None:
         explicit.append((direction, distance, -binding.end, binding))
 
     for pattern in _CANONICAL_FULL_YEAR:
-        for match in pattern.finditer(local):
+        for match in pattern.finditer(segment):
             year = _normalize_year(match.group(1))
-            start, end = left + match.start(), left + match.end()
-            add(_PeriodBinding(f"FY{year}", GuidancePeriodKind.FULL_YEAR, match.group(0), start, end))
+            add(_PeriodBinding(f"FY{year}", GuidancePeriodKind.FULL_YEAR, match.group(0), match.start(), match.end()))
 
     for pattern in _CANONICAL_QUARTER:
-        for match in pattern.finditer(local):
+        for match in pattern.finditer(segment):
             token = match.group(1)
             q = token if token.isdigit() else _QUARTER_WORD[token.lower()]
             year = _normalize_year(match.group(2))
-            start, end = left + match.start(), left + match.end()
-            add(_PeriodBinding(f"Q{q}FY{year}", GuidancePeriodKind.QUARTER, match.group(0), start, end))
+            add(_PeriodBinding(f"Q{q}FY{year}", GuidancePeriodKind.QUARTER, match.group(0), match.start(), match.end()))
 
     if explicit:
         preceding = [item for item in explicit if item[0] == 0 and item[3].end <= mention.start]
-        pool = preceding or explicit
-        pool.sort(key=lambda item: (item[0], item[1], item[2]))
-        best = pool[0]
-        tied = [item for item in pool if item[:2] == best[:2]]
-        periods = {item[3].period for item in tied}
-        if len(periods) != 1:
-            return None
-        return best[3]
+        if preceding:
+            preceding.sort(key=lambda item: (item[1], item[2]))
+            best = preceding[0]
+            tied = [item for item in preceding if item[1] == best[1]]
+            periods = {item[3].period for item in tied}
+            return best[3] if len(periods) == 1 else None
 
-    # Bare-year fallback is deliberately weaker than every explicit period.
+        following = [item for item in explicit if item[0] == 1 and item[1] <= 320]
+        if following:
+            following.sort(key=lambda item: (item[1], item[2]))
+            best = following[0]
+            tied = [item for item in following if item[1] == best[1]]
+            periods = {item[3].period for item in tied}
+            return best[3] if len(periods) == 1 else None
+
+    # Bare-year fallback is deliberately local and weaker than every explicit
+    # quarter/FY expression.
+    left = max(0, mention.start - 180)
+    right = min(len(segment), mention.end + 140)
+    local = segment[left:right]
     bare: list[tuple[int, int, _PeriodBinding]] = []
     for match in _BARE_YEAR.finditer(local):
         start, end = left + match.start(), left + match.end()
@@ -210,12 +264,94 @@ def _canonical_period_binding(segment: str, mention) -> _PeriodBinding | None:
     if not bare:
         return None
     preceding = [item for item in bare if item[0] == 0]
-    pool = preceding or bare
+    pool = preceding or [item for item in bare if item[1] <= 120]
+    if not pool:
+        return None
     pool.sort(key=lambda item: (item[0], item[1], -item[2].end))
     best = pool[0]
     tied = [item for item in pool if item[:2] == best[:2]]
     periods = {item[2].period for item in tied}
     return best[2] if len(periods) == 1 else None
+
+
+def _span_gap(a_start: int, a_end: int, b_start: int, b_end: int) -> int:
+    if a_end <= b_start:
+        return b_start - a_end
+    if b_end <= a_start:
+        return a_start - b_end
+    return 0
+
+
+def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> bool:
+    """Reject a value when another economic metric is closer than its owner."""
+    current_start = anchor
+    current_end = anchor + len(mention.text)
+    current_gap = _span_gap(current_start, current_end, value.start, value.end)
+
+    nearest_other: tuple[int, GuidanceMetric | str] | None = None
+    for owner, pattern in _VALUE_OWNER_PATTERNS:
+        for match in pattern.finditer(clause):
+            if owner is mention.metric and not (match.end() <= current_start or match.start() >= current_end):
+                continue
+            gap = _span_gap(match.start(), match.end(), value.start, value.end)
+            if nearest_other is None or gap < nearest_other[0]:
+                nearest_other = (gap, owner)
+
+    if nearest_other is None:
+        return True
+    other_gap, other_owner = nearest_other
+    if other_owner is mention.metric:
+        return True
+    return current_gap < other_gap
+
+
+def _historical_value_before_guidance(clause: str, anchor: int, mention, value) -> bool:
+    """Prevent results prose immediately before a guidance header from leaking in."""
+    if value is None:
+        return False
+    left = max(0, min(anchor, value.start) - 70)
+    right = min(len(clause), max(anchor + len(mention.text), value.end) + 70)
+    local = clause[left:right]
+    if not _ACTUAL_VALUE.search(local):
+        return False
+    if re.search(r"\b(?:guidance|outlook|forecast|expects?|expected)\b", local, re.I):
+        return False
+
+    before_value = clause[max(0, value.start - 180):value.start]
+    after_value = clause[value.end:min(len(clause), value.end + 180)]
+    return not _FORWARD_SIGNAL.search(before_value) and bool(_FORWARD_SIGNAL.search(after_value))
+
+
+def _ambiguous_parallel_period_table(clause: str) -> bool:
+    return bool(
+        re.search(r"\bthree\s+months\s+ending\b", clause, re.I)
+        and re.search(r"\byear\s+ending\b", clause, re.I)
+        and re.search(r"\b(?:table|reconciliation|guidance)\b", clause, re.I)
+    )
+
+
+def _ambiguous_current_prior_table(clause: str) -> bool:
+    return bool(
+        re.search(r"\b(?:updated|current)\b.{0,40}\bguidance\b", clause, re.I)
+        and re.search(r"\bprior\b.{0,40}\bguidance\b", clause, re.I)
+    )
+
+
+def _fact_role(clause: str, value) -> GuidanceFactRole:
+    if value is None:
+        return GuidanceFactRole.CURRENT
+    before = clause[max(0, value.start - 150):value.start]
+    if re.search(
+        r"\b(?:from\s+(?:our\s+)?)?prior(?:\s+[A-Za-z0-9*.-]+){0,4}\s+(?:guidance|outlook)\b",
+        before,
+        re.I,
+    ) or re.search(
+        r"\bprevious(?:\s+[A-Za-z0-9*.-]+){0,4}\s+(?:guidance|outlook)\b",
+        before,
+        re.I,
+    ):
+        return GuidanceFactRole.QUOTED_PRIOR
+    return GuidanceFactRole.CURRENT
 
 
 def _canonical_scope(clause: str, anchor: int, mention) -> tuple[GuidanceScopeKind, str | None]:
@@ -236,17 +372,17 @@ def _canonical_scope(clause: str, anchor: int, mention) -> tuple[GuidanceScopeKi
     if "product revenue" in lower and "total product revenue" not in lower:
         return GuidanceScopeKind.PRODUCT, label
 
-    # The generic metric matcher can return only the terminal word "revenue".
-    # In that case, inspect a very short adjacent noun phrase and recognize only
-    # explicit business-category qualifiers. Bullets, issuer names and verbs do
-    # not establish non-company scope.
-    prefix = clause[max(0, anchor - 55):anchor]
+    prefix = clause[max(0, anchor - 70):anchor]
     prefix = re.split(r"[.;:•|\n\r]", prefix)[-1].strip()
     if _PRODUCT_REVENUE_QUALIFIER.search(prefix):
         return GuidanceScopeKind.PRODUCT, prefix
     segment_match = _SEGMENT_REVENUE_QUALIFIER.search(prefix)
     if segment_match:
         return GuidanceScopeKind.SEGMENT, segment_match.group(0).strip()
+
+    contribution_context = clause[max(0, anchor - 180):anchor]
+    if re.search(r"\bacquisitions?\b.{0,120}\bcontribut(?:e|es|ed|ing)\b", contribution_context, re.I):
+        return GuidanceScopeKind.SEGMENT, "acquisition contribution"
     return GuidanceScopeKind.COMPANY, None
 
 
@@ -268,14 +404,17 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
             explicit_forward = _explicit_forward_context(local)
             local_action = _metric_action(segment, clause, anchor, mention)
 
-            # A directional word alone is not forward evidence. Numeric facts
-            # need explicit forecast/guidance context in the local clause.
             if not explicit_forward and local_action is GuidanceAction.NONE:
                 continue
 
-            if _ACTUAL.search(local) and not explicit_forward:
+            if _ambiguous_parallel_period_table(clause):
                 rejected.append(
-                    {"reason": "historical_actual", "metric": mention.metric.value, "evidence": clause[:500]}
+                    {"reason": "ambiguous_parallel_period_table", "metric": mention.metric.value, "evidence": clause[:500]}
+                )
+                continue
+            if _ambiguous_current_prior_table(clause):
+                rejected.append(
+                    {"reason": "ambiguous_current_prior_table", "metric": mention.metric.value, "evidence": clause[:500]}
                 )
                 continue
 
@@ -284,6 +423,26 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
                 rejected.append(
                     {
                         "reason": "invalid_reversed_range",
+                        "metric": mention.metric.value,
+                        "value_text": value.text,
+                        "evidence": clause[:500],
+                    }
+                )
+                continue
+            if value is not None and not _value_has_local_metric_owner(clause, anchor, mention, value):
+                rejected.append(
+                    {
+                        "reason": "metric_value_locality",
+                        "metric": mention.metric.value,
+                        "value_text": value.text,
+                        "evidence": clause[:500],
+                    }
+                )
+                continue
+            if value is not None and _historical_value_before_guidance(clause, anchor, mention, value):
+                rejected.append(
+                    {
+                        "reason": "historical_actual",
                         "metric": mention.metric.value,
                         "value_text": value.text,
                         "evidence": clause[:500],
@@ -311,9 +470,7 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
 
             scope_kind, scope_label = _canonical_scope(clause, anchor, mention)
             basis = _basis(segment, mention)
-            role = GuidanceFactRole.CURRENT
-            if re.search(r"\b(?:previous|prior|former)\s+guidance\b", clause, re.I):
-                role = GuidanceFactRole.QUOTED_PRIOR
+            role = _fact_role(clause, value)
 
             low = high = None
             unit = GuidanceUnit.UNKNOWN
@@ -389,7 +546,7 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
                     extraction_method=ExtractionMethod.DETERMINISTIC_TEXT,
                     provenance=[provenance],
                     metadata={
-                        "raw_document_extractor": "guidance-canonical-raw-v2",
+                        "raw_document_extractor": "guidance-canonical-raw-v3",
                         "source_form": document.form,
                     },
                 )
