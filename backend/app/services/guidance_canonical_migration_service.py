@@ -22,14 +22,29 @@ _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
 _MILLION_HEADER = re.compile(r"\b(?:USD|\$)\s*(?:in\s+)?millions?\b|\bin\s+millions?\b", re.I)
 _BILLION_HEADER = re.compile(r"\b(?:USD|\$)\s*(?:in\s+)?billions?\b|\bin\s+billions?\b", re.I)
 _THOUSAND_HEADER = re.compile(r"\b(?:USD|\$)\s*(?:in\s+)?thousands?\b|\bin\s+thousands?\b", re.I)
+_BETWEEN_RANGE = re.compile(
+    r"\bbetween\s+"
+    r"(?P<d1>\$)?\s*(?P<lo>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s1>billion|million|thousand|bn|mm|m|b)?\s*"
+    r"(?P<p1>%|bps|basis points)?\s+and\s+"
+    r"(?P<d2>\$)?\s*(?P<hi>\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s2>billion|million|thousand|bn|mm|m|b)?\s*"
+    r"(?P<p2>%|bps|basis points)?",
+    re.I,
+)
 _NON_COMPANY_REVENUE = re.compile(
     r"\b(?P<label>(?:annual\s+recurring|subscription|segment|product|service|services)\s+revenue)\b",
     re.I,
 )
 _COMPANY_REVENUE = re.compile(
-    r"\b(?P<label>(?:total|consolidated|company[- ]wide)\s+(?:net\s+)?revenues?|net\s+sales)\b",
+    r"\b(?P<label>(?:total\s+(?:net\s+)?product\s+revenue|"
+    r"(?:total|consolidated|company[- ]wide)\s+(?:net\s+)?revenues?|net\s+sales))\b",
     re.I,
 )
+
+
+def _nearly_equal(left: float, right: float) -> bool:
+    return abs(left - right) <= max(1e-7, abs(right) * 1e-7)
 
 
 def _raw_bound_values(value_text: str | None) -> tuple[float | None, float | None]:
@@ -41,6 +56,38 @@ def _raw_bound_values(value_text: str | None) -> tuple[float | None, float | Non
     if len(values) == 1:
         return values[0], values[0]
     return values[0], values[1]
+
+
+def _unit_from_range_tokens(record: GuidanceMetricRecord, match: re.Match[str]) -> GuidanceUnit:
+    groups = match.groupdict()
+    pct = (groups.get("p2") or groups.get("p1") or "").lower()
+    if pct:
+        if "bp" in pct or "basis" in pct:
+            return GuidanceUnit.BASIS_POINTS
+        return GuidanceUnit.PERCENT
+    scale = (groups.get("s2") or groups.get("s1") or "").lower()
+    if scale in {"b", "bn", "billion"}:
+        return GuidanceUnit.USD_BILLION
+    if scale in {"m", "mm", "million"}:
+        return GuidanceUnit.USD_MILLION
+    if scale == "thousand":
+        return GuidanceUnit.USD_THOUSAND
+    if record.metric is GuidanceMetric.EPS:
+        return GuidanceUnit.USD_PER_SHARE
+    return GuidanceUnit.USD
+
+
+def _canonical_pair(low: float, high: float, unit: GuidanceUnit) -> tuple[float, float]:
+    scale = {
+        GuidanceUnit.USD_THOUSAND: 1_000.0,
+        GuidanceUnit.USD_MILLION: 1_000_000.0,
+        GuidanceUnit.USD_BILLION: 1_000_000_000.0,
+    }.get(unit, 1.0)
+    if unit is GuidanceUnit.PERCENT:
+        return low / 100.0, high / 100.0
+    if unit is GuidanceUnit.BASIS_POINTS:
+        return low / 10_000.0, high / 10_000.0
+    return low * scale, high * scale
 
 
 def _source_unit(fact) -> GuidanceUnit:
@@ -65,30 +112,71 @@ def _source_unit(fact) -> GuidanceUnit:
     return unit
 
 
-def _nearest_revenue_scope(fact) -> tuple[GuidanceScopeKind, str | None]:
+def _migration_value_binding(
+    record: GuidanceMetricRecord,
+    fact,
+) -> tuple[float | None, float | None, GuidanceUnit, int | None]:
+    """Recover source-level value/unit/anchor exactly once for legacy migration.
+
+    The permanent raw extractor will emit this binding directly. This bridge
+    exists because the repaired Phase-1.1E ledger already contains normalized
+    values while some original issuer phrasings (notably "between X and Y") were
+    never represented in EvidenceBinding.value_text.
+    """
+    evidence = fact.provenance[0].evidence
+    raw_low, raw_high = _raw_bound_values(evidence.value_text)
+    if raw_low is not None and raw_high is not None:
+        return raw_low, raw_high, _source_unit(fact), evidence.value_start
+
+    if record.low is None or record.high is None:
+        return None, None, fact.unit, None
+
+    for match in _BETWEEN_RANGE.finditer(evidence.full_text):
+        low = float(match.group("lo").replace(",", ""))
+        high = float(match.group("hi").replace(",", ""))
+        if low > high:
+            continue
+        unit = _unit_from_range_tokens(record, match)
+        canonical_low, canonical_high = _canonical_pair(low, high, unit)
+        if _nearly_equal(canonical_low, record.low) and _nearly_equal(canonical_high, record.high):
+            return low, high, unit, match.start()
+
+    return None, None, fact.unit, None
+
+
+def _nearest_revenue_scope(
+    fact,
+    *,
+    value_anchor: int | None = None,
+) -> tuple[GuidanceScopeKind, str | None]:
     """Bind revenue scope to the phrase that owns the selected numeric value.
 
     Metric normalization deliberately collapses phrases such as "net product
-    revenue" to the REVENUE metric. Scope is therefore recovered independently
-    from the nearest source phrase before the bound value. Specific non-company
-    phrases win over generic revenue; an explicit total/consolidated/net-sales
-    phrase can win only when it is closer to the value.
+    revenue" to the REVENUE metric. Scope is recovered independently from the
+    nearest source phrase before the bound value. A longer/more-specific phrase
+    wins ties, so "total product revenue" is company-wide while named-product
+    "product revenue" remains non-company scope.
     """
     if fact.metric is not GuidanceMetric.REVENUE:
         return GuidanceScopeKind.COMPANY, None
 
     evidence = fact.provenance[0].evidence
-    anchor = evidence.value_start
+    anchor = value_anchor if value_anchor is not None else evidence.value_start
     if anchor is None:
-        # Qualitative revenue guidance has no value anchor. Use the local metric
-        # phrase only; ambiguity remains company scope until the raw extractor
-        # emits explicit scope directly.
         local = evidence.metric_text or ""
-        match = _NON_COMPANY_REVENUE.search(local)
-        if not match:
+        company = list(_COMPANY_REVENUE.finditer(local))
+        non_company = list(_NON_COMPANY_REVENUE.finditer(local))
+        candidates: list[tuple[int, GuidanceScopeKind, str]] = []
+        for match in company:
+            label = match.group("label")
+            candidates.append((-len(label), GuidanceScopeKind.COMPANY, label))
+        for match in non_company:
+            label = match.group("label")
+            kind = GuidanceScopeKind.SEGMENT if "segment" in label.lower() else GuidanceScopeKind.PRODUCT
+            candidates.append((-len(label), kind, label))
+        if not candidates:
             return GuidanceScopeKind.COMPANY, None
-        label = match.group("label")
-        kind = GuidanceScopeKind.SEGMENT if "segment" in label.lower() else GuidanceScopeKind.PRODUCT
+        _, kind, label = min(candidates, key=lambda item: item[0])
         return kind, label
 
     left = max(0, anchor - 260)
@@ -99,22 +187,17 @@ def _nearest_revenue_scope(fact) -> tuple[GuidanceScopeKind, str | None]:
         label = match.group("label")
         kind = GuidanceScopeKind.SEGMENT if "segment" in label.lower() else GuidanceScopeKind.PRODUCT
         distance = len(prefix) - match.end()
-        # Priority 0 means a specific scope phrase wins a tie with a company
-        # phrase ending at the same "revenue" token.
-        candidates.append((distance, 0, kind, label))
+        candidates.append((distance, -len(label), kind, label))
 
     for match in _COMPANY_REVENUE.finditer(prefix):
         label = match.group("label")
         distance = len(prefix) - match.end()
-        candidates.append((distance, 1, GuidanceScopeKind.COMPANY, label))
+        candidates.append((distance, -len(label), GuidanceScopeKind.COMPANY, label))
 
     if not candidates:
         return GuidanceScopeKind.COMPANY, None
 
     distance, _, kind, label = min(candidates, key=lambda item: (item[0], item[1]))
-    # Do not let a remote phrase elsewhere in a flattened filing assign scope to
-    # an unrelated value. 180 characters covers ordinary guidance table/copy
-    # constructions while failing safely on distant context.
     if distance > 180:
         return GuidanceScopeKind.COMPANY, None
     return kind, label
@@ -128,10 +211,8 @@ def typed_fact_from_legacy_record_for_migration(record: GuidanceMetricRecord):
     canonical invariant/normalization pipeline owns the fact permanently.
     """
     fact = typed_fact_from_legacy_record(record)
-    evidence = fact.provenance[0].evidence
-    raw_low, raw_high = _raw_bound_values(evidence.value_text)
-    unit = _source_unit(fact)
-    scope_kind, scope_label = _nearest_revenue_scope(fact)
+    raw_low, raw_high, unit, value_anchor = _migration_value_binding(record, fact)
+    scope_kind, scope_label = _nearest_revenue_scope(fact, value_anchor=value_anchor)
 
     updates = {
         "unit": unit,
