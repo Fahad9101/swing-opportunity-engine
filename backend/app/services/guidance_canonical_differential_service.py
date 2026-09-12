@@ -5,6 +5,7 @@ from typing import Any, Iterable
 
 from app.domain.soe_v1_1 import GuidanceMetricRecord
 from app.services.guidance_canonical_assessment_service import assess_canonicalization_result
+from app.services.guidance_canonical_ledger_service import CanonicalGuidanceLedger
 from app.services.guidance_canonical_migration_service import (
     canonicalize_legacy_records_for_migration,
 )
@@ -20,6 +21,42 @@ def _guidance_payloads(validation: dict[str, Any]) -> Iterable[tuple[str, dict[s
 
 def _record_from_payload(payload: dict[str, Any]) -> GuidanceMetricRecord:
     return GuidanceMetricRecord.model_validate(payload)
+
+
+def _fact_summary(fact) -> dict[str, Any]:
+    return {
+        "metric": fact.metric.value,
+        "fiscal_period": fact.fiscal_period,
+        "accounting_basis": fact.accounting_basis,
+        "scope_kind": fact.scope_kind.value,
+        "scope_label": fact.scope_label,
+        "value_kind": fact.value_kind.value,
+        "role": fact.role.value,
+        "low": fact.low,
+        "high": fact.high,
+        "unit": fact.unit.value,
+        "explicit_action": fact.explicit_action.value,
+        "timestamps": sorted({p.source_timestamp.isoformat() for p in fact.provenance}),
+    }
+
+
+def _observation_summary(item) -> dict[str, Any]:
+    fact = item.fact
+    return {
+        "available_at": item.available_at.isoformat(),
+        "comparison_key": list(item.comparison_key),
+        "metric": fact.metric.value,
+        "fiscal_period": fact.fiscal_period,
+        "accounting_basis": fact.accounting_basis,
+        "scope_kind": fact.scope_kind.value,
+        "scope_label": fact.scope_label,
+        "value_kind": fact.value_kind.value,
+        "role": fact.role.value,
+        "low": fact.low,
+        "high": fact.high,
+        "unit": fact.unit.value,
+        "explicit_action": fact.explicit_action.value,
+    }
 
 
 def canonical_guidance_differential_report(
@@ -87,6 +124,8 @@ def canonical_guidance_differential_report(
         classifications_canonical[canonical_classification] += 1
 
         if canonical_classification != old_classification:
+            ledger = CanonicalGuidanceLedger(canonical.accepted)
+            view = ledger.current_and_prior(ticker)
             divergences.append(
                 {
                     "ticker": ticker,
@@ -99,6 +138,10 @@ def canonical_guidance_differential_report(
                     "canonical_fact_count": len(canonical.accepted),
                     "quarantined_fact_count": len(canonical.quarantined),
                     "quarantine_codes": dict(sorted(ticker_codes.items())),
+                    "accepted_facts": [_fact_summary(fact) for fact in canonical.accepted],
+                    "ledger_current": [_observation_summary(item) for item in view.current],
+                    "ledger_prior": [_observation_summary(item) for item in view.prior],
+                    "ledger_conflicts": list(view.conflicts),
                 }
             )
 
