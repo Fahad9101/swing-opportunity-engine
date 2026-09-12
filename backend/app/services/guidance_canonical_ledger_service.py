@@ -29,6 +29,7 @@ _EXPLICIT_ACTIONS = {
     GuidanceAction.REAFFIRM,
     GuidanceAction.WITHDRAW,
 }
+_DIRECTIONAL_ACTIONS = {GuidanceAction.RAISE, GuidanceAction.LOWER}
 _ACTION_PRIORITY = {
     GuidanceAction.NONE: 0,
     GuidanceAction.INITIATE: 1,
@@ -41,13 +42,7 @@ _ACTION_PRIORITY = {
 
 @dataclass(frozen=True)
 class CanonicalGuidanceObservation:
-    """One point-in-time observation of one canonical guidance fact.
-
-    Canonical normalization is allowed to merge identical semantic facts from
-    multiple documents. Chronology must not be lost when the same guidance is
-    repeated on different dates, so the ledger expands merged provenance back
-    into timestamp-specific observations without reparsing source prose.
-    """
+    """One point-in-time observation of one canonical guidance fact."""
 
     fact: CanonicalGuidanceFact
     available_at: datetime
@@ -147,21 +142,59 @@ def _choose_consistent_observation(
     )[-1]
 
 
-def _same_snapshot_conflicts(
-    observations: Iterable[CanonicalGuidanceObservation],
-) -> list[str]:
-    grouped: dict[tuple, list[CanonicalGuidanceObservation]] = defaultdict(list)
-    for item in observations:
-        grouped[(item.available_at, item.comparison_key, item.fact.role.value)].append(item)
+def _midpoint(item: CanonicalGuidanceObservation) -> float | None:
+    if item.fact.low is None or item.fact.high is None:
+        return None
+    return (item.fact.low + item.fact.high) / 2.0
 
-    conflicts: list[str] = []
-    for (available_at, key, role), rows in grouped.items():
-        if _observations_conflict(rows):
-            conflicts.append(
-                f"conflicting canonical facts at {available_at.isoformat()} "
-                f"for key={key} role={role}"
-            )
-    return sorted(conflicts)
+
+def _resolve_latest_current_rows(
+    rows: Iterable[CanonicalGuidanceObservation],
+) -> tuple[CanonicalGuidanceObservation | None, CanonicalGuidanceObservation | None]:
+    """Resolve one latest current value and, when explicit, one quoted prior.
+
+    Same-value NONE/INITIATE duplicates are already non-conflicting. When two
+    different numeric values coexist at one timestamp, resolve them only if one
+    unique RAISE/LOWER value is explicit and the other unique value is
+    directionally consistent as the pre-change guidance. Any additional value,
+    contradictory action, or ambiguity remains a hard conflict.
+    """
+    rows = list(rows)
+    chosen = _choose_consistent_observation(rows)
+    if chosen is not None:
+        return chosen, None
+
+    directional = [row for row in rows if row.fact.explicit_action in _DIRECTIONAL_ACTIONS]
+    directions = {row.fact.explicit_action for row in directional}
+    directional_values = {(row.fact.low, row.fact.high) for row in directional}
+    if len(directions) != 1 or len(directional_values) != 1:
+        return None, None
+
+    direction = next(iter(directions))
+    current = sorted(directional, key=_observation_sort_key)[-1]
+    current_value = (current.fact.low, current.fact.high)
+
+    prior_rows = [row for row in rows if (row.fact.low, row.fact.high) != current_value]
+    if not prior_rows:
+        return current, None
+    if any(row.fact.explicit_action not in {GuidanceAction.NONE, GuidanceAction.INITIATE} for row in prior_rows):
+        return None, None
+    prior_values = {(row.fact.low, row.fact.high) for row in prior_rows}
+    if len(prior_values) != 1:
+        return None, None
+
+    prior = _choose_consistent_observation(prior_rows)
+    if prior is None:
+        return None, None
+    current_midpoint = _midpoint(current)
+    prior_midpoint = _midpoint(prior)
+    if current_midpoint is None or prior_midpoint is None:
+        return None, None
+    if direction is GuidanceAction.RAISE and current_midpoint <= prior_midpoint:
+        return None, None
+    if direction is GuidanceAction.LOWER and current_midpoint >= prior_midpoint:
+        return None, None
+    return current, prior
 
 
 def _legacy_unit(fact: CanonicalGuidanceFact) -> str:
@@ -181,11 +214,6 @@ def _observation_to_legacy_record(
     *,
     rules_hash: str,
 ) -> GuidanceMetricRecord:
-    """Temporary typed compatibility adapter to the frozen pure classifier.
-
-    No metric, period, basis, scope, role, unit, or numeric value is inferred
-    from evidence text here. The evidence span is retained only for provenance.
-    """
     fact = observation.fact
     if not observation.provenance:
         raise ValueError("Canonical guidance observation must retain provenance")
@@ -218,12 +246,7 @@ def _observation_to_legacy_record(
 
 
 class CanonicalGuidanceLedger:
-    """Canonical-only point-in-time ledger.
-
-    This is the architectural boundary after invariant validation and canonical
-    normalization. It never reparses raw SEC prose to alter metric, period,
-    accounting basis, scope, unit, role, or value.
-    """
+    """Canonical-only point-in-time ledger."""
 
     def __init__(self, facts: Iterable[CanonicalGuidanceFact] | None = None):
         self._facts = tuple(facts or ())
@@ -254,16 +277,9 @@ class CanonicalGuidanceLedger:
         if not eligible:
             return CanonicalGuidanceView(ticker=ticker, as_of=as_of, current=(), prior=())
 
-        conflicts = _same_snapshot_conflicts(eligible)
         current_candidates = [item for item in eligible if item.fact.role is GuidanceFactRole.CURRENT]
         if not current_candidates:
-            return CanonicalGuidanceView(
-                ticker=ticker,
-                as_of=as_of,
-                current=(),
-                prior=(),
-                conflicts=tuple(conflicts),
-            )
+            return CanonicalGuidanceView(ticker=ticker, as_of=as_of, current=(), prior=())
 
         latest_ts = max(item.available_at for item in current_candidates)
         latest_current = [item for item in current_candidates if item.available_at == latest_ts]
@@ -273,26 +289,16 @@ class CanonicalGuidanceLedger:
 
         current: list[CanonicalGuidanceObservation] = []
         prior: list[CanonicalGuidanceObservation] = []
+        conflicts: list[str] = []
         for key, rows in current_by_key.items():
-            chosen_current = _choose_consistent_observation(rows)
+            chosen_current, same_snapshot_prior = _resolve_latest_current_rows(rows)
             if chosen_current is None:
                 conflicts.append(f"conflicting current canonical values for key={key}")
                 continue
             current.append(chosen_current)
 
-            older = [
-                item
-                for item in current_candidates
-                if item.comparison_key == key and item.available_at < latest_ts
-            ]
-            if older:
-                prior_ts = max(item.available_at for item in older)
-                prior_rows = [item for item in older if item.available_at == prior_ts]
-                chosen_prior = _choose_consistent_observation(prior_rows)
-                if chosen_prior is None:
-                    conflicts.append(f"conflicting prior canonical values for key={key}")
-                else:
-                    prior.append(chosen_prior)
+            if same_snapshot_prior is not None:
+                prior.append(same_snapshot_prior)
                 continue
 
             quoted = [
@@ -308,6 +314,21 @@ class CanonicalGuidanceLedger:
                     conflicts.append(f"conflicting quoted-prior canonical values for key={key}")
                 else:
                     prior.append(chosen_quoted)
+                continue
+
+            older = [
+                item
+                for item in current_candidates
+                if item.comparison_key == key and item.available_at < latest_ts
+            ]
+            if older:
+                prior_ts = max(item.available_at for item in older)
+                prior_rows = [item for item in older if item.available_at == prior_ts]
+                chosen_prior = _choose_consistent_observation(prior_rows)
+                if chosen_prior is None:
+                    conflicts.append(f"conflicting prior canonical values for key={key}")
+                else:
+                    prior.append(chosen_prior)
 
         return CanonicalGuidanceView(
             ticker=ticker,
@@ -385,11 +406,7 @@ class CanonicalGuidanceLedger:
 def canonicalize_legacy_records_with_roles(
     records: Iterable[GuidanceMetricRecord],
 ):
-    """Migration-only helper preserving same-snapshot quoted-prior roles.
-
-    The permanent extractor should emit roles directly. This bridge exists only
-    for differential validation of the historical Phase 1.1E ledger.
-    """
+    """Migration-only helper preserving same-snapshot quoted-prior roles."""
     records = list(records)
     result = canonicalize_legacy_records(records)
     quoted_prior_ids = {
