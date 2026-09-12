@@ -15,7 +15,7 @@ from app.services.phase_1_1e_run90_population_preflight_v1_1 import (
 # evidence integrity. It does not change any SOE threshold, score, scanner,
 # ranking/classification rule, frozen SOE-1.0.0 rule, or IEE v1.7.2 logic.
 _REBIND = re.compile(
-    r"phase_1_1e_run88_period_rebind;\s*from=(?P<from>[^;]+);\s*to=(?P<to>[^;]+);",
+    r"phase_1_1e_run88_period_rebind;\s*from=(?P<from>[^;]+);\s*to=(?P<to>[^;]+);\s*",
     re.I,
 )
 _RUN88_SCALE = re.compile(
@@ -102,18 +102,17 @@ def _explicit_periods(text: str) -> set[str]:
 def _repair_period(record: GuidanceMetricRecord) -> tuple[GuidanceMetricRecord | None, str | None]:
     """Make explicit issuer period language authoritative; otherwise fail closed.
 
-    Run-88's nearest-preceding-period heuristic can bind an annual row to a
-    nearby quarter header. A single explicit issuer phrase such as "2025
-    Full-Year Guidance" or "Q4 2025 Guidance" is stronger evidence than that
-    heuristic and becomes authoritative here. If a changed Run-88 rebind has no
-    unambiguous explicit period in its preserved evidence, the row is excluded
-    rather than guessed.
+    Once a single explicit issuer period is proven, any older Run-88 rebind
+    marker is stale derived metadata. It is removed before the legacy dedupe
+    stack sees the record, so the old heuristic cannot overwrite the stronger
+    issuer statement on a later pass.
     """
     text = _evidence(record)
     explicit = _explicit_periods(text)
     if len(explicit) == 1:
         authoritative = next(iter(explicit))
-        if authoritative == record.fiscal_period:
+        cleaned_source = _REBIND.sub("", record.evidence_span or "").strip()
+        if authoritative == record.fiscal_period and cleaned_source == (record.evidence_span or "").strip():
             return record, None
         return (
             record.model_copy(
@@ -121,7 +120,7 @@ def _repair_period(record: GuidanceMetricRecord) -> tuple[GuidanceMetricRecord |
                     "fiscal_period": authoritative,
                     "evidence_span": (
                         f"phase_1_1e_run94_explicit_period_authority; "
-                        f"from={record.fiscal_period}; to={authoritative}; {record.evidence_span or ''}"
+                        f"from={record.fiscal_period}; to={authoritative}; {cleaned_source}"
                     )[:1000],
                 }
             ),
@@ -166,11 +165,7 @@ def _nearest_metric_before(text: str, position: int, *, max_distance: int = 260)
 
 
 def _scaled_table_metric_locality_clean(record: GuidanceMetricRecord) -> bool:
-    """Verify that a scaled table range belongs to the record's own metric.
-
-    This closes the Celestica failure where an adjusted-EPS range in a flattened
-    table inherited the revenue table scale and was persisted as revenue.
-    """
+    """Verify that a scaled table range belongs to the record's own metric."""
     if record.metric not in _MONEY or record.low is None or record.high is None:
         return True
     scale = _scale(record)
@@ -199,9 +194,6 @@ def _scaled_table_metric_locality_clean(record: GuidanceMetricRecord) -> bool:
 def _sanitize_after_run90(
     records: Iterable[GuidanceMetricRecord],
 ) -> tuple[list[GuidanceMetricRecord], list[dict]]:
-    # Repair explicit issuer period scope before the established Run-90 deduper.
-    # The old table deduper can otherwise discard a mis-rebound row before the
-    # stronger source-period evidence has a chance to restore it.
     pre_repaired: list[GuidanceMetricRecord] = []
     rejected: list[dict] = []
     for original in records:
@@ -222,7 +214,6 @@ def _sanitize_after_run90(
     established = dedupe_guidance_records_run90(pre_repaired)
     accepted: list[GuidanceMetricRecord] = []
     for record in established:
-        period_reason = None
         if not _scaled_table_metric_locality_clean(record):
             rejected.append(
                 {
@@ -236,8 +227,6 @@ def _sanitize_after_run90(
             continue
         accepted.append(record)
 
-    # Period correction can place formerly separated rows into the same scope;
-    # re-run the established fail-closed population sanitizer after correction.
     return dedupe_guidance_records_run90(accepted), rejected
 
 
