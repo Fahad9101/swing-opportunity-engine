@@ -306,20 +306,24 @@ def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> b
 
 
 def _historical_value_before_guidance(clause: str, anchor: int, mention, value) -> bool:
-    """Prevent results prose immediately before a guidance header from leaking in."""
+    """Prevent a reported result immediately before a guidance header from leaking in."""
     if value is None:
-        return False
-    left = max(0, min(anchor, value.start) - 70)
-    right = min(len(clause), max(anchor + len(mention.text), value.end) + 70)
-    local = clause[left:right]
-    if not _ACTUAL_VALUE.search(local):
-        return False
-    if re.search(r"\b(?:guidance|outlook|forecast|expects?|expected)\b", local, re.I):
         return False
 
     before_value = clause[max(0, value.start - 180):value.start]
     after_value = clause[value.end:min(len(clause), value.end + 180)]
-    return not _FORWARD_SIGNAL.search(before_value) and bool(_FORWARD_SIGNAL.search(after_value))
+    actual_before = _ACTUAL_VALUE.search(before_value)
+    if actual_before is None:
+        return False
+
+    # A true forecast such as "EBITDA is expected to be $58.4m" has its forward
+    # signal before the value and must survive. A historical sentence such as
+    # "EBITDA was $58.4m. Raising 2026 guidance..." has an actual verb before the
+    # value and its first forward signal only after it, so it is rejected.
+    tail_after_actual = before_value[actual_before.end():]
+    if _FORWARD_SIGNAL.search(tail_after_actual):
+        return False
+    return bool(_FORWARD_SIGNAL.search(after_value))
 
 
 def _ambiguous_parallel_period_table(clause: str) -> bool:
