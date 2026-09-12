@@ -32,6 +32,8 @@ jobs:
         run: python scripts/phase_1_1e_v5_minimal_acceptance_repair_v2.py
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
+      - name: Print bounded candidate diagnostics
+        run: python scripts/phase_1_1e_v5_minimal_diagnostics.py
       - name: Run complete deterministic test suite
         env:
           DATABASE_URL: sqlite+pysqlite:///./soe_minimal_v5_acceptance.db
