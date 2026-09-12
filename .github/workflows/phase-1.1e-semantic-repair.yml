@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Apply semantic repair batch
-        run: python scripts/phase_1_1e_semantic_repair_v3.py
+        run: python scripts/phase_1_1e_semantic_repair_v4.py
       - name: Install dependencies
         working-directory: backend
         run: pip install -r requirements.txt
@@ -32,7 +32,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add backend/app/services/guidance_raw_canonical_extractor.py backend/app/services/guidance_raw_typed_extractor.py backend/app/services/guidance_raw_replay_differential_service.py backend/tests/test_guidance_raw_canonical_extractor.py
+          git add backend/app/services/guidance_raw_canonical_extractor.py backend/app/services/guidance_raw_typed_extractor.py backend/tests/test_guidance_raw_canonical_extractor.py
           git diff --cached --check
           git commit -m "Phase 1.1E: repair raw guidance semantic binding [semantic-repair]"
           git push origin HEAD:phase-1.1e-canonical-guidance
