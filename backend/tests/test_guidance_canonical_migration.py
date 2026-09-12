@@ -99,6 +99,44 @@ def test_product_revenue_is_not_company_level_guidance():
     assert GuidanceInvariantCode.NON_COMPANY_SCOPE in {v.code for v in result.quarantined[0].violations}
 
 
+def test_flattened_product_revenue_scope_is_bound_to_selected_value():
+    row = record(
+        ticker="KNSA",
+        low=980_000_000,
+        high=995_000_000,
+        unit="USD",
+        evidence=(
+            "Kiniksa Pharmaceuticals Reports Second Quarter 2026 Financial Results and Corporate Update "
+            "Prior period revenue information and operating expense discussion. Financial Guidance "
+            "Kiniksa expects 2026 ARCALYST net product revenue of between $980 million and $995 million, "
+            "reflecting continued patient demand and commercial execution."
+        ),
+        ts=T3,
+    )
+    result = canonicalize_legacy_records_for_migration([row])
+    assert not result.accepted
+    assert len(result.quarantined) == 1
+    assert result.quarantined[0].fact.scope_kind is GuidanceScopeKind.PRODUCT
+    assert GuidanceInvariantCode.NON_COMPANY_SCOPE in {v.code for v in result.quarantined[0].violations}
+
+
+def test_explicit_total_revenue_nearer_value_overrides_remote_product_revenue():
+    row = record(
+        ticker="MIXED",
+        low=1_000_000_000,
+        high=1_100_000_000,
+        unit="USD",
+        evidence=(
+            "Product revenue grew during the quarter. For FY2026 the company expects total revenue "
+            "of $1.0 billion to $1.1 billion."
+        ),
+        ts=T3,
+    )
+    result = canonicalize_legacy_records_for_migration([row])
+    assert not result.quarantined
+    assert result.accepted[0].scope_kind is GuidanceScopeKind.COMPANY
+
+
 def test_margin_level_remains_absolute_despite_adjacent_growth_rows():
     row = record(
         ticker="RGEN",
