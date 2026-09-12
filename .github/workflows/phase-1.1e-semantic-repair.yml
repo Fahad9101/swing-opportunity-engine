@@ -1,5 +1,6 @@
 name: Phase 1.1E Semantic Repair
 
+# Trigger v8 systemic semantic acceptance repair.
 on:
   push:
     branches:
