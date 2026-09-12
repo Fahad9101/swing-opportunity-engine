@@ -1,6 +1,6 @@
 name: Phase 1.1E Semantic Repair
 
-# Trigger v10 narrowly scoped semantic acceptance repair with diagnostics and immutable replay.
+# Trigger v11 semantic acceptance repair with full deterministic and immutable replay gates.
 on:
   push:
     branches:
@@ -28,7 +28,7 @@ jobs:
           python-version: '3.12'
           cache: pip
       - name: Apply narrowed semantic repair batch
-        run: python scripts/phase_1_1e_semantic_repair_v10.py
+        run: python scripts/phase_1_1e_semantic_repair_v11.py
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
       - name: Print targeted semantic diagnostics
@@ -55,14 +55,14 @@ jobs:
         run: |
           python -m app.cli_guidance_raw_replay_differential \
             semantic-replay-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json \
-            --output semantic-repair-v10-replay.json \
+            --output semantic-repair-v11-replay.json \
             --min-interval 0.15 \
             --retries 3
       - name: Enforce non-regression acceptance gate
         run: |
           python - <<'PY'
           import json
-          report = json.load(open('semantic-repair-v10-replay.json'))
+          report = json.load(open('semantic-repair-v11-replay.json'))
           summary = {
               'documents_verified': f"{report['verified_source_count']}/{report['source_manifest_count']}",
               'fetch_failures': report['fetch_failure_count'],
@@ -86,8 +86,8 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: semantic-repair-v10-prepublish-replay
-          path: semantic-repair-v10-replay.json
+          name: semantic-repair-v11-prepublish-replay
+          path: semantic-repair-v11-replay.json
           if-no-files-found: error
       - name: Publish repair batch
         run: |
@@ -95,5 +95,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add backend/app/services/guidance_raw_canonical_extractor.py backend/tests/test_guidance_raw_canonical_extractor.py
           git diff --cached --check
-          git commit -m "Phase 1.1E: resolve final canonical semantic regressions [semantic-repair-v10]"
+          git commit -m "Phase 1.1E: finalize canonical semantic repair [semantic-repair-v11]"
           git push origin HEAD:phase-1.1e-canonical-guidance
