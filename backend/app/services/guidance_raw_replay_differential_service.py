@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any, Mapping
 
 from app.domain.guidance_canonical_v1 import CanonicalizationResult
-from app.domain.soe_v1_1 import GuidanceClassification, SourceDocument
+from app.domain.soe_v1_1 import SourceDocument
 from app.services.guidance_canonical_assessment_service import assess_canonicalization_result
 from app.services.guidance_canonical_service import CanonicalGuidanceNormalizer, GuidanceInvariantValidator
 from app.services.guidance_raw_typed_extractor import extract_typed_guidance_facts
@@ -103,16 +103,37 @@ def _canonicalize_ticker(
     verified_documents: Mapping[str, VerifiedDocumentContent],
     *,
     rules_hash: str,
-) -> tuple[CanonicalizationResult, int, list[dict[str, Any]]]:
+) -> tuple[CanonicalizationResult, int, list[dict[str, Any]], list[dict[str, Any]]]:
+    """Extract every source for one ticker while isolating document-level failures.
+
+    A malformed candidate in one document must never abort the population audit.
+    Any extraction exception makes the ticker incomplete/fail-closed, but the
+    remaining documents and tickers continue so one run reveals the full error set.
+    """
     validator = GuidanceInvariantValidator()
     validated = []
     raw_fact_count = 0
     rejected_candidates: list[dict[str, Any]] = []
+    extraction_errors: list[dict[str, Any]] = []
 
     for source in sources:
         verified = verified_documents[source.source_url]
         document = _source_document(source, verified, rules_hash=rules_hash)
-        extraction = extract_typed_guidance_facts(document)
+        try:
+            extraction = extract_typed_guidance_facts(document)
+        except Exception as exc:  # parser boundary: report, never partially trust
+            extraction_errors.append(
+                {
+                    "ticker": source.ticker,
+                    "source_url": source.source_url,
+                    "source_accession": source.source_accession,
+                    "source_timestamp": source.source_timestamp.isoformat(),
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
+            continue
+
         raw_fact_count += len(extraction.facts)
         rejected_candidates.extend(
             {
@@ -124,7 +145,7 @@ def _canonicalize_ticker(
         validated.extend(validator.validate(fact) for fact in extraction.facts)
 
     canonical = CanonicalGuidanceNormalizer().normalize(validated)
-    return canonical, raw_fact_count, rejected_candidates
+    return canonical, raw_fact_count, rejected_candidates, extraction_errors
 
 
 def raw_sec_replay_differential_report(
@@ -137,8 +158,8 @@ def raw_sec_replay_differential_report(
     """Replay exact immutable SEC documents through the raw typed architecture.
 
     `verified_documents` must already have passed byte-hash verification against
-    the immutable acceptance manifest. Missing documents are reported and their
-    tickers are not partially classified.
+    the immutable acceptance manifest. Missing or parser-failed documents make
+    their ticker incomplete; partial evidence is never classified as complete.
     """
     effective_rules_hash = rules_hash or str(validation.get("candidate_rules_hash") or "")
     manifest = build_raw_replay_manifest(validation)
@@ -161,6 +182,7 @@ def raw_sec_replay_differential_report(
     divergences: list[dict[str, Any]] = []
     ticker_reports: list[dict[str, Any]] = []
     rejected_count = 0
+    extraction_errors_all: list[dict[str, Any]] = []
 
     for ticker in sorted(benchmark):
         payload = benchmark[ticker]
@@ -178,13 +200,14 @@ def raw_sec_replay_differential_report(
             )
             continue
 
-        canonical, ticker_raw_count, rejected = _canonicalize_ticker(
+        canonical, ticker_raw_count, rejected, extraction_errors = _canonicalize_ticker(
             by_ticker.get(ticker, []),
             verified_documents,
             rules_hash=effective_rules_hash,
         )
         raw_facts += ticker_raw_count
         rejected_count += len(rejected)
+        extraction_errors_all.extend(extraction_errors)
         canonical_facts += len(canonical.accepted)
         quarantined_facts += len(canonical.quarantined)
 
@@ -194,6 +217,24 @@ def raw_sec_replay_differential_report(
                 if violation.quarantine:
                     quarantine_codes[violation.code.value] += 1
                     ticker_codes[violation.code.value] += 1
+
+        if extraction_errors:
+            ticker_reports.append(
+                {
+                    "ticker": ticker,
+                    "legacy_classification": old_classification,
+                    "status": "INCOMPLETE_EXTRACTION_REPLAY",
+                    "source_document_count": len(by_ticker.get(ticker, [])),
+                    "raw_fact_count": ticker_raw_count,
+                    "canonical_fact_count": len(canonical.accepted),
+                    "quarantined_fact_count": len(canonical.quarantined),
+                    "quarantine_codes": dict(sorted(ticker_codes.items())),
+                    "rejected_candidate_count": len(rejected),
+                    "extraction_error_count": len(extraction_errors),
+                    "extraction_errors": extraction_errors,
+                }
+            )
+            continue
 
         assessment = assess_canonicalization_result(
             canonical,
@@ -242,6 +283,11 @@ def raw_sec_replay_differential_report(
         "source_manifest_count": len(manifest),
         "verified_source_count": len(manifest) - len(missing_urls),
         "missing_source_count": len(missing_urls),
+        "extraction_error_count": len(extraction_errors_all),
+        "extraction_errors": sorted(
+            extraction_errors_all,
+            key=lambda item: (item["ticker"], item["source_timestamp"], item["source_url"]),
+        ),
         "complete_ticker_count": complete_tickers,
         "incomplete_ticker_count": len(benchmark) - complete_tickers,
         "raw_typed_fact_count": raw_facts,
