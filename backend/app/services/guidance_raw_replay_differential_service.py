@@ -10,7 +10,7 @@ from app.domain.guidance_canonical_v1 import CanonicalizationResult
 from app.domain.soe_v1_1 import SourceDocument
 from app.services.guidance_canonical_assessment_service import assess_canonicalization_result
 from app.services.guidance_canonical_service import CanonicalGuidanceNormalizer, GuidanceInvariantValidator
-from app.services.guidance_raw_typed_extractor import extract_typed_guidance_facts
+from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
 
 
 _SEC_URL = re.compile(
@@ -98,6 +98,51 @@ def _source_document(source: RawReplaySource, verified: VerifiedDocumentContent,
     )
 
 
+def _fact_summary(fact) -> dict[str, Any]:
+    provenance = []
+    for item in fact.provenance:
+        provenance.append(
+            {
+                "source_url": item.source_url,
+                "source_timestamp": item.source_timestamp.isoformat(),
+                "source_document_hash": item.source_document_hash,
+                "metric_text": item.evidence.metric_text,
+                "value_text": item.evidence.value_text,
+                "period_text": item.evidence.period_text,
+                "action_text": item.evidence.action_text,
+                "evidence": item.evidence.full_text[:700],
+            }
+        )
+    return {
+        "metric": fact.metric.value,
+        "fiscal_period": fact.fiscal_period,
+        "accounting_basis": fact.accounting_basis,
+        "scope_kind": fact.scope_kind.value,
+        "scope_label": fact.scope_label,
+        "value_kind": fact.value_kind.value,
+        "role": fact.role.value,
+        "low": fact.low,
+        "high": fact.high,
+        "unit": fact.unit.value,
+        "explicit_action": fact.explicit_action.value,
+        "provenance": provenance,
+    }
+
+
+def _quarantine_summary(item) -> dict[str, Any]:
+    return {
+        "fact": _fact_summary(item.fact),
+        "violations": [
+            {
+                "code": violation.code.value,
+                "message": violation.message,
+                "quarantine": violation.quarantine,
+            }
+            for violation in item.violations
+        ],
+    }
+
+
 def _canonicalize_ticker(
     sources: list[RawReplaySource],
     verified_documents: Mapping[str, VerifiedDocumentContent],
@@ -120,7 +165,7 @@ def _canonicalize_ticker(
         verified = verified_documents[source.source_url]
         document = _source_document(source, verified, rules_hash=rules_hash)
         try:
-            extraction = extract_typed_guidance_facts(document)
+            extraction = extract_canonical_typed_guidance_facts(document)
         except Exception as exc:  # parser boundary: report, never partially trust
             extraction_errors.append(
                 {
@@ -232,6 +277,8 @@ def raw_sec_replay_differential_report(
                     "rejected_candidate_count": len(rejected),
                     "extraction_error_count": len(extraction_errors),
                     "extraction_errors": extraction_errors,
+                    "accepted_facts": [_fact_summary(fact) for fact in canonical.accepted],
+                    "quarantined_facts": [_quarantine_summary(item) for item in canonical.quarantined],
                 }
             )
             continue
@@ -258,6 +305,9 @@ def raw_sec_replay_differential_report(
                     "canonical_fact_count": len(canonical.accepted),
                     "quarantined_fact_count": len(canonical.quarantined),
                     "quarantine_codes": dict(sorted(ticker_codes.items())),
+                    "accepted_facts": [_fact_summary(fact) for fact in canonical.accepted],
+                    "quarantined_facts": [_quarantine_summary(item) for item in canonical.quarantined],
+                    "rejected_candidates": rejected,
                 }
             )
 
