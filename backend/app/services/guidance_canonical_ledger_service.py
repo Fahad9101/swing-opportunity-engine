@@ -9,17 +9,16 @@ from app.domain.guidance_canonical_v1 import (
     CanonicalGuidanceFact,
     GuidanceFactRole,
     GuidanceProvenance,
+    GuidanceUnit,
 )
 from app.domain.soe_v1_1 import (
+    ExtractionMethod,
     GuidanceAction,
     GuidanceAssessment,
     GuidanceClassification,
     GuidanceMetricRecord,
 )
-from app.services.guidance_canonical_service import (
-    canonical_fact_to_legacy_record,
-    canonicalize_legacy_records,
-)
+from app.services.guidance_canonical_service import canonicalize_legacy_records
 from app.services.guidance_classifier import classify_guidance
 
 
@@ -122,23 +121,59 @@ def _same_snapshot_conflicts(
     return sorted(conflicts)
 
 
+def _legacy_unit(fact: CanonicalGuidanceFact) -> str:
+    if fact.unit is GuidanceUnit.USD:
+        return "USD"
+    if fact.unit is GuidanceUnit.USD_PER_SHARE:
+        return "USD/share"
+    if fact.unit is GuidanceUnit.FRACTION:
+        return "fraction"
+    if fact.unit is GuidanceUnit.UNKNOWN and fact.low is None and fact.high is None:
+        # Qualitative RAISE/LOWER/REAFFIRM/WITHDRAW facts intentionally have no
+        # numeric unit. The frozen classifier can consume them because it uses
+        # action/metric/period, not unit arithmetic. Numeric UNKNOWN is rejected.
+        return "UNKNOWN"
+    raise ValueError(f"Canonical unit {fact.unit.value} is not comparator-compatible")
+
+
 def _observation_to_legacy_record(
     observation: CanonicalGuidanceObservation,
     *,
     rules_hash: str,
 ) -> GuidanceMetricRecord:
-    # Restrict provenance to this point-in-time observation so the compatibility
-    # adapter cannot select a different historical timestamp. No evidence text is
-    # parsed after canonical validation; the frozen classifier only receives the
-    # already typed metric/period/basis/value/action fields.
-    fact = observation.fact.model_copy(update={"provenance": list(observation.provenance)})
-    record = canonical_fact_to_legacy_record(fact, rules_hash=rules_hash)
-    return record.model_copy(
-        update={
-            "source_timestamp": observation.available_at,
-            "as_of": observation.available_at,
-            "fetched_at": observation.available_at,
-        }
+    """Temporary typed compatibility adapter to the frozen pure classifier.
+
+    No metric, period, basis, scope, role, unit, or numeric value is inferred
+    from evidence text here. The evidence span is retained only for provenance.
+    """
+    fact = observation.fact
+    if not observation.provenance:
+        raise ValueError("Canonical guidance observation must retain provenance")
+    primary = min(
+        observation.provenance,
+        key=lambda item: (item.source_timestamp, item.source_url),
+    )
+    return GuidanceMetricRecord(
+        rules_hash=rules_hash,
+        ticker=fact.ticker,
+        fiscal_period=fact.fiscal_period,
+        metric=fact.metric,
+        accounting_basis=fact.accounting_basis,
+        low=fact.low,
+        high=fact.high,
+        unit=_legacy_unit(fact),
+        source=primary.source,
+        source_url=primary.source_url,
+        source_accession=primary.source_accession,
+        source_timestamp=observation.available_at,
+        explicit_action=fact.explicit_action,
+        verified=True,
+        extraction_method=ExtractionMethod.STRUCTURED,
+        evidence_span=primary.evidence.full_text,
+        source_document_hash=primary.source_document_hash,
+        as_of=observation.available_at,
+        fetched_at=observation.available_at,
+        stale=False,
     )
 
 
