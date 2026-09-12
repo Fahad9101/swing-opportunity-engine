@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Apply semantic repair batch
-        run: python scripts/phase_1_1e_semantic_repair_v2.py
+        run: python scripts/phase_1_1e_semantic_repair_v3.py
       - name: Install dependencies
         working-directory: backend
         run: pip install -r requirements.txt
