@@ -56,8 +56,8 @@ def _compact_metric_value_full_year_guidance_row(clause: str, anchor: int, menti
 if "def _compact_metric_value_full_year_guidance_row(" not in text:
     text = replace_once(text, helper_marker, helper + helper_marker, "insert v14 compact guidance row helper")
 
-old_locality = '''            if value is not None and not _value_has_local_metric_owner(clause, anchor, mention, value):\n                rejected.append({"reason": "metric_value_locality", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]}); continue\n'''
-new_locality = '''            if value is not None and not _value_has_local_metric_owner(clause, anchor, mention, value) and not _compact_metric_value_full_year_guidance_row(clause, anchor, mention, value):\n                rejected.append({"reason": "metric_value_locality", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]}); continue\n'''
+old_locality = '''            if value is not None and owned_value is None and not _value_has_local_metric_owner(clause, anchor, mention, value):\n                rejected.append({"reason": "metric_value_locality", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]}); continue\n'''
+new_locality = '''            if value is not None and owned_value is None and not _value_has_local_metric_owner(clause, anchor, mention, value) and not _compact_metric_value_full_year_guidance_row(clause, anchor, mention, value):\n                rejected.append({"reason": "metric_value_locality", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]}); continue\n'''
 text = replace_once(text, old_locality, new_locality, "v14 compact guidance locality exception")
 path.write_text(text)
 
