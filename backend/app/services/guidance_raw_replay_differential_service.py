@@ -45,12 +45,20 @@ def _guidance_payloads(validation: dict[str, Any]):
 
 
 def build_raw_replay_manifest(validation: dict[str, Any]) -> list[RawReplaySource]:
-    """Build a unique immutable SEC source manifest from the acceptance artifact."""
+    """Build the immutable SEC replay manifest from canonical evidence sources.
+
+    New Phase-1.1E artifacts carry `source_documents`, which is authoritative
+    because it includes every document that produced a raw typed guidance fact,
+    including facts later quarantined. Older artifacts fall back to legacy ledger
+    rows so historical acceptance bundles remain replayable.
+    """
     by_url: dict[str, RawReplaySource] = {}
     conflicts: list[str] = []
 
     for ticker, payload in _guidance_payloads(validation):
-        for record in payload.get("ledger_records") or []:
+        source_rows = list(payload.get("source_documents") or [])
+        rows = source_rows if source_rows else list(payload.get("ledger_records") or [])
+        for record in rows:
             url = str(record.get("source_url") or "").strip()
             expected_hash = str(record.get("source_document_hash") or "").strip().lower()
             timestamp_raw = record.get("source_timestamp")
@@ -58,7 +66,7 @@ def build_raw_replay_manifest(validation: dict[str, Any]) -> list[RawReplaySourc
                 continue
             match = _SEC_URL.match(url)
             if match is None:
-                conflicts.append(f"Non-SEC archive source in guidance ledger: {url}")
+                conflicts.append(f"Non-SEC archive source in guidance evidence: {url}")
                 continue
             timestamp = datetime.fromisoformat(str(timestamp_raw).replace("Z", "+00:00"))
             source = RawReplaySource(

@@ -1570,6 +1570,23 @@ def _suppress_document_fragments(facts: Iterable[TypedGuidanceFact], rejected: l
     return [fact for idx, fact in enumerate(items) if idx not in remove]
 
 
+_PENDING_GUIDANCE_REVIEW = re.compile(
+    r"(?:\b(?:reviewing|reassessing|evaluating)\b.{0,260}\b(?:guidance|outlook)\b.{0,260}\b(?:will|expects?\s+to)\s+(?:provide|issue|announce|give)\b.{0,100}\bupdate\b"
+    r"|\b(?:guidance|outlook)\b.{0,180}\bunder\s+review\b.{0,220}\bupdate\b)",
+    re.I | re.S,
+)
+
+
+def _pending_guidance_review(clause: str) -> bool:
+    """Identify an explicit pending-review state without treating prior bounds as current.
+
+    The issuer has not withdrawn guidance, but the prior quantitative range is no
+    longer a clean current reaffirmation. Emit a qualitative current observation
+    at the new source timestamp so canonical assessment cannot fall back through
+    the unresolved update to an older numeric snapshot.
+    """
+    return bool(_PENDING_GUIDANCE_REVIEW.search(clause))
+
 def _build_fact(*, document: SourceDocument, mention, period: _PeriodBinding, basis: str, scope_kind: GuidanceScopeKind, scope_label: str | None, role: GuidanceFactRole, action: GuidanceAction, value: _ValueBinding | None, clause: str, anchor: int) -> TypedGuidanceFact:
     low = high = None; unit = GuidanceUnit.UNKNOWN; value_kind = GuidanceValueKind.QUALITATIVE; value_text = None; value_start = value_end = None
     if value is not None:
@@ -1601,6 +1618,7 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
                 rejected.append({"reason": "ambiguous_current_prior_table", "metric": mention.metric.value, "evidence": clause[:500]}); continue
             if _ambiguous_eps_basis_window(clause, anchor, mention):
                 rejected.append({"reason": "ambiguous_accounting_basis", "metric": mention.metric.value, "evidence": clause[:500]}); continue
+            pending_review = _pending_guidance_review(clause)
             previous_now_value, previous_now_prior = _previous_now_value_pair(clause, mention)
             directional_value, directional_prior = _directional_value_pair(clause, anchor, mention, local_action)
             suffix_value = _suffix_owned_money_range(clause, anchor, mention)
@@ -1611,6 +1629,9 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
             value = _prefer_same_sentence_value(clause, anchor, mention, value)
             value = _normalize_margin_level(clause, anchor, mention, value)
             explicit_prior = previous_now_prior or directional_prior
+            if pending_review:
+                value = None
+                explicit_prior = None
             if value is not None and value.low > value.high:
                 rejected.append({"reason": "invalid_reversed_range", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]}); continue
             if _value_crosses_other_metric_owner(clause, anchor, mention, value):
@@ -1631,7 +1652,7 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
                 rejected.append({"reason": "ambiguous_current_guidance_columns", "metric": mention.metric.value, "value_text": value.text if value is not None else None, "evidence": clause[:500]}); continue
             if value is not None and (_value_is_historical_actual(clause, anchor, value) or _value_precedes_forward_heading(clause, anchor, value) or _local_preliminary_actual(clause, anchor, mention, value)):
                 rejected.append({"reason": "historical_actual", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]}); continue
-            role = GuidanceFactRole.CURRENT if previous_now_value is not None else _fact_role(clause, value)
+            role = GuidanceFactRole.CURRENT if pending_review or previous_now_value is not None else _fact_role(clause, value)
             if (
                 role is GuidanceFactRole.QUOTED_PRIOR
                 and _quoted_prior_marker_owned_by_other_metric(clause, anchor, mention, value)
@@ -1706,7 +1727,7 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
                         "evidence": clause[:500],
                     }
                 ); continue
-            if value is None and local_action not in {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM, GuidanceAction.WITHDRAW}:
+            if value is None and not pending_review and local_action not in {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM, GuidanceAction.WITHDRAW}:
                 rejected.append({"reason": "missing_bound_value", "metric": mention.metric.value, "evidence": clause[:500]}); continue
             scope_kind, scope_label = _canonical_scope(clause, anchor, mention, value)
             basis = _basis(segment, mention)
