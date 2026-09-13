@@ -5,6 +5,9 @@ on:
     branches: [phase-1.1e-canonical-guidance]
     paths:
       - .github/workflows/phase-1.1e-canonical-shadow-publisher.yml
+      - tools/apply_phase_1_1e_canonical_shadow_integration.py
+      - backend/app/services/canonical_shadow_guidance_service.py
+      - backend/tests/test_canonical_shadow_guidance_integration.py
   workflow_dispatch:
 
 permissions:
