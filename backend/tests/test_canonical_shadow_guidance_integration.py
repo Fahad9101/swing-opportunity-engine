@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 from datetime import UTC, date, datetime
 
-from app.core.config import SOE_1_1_RULES_PATH, load_rules_for_version, rules_hash_for
+from app.core.config import SOE_1_1_RULES_PATH, load_rules_for_version, rules_hash
 from app.domain.soe_v1_1 import SecDocumentReference, SourceDocument
 from app.services.canonical_shadow_guidance_service import assess_canonical_guidance_documents
 from app.services.guidance_raw_replay_differential_service import build_raw_replay_manifest
@@ -12,7 +12,7 @@ from app.services.source_document_service import complete_submission_text_refere
 
 def _rules():
     rules = load_rules_for_version(SOE_1_1_RULES_PATH, "SOE-1.1.0")
-    return rules, rules_hash_for(rules)
+    return rules, rules_hash(rules)
 
 
 def _document(ticker: str, text: str, timestamp: datetime, suffix: str) -> SourceDocument:
@@ -36,7 +36,7 @@ def _document(ticker: str, text: str, timestamp: datetime, suffix: str) -> Sourc
 
 
 def test_full_market_guidance_path_does_not_bind_q1_eps_to_full_year_orcl_period():
-    rules, rules_hash = _rules()
+    rules, rules_hash_value = _rules()
     june = _document(
         "ORCL",
         "Q1 FY 2027 Guidance. Non-GAAP earnings per share is expected to be between $1.71 and $1.75. "
@@ -52,7 +52,7 @@ def test_full_market_guidance_path_does_not_bind_q1_eps_to_full_year_orcl_period
     )
 
     assessment, meta, errors = assess_canonical_guidance_documents(
-        "ORCL", [june, september], rules, rules_hash=rules_hash
+        "ORCL", [june, september], rules, rules_hash=rules_hash_value
     )
 
     assert errors == []
@@ -68,7 +68,7 @@ def test_full_market_guidance_path_does_not_bind_q1_eps_to_full_year_orcl_period
 
 
 def test_guidance_under_review_becomes_latest_qualitative_state_and_blocks_stale_fallback():
-    rules, rules_hash = _rules()
+    rules, rules_hash_value = _rules()
     july = _document(
         "IOVA",
         "Full Year 2026 Guidance. Total revenue guidance is expected to be $350 million to $370 million.",
@@ -84,7 +84,7 @@ def test_guidance_under_review_becomes_latest_qualitative_state_and_blocks_stale
     )
 
     assessment, meta, errors = assess_canonical_guidance_documents(
-        "IOVA", [july, august], rules, rules_hash=rules_hash
+        "IOVA", [july, august], rules, rules_hash=rules_hash_value
     )
 
     assert errors == []
