@@ -84,5 +84,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: phase-1.1e-surgical-v5-acceptance
-          path: semantic-surgical-v5-acceptance.json
+          path: |
+            semantic-surgical-v5-acceptance.json
+            backend/app/services/guidance_raw_canonical_extractor.py
+            backend/tests/test_guidance_v5_surgical_acceptance.py
           if-no-files-found: error
