@@ -69,7 +69,6 @@ def _compact_metric_forward_guidance_value(clause: str, anchor: int, mention) ->
         return None
 
     value_start = mention_end + match.start("lo")
-    # Include a leading dollar sign in the raw evidence span when present.
     if match.group("d1"):
         value_start = mention_end + match.start("d1")
     value_end = mention_end + match.end("s2") if match.group("s2") else mention_end + match.end("s1")
@@ -104,7 +103,7 @@ def test_compact_ebitda_value_before_full_year_guidance_heading_is_retained_v15(
         "Net Income of $222 million to $239 million • Diluted EPS of $7.15 to $7.65 • EBITDA (1) of $381 million to $403 million Full Year 2025 Adjusted Guidance",
     ))
     ebitda = [f for f in ex.facts if f.metric.value == "ebitda" and f.low == 381.0 and f.high == 403.0]
-    assert ebitda
+    assert ebitda, ex.rejected_candidates
     assert all(f.fiscal_period == "FY2025" for f in ebitda), [(f.fiscal_period, f.low, f.high) for f in ebitda]
 
 
