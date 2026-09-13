@@ -11,12 +11,11 @@ permissions:
 
 jobs:
   publish-materialized-source:
-    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E surgical v5 acceptance v35') }}
+    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E materialized source publisher v37') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       MATERIALIZED_ARTIFACT_ID: '10318777142'
-      ACCEPTED_BASE_COMMIT: '0ee460a0c0befdc94b641262d89819059bf721f0'
       EXPECTED_EXTRACTOR_SHA256: '503dd1d4f15ecec65c3abcc790173fd0ae742ab08cf0691e298d99b468c754f5'
       EXPECTED_TEST_SHA256: '31c08dd7210fbb553bfac5b683f551c4fd6c1f80e4e79692e55142b7095ae1b9'
     steps:
@@ -42,29 +41,13 @@ jobs:
         run: |
           test "$(sha256sum materialized/unpacked/backend/app/services/guidance_raw_canonical_extractor.py | awk '{print $1}')" = "${EXPECTED_EXTRACTOR_SHA256}"
           test "$(sha256sum materialized/unpacked/backend/tests/test_guidance_v5_surgical_acceptance.py | awk '{print $1}')" = "${EXPECTED_TEST_SHA256}"
-      - name: Publish consolidated raw extractor and direct-validation workflow
+      - name: Publish consolidated raw extractor
         run: |
           cp materialized/unpacked/backend/app/services/guidance_raw_canonical_extractor.py backend/app/services/guidance_raw_canonical_extractor.py
           cp materialized/unpacked/backend/tests/test_guidance_v5_surgical_acceptance.py backend/tests/test_guidance_v5_surgical_acceptance.py
-          git show "${ACCEPTED_BASE_COMMIT}:.github/workflows/phase-1.1e-semantic-repair.yml" > /tmp/direct.yml
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('/tmp/direct.yml')
-          text = p.read_text()
-          apply_step = """      - name: Apply surgical v5 candidate in working tree\n        run: python scripts/phase_1_1e_v5_surgical_acceptance_v33.py\n"""
-          if text.count(apply_step) != 1:
-              raise SystemExit(f'expected one runtime-apply step, found {text.count(apply_step)}')
-          text = text.replace(apply_step, '', 1)
-          materialized_upload = """          path: |\n            semantic-surgical-v5-acceptance.json\n            backend/app/services/guidance_raw_canonical_extractor.py\n            backend/tests/test_guidance_v5_surgical_acceptance.py\n"""
-          if text.count(materialized_upload) != 1:
-              raise SystemExit(f'expected one materialized upload block, found {text.count(materialized_upload)}')
-          text = text.replace(materialized_upload, "          path: semantic-surgical-v5-acceptance.json\n", 1)
-          p.write_text(text)
-          PY
-          mv /tmp/direct.yml .github/workflows/phase-1.1e-semantic-repair.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add backend/app/services/guidance_raw_canonical_extractor.py backend/tests/test_guidance_v5_surgical_acceptance.py .github/workflows/phase-1.1e-semantic-repair.yml
+          git add backend/app/services/guidance_raw_canonical_extractor.py backend/tests/test_guidance_v5_surgical_acceptance.py
           git diff --cached --check
-          git commit -m "Trigger Phase 1.1E surgical v5 acceptance v36 consolidated raw extractor"
+          git commit -m "Phase 1.1E: publish consolidated raw extractor"
           git push origin HEAD:phase-1.1e-canonical-guidance
