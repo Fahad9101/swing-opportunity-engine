@@ -76,6 +76,12 @@ def _legacy_audit_unit(unit: GuidanceUnit, low: float | None, high: float | None
 
 
 def _audit_record(observation, *, rules_hash: str) -> dict[str, Any]:
+    """Serialize canonical evidence in the stable legacy audit envelope.
+
+    `ledger_records` is an external validation/replay surface used by older Phase
+    1.1E regression tests and artifacts. Keep it round-trippable through
+    GuidanceMetricRecord while adding canonical metadata alongside it.
+    """
     fact = observation.fact
     provenance = sorted(
         observation.provenance,
@@ -83,6 +89,7 @@ def _audit_record(observation, *, rules_hash: str) -> dict[str, Any]:
     )
     primary = provenance[0]
     midpoint = None if fact.low is None or fact.high is None else (fact.low + fact.high) / 2.0
+    timestamp = observation.available_at.isoformat()
     return {
         "rules_hash": rules_hash,
         "ticker": fact.ticker,
@@ -96,12 +103,15 @@ def _audit_record(observation, *, rules_hash: str) -> dict[str, Any]:
         "source": primary.source,
         "source_url": primary.source_url,
         "source_accession": primary.source_accession,
-        "source_timestamp": observation.available_at.isoformat(),
+        "source_timestamp": timestamp,
         "explicit_action": fact.explicit_action.value,
         "verified": True,
-        "extraction_method": "STRUCTURED",
+        "extraction_method": "deterministic_text",
         "evidence_span": primary.evidence.full_text,
         "source_document_hash": primary.source_document_hash,
+        "as_of": timestamp,
+        "fetched_at": timestamp,
+        "stale": False,
         "canonical": True,
         "canonical_role": fact.role.value,
         "canonical_scope_kind": fact.scope_kind.value,
