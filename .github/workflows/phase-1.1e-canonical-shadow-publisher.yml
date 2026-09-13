@@ -1,0 +1,73 @@
+name: Phase 1.1E Canonical Shadow Publisher
+
+on:
+  push:
+    branches: [phase-1.1e-canonical-guidance]
+    paths:
+      - .github/workflows/phase-1.1e-canonical-shadow-publisher.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout canonical branch
+        uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Apply guarded integration patch
+        run: python tools/apply_phase_1_1e_canonical_shadow_integration.py
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Run focused canonical integration regressions
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_ci.db
+          PROVIDER_NAME: fixture
+          SEC_USER_AGENT: "SwingOpportunityEngine-CI/1.0 (ci@example.invalid)"
+        run: >-
+          python -m pytest -q
+          backend/tests/test_canonical_shadow_guidance_integration.py
+          backend/tests/test_guidance_raw_canonical_consolidation.py
+          backend/tests/test_guidance_canonical_pipeline.py
+          backend/tests/test_shadow_enrichment_v1_1.py
+          backend/tests/test_source_document_service_v1_1.py
+
+      - name: Run complete deterministic suite
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_ci.db
+          PROVIDER_NAME: fixture
+          SEC_USER_AGENT: "SwingOpportunityEngine-CI/1.0 (ci@example.invalid)"
+        run: python -m pytest -q
+
+      - name: Verify clean patch formatting
+        run: git diff --check
+
+      - name: Publish tested source changes
+        run: |
+          if git diff --quiet; then
+            echo "No source changes to publish."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            backend/app/services/source_document_service.py \
+            backend/app/services/shadow_enrichment_service.py \
+            backend/app/services/guidance_raw_replay_differential_service.py \
+            backend/app/services/guidance_raw_canonical_extractor.py
+          git commit -m "Wire canonical guidance into full-market shadow validation"
+          git push origin HEAD:phase-1.1e-canonical-guidance
