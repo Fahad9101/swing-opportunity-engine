@@ -1,3 +1,5 @@
 Full-market acceptance trigger for canonical guidance integration.
 Source integration commit: 141f41d1a8db564ae756b3a52c5e25736c783e83
 Consolidated replay trigger commit: 856939c8fd1d9652cc86faf919cc16c0a6b5253f
+Guidance sufficiency metadata repair commit: d45d05df021be8e17395ed98f3f256054c1f51d5
+Cleanup commit: 944e7c68446e924e7a7bda2a2640969278ec361a
