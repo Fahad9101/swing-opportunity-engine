@@ -129,10 +129,11 @@ class GuidanceEvidenceBinder:
 
     def bind(self, fact, document: SourceDocument) -> GuidanceEvidenceBindingResult:
         base = self._v2.bind(fact, document)
-        if not base.accepted:
-            return base
-
         local = _window(fact)
+
+        # V3 semantic checks run even when an earlier layer already rejected the
+        # fact. This preserves the most specific quarantine diagnostics without
+        # ever turning a rejection back into an acceptance.
 
         # A statement explicitly describing a quarter-ended outlook cannot own a
         # full-year fact. The fiscal year in the date is not the guidance period.
