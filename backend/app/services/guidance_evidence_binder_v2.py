@@ -76,6 +76,20 @@ _SUBCOMPONENT_REVENUE = re.compile(
     r"\brevenue\s+from\s+(?:the\s+)?(?:new\s+)?(?:acquisitions?|segment|business|project)\b",
     re.I,
 )
+_QUARTER_GUIDANCE_HEADER = re.compile(
+    r"\b(?:Q[1-4]\s+(?:FY\s*)?20\d{2}|"
+    r"(?:first|second|third|fourth)\s+(?:fiscal\s+)?quarter(?:\s+(?:of\s+)?(?:FY\s*)?20\d{2})?)\s+guidance\b",
+    re.I,
+)
+_FULL_YEAR_GUIDANCE_HEADER = re.compile(
+    r"\b(?:FY\s*20\d{2}|full[- ]year(?:\s+20\d{2})?)\s+guidance\b",
+    re.I,
+)
+_METRIC_LABEL = re.compile(
+    r"\b(?:revenue|revenues|net\s+sales|EPS|earnings\s+per\s+share|EBITDA|free\s+cash\s+flow|FCF|"
+    r"gross\s+margin|operating\s+margin)\b",
+    re.I,
+)
 
 _METRIC_AFTER_VALUE: list[tuple[GuidanceMetric, re.Pattern[str]]] = [
     (GuidanceMetric.FCF, re.compile(r"^\s*(?:of\s+)?(?:adjusted\s+)?(?:free\s+cash\s+flow|FCF)\b", re.I)),
@@ -127,27 +141,30 @@ def _period_year(fiscal_period: str) -> int | None:
 
 def _mixed_quarter_full_year_guidance_table(text: str) -> bool:
     normalized = re.sub(r"\s+", " ", text or "").strip()
-    quarter = re.search(
-        r"\b(?:Q[1-4]\s+(?:FY\s*)?20\d{2}|"
-        r"(?:first|second|third|fourth)\s+(?:fiscal\s+)?quarter(?:\s+(?:of\s+)?(?:FY\s*)?20\d{2})?)\s+guidance\b",
-        normalized,
-        re.I,
-    )
-    full_year = re.search(
-        r"\b(?:FY\s*20\d{2}|full[- ]year(?:\s+20\d{2})?)\s+guidance\b",
-        normalized,
-        re.I,
-    )
-    if not (quarter and full_year):
+    quarter_headers = list(_QUARTER_GUIDANCE_HEADER.finditer(normalized))
+    full_year_headers = list(_FULL_YEAR_GUIDANCE_HEADER.finditer(normalized))
+    if not quarter_headers or not full_year_headers:
         return False
-    numeric_count = len(
-        re.findall(
-            r"\$?\s*\d[\d,.]*(?:\s*(?:million|billion|m|b|%))?",
-            normalized,
-            re.I,
-        )
-    )
-    return numeric_count >= 6
+
+    for quarter in quarter_headers:
+        for full_year in full_year_headers:
+            first, second = sorted((quarter, full_year), key=lambda match: match.start())
+            between = normalized[first.end():second.start()]
+            # A flattened table commonly places the period headers side by side,
+            # before any metric row. Narrative guidance places metric/value text
+            # between the two period sections and is therefore admissible.
+            if len(between) <= 40 and not _METRIC_LABEL.search(between):
+                tail = normalized[second.end():second.end() + 500]
+                numeric_count = len(
+                    re.findall(
+                        r"\$?\s*\d[\d,.]*(?:\s*(?:million|billion|m|b|%))?",
+                        tail,
+                        re.I,
+                    )
+                )
+                if numeric_count >= 4:
+                    return True
+    return False
 
 
 class GuidanceEvidenceBinder:
@@ -164,12 +181,19 @@ class GuidanceEvidenceBinder:
         self._v1 = StrictV1GuidanceEvidenceBinder()
 
     def bind(self, fact, document: SourceDocument) -> GuidanceEvidenceBindingResult:
+        evidence = fact.provenance[0].evidence
+        text = evidence.full_text or ""
         base = self._v1.bind(fact, document)
+
+        # Document-level row/column ambiguity is evaluated even when strict-v1
+        # has already rejected another dimension so the quarantine retains the
+        # true mixed-period-table defect explicitly.
+        if _mixed_quarter_full_year_guidance_table(text):
+            return _fail(base, "column", "column-v2: flattened quarter/full-year table is ambiguous")
+
         if not base.accepted:
             return base
 
-        evidence = fact.provenance[0].evidence
-        text = evidence.full_text or ""
         local = _local_value_context(fact)
         suffix = _selected_suffix(fact)
         prefix = _selected_prefix(fact)
@@ -202,9 +226,6 @@ class GuidanceEvidenceBinder:
             actual_year = table_match.group("year") or table_match.group("year2")
             if actual_year and fact.fiscal_period.upper() == f"FY{actual_year}":
                 return _fail(base, "column", "column-v2: selected value belongs to the Actual FY Results column")
-
-        if _mixed_quarter_full_year_guidance_table(text):
-            return _fail(base, "column", "column-v2: flattened quarter/full-year table is ambiguous")
 
         if _HISTORICAL_CHANGE.search(local) and not re.search(r"\b(?:guidance|outlook|forecast)\b.{0,90}$", prefix, re.I):
             return _fail(base, "action", "action-v2: realized sequential/YoY result is not forward guidance")
