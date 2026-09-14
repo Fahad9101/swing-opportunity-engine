@@ -6,6 +6,10 @@ on:
       - phase-1.1e-canonical-guidance
     paths:
       - '.github/workflows/phase-1.1e-guidance-binder-preflight.yml'
+      - 'backend/app/services/guidance_evidence_binder.py'
+      - 'backend/app/services/guidance_evidence_binder_v2.py'
+      - 'backend/app/services/canonical_shadow_guidance_service.py'
+      - 'backend/app/services/guidance_raw_canonical_extractor.py'
 
 permissions:
   contents: read
@@ -116,7 +120,7 @@ jobs:
 
           out = {
               'phase': '1.1E',
-              'preflight': 'strict-guidance-binder-v1',
+              'preflight': 'strict-guidance-binder-v2',
               'capture_head_sha': capture_meta.get('head_sha'),
               'capture_scan_run_id': str(capture_meta['scan_run_id']),
               'captured_snapshot_fingerprint': context.fingerprint,
@@ -184,7 +188,7 @@ jobs:
 
           report = {
               'phase': '1.1E',
-              'preflight': 'strict-guidance-binder-v1',
+              'preflight': 'strict-guidance-binder-v2',
               'captured_snapshot_fingerprint': next(iter(fingerprints)),
               'baseline_rules_hash': next(iter(baseline_hashes)),
               'candidate_rules_hash': next(iter(candidate_hashes)),
