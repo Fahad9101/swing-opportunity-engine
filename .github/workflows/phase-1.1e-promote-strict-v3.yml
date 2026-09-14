@@ -1,5 +1,6 @@
 name: Phase 1.1E Promote Strict V3
 
+# Promotion retry after semantic quarantine diagnostics were hardened.
 on:
   push:
     branches:
