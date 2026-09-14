@@ -1,0 +1,35 @@
+name: Phase 1.1E Residual Semantic Probes
+
+on:
+  push:
+    branches:
+      - phase-1.1e-semantic-probes
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-probes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./soe_semantic_probe.db
+      PROVIDER_NAME: fixture
+      SEC_USER_AGENT: 'SOE-Semantic-Probe/1.0 (ci@example.invalid)'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+      - name: Run residual semantic probes
+        run: python -m pytest -q backend/tests/test_guidance_semantic_probe_residuals.py
+      - name: Run existing semantic ownership closure tests
+        run: python -m pytest -q backend/tests/test_guidance_semantic_ownership_closure.py backend/tests/test_guidance_table_coordinate_ownership.py backend/tests/test_guidance_manual_audit_regressions.py
+      - name: Verify SOE-1.0.0 remains frozen
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
