@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/phase-1.1e-fresh-manual-audit-repair.yml'
       - '.github/scripts/phase_1_1e_fresh_manual_audit_repair.py'
+      - '.github/scripts/phase_1_1e_fresh_manual_audit_repair_v2.py'
 
 permissions:
   contents: write
@@ -39,7 +40,7 @@ jobs:
           echo "frozen_rules_blob_sha=$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)"
 
       - name: Apply fresh manual-audit semantic repair
-        run: python .github/scripts/phase_1_1e_fresh_manual_audit_repair.py
+        run: python .github/scripts/phase_1_1e_fresh_manual_audit_repair_v2.py
 
       - name: Run targeted guidance regressions
         run: |
