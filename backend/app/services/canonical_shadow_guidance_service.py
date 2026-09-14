@@ -9,6 +9,7 @@ from app.services.fact_extraction_service import html_to_text
 from app.services.guidance_canonical_assessment_service import assess_canonicalization_result
 from app.services.guidance_canonical_ledger_service import CanonicalGuidanceLedger
 from app.services.guidance_canonical_service import CanonicalGuidanceNormalizer, GuidanceInvariantValidator
+from app.services.guidance_evidence_binder import GuidanceEvidenceBinder
 from app.services.guidance_ledger_service import GuidanceLedger
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
 
@@ -157,7 +158,10 @@ def assess_canonical_guidance_documents(
     """
     documents = list(documents)
     validator = GuidanceInvariantValidator()
+    binder = GuidanceEvidenceBinder()
     validated = []
+    binder_rejected_count = 0
+    binder_quarantine: list[dict[str, Any]] = []
     policies: list[GuidancePolicyEvidence] = []
     raw_fact_count = 0
     rejected_candidate_count = 0
@@ -180,7 +184,26 @@ def assess_canonical_guidance_documents(
         rejected_candidate_count += len(extraction.rejected_candidates)
         if extraction.facts:
             source_documents[document.source_url] = _source_manifest_row(document)
-        validated.extend(validator.validate(fact) for fact in extraction.facts)
+        for fact in extraction.facts:
+            binding = binder.bind(fact, document)
+            if binding.accepted:
+                validated.append(validator.validate(fact))
+                continue
+            binder_rejected_count += 1
+            binder_quarantine.append(
+                {
+                    "ticker": fact.ticker,
+                    "metric": fact.metric.value,
+                    "fiscal_period": fact.fiscal_period,
+                    "accounting_basis": fact.accounting_basis,
+                    "dimensions": dict(binding.dimensions),
+                    "reasons": list(binding.reasons),
+                    "source_url": document.source_url,
+                    "source_timestamp": document.source_timestamp.isoformat(),
+                    "evidence_span": fact.provenance[0].evidence.full_text,
+                }
+            )
+            validated.append(binding.as_quarantined(fact))
 
     canonical = CanonicalGuidanceNormalizer().normalize(validated)
     ledger = CanonicalGuidanceLedger(canonical.accepted)
@@ -238,6 +261,9 @@ def assess_canonical_guidance_documents(
         "canonical_accepted_facts": len(canonical.accepted),
         "canonical_quarantined_facts": len(canonical.quarantined),
         "canonical_quarantine": [_quarantine_summary(item) for item in canonical.quarantined],
+        "evidence_binder_version": "strict-v1",
+        "evidence_binder_rejected_facts": binder_rejected_count,
+        "evidence_binder_quarantine": binder_quarantine,
         "rejected_candidates": rejected_candidate_count,
         "extraction_errors": list(extraction_errors),
         "comparable_pairs": comparable_pairs,

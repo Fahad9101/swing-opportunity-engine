@@ -20,7 +20,8 @@ from app.domain.soe_v1_1 import GuidanceAction, GuidanceMetric, SourceDocument
 # can be tied to the same local piece of primary-source evidence.
 _GUIDANCE_SIGNAL = re.compile(
     r"\b(?:guidance|outlook|forecast|expects?|expected|anticipat(?:e|es|ed|ing)|"
-    r"project(?:s|ed|ing)|provid(?:e|es|ed|ing)|issu(?:e|es|ed|ing)|"
+    r"project(?:s|ed|ing)\s+(?:full[- ]year|fiscal|annual|quarterly?|revenue|revenues|sales|EPS|earnings|EBITDA|free\s+cash\s+flow|FCF|gross\s+margin|operating\s+margin)|"
+    r"provid(?:e|es|ed|ing)|issu(?:e|es|ed|ing)|"
     r"reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?|"
     r"rais(?:e|es|ed|ing)|lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|withdraw(?:s|n|ing)?)\b",
     re.I,
@@ -185,8 +186,26 @@ def _period_dimension(fact: TypedGuidanceFact, text: str, binding_sentence: str)
     # A bare year may support a full-year fact only when the same binding sentence
     # is explicitly annual/full-year guidance, never when it describes a quarter.
     if fact.period_kind is GuidancePeriodKind.FULL_YEAR and not explicit_periods:
-        if re.search(r"\b(?:first|second|third|fourth)\s+(?:fiscal\s+)?quarter\b", binding_sentence, re.I):
-            return False, "period: bare year was taken from a quarterly guidance sentence"
+        quarter_pattern = re.compile(r"\b(?:first|second|third|fourth)\s+(?:fiscal\s+)?quarter\b", re.I)
+        for quarter_match in quarter_pattern.finditer(binding_sentence):
+            before = binding_sentence[max(0, quarter_match.start() - 90):quarter_match.start()]
+            after = binding_sentence[quarter_match.end():min(len(binding_sentence), quarter_match.end() + 110)]
+            # A quarter may describe when management will provide the next update,
+            # not the period of the guidance being reviewed (e.g. IOVA). That
+            # timing reference must not displace the issuer's FY guidance state.
+            if re.search(
+                r"\b(?:update|announcement)\b.{0,32}\b(?:during|in)\s+(?:the\s+)?$",
+                before,
+                re.I,
+            ):
+                continue
+            local = f"{before[-70:]} {after[:90]}"
+            if re.search(
+                r"\b(?:guidance|outlook|forecast|expects?|expected|revenue|revenues|net\s+sales|EPS|earnings\s+per\s+share|EBITDA|free\s+cash\s+flow|FCF|gross\s+margin|operating\s+margin)\b",
+                local,
+                re.I,
+            ):
+                return False, "period: bare year was taken from a quarterly guidance sentence"
     return True, None
 
 
