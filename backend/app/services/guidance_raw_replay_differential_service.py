@@ -10,6 +10,7 @@ from app.domain.guidance_canonical_v1 import CanonicalizationResult
 from app.domain.soe_v1_1 import SourceDocument
 from app.services.guidance_canonical_assessment_service import assess_canonicalization_result
 from app.services.guidance_canonical_service import CanonicalGuidanceNormalizer, GuidanceInvariantValidator
+from app.services.guidance_evidence_binder_v4 import GuidanceEvidenceBinder
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
 
 
@@ -157,13 +158,16 @@ def _canonicalize_ticker(
     *,
     rules_hash: str,
 ) -> tuple[CanonicalizationResult, int, list[dict[str, Any]], list[dict[str, Any]]]:
-    """Extract every source for one ticker while isolating document-level failures.
+    """Replay one ticker through the exact production semantic admission path.
 
-    A malformed candidate in one document must never abort the population audit.
-    Any extraction exception makes the ticker incomplete/fail-closed, but the
-    remaining documents and tickers continue so one run reveals the full error set.
+    Raw replay must never be more permissive than production. Every typed fact
+    therefore passes through the canonical strict-v4 GuidanceEvidenceBinder
+    before invariant validation and normalization. A malformed candidate in one
+    document must never abort the population audit; parser failures make the
+    ticker incomplete/fail-closed while the remaining population continues.
     """
     validator = GuidanceInvariantValidator()
+    binder = GuidanceEvidenceBinder()
     validated = []
     raw_fact_count = 0
     rejected_candidates: list[dict[str, Any]] = []
@@ -195,7 +199,12 @@ def _canonicalize_ticker(
             }
             for candidate in extraction.rejected_candidates
         )
-        validated.extend(validator.validate(fact) for fact in extraction.facts)
+        for fact in extraction.facts:
+            binding = binder.bind(fact, document)
+            if binding.accepted:
+                validated.append(validator.validate(fact))
+            else:
+                validated.append(binding.as_quarantined(fact))
 
     canonical = CanonicalGuidanceNormalizer().normalize(validated)
     return canonical, raw_fact_count, rejected_candidates, extraction_errors
@@ -208,11 +217,13 @@ def raw_sec_replay_differential_report(
     *,
     rules_hash: str | None = None,
 ) -> dict[str, Any]:
-    """Replay exact immutable SEC documents through the raw typed architecture.
+    """Replay exact immutable SEC documents through the production raw architecture.
 
     `verified_documents` must already have passed byte-hash verification against
     the immutable acceptance manifest. Missing or parser-failed documents make
     their ticker incomplete; partial evidence is never classified as complete.
+    The semantic admission layer is exactly the canonical strict-v4 binder used
+    by production guidance assessment.
     """
     effective_rules_hash = rules_hash or str(validation.get("candidate_rules_hash") or "")
     manifest = build_raw_replay_manifest(validation)
@@ -337,6 +348,7 @@ def raw_sec_replay_differential_report(
     complete_tickers = sum(1 for item in ticker_reports if item.get("status") == "COMPLETE")
     return {
         "rules_hash": effective_rules_hash,
+        "evidence_binder_version": "strict-v4",
         "tickers_with_guidance_payload": len(benchmark),
         "source_manifest_count": len(manifest),
         "verified_source_count": len(manifest) - len(missing_urls),
