@@ -90,6 +90,11 @@ _METRIC_LABEL = re.compile(
     r"gross\s+margin|operating\s+margin)\b",
     re.I,
 )
+_TABLE_VALUE_TOKEN = re.compile(
+    r"(?:\$\s*-?\d[\d,.]*(?:\s*(?:million|billion|thousand|mm|bn|m|b))?|"
+    r"-?\d+(?:\.\d+)?\s*%)",
+    re.I,
+)
 
 _METRIC_AFTER_VALUE: list[tuple[GuidanceMetric, re.Pattern[str]]] = [
     (GuidanceMetric.FCF, re.compile(r"^\s*(?:of\s+)?(?:adjusted\s+)?(?:free\s+cash\s+flow|FCF)\b", re.I)),
@@ -150,19 +155,18 @@ def _mixed_quarter_full_year_guidance_table(text: str) -> bool:
         for full_year in full_year_headers:
             first, second = sorted((quarter, full_year), key=lambda match: match.start())
             between = normalized[first.end():second.start()]
-            # A flattened table commonly places the period headers side by side,
-            # before any metric row. Narrative guidance places metric/value text
-            # between the two period sections and is therefore admissible.
+            # Flattened SEC/XBRL table text may serialize the period headers before
+            # OR after the metric/value rows. Adjacent quarter/FY headers with no
+            # metric between them are therefore treated as a column-header pair.
+            # If a dense metric/value neighborhood exists on either side, row×column
+            # ownership is not deterministic and the facts must fail closed.
             if len(between) <= 40 and not _METRIC_LABEL.search(between):
-                tail = normalized[second.end():second.end() + 500]
-                numeric_count = len(
-                    re.findall(
-                        r"\$?\s*\d[\d,.]*(?:\s*(?:million|billion|m|b|%))?",
-                        tail,
-                        re.I,
-                    )
-                )
-                if numeric_count >= 4:
+                neighborhood = normalized[
+                    max(0, first.start() - 500):min(len(normalized), second.end() + 500)
+                ]
+                numeric_count = len(_TABLE_VALUE_TOKEN.findall(neighborhood))
+                metric_count = len(_METRIC_LABEL.findall(neighborhood))
+                if numeric_count >= 4 and metric_count >= 1:
                     return True
     return False
 
