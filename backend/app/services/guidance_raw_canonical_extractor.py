@@ -1464,6 +1464,139 @@ def _suppress_semantic_aliases_v29(
         })
     return kept
 
+
+# Phase 1.1E manual-audit hardening. These guards are deliberately conservative:
+# they reject ambiguous/non-guidance evidence rather than inventing a comparator.
+# Frozen SOE thresholds and classifier rules are unchanged.
+_FORMAL_GUIDANCE_NOUN_V33 = re.compile(r"\b(?:guidance|outlook|forecast)\b", re.I)
+_THREE_MONTH_OUTLOOK_V33 = re.compile(
+    r"\b(?:outlook|guidance)\s+for\s+(?:the\s+)?three\s+months?\s+ending\b"
+    r"|\bthree\s+months?\s+ending\b.{0,90}\b(?:outlook|guidance)\b",
+    re.I | re.S,
+)
+_PARALLEL_QUARTER_V33 = re.compile(
+    r"\b(?:Q[1-4]\s*(?:FY)?\s*'?20\d{2}|FY\s*20\d{2}\s+Q[1-4]|"
+    r"(?:first|second|third|fourth)\s+quarter(?:\s+(?:of|fiscal(?:\s+year)?))?\s+20\d{2})\b",
+    re.I,
+)
+_PARALLEL_FULL_YEAR_V33 = re.compile(
+    r"\b(?:full[- ]year\s+20\d{2}|FY\s*20\d{2}\s+(?:guidance|outlook))\b",
+    re.I,
+)
+_PARALLEL_COLUMNS_V33 = re.compile(
+    r"\blow\s+high\b.{0,140}\blow\s+high\b"
+    r"|\bFY\s*20\d{2}\s+Q[1-4]\s+guidance\b.{0,100}\bFY\s*20\d{2}\s+guidance\b",
+    re.I | re.S,
+)
+_OUTLOOK_ACTUAL_COLUMNS_V33 = re.compile(
+    r"\bFY\s*(20\d{2})\s+outlook\b.{0,120}\bFY\s*(20\d{2})\s+actual\b",
+    re.I | re.S,
+)
+
+
+def _manual_audit_semantic_reason_v33(fact: TypedGuidanceFact) -> str | None:
+    if not fact.provenance:
+        return None
+    evidence = fact.provenance[0].evidence
+    clause = evidence.full_text or ""
+    if not clause:
+        return None
+    ms, me = evidence.metric_start, evidence.metric_end
+    vs, ve = evidence.value_start, evidence.value_end
+
+    # LOWER/WITHDRAW must be guidance-local. Ordinary lower costs, lower demand,
+    # lower year-over-year revenue, or rate cuts are not formal guidance actions.
+    if (
+        fact.value_kind is GuidanceValueKind.QUALITATIVE
+        and fact.explicit_action in {GuidanceAction.LOWER, GuidanceAction.WITHDRAW}
+        and ms is not None
+    ):
+        local = clause[max(0, ms - 180):min(len(clause), (me or ms) + 180)]
+        if not _FORMAL_GUIDANCE_NOUN_V33.search(local) and not re.search(
+            r"\b(?:range|target|projection)s?\b", local, re.I
+        ):
+            return "directional_action_not_guidance_local"
+
+    # A three-month outlook is not full-year guidance merely because the calendar
+    # year appears in the ending date.
+    if fact.period_kind is GuidancePeriodKind.FULL_YEAR and _THREE_MONTH_OUTLOOK_V33.search(clause):
+        return "three_month_outlook_misbound_full_year"
+
+    # Flattened tables with simultaneous quarter and full-year columns are not
+    # safe for a one-dimensional nearest-value binder. Fail closed instead of
+    # comparing the first quarter column as annual guidance.
+    if (
+        _PARALLEL_QUARTER_V33.search(clause)
+        and _PARALLEL_FULL_YEAR_V33.search(clause)
+        and _PARALLEL_COLUMNS_V33.search(clause)
+    ):
+        return "ambiguous_parallel_quarter_full_year_columns"
+
+    # Likewise, do not bind a value under the Actual column to the preceding
+    # Outlook year simply because it is closer to the metric label.
+    outlook_actual = _OUTLOOK_ACTUAL_COLUMNS_V33.search(clause)
+    if outlook_actual and fact.fiscal_period == f"FY{outlook_actual.group(2)}":
+        return "outlook_actual_column_period_misbind"
+
+    if ms is not None:
+        metric_local = clause[max(0, ms - 45):min(len(clause), (me or ms) + 45)]
+        if fact.metric is GuidanceMetric.REVENUE and re.search(
+            r"\bcosts?\s+of\s+(?:contract\s+)?revenue\b", metric_local, re.I
+        ):
+            return "revenue_token_inside_cost_metric"
+
+    if vs is not None and ve is not None:
+        before = clause[max(0, vs - 260):vs]
+        after = clause[ve:min(len(clause), ve + 120)]
+
+        # Realized financial highlights/results followed by YoY comparison are
+        # historical actuals, not forward guidance.
+        if (
+            re.search(r"\bfinancial\s+(?:results|highlights)\b", before, re.I)
+            and re.match(r"\s*,?\s*(?:up|down)\s+\d+(?:\.\d+)?%", after, re.I)
+        ):
+            return "financial_highlights_actual"
+
+        # Dollar amount in "up/down ... YoY" is a change, not a guidance level.
+        if (
+            re.search(r"\b(?:up|down)\s+(?:by\s+|more\s+than\s+|approximately\s+)?\$?\s*$", before, re.I)
+            and re.match(r"\s*(?:million|billion|thousand|mm|bn|m|b)?\s*(?:YoY|Y/Y|year[- ]over[- ]year)\b", after, re.I)
+        ):
+            return "yoy_change_not_guidance_level"
+
+        # Flattened revised-guidance rows can put two Net Income ranges directly
+        # before the EBITDA label. Do not let the second Net Income range become
+        # a same-snapshot quoted-prior EBITDA value.
+        if fact.metric is GuidanceMetric.EBITDA and ve <= (ms if ms is not None else ve):
+            local = clause[max(0, vs - 220):min(len(clause), (me or ve) + 40)]
+            money_range = r"\$?\s*\d[\d,]*(?:\.\d+)?\s*(?:-|–|—|to)\s*\$?\s*\d[\d,]*(?:\.\d+)?"
+            if (
+                re.search(r"\bnet\s+(?:income|loss)\b", local, re.I)
+                and len(re.findall(money_range, local, re.I)) >= 2
+            ):
+                return "parallel_row_value_owned_by_net_income"
+
+    return None
+
+
+def _suppress_manual_audit_defects_v33(
+    facts: Iterable[TypedGuidanceFact],
+    rejected: list[dict],
+) -> list[TypedGuidanceFact]:
+    kept: list[TypedGuidanceFact] = []
+    for fact in facts:
+        reason = _manual_audit_semantic_reason_v33(fact)
+        if reason is None:
+            kept.append(fact)
+            continue
+        rejected.append({
+            "reason": reason,
+            "metric": fact.metric.value,
+            "period": fact.fiscal_period,
+            "value": [fact.low, fact.high],
+        })
+    return kept
+
 def _suppress_document_fragments(facts: Iterable[TypedGuidanceFact], rejected: list[dict]) -> list[TypedGuidanceFact]:
     items = list(facts)
     remove: set[int] = set()
@@ -1740,6 +1873,7 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
                 prior_key = (prior_fact.ticker, prior_fact.metric.value, prior_fact.fiscal_period, prior_fact.accounting_basis, prior_fact.scope_kind.value, prior_fact.scope_label or "", prior_fact.role.value, prior_fact.low, prior_fact.high, prior_fact.unit.value, prior_fact.value_kind.value, prior_fact.explicit_action.value)
                 if prior_key not in seen:
                     seen.add(prior_key); facts.append(prior_fact)
+    facts = _suppress_manual_audit_defects_v33(facts, rejected)
     facts = _suppress_document_fragments(facts, rejected)
     facts = _suppress_semantic_aliases_v29(facts, rejected)
     return RawTypedGuidanceExtraction(ticker=document.ticker, document_id=document.document_id, facts=tuple(facts), rejected_candidates=tuple(rejected))
