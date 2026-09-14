@@ -72,3 +72,57 @@ def test_net_income_ranges_do_not_become_prior_ebitda_value():
 def test_formal_numeric_outlook_cut_remains_extractable():
     facts = _facts("TFX", "The Company reduced its full year 2026 GAAP diluted earnings per share outlook range to $2.54 to $2.84.")
     assert any(f.metric.value == "eps" and f.explicit_action is GuidanceAction.LOWER for f in facts)
+
+# Fresh post-v33 full-market manual-audit regressions (v34).
+def test_remaining_performance_obligation_revenue_is_not_guidance():
+    toast = _facts("TOST", "As of June 30, 2026, approximately $1,110 million of revenue is expected to be recognized from remaining performance obligations over the next twelve months.")
+    assert not any(f.metric.value == "revenue" and f.low == 1110 for f in toast)
+    okta = _facts("OKTA", "Remaining performance obligations were $4,858 million. Of this amount, the Company expects to recognize revenue of approximately $2,585 million over the next 12 months.")
+    assert not any(f.metric.value == "revenue" and f.low == 2585 for f in okta)
+
+
+def test_recognized_revenue_result_is_not_full_year_guidance():
+    facts = _facts("PWR", "For the full year ending December 31, 2026, Quanta expects revenues to range between $34.7 billion and $35.2 billion. During the six months ended June 30, 2026 and 2025, Quanta recognized revenue of approximately $2.53 billion and $1.96 billion, respectively.")
+    assert not any(f.metric.value == "revenue" and f.low == 2.53 for f in facts)
+
+
+def test_outlook_historical_column_is_not_current_guidance():
+    facts = _facts("EVTC", "2026 Outlook. Outlook 2026 2025 (Dollar amounts in millions, except per share data) Low High Revenues (GAAP) $1,085 $1,095 $1,073.")
+    assert not any(f.metric.value == "revenue" and f.fiscal_period == "FY2025" and f.low == 1073 for f in facts)
+
+
+def test_quarter_results_do_not_inherit_full_year_raise_action():
+    facts = _facts("GE", "GE Aerospace announces Second Quarter 2026 Results, raising full-year guidance across the board. Second Quarter 2026 Results: Total revenue (GAAP) of $13.3 billion, +21%; adjusted revenue of $12.6 billion, +24%.")
+    assert not any(f.metric.value == "revenue" and f.fiscal_period == "Q2FY2026" for f in facts)
+
+
+def test_realized_fcf_before_financial_guidance_section_is_not_guidance():
+    facts = _facts("PYPL", "Adjusted free cash flow $1,832 $656 179%. Financial Guidance 2026 Guidance: Following another strong quarter, PayPal is raising full year non-GAAP EPS guidance.")
+    assert not any(f.metric.value == "fcf" and f.low == 1832 for f in facts)
+
+
+def test_cost_of_revenues_plural_is_not_revenue_guidance():
+    facts = _facts("ENTG", "We expect total depreciation expense in 2026 to be reduced by approximately $73.0 million recognized primarily in cost of revenues and R&D expenses.")
+    assert not any(f.metric.value == "revenue" and f.low == 73 for f in facts)
+
+
+def test_full_year_revenue_guidance_is_not_rebound_to_quarter():
+    facts = _facts("CIEN", "Providing revenue guidance for fiscal fourth quarter 2026 of $1.75 billion plus or minus $50 million. Raising revenue guidance for fiscal year 2026 to $6.42 billion plus or minus $50 million.")
+    assert any(f.metric.value == "revenue" and f.fiscal_period == "FY2026" and f.low == 6.42 for f in facts)
+    assert not any(f.metric.value == "revenue" and f.fiscal_period == "Q4FY2026" and f.low == 6.42 for f in facts)
+
+
+def test_stock_split_eps_restatement_is_not_economic_guidance_cut():
+    facts = _facts("APH", "Following the two-for-one stock split, the Company's Adjusted Diluted EPS guidance for the third quarter of 2026 would be $0.70 to $0.71, versus pre-split guidance of $1.40 to $1.42.")
+    assert not any(f.metric.value == "eps" and f.low == 0.70 and f.high == 0.71 for f in facts)
+
+
+def test_named_entity_standalone_revenue_forecast_fails_closed_on_scope():
+    facts = _facts("ECG", "For the full calendar year 2026, Epsilon expects to generate revenue of approximately $250 million with earnings before interest, taxes, depreciation and amortization.")
+    assert not any(f.metric.value == "revenue" and f.low == 250 for f in facts)
+
+
+def test_valid_annual_ebitda_raise_survives_v34_guards():
+    facts = _facts("ESI", "The Company now expects full year 2026 adjusted EBITDA to be in the range of $690 million to $710 million.")
+    assert any(f.metric.value == "ebitda" and f.fiscal_period == "FY2026" for f in facts)
+
