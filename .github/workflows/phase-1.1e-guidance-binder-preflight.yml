@@ -9,6 +9,7 @@ on:
       - 'backend/app/services/guidance_evidence_binder.py'
       - 'backend/app/services/guidance_evidence_binder_v2.py'
       - 'backend/app/services/guidance_evidence_binder_v3.py'
+      - 'backend/app/services/guidance_evidence_binder_v4.py'
       - 'backend/app/services/canonical_shadow_guidance_service.py'
       - 'backend/app/services/guidance_raw_canonical_extractor.py'
 
@@ -37,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: phase-1.1e-canonical-guidance
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -77,7 +78,7 @@ jobs:
           CHUNK_COUNT: '12'
         run: |
           PYTHONPATH=backend python - <<'PY'
-          import json, os
+          import json, os, subprocess
           from pathlib import Path
           from app.persistence.database import init_database
           from app.services.shadow_chunk_service import build_shadow_chunk_context, partition_targets
@@ -121,11 +122,12 @@ jobs:
 
           out = {
               'phase': '1.1E',
-              'preflight': 'strict-guidance-binder-v3',
+              'preflight': 'strict-guidance-binder-v4',
               'capture_head_sha': capture_meta.get('head_sha'),
               'capture_scan_run_id': str(capture_meta['scan_run_id']),
               'captured_snapshot_fingerprint': context.fingerprint,
-              'current_head_sha': os.environ.get('GITHUB_SHA'),
+              'workflow_head_sha': os.environ.get('GITHUB_SHA'),
+              'checked_out_head_sha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
               'baseline_rules_hash': context.baseline_hash,
               'candidate_rules_hash': context.candidate_hash,
               'growth_target_count': len(context.growth_targets),
@@ -170,7 +172,11 @@ jobs:
           baseline_hashes = {p['baseline_rules_hash'] for p in payloads}
           candidate_hashes = {p['candidate_rules_hash'] for p in payloads}
           target_counts = {p['growth_target_count'] for p in payloads}
+          workflow_heads = {p['workflow_head_sha'] for p in payloads}
+          checkout_heads = {p['checked_out_head_sha'] for p in payloads}
           assert len(fingerprints) == len(baseline_hashes) == len(candidate_hashes) == len(target_counts) == 1
+          assert len(workflow_heads) == len(checkout_heads) == 1
+          assert workflow_heads == checkout_heads, (workflow_heads, checkout_heads)
           for payload in payloads:
               items.extend(payload['items'])
           expected = target_counts.pop()
@@ -184,13 +190,16 @@ jobs:
           extraction_error_rows = [r for r in items if r['errors'] or r['extraction_errors']]
           binder_versions = Counter(r['evidence_binder_version'] or 'NONE' for r in items)
           classifications = Counter(r['classification'] or 'UNKNOWN' for r in items)
+          assert set(binder_versions) == {'strict-v4'}, binder_versions
           classified_tickers = {r['ticker'] for r in classified}
-          known_prior_failures = ['FN','MYRG','RBLX','TLN','ENTG','APH','IESC','CRGY','HOOD','ALAB','BRZE','CVNA','OPLN','WLDN','BTSG','SHAK','ANET','ASTH','TEM','LITE','VOYG','WFRD','CHRD','GVA','KNTK','SPXC','LRCX','WMS','PTRN','WAB','FSS','ORCL','IOVA']
+          known_prior_failures = ['FN','MYRG','RBLX','TLN','ENTG','APH','IESC','CRGY','HOOD','ALAB','BRZE','CVNA','OPLN','WLDN','BTSG','SHAK','ANET','ASTH','TEM','LITE','VOYG','WFRD','CHRD','GVA','KNTK','SPXC','LRCX','WMS','PTRN','WAB','FSS','ORCL','IOVA','CXT','LPLA','MRVL','CGNX']
 
           report = {
               'phase': '1.1E',
-              'preflight': 'strict-guidance-binder-v3',
+              'preflight': 'strict-guidance-binder-v4',
               'captured_snapshot_fingerprint': next(iter(fingerprints)),
+              'workflow_head_sha': next(iter(workflow_heads)),
+              'checked_out_head_sha': next(iter(checkout_heads)),
               'baseline_rules_hash': next(iter(baseline_hashes)),
               'candidate_rules_hash': next(iter(candidate_hashes)),
               'growth_target_count': expected,
