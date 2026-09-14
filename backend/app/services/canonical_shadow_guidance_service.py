@@ -9,7 +9,7 @@ from app.services.fact_extraction_service import html_to_text
 from app.services.guidance_canonical_assessment_service import assess_canonicalization_result
 from app.services.guidance_canonical_ledger_service import CanonicalGuidanceLedger
 from app.services.guidance_canonical_service import CanonicalGuidanceNormalizer, GuidanceInvariantValidator
-from app.services.guidance_evidence_binder import GuidanceEvidenceBinder
+from app.services.guidance_evidence_binder_v2 import GuidanceEvidenceBinder
 from app.services.guidance_ledger_service import GuidanceLedger
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
 
@@ -219,8 +219,6 @@ def assess_canonical_guidance_documents(
             rules_hash=rules_hash,
         )
     elif not extraction_errors and policy is not None:
-        # Preserve the frozen standing-no-guidance rule without reintroducing
-        # legacy numeric extraction into the production evidence path.
         assessment = GuidanceLedger([]).assess(
             ticker,
             rules,
@@ -261,7 +259,7 @@ def assess_canonical_guidance_documents(
         "canonical_accepted_facts": len(canonical.accepted),
         "canonical_quarantined_facts": len(canonical.quarantined),
         "canonical_quarantine": [_quarantine_summary(item) for item in canonical.quarantined],
-        "evidence_binder_version": "strict-v1",
+        "evidence_binder_version": "strict-v2",
         "evidence_binder_rejected_facts": binder_rejected_count,
         "evidence_binder_quarantine": binder_quarantine,
         "rejected_candidates": rejected_candidate_count,
