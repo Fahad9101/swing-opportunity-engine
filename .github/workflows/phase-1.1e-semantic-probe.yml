@@ -11,7 +11,7 @@ permissions:
 jobs:
   semantic-probes:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       DATABASE_URL: sqlite+pysqlite:///./soe_semantic_probe.db
       PROVIDER_NAME: fixture
@@ -28,6 +28,8 @@ jobs:
         run: python -m pytest -q backend/tests/test_guidance_semantic_probe_residuals.py
       - name: Run existing semantic ownership closure tests
         run: python -m pytest -q backend/tests/test_guidance_semantic_ownership_closure.py backend/tests/test_guidance_table_coordinate_ownership.py backend/tests/test_guidance_manual_audit_regressions.py
+      - name: Run complete deterministic suite
+        run: python -m pytest -q
       - name: Verify SOE-1.0.0 remains frozen
         shell: bash
         run: |
