@@ -1,0 +1,82 @@
+name: Phase 1.1E Guidance Coverage Metadata Repair
+
+on:
+  push:
+    branches: [phase-1.1e-canonical-guidance]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E guidance coverage metadata repair') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Apply denominator-contract repair and persistent regressions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          service = Path('backend/app/services/canonical_shadow_guidance_service.py')
+          text = service.read_text(encoding='utf-8')
+          old = '        "sufficient_comparable_guidance": comparable_pairs > 0,\n'
+          new = '        "sufficient_comparable_guidance": comparable_pairs > 0 and guidance_deterioration is not None,\n'
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one service anchor, found {text.count(old)}')
+          service.write_text(text.replace(old, new), encoding='utf-8')
+
+          test = Path('backend/tests/test_canonical_shadow_guidance_integration.py')
+          text = test.read_text(encoding='utf-8')
+          orcl_old = '    assert assessment.guidance_deterioration is False\n    fy_eps = [\n'
+          orcl_new = '    assert assessment.guidance_deterioration is False\n    assert meta["sufficient_comparable_guidance"] is True\n    fy_eps = [\n'
+          if text.count(orcl_old) != 1:
+              raise SystemExit(f'expected exactly one ORCL anchor, found {text.count(orcl_old)}')
+          text = text.replace(orcl_old, orcl_new)
+          iova_old = '    assert meta["classification"] == "UNKNOWN"\n    latest = max(meta["ledger_records"], key=lambda row: row["source_timestamp"])\n'
+          iova_new = '    assert meta["classification"] == "UNKNOWN"\n    assert meta["sufficient_comparable_guidance"] is False\n    latest = max(meta["ledger_records"], key=lambda row: row["source_timestamp"])\n'
+          if text.count(iova_old) != 1:
+              raise SystemExit(f'expected exactly one IOVA anchor, found {text.count(iova_old)}')
+          test.write_text(text.replace(iova_old, iova_new), encoding='utf-8')
+          PY
+      - name: Install package and tests
+        run: python -m pip install -e '.[test]'
+      - name: Run canonical integration regressions
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_guidance_coverage_fix.db
+          PROVIDER_NAME: fixture
+        run: python -m pytest -q backend/tests/test_canonical_shadow_guidance_integration.py
+      - name: Run complete deterministic suite
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_guidance_coverage_fix.db
+          PROVIDER_NAME: fixture
+        run: python -m pytest -q
+      - name: Verify only intended files changed
+        run: |
+          git diff --check
+          git status --short
+          python - <<'PY'
+          import subprocess
+          changed = set(subprocess.check_output(['git','diff','--name-only'], text=True).splitlines())
+          expected = {
+              'backend/app/services/canonical_shadow_guidance_service.py',
+              'backend/tests/test_canonical_shadow_guidance_integration.py',
+          }
+          if changed != expected:
+              raise SystemExit(f'unexpected changed files: {sorted(changed)}')
+          PY
+      - name: Publish tested repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/app/services/canonical_shadow_guidance_service.py backend/tests/test_canonical_shadow_guidance_integration.py
+          git commit -m 'Phase 1.1E: align guidance coverage denominator with canonical sufficiency'
+          git push origin HEAD:phase-1.1e-canonical-guidance
