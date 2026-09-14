@@ -8,6 +8,7 @@ on:
       - '.github/workflows/phase-1.1e-guidance-binder-preflight.yml'
       - 'backend/app/services/guidance_evidence_binder.py'
       - 'backend/app/services/guidance_evidence_binder_v2.py'
+      - 'backend/app/services/guidance_evidence_binder_v3.py'
       - 'backend/app/services/canonical_shadow_guidance_service.py'
       - 'backend/app/services/guidance_raw_canonical_extractor.py'
 
@@ -120,7 +121,7 @@ jobs:
 
           out = {
               'phase': '1.1E',
-              'preflight': 'strict-guidance-binder-v2',
+              'preflight': 'strict-guidance-binder-v3',
               'capture_head_sha': capture_meta.get('head_sha'),
               'capture_scan_run_id': str(capture_meta['scan_run_id']),
               'captured_snapshot_fingerprint': context.fingerprint,
@@ -184,11 +185,11 @@ jobs:
           binder_versions = Counter(r['evidence_binder_version'] or 'NONE' for r in items)
           classifications = Counter(r['classification'] or 'UNKNOWN' for r in items)
           classified_tickers = {r['ticker'] for r in classified}
-          known_prior_failures = ['FN','MYRG','RBLX','TLN','ENTG','APH','IESC','CRGY','HOOD','ALAB','BRZE','CVNA','OPLN','WLDN','BTSG']
+          known_prior_failures = ['FN','MYRG','RBLX','TLN','ENTG','APH','IESC','CRGY','HOOD','ALAB','BRZE','CVNA','OPLN','WLDN','BTSG','SHAK','ANET','ASTH','TEM','LITE','VOYG','WFRD','CHRD','GVA','KNTK','SPXC','LRCX','WMS','PTRN','WAB','FSS','ORCL','IOVA']
 
           report = {
               'phase': '1.1E',
-              'preflight': 'strict-guidance-binder-v2',
+              'preflight': 'strict-guidance-binder-v3',
               'captured_snapshot_fingerprint': next(iter(fingerprints)),
               'baseline_rules_hash': next(iter(baseline_hashes)),
               'candidate_rules_hash': next(iter(candidate_hashes)),
