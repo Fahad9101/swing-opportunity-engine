@@ -139,6 +139,37 @@ def _selected_prefix(fact, width: int = 120) -> str:
     return text[max(0, evidence.value_start - width):evidence.value_start]
 
 
+def _row_coordinate_ambiguity(fact) -> str | None:
+    """Reject numeric facts when their exact table-row ownership is ambiguous.
+
+    SEC HTML/XBRL tables can flatten with row labels, cell values, and period
+    headers serialized in either direction. Proximity is therefore insufficient:
+    a numeric token between the selected metric label and selected value proves
+    that the metric-to-value cell intersection is not deterministic. Likewise,
+    revenue used as a percentage denominator is a reference label, not a revenue
+    row owner. Ambiguous observations fail closed before canonical admission.
+    """
+    evidence = fact.provenance[0].evidence
+    text = evidence.full_text or ""
+    if fact.low is None and fact.high is None:
+        return None
+    if evidence.metric_start is None or evidence.metric_end is None or evidence.value_start is None:
+        return None
+    if evidence.metric_end > evidence.value_start:
+        return None  # strict-v1 already rejects values that precede their metric.
+
+    between = text[evidence.metric_end:evidence.value_start]
+    if _TABLE_VALUE_TOKEN.search(between):
+        return "row-v2: intervening numeric table value breaks metric-to-value ownership"
+
+    if fact.metric is GuidanceMetric.REVENUE:
+        metric_prefix = text[max(0, evidence.metric_start - 100):evidence.metric_start]
+        if re.search(r"(?:%|\bpercent(?:age)?)\s+(?:of\s+)?$", metric_prefix, re.I):
+            return "row-v2: revenue label is a percentage denominator/reference, not a revenue row owner"
+
+    return None
+
+
 def _period_year(fiscal_period: str) -> int | None:
     match = re.search(r"FY(20\d{2})", fiscal_period or "", re.I)
     return int(match.group(1)) if match else None
@@ -188,6 +219,12 @@ class GuidanceEvidenceBinder:
         evidence = fact.provenance[0].evidence
         text = evidence.full_text or ""
         base = self._v1.bind(fact, document)
+
+        # Row ownership is evaluated independently of strict-v1 acceptance so
+        # quarantine diagnostics retain the underlying coordinate failure.
+        row_ambiguity = _row_coordinate_ambiguity(fact)
+        if row_ambiguity is not None:
+            return _fail(base, "row", row_ambiguity)
 
         # Document-level row/column ambiguity is evaluated even when strict-v1
         # has already rejected another dimension so the quarantine retains the
