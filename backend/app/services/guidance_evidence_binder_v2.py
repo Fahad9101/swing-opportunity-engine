@@ -283,9 +283,14 @@ class GuidanceEvidenceBinder:
         if _COMMODITY_SUFFIX.search(suffix):
             return _fail(base, "row", "row-v2: selected value is a commodity-price assumption")
 
-        for owner_metric, pattern in _METRIC_AFTER_VALUE:
-            if owner_metric is not fact.metric and pattern.search(suffix):
-                return _fail(base, "row", f"row-v2: selected value is owned by following {owner_metric.value} label")
+        # A following metric label owns the selected value only when an explicit
+        # ownership connector (for example, "$700MM of Adjusted FCF") ties the
+        # value to that following metric. Plain "Revenue value EBITDA value" is
+        # the normal serialization of adjacent valid rows and must not be rejected.
+        if re.match(r"^\s*(?:of|for)\s+", suffix, re.I):
+            for owner_metric, pattern in _METRIC_AFTER_VALUE:
+                if owner_metric is not fact.metric and pattern.search(suffix):
+                    return _fail(base, "row", f"row-v2: selected value is owned by following {owner_metric.value} label")
 
         if fact.metric is GuidanceMetric.REVENUE and _SUBCOMPONENT_REVENUE.search(local):
             if not re.search(r"\b(?:total|consolidated)\s+(?:net\s+sales|revenue|revenues)\b", local, re.I):
