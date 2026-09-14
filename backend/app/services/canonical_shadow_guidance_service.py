@@ -241,7 +241,7 @@ def assess_canonical_guidance_documents(
         "rejected_candidates": rejected_candidate_count,
         "extraction_errors": list(extraction_errors),
         "comparable_pairs": comparable_pairs,
-        "sufficient_comparable_guidance": comparable_pairs > 0,
+        "sufficient_comparable_guidance": comparable_pairs > 0 and guidance_deterioration is not None,
         "classification": classification,
         "guidance_deterioration": guidance_deterioration,
         "rule_path": rule_path,

@@ -58,6 +58,7 @@ def test_full_market_guidance_path_does_not_bind_q1_eps_to_full_year_orcl_period
     assert errors == []
     assert assessment is not None
     assert assessment.guidance_deterioration is False
+    assert meta["sufficient_comparable_guidance"] is True
     fy_eps = [
         row for row in meta["ledger_records"]
         if row["metric"] == "eps" and row["fiscal_period"] == "FY2027"
@@ -91,6 +92,7 @@ def test_guidance_under_review_becomes_latest_qualitative_state_and_blocks_stale
     assert assessment is not None
     assert assessment.guidance_deterioration is None
     assert meta["classification"] == "UNKNOWN"
+    assert meta["sufficient_comparable_guidance"] is False
     latest = max(meta["ledger_records"], key=lambda row: row["source_timestamp"])
     assert latest["source_timestamp"].startswith("2026-08-06")
     assert latest["low"] is None and latest["high"] is None
