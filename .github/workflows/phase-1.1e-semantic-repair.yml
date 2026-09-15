@@ -1,4 +1,4 @@
-name: Phase 1.1E Consolidated Source Acceptance
+name: Phase 1.1E Survivor Semantic Repair Runner
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
   actions: read
 
 jobs:
-  survivor-semantic-repair:
+  repair-and-validate:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -30,190 +30,8 @@ jobs:
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
 
-      - name: Apply coherent survivor semantic repair batch
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          workflow = Path('.github/workflows/phase-1.1e-survivor-semantic-repair.yml').read_text()
-          marker = "          python - <<'PY'\n"
-          start = workflow.index(marker) + len(marker)
-          end = workflow.index("\n          PY", start)
-          lines = workflow[start:end].splitlines()
-          repair_source = "\n".join(line[10:] if line.startswith("          ") else line for line in lines)
-          exec(compile(repair_source, '<phase-1.1e-survivor-semantic-repair>', 'exec'), {})
-          PY
-
-          python - <<'PY'
-          from pathlib import Path
-
-          semantic_path = Path('backend/app/services/guidance_semantic_ownership_service.py')
-          semantic = semantic_path.read_text()
-
-          loss_anchor = '''def _normalize_loss_sign(fact: TypedGuidanceFact) -> tuple[float | None, float | None, str | None]:
-'''
-          loss_helpers = r'''_PAREN_NEGATIVE_RANGE = re.compile(
-    r"\$\s*\(\s*(?P<n1>\d+(?:\.\d+)?)\s*\)\s*(?P<s1>billion|million|thousand|bn|mm|m|b|k)?\s*"
-    r"(?:to|through|[-–—])\s*\$?\s*(?P<n2>\d+(?:\.\d+)?)\s*(?P<s2>billion|million|thousand|bn|mm|m|b|k)?\b",
-    re.I,
-)
-_FOLLOWING_GUIDANCE_HEADING = re.compile(r"\b(?:F|FY)?\s*20\d{2}\s+(?:GUIDANCE|OUTLOOK)\b", re.I)
-
-
-def _parenthesized_negative_interval(fact: TypedGuidanceFact) -> tuple[float, float] | None:
-    if fact.metric not in {GuidanceMetric.EBITDA, GuidanceMetric.FCF}:
-        return None
-    local = _value_window(fact, 170, 100)
-    match = _PAREN_NEGATIVE_RANGE.search(local)
-    if match is None:
-        return None
-    s1 = match.group("s1") or match.group("s2")
-    s2 = match.group("s2") or match.group("s1")
-    unit_scale = _unit_multiplier(fact.unit)
-    first = -(float(match.group("n1")) * _scale_multiplier(s1)) / unit_scale
-    second = (float(match.group("n2")) * _scale_multiplier(s2)) / unit_scale
-    return min(first, second), max(first, second)
-
-
-def _period_year(fact: TypedGuidanceFact) -> int | None:
-    match = re.search(r"FY(20\d{2})$", fact.fiscal_period or "", re.I)
-    return int(match.group(1)) if match else None
-
-
-def _post_period_preliminary_result(fact: TypedGuidanceFact, document: SourceDocument) -> bool:
-    if fact.period_kind is not GuidancePeriodKind.FULL_YEAR:
-        return False
-    year = _period_year(fact)
-    source_ts = document.source_timestamp or document.fetched_at
-    if year is None or source_ts is None or source_ts.year <= year:
-        return False
-    sentence = _binding_sentence(fact)
-    if re.search(r"\b(?:guidance|outlook|forecast)\b", sentence, re.I):
-        return False
-    return bool(
-        re.search(r"\bexpects?\b", sentence, re.I)
-        and re.search(r"\b(?:increase|decrease|growth|grew|declin|compared|versus|vs\.?)\b", sentence, re.I)
-    )
-
-
-def _table_actual_before_guidance_heading(fact: TypedGuidanceFact) -> bool:
-    evidence = _evidence(fact)
-    text = evidence.full_text or ""
-    if evidence.value_end is None:
-        return False
-    after = text[evidence.value_end:min(len(text), evidence.value_end + 120)]
-    heading = _FOLLOWING_GUIDANCE_HEADING.search(after)
-    if heading is None:
-        return False
-    left = evidence.metric_start if evidence.metric_start is not None else max(0, evidence.value_end - 100)
-    boundary = evidence.value_end + heading.start()
-    fragment = text[left:boundary]
-    return len(list(_MONEY.finditer(fragment))) >= 2 and not _FORWARD_CUE.search(fragment)
-
-
-def _actual_growth_point(fact: TypedGuidanceFact) -> bool:
-    if fact.low is None or fact.high is None or fact.low != fact.high:
-        return False
-    sentence = _binding_sentence(fact)
-    if _FORWARD_CUE.search(sentence):
-        return False
-    evidence = _evidence(fact)
-    text = evidence.full_text or ""
-    end = evidence.value_end if evidence.value_end is not None else 0
-    tail = text[end:min(len(text), end + 90)]
-    metric_of = re.search(
-        r"\b(?:revenue|revenues|net\s+sales|EBITDA|free\s+cash\s+flow|FCF)\b.{0,30}\b(?:of|was|were)\b",
-        sentence,
-        re.I | re.S,
-    )
-    growth_suffix = re.search(r"(?:,\s*[+-]\s*\d|\b(?:grew|growth|increased|decreased|up|down)\b)", tail, re.I)
-    return bool(metric_of and growth_suffix)
-
-
-'''
-          assert semantic.count(loss_anchor) == 1
-          semantic = semantic.replace(loss_anchor, loss_helpers + loss_anchor, 1)
-
-          old_loss_start = '''def _normalize_loss_sign(fact: TypedGuidanceFact) -> tuple[float | None, float | None, str | None]:
-    if fact.metric not in {GuidanceMetric.EBITDA, GuidanceMetric.FCF}:
-        return fact.low, fact.high, None
-    local = _value_window(fact, 130, 100)
-'''
-          new_loss_start = '''def _normalize_loss_sign(fact: TypedGuidanceFact) -> tuple[float | None, float | None, str | None]:
-    if fact.metric not in {GuidanceMetric.EBITDA, GuidanceMetric.FCF}:
-        return fact.low, fact.high, None
-    parenthesized = _parenthesized_negative_interval(fact)
-    if parenthesized is not None:
-        return parenthesized[0], parenthesized[1], None
-    local = _value_window(fact, 130, 100)
-'''
-          assert semantic.count(old_loss_start) == 1
-          semantic = semantic.replace(old_loss_start, new_loss_start, 1)
-
-          del_anchor = '''    del document
-    updates: dict = {}
-'''
-          assert semantic.count(del_anchor) == 1
-          semantic = semantic.replace(del_anchor, '''    updates: dict = {}
-''', 1)
-
-          actual_anchor = '''    if _historical_actual(fact):
-        updates["role"] = GuidanceFactRole.ACTUAL
-'''
-          actual_replacement = '''    if (
-        _historical_actual(fact)
-        or _post_period_preliminary_result(fact, document)
-        or _table_actual_before_guidance_heading(fact)
-        or _actual_growth_point(fact)
-    ):
-        updates["role"] = GuidanceFactRole.ACTUAL
-'''
-          assert semantic.count(actual_anchor) == 1
-          semantic = semantic.replace(actual_anchor, actual_replacement, 1)
-          semantic_path.write_text(semantic)
-
-          test_path = Path('backend/tests/test_guidance_survivor_semantic_regressions.py')
-          tests = test_path.read_text()
-          tests += r'''
-
-
-def _normalize_all(text: str):
-    from app.services.guidance_semantic_ownership_service import normalize_typed_guidance_fact
-    document = _doc(text)
-    extraction = extract_canonical_typed_guidance_facts(document)
-    return [normalize_typed_guidance_fact(fact, document) for fact in extraction.facts]
-
-
-def test_post_period_preliminary_expectation_is_actual_not_guidance():
-    facts = _normalize_all("The Company expects 2024 revenue of approximately $8.35 billion, an increase of 17% compared with $7.12 billion in 2023.")
-    revenue = [f for f in facts if f.metric is GuidanceMetric.REVENUE and f.fiscal_period == "FY2024"]
-    assert revenue
-    assert all(f.role is GuidanceFactRole.ACTUAL for f in revenue)
-
-
-def test_parenthesized_adjusted_ebitda_loss_preserves_negative_sign():
-    facts = _normalize_all("2026 Guidance: Adjusted EBITDA*: $(15) million - $0 million.")
-    ebitda = [f for f in facts if f.metric is GuidanceMetric.EBITDA]
-    assert ebitda
-    assert any(f.low == -15 and f.high == 0 for f in ebitda)
-
-
-def test_actual_table_cells_before_guidance_heading_fail_as_actual():
-    facts = _normalize_all("Free cash flow (Non-GAAP) $4,791 $975 F 2026 GUIDANCE: Revenue $44 billion to $45 billion.")
-    fcf = [f for f in facts if f.metric is GuidanceMetric.FCF and f.low is not None]
-    assert fcf
-    assert all(f.role is GuidanceFactRole.ACTUAL for f in fcf)
-
-
-def test_actual_growth_bullet_point_is_not_forward_guidance():
-    facts = _normalize_all("Revenue of $9.3 billion, +12% year over year.")
-    revenue = [f for f in facts if f.metric is GuidanceMetric.REVENUE]
-    assert revenue
-    assert all(f.role is GuidanceFactRole.ACTUAL for f in revenue)
-'''
-          test_path.write_text(tests)
-          PY
+      - name: Apply approved semantic repair payload
+        run: python scripts/phase_1_1e_apply_survivor_repair.py
 
       - name: Compile repaired guidance code
         run: |
@@ -223,15 +41,8 @@ def test_actual_growth_bullet_point_is_not_forward_guidance():
             backend/app/services/guidance_semantic_ownership_service.py \
             backend/tests/test_guidance_survivor_semantic_regressions.py
 
-      - name: Run focused semantic ownership regressions
-        run: |
-          pytest -q \
-            backend/tests/test_guidance_survivor_semantic_regressions.py \
-            backend/tests/test_guidance_range_revision_ownership.py \
-            backend/tests/test_guidance_semantic_ownership_audit_regressions.py \
-            backend/tests/test_guidance_semantic_ownership_repair.py \
-            backend/tests/test_canonical_shadow_guidance_integration.py \
-            backend/tests/test_guidance_raw_replay_differential.py
+      - name: Run focused survivor semantic regressions
+        run: pytest -q backend/tests/test_guidance_survivor_semantic_regressions.py
 
       - name: Run complete deterministic suite
         run: pytest -q
@@ -247,7 +58,7 @@ def test_actual_growth_bullet_point_is_not_forward_guidance():
             exit 1
           fi
 
-      - name: Commit and push coherent semantic repair
+      - name: Commit and push coherent production repair
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
