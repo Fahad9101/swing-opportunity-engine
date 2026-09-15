@@ -1,0 +1,528 @@
+name: Phase 1.1E Survivor Semantic Repair
+
+on:
+  push:
+    branches:
+      - phase-1.1e-canonical-guidance
+    paths:
+      - '.github/workflows/phase-1.1e-survivor-semantic-repair.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  repair-and-validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Apply generic survivor semantic repairs
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          raw_path = Path('backend/app/services/guidance_raw_typed_extractor.py')
+          raw = raw_path.read_text()
+
+          old_raise = '    (GuidanceAction.RAISE, re.compile(r"\\b(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\\b", re.I)),\n'
+          new_raise = '    (GuidanceAction.RAISE, re.compile(r"\\b(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\\b|\\bincreas(?:e|es|ed|ing)\\b(?=[^.;•]{0,100}\\b(?:guidance|outlook)\\b)", re.I)),\n'
+          assert old_raise in raw
+          raw = raw.replace(old_raise, new_raise, 1)
+
+          scale_anchor = '''_SCALE_UNITS = {
+    "b": GuidanceUnit.USD_BILLION,
+    "bn": GuidanceUnit.USD_BILLION,
+    "billion": GuidanceUnit.USD_BILLION,
+    "m": GuidanceUnit.USD_MILLION,
+    "mm": GuidanceUnit.USD_MILLION,
+    "million": GuidanceUnit.USD_MILLION,
+    "thousand": GuidanceUnit.USD_THOUSAND,
+}
+'''
+          scale_replacement = scale_anchor + '''
+_MONEY_UNIT_FACTORS = {
+    GuidanceUnit.USD: 1.0,
+    GuidanceUnit.USD_THOUSAND: 1_000.0,
+    GuidanceUnit.USD_MILLION: 1_000_000.0,
+    GuidanceUnit.USD_BILLION: 1_000_000_000.0,
+}
+'''
+          assert raw.count(scale_anchor) == 1
+          raw = raw.replace(scale_anchor, scale_replacement, 1)
+
+          helper_anchor = '''def _bind_value(clause: str, mention: _MetricMention, anchor: int) -> _ValueBinding | None:
+'''
+          helper = '''def _normalized_money_range(
+    lo_text: str,
+    hi_text: str,
+    scale1: str | None,
+    scale2: str | None,
+    *,
+    has_dollar: bool,
+    text: str,
+    position: int,
+) -> tuple[float, float, GuidanceUnit] | None:
+    """Normalize explicit money-range endpoints before ordering them.
+
+    A range such as ``$980 million to $1 billion`` is economically ordered even
+    though the raw numbers are 980 and 1. Missing endpoint scales inherit the
+    explicit partner scale; otherwise the table/header unit is used.
+    """
+    s1 = scale1
+    s2 = scale2
+    if not s1 and s2:
+        s1 = s2
+    if not s2 and s1:
+        s2 = s1
+    u1 = _source_money_unit(s1, None, has_dollar=has_dollar, text=text, position=position)
+    u2 = _source_money_unit(s2, None, has_dollar=has_dollar, text=text, position=position)
+    f1 = _MONEY_UNIT_FACTORS.get(u1)
+    f2 = _MONEY_UNIT_FACTORS.get(u2)
+    if f1 is None or f2 is None:
+        return None
+    lo_base = float(lo_text.replace(",", "")) * f1
+    hi_base = float(hi_text.replace(",", "")) * f2
+    if lo_base > hi_base:
+        return None
+    target = u1 if f1 >= f2 else u2
+    target_factor = _MONEY_UNIT_FACTORS[target]
+    return lo_base / target_factor, hi_base / target_factor, target
+
+
+'''
+          assert raw.count(helper_anchor) == 1
+          raw = raw.replace(helper_anchor, helper + helper_anchor, 1)
+
+          old_money = '''        for match in _MONEY_RANGE.finditer(clause):
+            has_dollar = bool(match.group("d1") or match.group("d2"))
+            unit = _source_money_unit(match.group("s1"), match.group("s2"), has_dollar=has_dollar, text=clause, position=match.start())
+            if unit is GuidanceUnit.UNKNOWN:
+                continue
+            low = float(match.group("lo").replace(",", ""))
+            high = float(match.group("hi").replace(",", ""))
+            if low > high:
+                continue
+            candidates.append(_ValueBinding(low, high, unit, GuidanceValueKind.ABSOLUTE_LEVEL, match.group(0), match.start(), match.end()))
+'''
+          new_money = '''        for match in _MONEY_RANGE.finditer(clause):
+            has_dollar = bool(match.group("d1") or match.group("d2"))
+            normalized = _normalized_money_range(
+                match.group("lo"), match.group("hi"), match.group("s1"), match.group("s2"),
+                has_dollar=has_dollar, text=clause, position=match.start(),
+            )
+            if normalized is None:
+                continue
+            low, high, unit = normalized
+            candidates.append(_ValueBinding(low, high, unit, GuidanceValueKind.ABSOLUTE_LEVEL, match.group(0), match.start(), match.end()))
+'''
+          assert raw.count(old_money) == 1
+          raw = raw.replace(old_money, new_money, 1)
+          raw_path.write_text(raw)
+
+          canonical_path = Path('backend/app/services/guidance_raw_canonical_extractor.py')
+          canonical = canonical_path.read_text()
+
+          import_anchor = '''    _normalize_year,
+    _segments,
+)
+'''
+          import_replacement = '''    _normalize_year,
+    _normalized_money_range,
+    _segments,
+)
+'''
+          assert canonical.count(import_anchor) == 1
+          canonical = canonical.replace(import_anchor, import_replacement, 1)
+
+          section_anchor = '''_SECTION_FULL_YEAR_HEADINGS = (
+'''
+          section_insert = '''_SECTION_FULL_YEAR_HEADINGS = (
+    re.compile(r"(?:^|[.;:•])\\s*(20\\d{2})\\s+full[- ]year\\s+(?:guidance|outlook)\\b", re.I),
+    re.compile(r"(?:^|[.;:•])\\s*(20\\d{2})\\s+(?:guidance|outlook)\\b", re.I),
+'''
+          assert canonical.count(section_anchor) == 1
+          canonical = canonical.replace(section_anchor, section_insert, 1)
+
+          doc_heading_anchor = '''_DOCUMENT_SECTION_HEADINGS = (
+'''
+          doc_heading_insert = '''_DOCUMENT_SECTION_HEADINGS = (
+    (re.compile(r"\\b(20\\d{2})\\s+full[- ]year\\s+(?:guidance|outlook)\\b", re.I), "FY"),
+    (re.compile(r"\\b(20\\d{2})\\s+(?:guidance|outlook)\\b", re.I), "FY"),
+'''
+          assert canonical.count(doc_heading_anchor) == 1
+          canonical = canonical.replace(doc_heading_anchor, doc_heading_insert, 1)
+
+          ref_old = '''r"\\b(?:unchanged\\s+from|compared\\s+(?:with|to)|from\\s+(?:the\\s+)?prior|"
+        r"previous(?:ly)?|as\\s+reported|reported|results?|reference(?:d)?)\\b",'''
+          ref_new = '''r"\\b(?:unchanged\\s+from|compared\\s+(?:with|to)|versus|vs\\.?|from\\s+(?:the\\s+)?prior|"
+        r"previous(?:ly)?|as\\s+reported|reported|results?|reference(?:d)?)\\b",'''
+          assert canonical.count(ref_old) == 1
+          canonical = canonical.replace(ref_old, ref_new, 1)
+
+          compact_old = '''    s1 = (match.group("s1") or "").lower()
+    s2 = (match.group("s2") or "").lower()
+    if s1 and s2 and s1 != s2:
+        aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}
+        if aliases.get(s1, s1) != aliases.get(s2, s2):
+            return None
+    scale = match.group("s2") or match.group("s1")
+    if not scale:
+        return None
+
+    unit = _unit_from_scale(
+        scale,
+        mention.metric,
+        dollar=bool(match.group("d1") or match.group("d2")),
+    )
+    if unit is GuidanceUnit.UNKNOWN:
+        return None
+
+    low = float(match.group("lo").replace(",", ""))
+    high = float(match.group("hi").replace(",", ""))
+    if low > high:
+        return None
+'''
+          compact_new = '''    normalized = _normalized_money_range(
+        match.group("lo"), match.group("hi"), match.group("s1"), match.group("s2"),
+        has_dollar=bool(match.group("d1") or match.group("d2")),
+        text=clause,
+        position=mention_end + match.start(),
+    )
+    if normalized is None:
+        return None
+    low, high, unit = normalized
+'''
+          assert canonical.count(compact_old) == 1
+          canonical = canonical.replace(compact_old, compact_new, 1)
+
+          range_anchor = '''    if range_revision:
+        aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}
+'''
+          range_insert = '''    if range_revision:
+        old_normalized = _normalized_money_range(
+            range_revision.group("old_lo"), range_revision.group("old_hi"),
+            range_revision.group("s1"), range_revision.group("s2"),
+            has_dollar=bool(range_revision.group("d1") or range_revision.group("d2")),
+            text=clause, position=range_revision.start("old_lo"),
+        )
+        new_normalized = _normalized_money_range(
+            range_revision.group("new_lo"), range_revision.group("new_hi"),
+            range_revision.group("s3"), range_revision.group("s4"),
+            has_dollar=bool(range_revision.group("d3") or range_revision.group("d4")),
+            text=clause, position=range_revision.start("new_lo"),
+        )
+        if old_normalized is not None and new_normalized is not None:
+            old_lo, old_hi, old_unit = old_normalized
+            new_lo, new_hi, new_unit = new_normalized
+            old_start = range_revision.start("d1") if range_revision.group("d1") else range_revision.start("old_lo")
+            old_end = range_revision.end("s2") if range_revision.group("s2") else range_revision.end("old_hi")
+            new_start = range_revision.start("d3") if range_revision.group("d3") else range_revision.start("new_lo")
+            new_end = range_revision.end("s4") if range_revision.group("s4") else range_revision.end("new_hi")
+            return (
+                _ValueBinding(new_lo, new_hi, new_unit, GuidanceValueKind.ABSOLUTE_LEVEL, clause[new_start:new_end].strip(), new_start, new_end),
+                _ValueBinding(old_lo, old_hi, old_unit, GuidanceValueKind.ABSOLUTE_LEVEL, clause[old_start:old_end].strip(), old_start, old_end),
+            )
+
+        aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}
+'''
+          assert canonical.count(range_anchor) == 1
+          canonical = canonical.replace(range_anchor, range_insert, 1)
+
+          role_anchor = '''def _fact_role(clause: str, value) -> GuidanceFactRole:
+'''
+          role_helper = '''def _quoted_prior_locally_owns_value(clause: str, anchor: int, mention, value) -> bool:
+    if value is None:
+        return False
+    before = clause[max(0, value.start - 220):value.start]
+    markers = [match for match in _PRIOR_ROLE_OWNERSHIP_MARKER.finditer(before)]
+    if not markers:
+        return False
+    latest = markers[-1]
+    absolute_marker_start = max(0, value.start - 220) + latest.start()
+    absolute_marker_end = max(0, value.start - 220) + latest.end()
+    if absolute_marker_start >= anchor:
+        return not bool(re.search(r"(?<!\\d)\\.(?!\\d)|[!?•;]", clause[absolute_marker_end:value.start]))
+    bridge = clause[absolute_marker_end:anchor]
+    if re.search(r"(?<!\\d)\\.(?!\\d)|[!?•;]", bridge):
+        return False
+    mentions = _metric_mentions(clause)
+    preceding = [item for item in mentions if item.end <= absolute_marker_start]
+    if preceding:
+        owner = max(preceding, key=lambda item: item.end)
+        if owner.metric is not mention.metric:
+            return False
+    return anchor - absolute_marker_end <= 90
+
+
+def _local_full_year_phrase_before_value(clause: str, anchor: int, mention, value) -> _PeriodBinding | None:
+    if value is None:
+        return None
+    left = max(0, anchor - 150)
+    local = clause[left:value.start]
+    matches = list(re.finditer(r"\\b(?:for\\s+(?:the\\s+)?|during\\s+(?:the\\s+)?)(?:full[- ]year|fiscal(?:\\s+year)?)\\s+(20\\d{2})\\b", local, re.I))
+    if not matches:
+        return None
+    match = matches[-1]
+    start = left + match.start()
+    end = left + match.end()
+    tail = clause[end:value.start]
+    if re.search(r"\\b(?:Q[1-4]\\s*(?:FY)?\\s*'?20\\d{2}|[1-4]Q\\s*'?20\\d{2}|(?:first|second|third|fourth)\\s+quarter)\\b", tail, re.I):
+        return None
+    year = _normalize_year(match.group(1))
+    return _PeriodBinding(f"FY{year}", GuidancePeriodKind.FULL_YEAR, match.group(0), start, end)
+
+
+_GUIDANCE_VERSION_LABEL = re.compile(r"\\b(?:initial|most\\s+recent|previous|prior|current)\\s+guidance\\b", re.I)
+_SPLIT_MONEY_TOKEN = re.compile(r"\\$\\s*\\d{1,3}\\s+\\d{1,3}\\s+(?:billion|million|thousand|bn|mm|m|b)\\b", re.I)
+
+
+def _ambiguous_guidance_version_table(text: str) -> bool:
+    labels = {match.group(0).lower() for match in _GUIDANCE_VERSION_LABEL.finditer(text)}
+    if not any("current guidance" == label for label in labels):
+        return False
+    if len(labels) < 2:
+        return False
+    ranges = list(_MONEY_RANGE.finditer(text))
+    return len(ranges) >= 2
+
+
+def _split_money_token_corruption(clause: str, anchor: int, mention) -> bool:
+    local = clause[max(0, anchor - 100):min(len(clause), anchor + len(mention.text) + 220)]
+    return bool(_SPLIT_MONEY_TOKEN.search(local))
+
+
+'''
+          assert canonical.count(role_anchor) == 1
+          canonical = canonical.replace(role_anchor, role_helper + role_anchor, 1)
+
+          guards_anchor = '''            if _ambiguous_parallel_period_table(clause):
+'''
+          guards_insert = '''            if _ambiguous_guidance_version_table(segment):
+                rejected.append({"reason": "ambiguous_guidance_version_table", "metric": mention.metric.value, "evidence": clause[:500]}); continue
+            if _split_money_token_corruption(clause, anchor, mention):
+                rejected.append({"reason": "split_money_token_corruption", "metric": mention.metric.value, "evidence": clause[:500]}); continue
+'''
+          assert canonical.count(guards_anchor) == 1
+          canonical = canonical.replace(guards_anchor, guards_insert + guards_anchor, 1)
+
+          role_old = '''            role = GuidanceFactRole.CURRENT if pending_review or previous_now_value is not None else _fact_role(clause, value)
+            if (
+                role is GuidanceFactRole.QUOTED_PRIOR
+                and _quoted_prior_marker_owned_by_other_metric(clause, anchor, mention, value)
+            ):
+                role = GuidanceFactRole.CURRENT
+'''
+          role_new = '''            role = GuidanceFactRole.CURRENT if pending_review or previous_now_value is not None else _fact_role(clause, value)
+            if role is GuidanceFactRole.QUOTED_PRIOR and (
+                not _quoted_prior_locally_owns_value(clause, anchor, mention, value)
+                or _quoted_prior_marker_owned_by_other_metric(clause, anchor, mention, value)
+            ):
+                role = GuidanceFactRole.CURRENT
+'''
+          assert canonical.count(role_old) == 1
+          canonical = canonical.replace(role_old, role_new, 1)
+
+          section_use_anchor = '''            section_period = _nearest_section_heading_period(segment, clause, anchor, mention)
+            compact_forward_period_owned = _compact_forward_period_is_owned(clause, compact_forward_value, period)
+'''
+          section_use_new = '''            section_period = _nearest_section_heading_period(segment, clause, anchor, mention)
+            if (
+                section_period is not None
+                and section_period.kind is GuidancePeriodKind.FULL_YEAR
+                and period is not None
+                and period.kind is GuidancePeriodKind.FULL_YEAR
+                and period.period != section_period.period
+                and direct_period is None
+            ):
+                period = section_period
+            compact_forward_period_owned = _compact_forward_period_is_owned(clause, compact_forward_value, period)
+'''
+          assert canonical.count(section_use_anchor) == 1
+          canonical = canonical.replace(section_use_anchor, section_use_new, 1)
+
+          local_quarter_anchor = '''            local_quarter_period_v29 = _local_explicit_quarter_before_value_v29(clause, anchor, mention, value)
+            if local_quarter_period_v29 is not None:
+                period = local_quarter_period_v29
+'''
+          local_quarter_new = local_quarter_anchor + '''            local_full_year_period = _local_full_year_phrase_before_value(clause, anchor, mention, value)
+            if local_full_year_period is not None:
+                period = local_full_year_period
+'''
+          assert canonical.count(local_quarter_anchor) == 1
+          canonical = canonical.replace(local_quarter_anchor, local_quarter_new, 1)
+
+          dedup_anchor = '''    best_by_key: dict[tuple, int] = {}
+'''
+          dedup_insert = '''    directional_actions = {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM}
+    for i, fact in enumerate(items):
+        if i in remove or fact.explicit_action is not GuidanceAction.INITIATE:
+            continue
+        for j, other in enumerate(items):
+            if i == j or j in remove or other.explicit_action not in directional_actions:
+                continue
+            if not _same_economic_identity(fact, other):
+                continue
+            if (fact.low, fact.high, fact.unit, fact.value_kind) != (other.low, other.high, other.unit, other.value_kind):
+                continue
+            fact_doc = fact.provenance[0].document_id if fact.provenance else None
+            other_doc = other.provenance[0].document_id if other.provenance else None
+            if fact_doc == other_doc:
+                remove.add(i)
+                rejected.append({"reason": "generic_initiate_duplicate_of_directional_action", "metric": fact.metric.value, "period": fact.fiscal_period, "value": [fact.low, fact.high]})
+                break
+
+'''
+          assert canonical.count(dedup_anchor) == 1
+          canonical = canonical.replace(dedup_anchor, dedup_insert + dedup_anchor, 1)
+          canonical_path.write_text(canonical)
+
+          test_path = Path('backend/tests/test_guidance_survivor_semantic_regressions.py')
+          test_path.write_text(r'''from __future__ import annotations
+
+import hashlib
+from datetime import UTC, datetime
+
+from app.domain.guidance_canonical_v1 import GuidanceFactRole, GuidancePeriodKind, GuidanceUnit
+from app.domain.soe_v1_1 import GuidanceAction, GuidanceMetric, SourceDocument
+from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
+from app.services.guidance_raw_typed_extractor import _action
+
+
+def _doc(text: str) -> SourceDocument:
+    ts = datetime(2026, 9, 15, tzinfo=UTC)
+    digest = hashlib.sha256(text.encode()).hexdigest()
+    return SourceDocument(
+        document_id=f"survivor-{digest[:12]}", rules_hash="candidate-hash", ticker="TEST",
+        cik="0000000001", accession="0000000001-26-999994", form="8-K",
+        filing_date=ts.date(), source_url="https://www.sec.gov/Archives/edgar/data/1/survivor.htm",
+        source_timestamp=ts, fetched_at=ts, content_hash=digest, content_type="text/plain", content=text,
+    )
+
+
+def _facts(text: str, metric: GuidanceMetric):
+    return [f for f in extract_canonical_typed_guidance_facts(_doc(text)).facts if f.metric is metric]
+
+
+def test_mixed_scale_money_range_is_normalized_economically():
+    facts = _facts("2026 Guidance: Total revenue expected between $980 million and $1 billion.", GuidanceMetric.REVENUE)
+    assert any(f.low == 0.98 and f.high == 1.0 and f.unit is GuidanceUnit.USD_BILLION for f in facts)
+    assert not any(f.low == f.high == 980 for f in facts)
+
+
+def test_mixed_scale_directional_range_preserves_full_range():
+    facts = _facts("2026 Guidance: The company raised total revenue guidance from a range of $900 million to $950 million to a range of $940 million to $1 billion.", GuidanceMetric.REVENUE)
+    assert any(f.role is GuidanceFactRole.CURRENT and f.low == 0.94 and f.high == 1.0 and f.unit is GuidanceUnit.USD_BILLION for f in facts)
+
+
+def test_bare_year_guidance_heading_owns_following_ebitda():
+    facts = _facts("2026 Guidance: Revenue expected at $955 million to $970 million; Adjusted EBITDA projected at $213 million to $220 million.", GuidanceMetric.EBITDA)
+    assert any(f.fiscal_period == "FY2026" and f.low == 213 and f.high == 220 for f in facts)
+    assert not any(f.fiscal_period == "FY2025" for f in facts)
+
+
+def test_full_year_heading_beats_trailing_versus_reference_year():
+    facts = _facts("2025 Full Year Guidance: Adjusted EBITDA of $90 million to $100 million versus 2024 adjusted EBITDA.", GuidanceMetric.EBITDA)
+    assert any(f.fiscal_period == "FY2025" and f.low == 90 and f.high == 100 for f in facts)
+    assert not any(f.fiscal_period == "FY2024" for f in facts)
+
+
+def test_flattened_multiple_guidance_version_columns_fail_closed():
+    extraction = extract_canonical_typed_guidance_facts(_doc("2025 Revenue Guidance Initial Guidance Most Recent Guidance Current Guidance Total revenue $250 million to $260 million $260 million to $270 million $275 million to $280 million."))
+    assert not [f for f in extraction.facts if f.metric is GuidanceMetric.REVENUE]
+    assert any(r.get("reason") == "ambiguous_guidance_version_table" for r in extraction.rejected_candidates)
+
+
+def test_split_money_digit_corruption_fails_closed():
+    extraction = extract_canonical_typed_guidance_facts(_doc("2026 Annual Guidance: Total revenue of $21 8 million to $222 million."))
+    assert not [f for f in extraction.facts if f.metric is GuidanceMetric.REVENUE]
+    assert any(r.get("reason") == "split_money_token_corruption" for r in extraction.rejected_candidates)
+
+
+def test_prior_revenue_marker_does_not_relabel_current_ebitda():
+    facts = _facts("For the full year 2026, revenue is expected at $3.29 billion to $3.33 billion, up from our prior guidance range of approximately 25% to 26% growth; Adjusted EBITDA is expected to be $199 million to $201 million.", GuidanceMetric.EBITDA)
+    assert any(f.role is GuidanceFactRole.CURRENT and f.fiscal_period == "FY2026" and f.low == 199 and f.high == 201 for f in facts)
+    assert not any(f.role is GuidanceFactRole.QUOTED_PRIOR and f.low == 199 for f in facts)
+
+
+def test_prior_revenue_marker_does_not_relabel_current_margin():
+    facts = _facts("2026 Guidance: Total revenue is now $220 million versus prior guidance of $215 million; non-GAAP gross margin is expected to be 82%.", GuidanceMetric.GROSS_MARGIN)
+    assert any(f.role is GuidanceFactRole.CURRENT and f.low == 82 for f in facts)
+    assert not any(f.role is GuidanceFactRole.QUOTED_PRIOR and f.low == 82 for f in facts)
+
+
+def test_local_full_year_phrase_overrides_stale_quarter_context():
+    facts = _facts("Q1 2026 results. For the full year 2026, the company expects Adjusted EBITDA of $199 million to $201 million.", GuidanceMetric.EBITDA)
+    assert any(f.period_kind is GuidancePeriodKind.FULL_YEAR and f.fiscal_period == "FY2026" for f in facts)
+    assert not any(f.period_kind is GuidancePeriodKind.QUARTER for f in facts)
+
+
+def test_increase_is_directional_only_when_guidance_owned():
+    assert _action("growing demand is increasing our revenue growth") is GuidanceAction.NONE
+    assert _action("the company is increasing full-year 2026 revenue guidance") is GuidanceAction.RAISE
+
+
+def test_directional_action_deduplicates_generic_initiate_same_value():
+    facts = _facts("The company raised FY 2026 total revenue guidance to $1.6 billion. The company expects FY 2026 total revenue of $1.6 billion.", GuidanceMetric.REVENUE)
+    assert any(f.explicit_action is GuidanceAction.RAISE and f.low == 1.6 for f in facts)
+    assert not any(f.explicit_action is GuidanceAction.INITIATE and f.low == 1.6 for f in facts)
+''')
+          PY
+
+      - name: Compile repaired guidance code
+        run: |
+          python -m py_compile \
+            backend/app/services/guidance_raw_typed_extractor.py \
+            backend/app/services/guidance_raw_canonical_extractor.py \
+            backend/tests/test_guidance_survivor_semantic_regressions.py
+
+      - name: Run focused semantic ownership regressions
+        run: |
+          pytest -q \
+            backend/tests/test_guidance_survivor_semantic_regressions.py \
+            backend/tests/test_guidance_range_revision_ownership.py \
+            backend/tests/test_guidance_semantic_ownership_audit_regressions.py \
+            backend/tests/test_guidance_semantic_ownership_repair.py \
+            backend/tests/test_canonical_shadow_guidance_integration.py \
+            backend/tests/test_guidance_raw_replay_differential.py
+
+      - name: Run complete deterministic suite
+        run: pytest -q
+
+      - name: Verify frozen SOE rules and IEE boundary
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+          git diff --exit-code origin/main -- config/soe_v1_0_rules.yaml
+          if git diff --name-only origin/main...HEAD | grep -Ei 'investment.?execution|iee'; then
+            echo 'IEE boundary changed unexpectedly.' >&2
+            exit 1
+          fi
+
+      - name: Commit and push coherent semantic repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            backend/app/services/guidance_raw_typed_extractor.py \
+            backend/app/services/guidance_raw_canonical_extractor.py \
+            backend/tests/test_guidance_survivor_semantic_regressions.py
+          git diff --cached --check
+          git commit -m 'Phase 1.1E: harden survivor semantic ownership'
+          git push origin HEAD:phase-1.1e-canonical-guidance
