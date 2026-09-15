@@ -22,12 +22,28 @@ def _extract_python_blocks(workflow: str) -> list[str]:
 
 
 def _exec(source: str, label: str) -> None:
-    exec(compile(source, label, "exec"), {})
+    try:
+        exec(compile(source, label, "exec"), {})
+    except AssertionError:
+        import sys
+
+        _, _, tb = sys.exc_info()
+        while tb is not None and tb.tb_next is not None:
+            tb = tb.tb_next
+        lineno = tb.tb_lineno if tb is not None else 0
+        lines = source.splitlines()
+        lo = max(1, lineno - 5)
+        hi = min(len(lines), lineno + 5)
+        print(f"ASSERTION_CONTEXT {label} line={lineno}")
+        for number in range(lo, hi + 1):
+            marker = ">>" if number == lineno else "  "
+            print(f"{marker} {number:04d}: {lines[number - 1]}")
+        raise
 
 
 def main() -> None:
     # The first approved repair batch is retained verbatim in the temporary
-    # survivor workflow.  Treat it only as a payload file; it is intentionally
+    # survivor workflow. Treat it only as a payload file; it is intentionally
     # not executed by GitHub Actions as YAML.
     survivor = Path(".github/workflows/phase-1.1e-survivor-semantic-repair.yml").read_text()
     survivor_blocks = _extract_python_blocks(survivor)
@@ -36,7 +52,7 @@ def main() -> None:
     _exec(survivor_blocks[0], "<phase-1.1e-survivor-semantic-repair>")
 
     # The immediately preceding commit contains the approved extension for
-    # post-period actuals and parenthesized loss signs.  Extract the second
+    # post-period actuals and parenthesized loss signs. Extract the second
     # embedded Python payload before the registered workflow is simplified.
     previous = subprocess.check_output(
         ["git", "show", "HEAD^:.github/workflows/phase-1.1e-semantic-repair.yml"],
