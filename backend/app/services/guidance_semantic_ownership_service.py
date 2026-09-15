@@ -42,15 +42,10 @@ _STRONG_ACTUAL_CUE = re.compile(
     r"(?:(?:was|were)|(?:increased|decreased|rose|fell|grew|declined)\s+to))\b",
     re.I,
 )
-_RESULT_CONTEXT = re.compile(
-    r"\b(?:results?|actuals?|preliminary(?:\s+unaudited)?|unaudited)\b", re.I
-)
+_RESULT_CONTEXT = re.compile(r"\b(?:results?|actuals?|preliminary(?:\s+unaudited)?|unaudited)\b", re.I)
 _LONG_TERM_TARGET = re.compile(
-    r"\blong[- ]term\b|"
-    r"\bmulti[- ]year\b|"
-    r"\bover\s+the\s+next\s+\d+\s+years?\b|"
-    r"\boutlook\s+by\s+20\d{2}\b|"
-    r"\bby\s+20\d{2}\b.{0,80}\b(?:target|goal|objective|outlook)\b",
+    r"\blong[- ]term\b|\bmulti[- ]year\b|\bover\s+the\s+next\s+\d+\s+years?\b|"
+    r"\boutlook\s+by\s+20\d{2}\b|\bby\s+20\d{2}\b.{0,80}\b(?:target|goal|objective|outlook)\b",
     re.I | re.S,
 )
 _SUBCOMPONENT_REVENUE = re.compile(
@@ -62,8 +57,8 @@ _SUBCOMPONENT_REVENUE = re.compile(
     re.I | re.S,
 )
 _PORTFOLIO_EFFECT = re.compile(
-    r"\b(?:divestitures?|business\s+exits?|portfolio\s+pruning|pruning|"
-    r"non[- ]strategic\s+revenue|sale\s+of\s+(?:the\s+)?[A-Za-z0-9&' -]{2,60}\s+business)\b|"
+    r"\b(?:divestitures?|business\s+exits?|portfolio\s+pruning|pruning|non[- ]strategic\s+revenue|"
+    r"sale\s+of\s+(?:the\s+)?[A-Za-z0-9&' -]{2,60}\s+business)\b|"
     r"\b(?:reduction|impact|headwind)\b.{0,120}\b(?:sale|divestiture|pruning|business\s+exit)\b",
     re.I | re.S,
 )
@@ -74,27 +69,21 @@ _TRANSACTION_EFFECT = re.compile(
     r"\b(?:transaction|acquisition)\b.{0,100}\b(?:accretion|dilution|synerg(?:y|ies))\b",
     re.I | re.S,
 )
-_NAMED_OWNER_COLON = re.compile(
-    r"(?:^|[.;•\n\r])\s*(?P<label>[A-Z][A-Za-z0-9&'(). /-]{2,70})\s*:\s*$"
-)
+_NAMED_OWNER_COLON = re.compile(r"(?:^|[.;•\n\r])\s*(?P<label>[A-Z][A-Za-z0-9&'(). /-]{2,70})\s*:\s*$")
 _OWNER_RESERVED = re.compile(
     r"^(?:financial\s+)?(?:guidance|outlook|forecast|results?|highlights?)$|"
-    r"^(?:full[- ]year|fiscal(?:\s+year)?|annual|quarterly?)\b.*"
-    r"(?:guidance|outlook|forecast|results?)$|"
+    r"^(?:full[- ]year|fiscal(?:\s+year)?|annual|quarterly?)\b.*(?:guidance|outlook|forecast|results?)$|"
     r"^(?:the\s+)?(?:company|consolidated|total)$",
     re.I,
 )
 _LOSS_OWNER = re.compile(
-    r"\b(?:adjusted\s+|non[- ]GAAP\s+)?"
-    r"(?:EBITDA|free\s+cash\s+flow|FCF)\s+(?:guidance\s+)?(?:is\s+)?(?:an?\s+)?loss\b|"
+    r"\b(?:adjusted\s+|non[- ]GAAP\s+)?(?:EBITDA|free\s+cash\s+flow|FCF)\s+"
+    r"(?:guidance\s+)?(?:is\s+)?(?:an?\s+)?loss\b|"
     r"\b(?:EBITDA|free\s+cash\s+flow|FCF)\b.{0,55}\bloss\b",
     re.I | re.S,
 )
-_BREAKEVEN_LOSS = re.compile(
-    r"\bbreakeven\b.{0,60}\bloss\b|\bloss\b.{0,60}\bbreakeven\b", re.I | re.S
-)
+_BREAKEVEN_LOSS = re.compile(r"\bbreakeven\b.{0,60}\bloss\b|\bloss\b.{0,60}\bbreakeven\b", re.I | re.S)
 _RESPECTIVELY = re.compile(r"\brespectively\b", re.I)
-
 _QUARTER = re.compile(
     r"\bQ(?P<q>[1-4])\s*(?:FY)?\s*'?(?P<year>20\d{2})\b|"
     r"\b(?P<word>first|second|third|fourth)\s+(?:fiscal\s+)?quarter"
@@ -109,26 +98,19 @@ _FULL_YEAR = re.compile(
     re.I,
 )
 _QWORD = {"first": "1", "second": "2", "third": "3", "fourth": "4"}
-
 _METRIC_TOKEN = re.compile(
-    r"\b(?:revenue|revenues|net\s+sales|EPS|earnings\s+per\s+share|"
-    r"EBITDA|free\s+cash\s+flow|FCF|gross\s+margin|operating\s+margin)\b",
+    r"\b(?:revenue|revenues|net\s+sales|EPS|earnings\s+per\s+share|EBITDA|free\s+cash\s+flow|FCF|"
+    r"gross\s+margin|operating\s+margin)\b",
     re.I,
 )
-_MONEY = re.compile(
-    r"\$?\s*(?P<num>\d+(?:\.\d+)?)\s*"
-    r"(?P<scale>billion|million|thousand|bn|mm|m|b|k)?\b",
-    re.I,
-)
+_MONEY = re.compile(r"\$?\s*(?P<num>\d+(?:\.\d+)?)\s*(?P<scale>billion|million|thousand|bn|mm|m|b|k)?\b", re.I)
 _RANGE_CONNECTOR = re.compile(r"\s*(?:to|through|[-–—])\s*", re.I)
 _TABLE_CUE = re.compile(
-    r"\b(?:low\s+high|date\s+issued|guidance\s+low\s+high|"
-    r"net\s+revenue\s+adjusted\s+EBITDA|GAAP\s+.*non[- ]GAAP)\b",
+    r"\b(?:low\s+high|date\s+issued|guidance\s+low\s+high|net\s+revenue\s+adjusted\s+EBITDA|"
+    r"GAAP\s+.*non[- ]GAAP)\b",
     re.I | re.S,
 )
-_PRODUCT_NET_SALES = re.compile(
-    r"\b[A-Z][A-Z0-9-]{3,}(?:\s*\([^)]{1,50}\))?\s+Net\s+Sales(?:\s+Guidance)?\b"
-)
+_PRODUCT_NET_SALES = re.compile(r"\b[A-Z][A-Z0-9-]{3,}(?:\s*\([^)]{1,50}\))?\s+Net\s+Sales(?:\s+Guidance)?\b")
 
 
 def _evidence(fact: TypedGuidanceFact):
@@ -144,7 +126,7 @@ def _value_window(fact: TypedGuidanceFact, before: int = 220, after: int = 180) 
         start = evidence.metric_start or 0
     if end is None:
         end = start
-    return text[max(0, start - before): min(len(text), end + after)]
+    return text[max(0, start - before):min(len(text), end + after)]
 
 
 def _binding_sentence(fact: TypedGuidanceFact) -> str:
@@ -156,17 +138,8 @@ def _binding_sentence(fact: TypedGuidanceFact) -> str:
         return text
     left_anchor = min(starts)
     right_anchor = max(ends) if ends else left_anchor
-    left = max(
-        text.rfind(".", 0, left_anchor),
-        text.rfind(";", 0, left_anchor),
-        text.rfind("\n", 0, left_anchor),
-        text.rfind("•", 0, left_anchor),
-    ) + 1
-    rights = [
-        pos
-        for token in (".", ";", "\n", "•")
-        if (pos := text.find(token, right_anchor)) >= 0
-    ]
+    left = max(text.rfind(".", 0, left_anchor), text.rfind(";", 0, left_anchor), text.rfind("\n", 0, left_anchor), text.rfind("•", 0, left_anchor)) + 1
+    rights = [pos for token in (".", ";", "\n", "•") if (pos := text.find(token, right_anchor)) >= 0]
     right = min(rights) if rights else len(text)
     return text[left:right].strip()
 
@@ -176,29 +149,20 @@ def _named_owner_label(fact: TypedGuidanceFact) -> str | None:
     text = evidence.full_text or ""
     if evidence.metric_start is None:
         return None
-    prefix = text[max(0, evidence.metric_start - 100): evidence.metric_start]
+    prefix = text[max(0, evidence.metric_start - 100):evidence.metric_start]
     match = _NAMED_OWNER_COLON.search(prefix)
     if match is not None:
         label = re.sub(r"\s+", " ", match.group("label")).strip()
-        if not _OWNER_RESERVED.search(label) and not re.search(
-            r"\b(?:guidance|outlook|forecast|results?|company|consolidated)\b", label, re.I
-        ):
+        if not _OWNER_RESERVED.search(label) and not re.search(r"\b(?:guidance|outlook|forecast|results?|company|consolidated)\b", label, re.I):
             return label
-
     tail = re.sub(r"\s+", " ", prefix).strip()
-    match = re.search(
-        r"(?:^|[.;•|])\s*(?P<label>[A-Z][A-Za-z0-9&'()./-]{2,35})\s+$", tail
-    )
+    match = re.search(r"(?:^|[.;•|])\s*(?P<label>[A-Z][A-Za-z0-9&'()./-]{2,35})$", tail)
     if match is None:
-        match = re.search(r"\b(?P<label>[A-Z][A-Za-z0-9&'()./-]{2,35})\s+$", tail)
+        match = re.search(r"\b(?P<label>[A-Z][A-Za-z0-9&'()./-]{2,35})$", tail)
     if match is None:
         return None
     label = match.group("label").strip()
-    if _OWNER_RESERVED.search(label) or re.search(
-        r"\b(?:total|company|consolidated|adjusted|non[- ]GAAP|full[- ]year|fiscal)\b",
-        label,
-        re.I,
-    ):
+    if _OWNER_RESERVED.search(label) or re.search(r"\b(?:total|company|consolidated|adjusted|non[- ]GAAP|full[- ]year|fiscal)\b", label, re.I):
         return None
     return label
 
@@ -206,8 +170,7 @@ def _named_owner_label(fact: TypedGuidanceFact) -> str | None:
 def _explicit_period_mentions(text: str, offset: int = 0) -> list[tuple[str, int, int]]:
     periods: list[tuple[str, int, int]] = []
     for match in _QUARTER.finditer(text):
-        word = (match.group("word") or "").lower()
-        q = match.group("q") or _QWORD.get(word)
+        q = match.group("q") or _QWORD.get((match.group("word") or "").lower())
         year = match.group("year") or match.group("year2")
         if q and year:
             periods.append((f"Q{q}FY{year}", offset + match.start(), offset + match.end()))
@@ -220,14 +183,7 @@ def _explicit_period_mentions(text: str, offset: int = 0) -> list[tuple[str, int
 
 def _is_comparator_context(text: str, start: int) -> bool:
     before = text[max(0, start - 55):start]
-    return bool(
-        re.search(
-            r"\b(?:compared\s+(?:with|to)|versus|vs\.?|prior[- ]year|year[- ]ago|"
-            r"from\s+the\s+same\s+period)\b",
-            before,
-            re.I,
-        )
-    )
+    return bool(re.search(r"\b(?:compared\s+(?:with|to)|versus|vs\.?|prior[- ]year|year[- ]ago|from\s+the\s+same\s+period)\b", before, re.I))
 
 
 def _owned_period(fact: TypedGuidanceFact) -> str | None:
@@ -241,19 +197,22 @@ def _owned_period(fact: TypedGuidanceFact) -> str | None:
     mentions = _explicit_period_mentions(text[lo:hi], offset=lo)
     if not mentions:
         return None
-    ranked: list[tuple[int, int, str]] = []
+    preceding: list[tuple[int, str]] = []
+    following: list[tuple[int, str]] = []
     for period, start, end in mentions:
         if _is_comparator_context(text, start):
             continue
         if end <= pivot:
-            distance, side = pivot - end, 0
+            preceding.append((pivot - end, period))
         else:
-            distance, side = start - pivot, 1
-        ranked.append((distance, side, period))
-    if not ranked:
-        return None
-    ranked.sort(key=lambda item: (item[0], item[1]))
-    return ranked[0][2]
+            following.append((start - pivot, period))
+    if preceding:
+        preceding.sort(key=lambda item: item[0])
+        return preceding[0][1]
+    if following:
+        following.sort(key=lambda item: item[0])
+        return following[0][1]
+    return None
 
 
 def _local_period_conflict(fact: TypedGuidanceFact) -> bool:
@@ -268,8 +227,7 @@ def _long_term_owner(fact: TypedGuidanceFact) -> bool:
     if pivot is None:
         return False
     end = evidence.value_end if evidence.value_end is not None else pivot
-    local = text[max(0, pivot - 100):min(len(text), end + 100)]
-    return bool(_LONG_TERM_TARGET.search(local))
+    return bool(_LONG_TERM_TARGET.search(text[max(0, pivot - 100):min(len(text), end + 100)]))
 
 
 def _historical_actual(fact: TypedGuidanceFact) -> bool:
@@ -410,9 +368,7 @@ def _range_endpoint_issue(fact: TypedGuidanceFact) -> str | None:
     f_low, f_high = sorted((fact.low, fact.high))
     scale = max(abs(p_low), abs(p_high), 1.0)
     if abs(p_low - f_low) > scale * 1e-6 or abs(p_high - f_high) > scale * 1e-6:
-        if fact.metric in {GuidanceMetric.EBITDA, GuidanceMetric.FCF} and _LOSS_OWNER.search(
-            _value_window(fact, 130, 100)
-        ):
+        if fact.metric in {GuidanceMetric.EBITDA, GuidanceMetric.FCF} and _LOSS_OWNER.search(_value_window(fact, 130, 100)):
             return None
         return "value: selected numeric range endpoints do not match the locally bound textual range"
     return None
@@ -456,15 +412,8 @@ def _basis_update(fact: TypedGuidanceFact) -> str | None:
     return None
 
 
-def normalize_typed_guidance_fact(
-    fact: TypedGuidanceFact,
-    document: SourceDocument,
-) -> TypedGuidanceFact:
-    """Normalize deterministic semantic ownership before strict-v4 admission.
-
-    The stage corrects only evidence-owned semantics. Any unresolved ownership
-    ambiguity is recorded for strict-v4 to reject fail-closed.
-    """
+def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocument) -> TypedGuidanceFact:
+    """Normalize deterministic semantic ownership before strict-v4 admission."""
     del document
     updates: dict = {}
     issues: list[str] = []
@@ -481,7 +430,6 @@ def normalize_typed_guidance_fact(
     if _PRODUCT_NET_SALES.search(local) and not _is_total_metric_label(fact):
         updates["scope_kind"] = GuidanceScopeKind.PRODUCT
         updates["scope_label"] = "product net sales"
-
     if _long_term_owner(fact):
         updates["role"] = GuidanceFactRole.LONG_TERM_TARGET
         updates["period_kind"] = GuidancePeriodKind.LONG_TERM
@@ -502,18 +450,21 @@ def normalize_typed_guidance_fact(
         metadata["semantic_sign_normalized"] = True
     if loss_issue:
         issues.append(loss_issue)
-
     range_issue = _range_endpoint_issue(fact)
     if range_issue:
         issues.append(range_issue)
 
     if _local_period_conflict(fact):
         owner_period = _owned_period(fact)
-        issues.append(
-            f"period: locally owned period {owner_period} conflicts with selected fiscal period {fact.fiscal_period}"
-        )
+        issues.append(f"period: locally owned period {owner_period} conflicts with selected fiscal period {fact.fiscal_period}")
 
-    if fact.metric is GuidanceMetric.REVENUE and not _is_total_metric_label(fact) and _SUBCOMPONENT_REVENUE.search(local):
+    effective_scope = updates.get("scope_kind", fact.scope_kind)
+    if (
+        fact.metric is GuidanceMetric.REVENUE
+        and effective_scope is not GuidanceScopeKind.PRODUCT
+        and not _is_total_metric_label(fact)
+        and _SUBCOMPONENT_REVENUE.search(local)
+    ):
         updates["scope_kind"] = GuidanceScopeKind.UNKNOWN
         updates["scope_label"] = "revenue subcomponent"
         issues.append("issuer: revenue subcomponent/recognition amount is not consolidated issuer revenue")
@@ -521,12 +472,10 @@ def normalize_typed_guidance_fact(
     if fact.metric in {GuidanceMetric.REVENUE, GuidanceMetric.EBITDA, GuidanceMetric.EPS} and _PORTFOLIO_EFFECT.search(local):
         updates["value_kind"] = GuidanceValueKind.DELTA
         issues.append("row: portfolio/divestiture/business-exit effect is not consolidated issuer guidance")
-
     if fact.metric in {GuidanceMetric.EBITDA, GuidanceMetric.EPS, GuidanceMetric.REVENUE} and _TRANSACTION_EFFECT.search(local):
         updates["scope_kind"] = GuidanceScopeKind.UNKNOWN
         updates["scope_label"] = "transaction effect"
         issues.append("issuer: transaction synergy/accretion/dilution effect is not issuer operating guidance")
-
     if _RESPECTIVELY.search(sentence):
         metric_tokens = {match.group(0).lower() for match in _METRIC_TOKEN.finditer(sentence)}
         if len(metric_tokens) >= 2:
@@ -538,7 +487,6 @@ def normalize_typed_guidance_fact(
     if basis is not None and basis != fact.accounting_basis:
         updates["accounting_basis"] = basis
         metadata["semantic_basis_normalized"] = True
-
     if effective_role is GuidanceFactRole.QUOTED_PRIOR and fact.explicit_action is not GuidanceAction.NONE:
         updates["explicit_action"] = GuidanceAction.NONE
         metadata["semantic_prior_action_normalized"] = True
