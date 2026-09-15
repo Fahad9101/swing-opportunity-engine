@@ -35,12 +35,23 @@ jobs:
         run: python scripts/phase_1_1e_apply_survivor_repair.py
 
       - name: Compile repaired guidance code
+        shell: bash
         run: |
+          set +e
           python -m py_compile \
             backend/app/services/guidance_raw_typed_extractor.py \
             backend/app/services/guidance_raw_canonical_extractor.py \
             backend/app/services/guidance_semantic_ownership_service.py \
             backend/tests/test_guidance_survivor_semantic_regressions.py
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            echo '--- generated raw typed extractor context ---'
+            nl -ba backend/app/services/guidance_raw_typed_extractor.py | sed -n '425,470p'
+            echo '--- generated canonical extractor context ---'
+            nl -ba backend/app/services/guidance_raw_canonical_extractor.py | sed -n '300,380p'
+            exit "$status"
+          fi
 
       - name: Run focused survivor semantic regressions
         run: pytest -q backend/tests/test_guidance_survivor_semantic_regressions.py
