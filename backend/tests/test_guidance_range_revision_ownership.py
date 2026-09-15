@@ -81,3 +81,50 @@ def test_plain_guidance_range_from_to_is_not_reclassified_as_revision():
         for fact in facts
     )
     assert not any(fact.role is GuidanceFactRole.QUOTED_PRIOR for fact in facts)
+
+
+def test_two_revised_metrics_keep_each_range_pair_with_its_metric():
+    document = _doc(
+        "The company is increasing full-year 2026 total revenue guidance "
+        "from a range of $250 million to $260 million to a range of $260 million to $270 million "
+        "and raising full-year 2026 adjusted EBITDA guidance from a range of $40 million to $45 million "
+        "to a range of $50 million to $55 million."
+    )
+    facts = list(extract_canonical_typed_guidance_facts(document).facts)
+
+    revenue = [fact for fact in facts if fact.metric is GuidanceMetric.REVENUE]
+    ebitda = [fact for fact in facts if fact.metric is GuidanceMetric.EBITDA]
+
+    assert any(
+        fact.fiscal_period == "FY2026"
+        and fact.role is GuidanceFactRole.CURRENT
+        and fact.low == 260 and fact.high == 270
+        and fact.explicit_action is GuidanceAction.RAISE
+        for fact in revenue
+    )
+    assert any(
+        fact.fiscal_period == "FY2026"
+        and fact.role is GuidanceFactRole.QUOTED_PRIOR
+        and fact.low == 250 and fact.high == 260
+        for fact in revenue
+    )
+    assert any(
+        fact.fiscal_period == "FY2026"
+        and fact.role is GuidanceFactRole.CURRENT
+        and fact.low == 50 and fact.high == 55
+        and fact.unit is GuidanceUnit.USD_MILLION
+        and fact.explicit_action is GuidanceAction.RAISE
+        for fact in ebitda
+    )
+    assert any(
+        fact.fiscal_period == "FY2026"
+        and fact.role is GuidanceFactRole.QUOTED_PRIOR
+        and fact.low == 40 and fact.high == 45
+        and fact.unit is GuidanceUnit.USD_MILLION
+        for fact in ebitda
+    )
+    assert not any(
+        fact.low in {250, 260} and fact.high in {260, 270}
+        for fact in ebitda
+        if fact.low is not None and fact.high is not None
+    )

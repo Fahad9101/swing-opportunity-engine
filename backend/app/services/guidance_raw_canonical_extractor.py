@@ -1198,7 +1198,11 @@ def _directional_value_pair(clause: str, anchor: int, mention, action: GuidanceA
     # the new range as CURRENT. This is intentionally gated on a directional
     # RAISE/LOWER action, so ordinary ``guidance ranges from X to Y`` remains a
     # single current range.
-    range_revision = _FROM_RANGE_TO_RANGE_MONEY.search(clause)
+    # A metric clause intentionally retains left context. Search only after the
+    # current metric so a preceding metric's revision cannot be rebound here.
+    range_revision = _FROM_RANGE_TO_RANGE_MONEY.search(
+        clause, anchor + len(mention.text)
+    )
     if range_revision:
         aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}
 
