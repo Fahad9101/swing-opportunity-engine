@@ -12,12 +12,15 @@ on:
       - 'backend/app/services/guidance_evidence_binder_v4.py'
       - 'backend/app/services/canonical_shadow_guidance_service.py'
       - 'backend/app/services/guidance_raw_canonical_extractor.py'
+      - 'backend/app/services/guidance_raw_typed_extractor.py'
       - 'backend/app/services/guidance_raw_replay_differential_service.py'
       - 'backend/app/services/guidance_semantic_ownership_service.py'
       - 'backend/tests/test_guidance_raw_replay_differential.py'
       - 'backend/tests/test_guidance_semantic_ownership_repair.py'
       - 'backend/tests/test_guidance_semantic_ownership_audit_regressions.py'
       - 'backend/tests/test_guidance_semantic_period_heading_regression.py'
+      - 'backend/tests/test_guidance_range_revision_ownership.py'
+  workflow_dispatch:
 
 permissions:
   contents: read
