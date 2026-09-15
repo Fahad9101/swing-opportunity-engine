@@ -48,10 +48,10 @@ jobs:
           if [ "$status" -ne 0 ]; then
             echo '--- generated raw typed extractor context ---'
             nl -ba backend/app/services/guidance_raw_typed_extractor.py | sed -n '425,470p'
-            echo '--- generated canonical extractor context around compile failure ---'
+            echo '--- generated canonical extractor role/helper context ---'
             nl -ba backend/app/services/guidance_raw_canonical_extractor.py | sed -n '980,1065p'
-            echo '--- generated canonical extractor period/role context ---'
-            nl -ba backend/app/services/guidance_raw_canonical_extractor.py | sed -n '850,980p'
+            echo '--- generated canonical extractor line-1272 context ---'
+            nl -ba backend/app/services/guidance_raw_canonical_extractor.py | sed -n '1220,1315p'
             exit "$status"
           fi
 
