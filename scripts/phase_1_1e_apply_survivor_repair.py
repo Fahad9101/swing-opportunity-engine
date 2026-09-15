@@ -24,8 +24,37 @@ def _extract_python_blocks(workflow: str) -> list[str]:
     return blocks
 
 
+def _normalize_embedded_role_helper(source: str) -> str:
+    """Repair YAML-dedent damage inside the approved role-helper string only."""
+    helper_start_marker = "role_helper = '''def _quoted_prior_locally_owns_value"
+    helper_end_marker = "'''\nassert canonical.count(role_anchor) == 1"
+    start = source.index(helper_start_marker)
+    end = source.index(helper_end_marker, start)
+    block = source[start:end]
+    malformed = (
+        "    if preceding:\n"
+        "        owner = max(preceding, key=lambda item: item.end)\n"
+        "        if owner.metric is not mention.metric:\n"
+        "  return False\n"
+        "    return anchor - absolute_marker_end <= 90\n"
+    )
+    corrected = (
+        "    if preceding:\n"
+        "        owner = max(preceding, key=lambda item: item.end)\n"
+        "        if owner.metric is not mention.metric:\n"
+        "            return False\n"
+        "    return anchor - absolute_marker_end <= 90\n"
+    )
+    if malformed not in block:
+        raise RuntimeError("approved role-helper dedent defect not found")
+    block = block.replace(malformed, corrected, 1)
+    return source[:start] + block + source[end:]
+
+
 def _compat_survivor_payload(source: str) -> str:
     """Keep approved semantics while tolerating harmless live-source formatting drift."""
+    source = _normalize_embedded_role_helper(source)
+
     brittle_money = "assert raw.count(old_money) == 1\nraw = raw.replace(old_money, new_money, 1)"
     structural_money = '''money_lines = new_money.rstrip("\\n").splitlines()
 assert money_lines and money_lines[0].lstrip().startswith("for match in _MONEY_RANGE.finditer(clause):")
