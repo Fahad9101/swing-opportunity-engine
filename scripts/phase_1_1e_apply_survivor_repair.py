@@ -58,7 +58,24 @@ else:
 '''.rstrip()
     if brittle_compact not in source:
         raise RuntimeError("approved compact-range patch guard not found")
-    return source.replace(brittle_compact, structural_compact, 1)
+    source = source.replace(brittle_compact, structural_compact, 1)
+
+    brittle_role = "assert canonical.count(role_old) == 1\ncanonical = canonical.replace(role_old, role_new, 1)"
+    structural_role = '''if canonical.count(role_old) == 1:
+    canonical = canonical.replace(role_old, role_new, 1)
+else:
+    extract_start = canonical.index("def extract_canonical_typed_guidance_facts(document: SourceDocument)")
+    start_marker = "            role = GuidanceFactRole.CURRENT if pending_review or previous_now_value is not None else _fact_role(clause, value)\\n"
+    end_marker = "            canonical_period = _canonical_period_binding(clause, anchor, mention)\\n"
+    start = canonical.find(start_marker, extract_start)
+    end = canonical.find(end_marker, start)
+    assert start >= 0 and end > start
+    assert canonical.find(start_marker, start + len(start_marker)) < 0
+    canonical = canonical[:start] + role_new + canonical[end:]
+'''.rstrip()
+    if brittle_role not in source:
+        raise RuntimeError("approved role-locality patch guard not found")
+    return source.replace(brittle_role, structural_role, 1)
 
 
 def _exec(source: str, label: str) -> None:
