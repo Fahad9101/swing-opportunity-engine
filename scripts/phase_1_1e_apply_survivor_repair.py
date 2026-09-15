@@ -93,7 +93,26 @@ else:
 '''.rstrip()
     if brittle_section not in source:
         raise RuntimeError("approved annual-section patch guard not found")
-    return source.replace(brittle_section, structural_section, 1)
+    source = source.replace(brittle_section, structural_section, 1)
+
+    brittle_local = "assert canonical.count(local_quarter_anchor) == 1\ncanonical = canonical.replace(local_quarter_anchor, local_quarter_new, 1)"
+    structural_local = '''if canonical.count(local_quarter_anchor) == 1:
+    canonical = canonical.replace(local_quarter_anchor, local_quarter_new, 1)
+else:
+    extract_start = canonical.index("def extract_canonical_typed_guidance_facts(document: SourceDocument)")
+    start_marker = "            local_quarter_period_v29 = _local_explicit_quarter_before_value_v29(clause, anchor, mention, value)\\n"
+    end_marker = "            strict_segment_quarter_v32 = _strict_segment_quarter_heading_v32(segment, clause, anchor, mention)\\n"
+    start = canonical.find(start_marker, extract_start)
+    end = canonical.find(end_marker, start)
+    assert start >= 0 and end > start
+    assert canonical.find(start_marker, start + len(start_marker)) < 0
+    live_block = canonical[start:end]
+    insertion = '''            local_full_year_period = _local_full_year_phrase_before_value(clause, anchor, mention, value)\n            if local_full_year_period is not None:\n                period = local_full_year_period\n'''
+    canonical = canonical[:end] + insertion + canonical[end:]
+'''.rstrip()
+    if brittle_local not in source:
+        raise RuntimeError("approved local-full-year patch guard not found")
+    return source.replace(brittle_local, structural_local, 1)
 
 
 def _exec(source: str, label: str) -> None:
