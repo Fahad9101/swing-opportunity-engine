@@ -27,8 +27,22 @@ def _extract_python_blocks(workflow: str) -> list[str]:
 def _compat_survivor_payload(source: str) -> str:
     """Keep approved semantics while tolerating harmless live-source formatting drift."""
     brittle_money = "assert raw.count(old_money) == 1\nraw = raw.replace(old_money, new_money, 1)"
-    structural_money = '''if raw.count(old_money) == 1:
-    raw = raw.replace(old_money, new_money, 1)
+    structural_money = '''money_lines = new_money.rstrip("\\n").splitlines()
+assert money_lines and money_lines[0].lstrip().startswith("for match in _MONEY_RANGE.finditer(clause):")
+body_indents = [len(line) - len(line.lstrip()) for line in money_lines[1:] if line.strip()]
+assert body_indents
+body_shift = 12 - min(body_indents)
+assert body_shift >= 0
+normalized_money_lines = ["        " + money_lines[0].lstrip()]
+for line in money_lines[1:]:
+    if not line.strip():
+        normalized_money_lines.append("")
+        continue
+    indent = len(line) - len(line.lstrip())
+    normalized_money_lines.append(" " * (indent + body_shift) + line.lstrip())
+normalized_money = "\\n".join(normalized_money_lines) + "\\n"
+if raw.count(old_money) == 1:
+    raw = raw.replace(old_money, normalized_money, 1)
 else:
     money_marker = "        for match in _MONEY_RANGE.finditer(clause):\\n"
     single_marker = "        for match in _MONEY_SINGLE.finditer(clause):\\n"
@@ -37,7 +51,7 @@ else:
     end = raw.find(single_marker, start)
     assert start >= 0 and end > start
     assert raw.find(money_marker, start + len(money_marker)) < 0
-    raw = raw[:start] + new_money + raw[end:]
+    raw = raw[:start] + normalized_money + raw[end:]
 '''.rstrip()
     if brittle_money not in source:
         raise RuntimeError("approved money-range patch guard not found")
