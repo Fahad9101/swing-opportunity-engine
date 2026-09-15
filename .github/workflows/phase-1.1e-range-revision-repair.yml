@@ -1,0 +1,83 @@
+name: Phase 1.1E Range Revision Ownership Repair
+
+on:
+  push:
+    branches:
+      - phase-1.1e-canonical-guidance
+    paths:
+      - .github/workflows/phase-1.1e-range-revision-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Apply generic range-to-range ownership repair
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          typed = Path('backend/app/services/guidance_raw_typed_extractor.py')
+          text = typed.read_text()
+          old = '(GuidanceAction.RAISE, re.compile(r"\\b(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\\b", re.I)),'
+          new = '(GuidanceAction.RAISE, re.compile(r"\\b(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\\b", re.I)),'
+          assert text.count(old) == 1, 'unexpected RAISE action pattern'
+          typed.write_text(text.replace(old, new))
+
+          canonical = Path('backend/app/services/guidance_raw_canonical_extractor.py')
+          text = canonical.read_text()
+          marker = '_FROM_TO_MONEY = re.compile(\n'
+          assert text.count(marker) == 1, 'unexpected _FROM_TO_MONEY marker'
+          range_regex = '''_FROM_RANGE_TO_RANGE_MONEY = re.compile(\n    r"\\bfrom\\s+(?:a\\s+)?range\\s+(?:of\\s+)?"\n    r"(?P<d1>\\$)?\\s*(?P<old_lo>-?\\d[\\d,]*(?:\\.\\d+)?)\\s*"\n    r"(?P<s1>billion|million|thousand|bn|mm|m|b)?\\s*"\n    r"(?:to|through|-|–|—)\\s*(?P<d2>\\$)?\\s*(?P<old_hi>-?\\d[\\d,]*(?:\\.\\d+)?)\\s*"\n    r"(?P<s2>billion|million|thousand|bn|mm|m|b)?"\n    r"\\s+to\\s+(?:a\\s+)?range\\s+(?:of\\s+)?"\n    r"(?P<d3>\\$)?\\s*(?P<new_lo>-?\\d[\\d,]*(?:\\.\\d+)?)\\s*"\n    r"(?P<s3>billion|million|thousand|bn|mm|m|b)?\\s*"\n    r"(?:to|through|-|–|—)\\s*(?P<d4>\\$)?\\s*(?P<new_hi>-?\\d[\\d,]*(?:\\.\\d+)?)\\s*"\n    r"(?P<s4>billion|million|thousand|bn|mm|m|b)?\\b",\n    re.I,\n)\n'''
+          text = text.replace(marker, range_regex + marker, 1)
+
+          target = '''    if mention.metric not in {GuidanceMetric.REVENUE, GuidanceMetric.EBITDA, GuidanceMetric.FCF, GuidanceMetric.EPS}:\n        return None, None\n    by_match = _BY_TO_MONEY.search(clause)\n'''
+          assert text.count(target) == 1, 'unexpected directional money insertion point'
+          replacement = '''    if mention.metric not in {GuidanceMetric.REVENUE, GuidanceMetric.EBITDA, GuidanceMetric.FCF, GuidanceMetric.EPS}:\n        return None, None\n\n    # Directional range-to-range revisions need four endpoints, not the scalar\n    # ``from X to Y`` grammar. Preserve the old range as QUOTED_PRIOR and bind\n    # the new range as CURRENT. This is intentionally gated on a directional\n    # RAISE/LOWER action, so ordinary ``guidance ranges from X to Y`` remains a\n    # single current range.\n    range_revision = _FROM_RANGE_TO_RANGE_MONEY.search(clause)\n    if range_revision:\n        aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}\n\n        def compatible_scale(left: str | None, right: str | None) -> str | None:\n            left_norm = aliases.get((left or "").lower(), (left or "").lower())\n            right_norm = aliases.get((right or "").lower(), (right or "").lower())\n            if left_norm and right_norm and left_norm != right_norm:\n                return None\n            return right or left\n\n        old_scale = compatible_scale(range_revision.group("s1"), range_revision.group("s2"))\n        new_scale = compatible_scale(range_revision.group("s3"), range_revision.group("s4"))\n        if old_scale is not None and new_scale is not None:\n            old_unit = _unit_from_scale(\n                old_scale, mention.metric,\n                dollar=bool(range_revision.group("d1") or range_revision.group("d2")),\n            )\n            new_unit = _unit_from_scale(\n                new_scale, mention.metric,\n                dollar=bool(range_revision.group("d3") or range_revision.group("d4")),\n            )\n            if old_unit is not GuidanceUnit.UNKNOWN and new_unit is not GuidanceUnit.UNKNOWN:\n                old_lo = float(range_revision.group("old_lo").replace(",", ""))\n                old_hi = float(range_revision.group("old_hi").replace(",", ""))\n                new_lo = float(range_revision.group("new_lo").replace(",", ""))\n                new_hi = float(range_revision.group("new_hi").replace(",", ""))\n                if old_lo <= old_hi and new_lo <= new_hi:\n                    old_start = range_revision.start("d1") if range_revision.group("d1") else range_revision.start("old_lo")\n                    old_end = range_revision.end("s2") if range_revision.group("s2") else range_revision.end("old_hi")\n                    new_start = range_revision.start("d3") if range_revision.group("d3") else range_revision.start("new_lo")\n                    new_end = range_revision.end("s4") if range_revision.group("s4") else range_revision.end("new_hi")\n                    current = _ValueBinding(\n                        new_lo, new_hi, new_unit, GuidanceValueKind.ABSOLUTE_LEVEL,\n                        clause[new_start:new_end].strip(), new_start, new_end,\n                    )\n                    prior = _ValueBinding(\n                        old_lo, old_hi, old_unit, GuidanceValueKind.ABSOLUTE_LEVEL,\n                        clause[old_start:old_end].strip(), old_start, old_end,\n                    )\n                    return current, prior\n\n    by_match = _BY_TO_MONEY.search(clause)\n'''
+          canonical.write_text(text.replace(target, replacement, 1))
+
+          test = Path('backend/tests/test_guidance_range_revision_ownership.py')
+          test.write_text('''from __future__ import annotations\n\nimport hashlib\nfrom datetime import UTC, datetime\n\nfrom app.domain.guidance_canonical_v1 import GuidanceFactRole, GuidanceUnit\nfrom app.domain.soe_v1_1 import GuidanceAction, GuidanceMetric, SourceDocument\nfrom app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts\n\n\ndef _doc(text: str) -> SourceDocument:\n    ts = datetime(2026, 9, 15, tzinfo=UTC)\n    digest = hashlib.sha256(text.encode()).hexdigest()\n    return SourceDocument(\n        document_id=f"range-revision-{digest[:12]}",\n        rules_hash="candidate-hash",\n        ticker="TEST",\n        cik="0000000001",\n        accession="0000000001-26-999995",\n        form="8-K",\n        filing_date=ts.date(),\n        source_url="https://www.sec.gov/Archives/edgar/data/1/range-revision.htm",\n        source_timestamp=ts,\n        fetched_at=ts,\n        content_hash=digest,\n        content_type="text/plain",\n        content=text,\n    )\n\n\ndef _revenue_facts(text: str):\n    return [\n        fact for fact in extract_canonical_typed_guidance_facts(_doc(text)).facts\n        if fact.metric is GuidanceMetric.REVENUE\n    ]\n\n\ndef test_increasing_range_to_range_emits_new_current_and_old_quoted_prior():\n    facts = _revenue_facts(\n        "For 2025, the company is increasing total revenue guidance "\n        "from a range of $250 million to $260 million to a range of $260 million to $270 million."\n    )\n    current = [fact for fact in facts if fact.role is GuidanceFactRole.CURRENT]\n    prior = [fact for fact in facts if fact.role is GuidanceFactRole.QUOTED_PRIOR]\n    assert any(\n        fact.low == 260 and fact.high == 270 and fact.unit is GuidanceUnit.USD_MILLION\n        and fact.explicit_action is GuidanceAction.RAISE\n        for fact in current\n    )\n    assert any(\n        fact.low == 250 and fact.high == 260 and fact.unit is GuidanceUnit.USD_MILLION\n        and fact.explicit_action is GuidanceAction.NONE\n        for fact in prior\n    )\n    assert not any(fact.low == 250 and fact.high == 260 for fact in current)\n\n\ndef test_lowering_range_to_range_emits_new_current_and_old_quoted_prior():\n    facts = _revenue_facts(\n        "For 2026, the company is lowering total revenue guidance "\n        "from a range of $300 million to $320 million to a range of $280 million to $290 million."\n    )\n    assert any(\n        fact.role is GuidanceFactRole.CURRENT and fact.low == 280 and fact.high == 290\n        and fact.explicit_action is GuidanceAction.LOWER\n        for fact in facts\n    )\n    assert any(\n        fact.role is GuidanceFactRole.QUOTED_PRIOR and fact.low == 300 and fact.high == 320\n        and fact.explicit_action is GuidanceAction.NONE\n        for fact in facts\n    )\n\n\ndef test_plain_guidance_range_from_to_is_not_reclassified_as_revision():\n    facts = _revenue_facts(\n        "For 2026, the company expects total revenue guidance in a range from $315 million to $325 million."\n    )\n    assert any(\n        fact.role is GuidanceFactRole.CURRENT and fact.low == 315 and fact.high == 325\n        for fact in facts\n    )\n    assert not any(fact.role is GuidanceFactRole.QUOTED_PRIOR for fact in facts)\n''')
+          PY
+
+      - name: Install package and run deterministic suite
+        run: |
+          python -m pip install -e '.[test]'
+          python -m pytest
+
+      - name: Verify frozen investment rules unchanged
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+
+      - name: Commit coherent repair and remove installer
+        shell: bash
+        run: |
+          rm .github/workflows/phase-1.1e-range-revision-repair.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/app/services/guidance_raw_typed_extractor.py \
+                  backend/app/services/guidance_raw_canonical_extractor.py \
+                  backend/tests/test_guidance_range_revision_ownership.py \
+                  .github/workflows/phase-1.1e-range-revision-repair.yml
+          git diff --cached --check
+          git commit -m 'Phase 1.1E: repair range revision ownership'
+          git push origin HEAD:phase-1.1e-canonical-guidance
