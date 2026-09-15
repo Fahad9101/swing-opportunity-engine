@@ -51,9 +51,48 @@ def _normalize_embedded_role_helper(source: str) -> str:
     return source[:start] + block + source[end:]
 
 
+def _normalize_embedded_range_insert(source: str) -> str:
+    """Reconstruct the approved range-revision block after YAML block dedent damage."""
+    start_marker = "range_insert = '''    if range_revision:\n"
+    end_marker = "'''\nassert canonical.count(range_anchor) == 1"
+    start = source.index(start_marker)
+    end = source.index(end_marker, start)
+    range_text = (
+        "    if range_revision:\n"
+        "        old_normalized = _normalized_money_range(\n"
+        "            range_revision.group(\"old_lo\"), range_revision.group(\"old_hi\"),\n"
+        "            range_revision.group(\"s1\"), range_revision.group(\"s2\"),\n"
+        "            has_dollar=bool(range_revision.group(\"d1\") or range_revision.group(\"d2\")),\n"
+        "            text=clause, position=range_revision.start(\"old_lo\"),\n"
+        "        )\n"
+        "        new_normalized = _normalized_money_range(\n"
+        "            range_revision.group(\"new_lo\"), range_revision.group(\"new_hi\"),\n"
+        "            range_revision.group(\"s3\"), range_revision.group(\"s4\"),\n"
+        "            has_dollar=bool(range_revision.group(\"d3\") or range_revision.group(\"d4\")),\n"
+        "            text=clause, position=range_revision.start(\"new_lo\"),\n"
+        "        )\n"
+        "        if old_normalized is not None and new_normalized is not None:\n"
+        "            old_lo, old_hi, old_unit = old_normalized\n"
+        "            new_lo, new_hi, new_unit = new_normalized\n"
+        "            old_start = range_revision.start(\"d1\") if range_revision.group(\"d1\") else range_revision.start(\"old_lo\")\n"
+        "            old_end = range_revision.end(\"s2\") if range_revision.group(\"s2\") else range_revision.end(\"old_hi\")\n"
+        "            new_start = range_revision.start(\"d3\") if range_revision.group(\"d3\") else range_revision.start(\"new_lo\")\n"
+        "            new_end = range_revision.end(\"s4\") if range_revision.group(\"s4\") else range_revision.end(\"new_hi\")\n"
+        "            return (\n"
+        "                _ValueBinding(new_lo, new_hi, new_unit, GuidanceValueKind.ABSOLUTE_LEVEL, clause[new_start:new_end].strip(), new_start, new_end),\n"
+        "                _ValueBinding(old_lo, old_hi, old_unit, GuidanceValueKind.ABSOLUTE_LEVEL, clause[old_start:old_end].strip(), old_start, old_end),\n"
+        "            )\n"
+        "\n"
+        "        aliases = {\"m\": \"million\", \"mm\": \"million\", \"b\": \"billion\", \"bn\": \"billion\"}\n"
+    )
+    replacement = f"range_insert = {range_text!r}"
+    return source[:start] + replacement + source[end + 3:]
+
+
 def _compat_survivor_payload(source: str) -> str:
     """Keep approved semantics while tolerating harmless live-source formatting drift."""
     source = _normalize_embedded_role_helper(source)
+    source = _normalize_embedded_range_insert(source)
 
     brittle_money = "assert raw.count(old_money) == 1\nraw = raw.replace(old_money, new_money, 1)"
     structural_money = '''money_lines = new_money.rstrip("\\n").splitlines()
