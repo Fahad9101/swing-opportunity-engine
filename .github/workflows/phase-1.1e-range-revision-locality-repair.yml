@@ -39,7 +39,7 @@ jobs:
 
           test = Path('backend/tests/test_guidance_range_revision_ownership.py')
           text = test.read_text()
-          addition = '''\n\ndef test_two_revised_metrics_keep_each_range_pair_with_its_metric():\n    document = _doc(\n        "For 2026, the company is increasing total revenue guidance "\n        "from a range of $250 million to $260 million to a range of $260 million to $270 million "\n        "and raising adjusted EBITDA guidance from a range of $40 million to $45 million "\n        "to a range of $50 million to $55 million."\n    )\n    facts = list(extract_canonical_typed_guidance_facts(document).facts)\n\n    revenue = [fact for fact in facts if fact.metric is GuidanceMetric.REVENUE]\n    ebitda = [fact for fact in facts if fact.metric is GuidanceMetric.EBITDA]\n\n    assert any(\n        fact.role is GuidanceFactRole.CURRENT and fact.low == 260 and fact.high == 270\n        for fact in revenue\n    )\n    assert any(\n        fact.role is GuidanceFactRole.QUOTED_PRIOR and fact.low == 250 and fact.high == 260\n        for fact in revenue\n    )\n    assert any(\n        fact.role is GuidanceFactRole.CURRENT and fact.low == 50 and fact.high == 55\n        and fact.unit is GuidanceUnit.USD_MILLION\n        for fact in ebitda\n    )\n    assert any(\n        fact.role is GuidanceFactRole.QUOTED_PRIOR and fact.low == 40 and fact.high == 45\n        and fact.unit is GuidanceUnit.USD_MILLION\n        for fact in ebitda\n    )\n    assert not any(\n        fact.low in {250, 260} and fact.high in {260, 270}\n        for fact in ebitda\n        if fact.low is not None and fact.high is not None\n    )\n'''
+          addition = '''\n\ndef test_two_revised_metrics_keep_each_range_pair_with_its_metric():\n    document = _doc(\n        "The company is increasing full-year 2026 total revenue guidance "\n        "from a range of $250 million to $260 million to a range of $260 million to $270 million "\n        "and raising full-year 2026 adjusted EBITDA guidance from a range of $40 million to $45 million "\n        "to a range of $50 million to $55 million."\n    )\n    facts = list(extract_canonical_typed_guidance_facts(document).facts)\n\n    revenue = [fact for fact in facts if fact.metric is GuidanceMetric.REVENUE]\n    ebitda = [fact for fact in facts if fact.metric is GuidanceMetric.EBITDA]\n\n    assert any(\n        fact.fiscal_period == "FY2026"\n        and fact.role is GuidanceFactRole.CURRENT\n        and fact.low == 260 and fact.high == 270\n        and fact.explicit_action is GuidanceAction.RAISE\n        for fact in revenue\n    )\n    assert any(\n        fact.fiscal_period == "FY2026"\n        and fact.role is GuidanceFactRole.QUOTED_PRIOR\n        and fact.low == 250 and fact.high == 260\n        for fact in revenue\n    )\n    assert any(\n        fact.fiscal_period == "FY2026"\n        and fact.role is GuidanceFactRole.CURRENT\n        and fact.low == 50 and fact.high == 55\n        and fact.unit is GuidanceUnit.USD_MILLION\n        and fact.explicit_action is GuidanceAction.RAISE\n        for fact in ebitda\n    )\n    assert any(\n        fact.fiscal_period == "FY2026"\n        and fact.role is GuidanceFactRole.QUOTED_PRIOR\n        and fact.low == 40 and fact.high == 45\n        and fact.unit is GuidanceUnit.USD_MILLION\n        for fact in ebitda\n    )\n    assert not any(\n        fact.low in {250, 260} and fact.high in {260, 270}\n        for fact in ebitda\n        if fact.low is not None and fact.high is not None\n    )\n'''
           assert 'test_two_revised_metrics_keep_each_range_pair_with_its_metric' not in text
           test.write_text(text + addition)
           PY
@@ -52,15 +52,17 @@ jobs:
         run: |
           git fetch origin main --depth=1
           test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
-      - name: Commit repair and remove installer
+      - name: Commit repair and remove diagnostics
         shell: bash
         run: |
           rm .github/workflows/phase-1.1e-range-revision-locality-repair.yml
+          rm .github/workflows/phase-1.1e-range-revision-locality-diagnostic.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add backend/app/services/guidance_raw_canonical_extractor.py \
                   backend/tests/test_guidance_range_revision_ownership.py \
-                  .github/workflows/phase-1.1e-range-revision-locality-repair.yml
+                  .github/workflows/phase-1.1e-range-revision-locality-repair.yml \
+                  .github/workflows/phase-1.1e-range-revision-locality-diagnostic.yml
           git diff --cached --check
           git commit -m 'Phase 1.1E: bind range revisions to metric locality'
           git push origin HEAD:phase-1.1e-canonical-guidance
