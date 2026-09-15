@@ -6,6 +6,7 @@ on:
       - phase-1.1e-canonical-guidance
     paths:
       - '.github/workflows/phase-1.1e-semantic-repair.yml'
+      - 'scripts/phase_1_1e_apply_survivor_repair.py'
   workflow_dispatch:
 
 permissions:
