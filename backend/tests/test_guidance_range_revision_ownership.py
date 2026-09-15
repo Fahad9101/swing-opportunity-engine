@@ -7,6 +7,8 @@ from app.domain.guidance_canonical_v1 import GuidanceFactRole, GuidanceUnit
 from app.domain.soe_v1_1 import GuidanceAction, GuidanceMetric, SourceDocument
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
 
+# This regression path is intentionally part of the exact same-snapshot 432 preflight trigger.
+
 
 def _doc(text: str) -> SourceDocument:
     ts = datetime(2026, 9, 15, tzinfo=UTC)
