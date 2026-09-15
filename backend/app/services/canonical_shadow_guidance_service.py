@@ -12,6 +12,7 @@ from app.services.guidance_canonical_service import CanonicalGuidanceNormalizer,
 from app.services.guidance_evidence_binder_v4 import GuidanceEvidenceBinder
 from app.services.guidance_ledger_service import GuidanceLedger
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
+from app.services.guidance_semantic_ownership_service import normalize_typed_guidance_fact
 
 
 _NO_GUIDANCE_POLICY = re.compile(
@@ -48,13 +49,7 @@ def _midpoint(item) -> float | None:
 
 
 def guidance_comparable_pair_count(ledger, ticker: str) -> int:
-    """Count numeric current/prior pairs for legacy or canonical ledgers.
-
-    The coverage contract is unchanged: a name enters the denominator only when
-    the latest guidance snapshot has at least one numeric key with a comparable
-    prior. Supporting both ledger types keeps the pre-existing test contract
-    while the production path moves to the canonical ledger.
-    """
+    """Count numeric current/prior pairs for legacy or canonical ledgers."""
     view = ledger.current_and_prior(ticker)
     if hasattr(view, "current"):
         current, prior = list(view.current), list(view.prior)
@@ -77,12 +72,6 @@ def _legacy_audit_unit(unit: GuidanceUnit, low: float | None, high: float | None
 
 
 def _audit_record(observation, *, rules_hash: str) -> dict[str, Any]:
-    """Serialize canonical evidence in the stable legacy audit envelope.
-
-    `ledger_records` is an external validation/replay surface used by older Phase
-    1.1E regression tests and artifacts. Keep it round-trippable through
-    GuidanceMetricRecord while adding canonical metadata alongside it.
-    """
     fact = observation.fact
     provenance = sorted(
         observation.provenance,
@@ -148,14 +137,7 @@ def assess_canonical_guidance_documents(
     *,
     rules_hash: str,
 ) -> tuple[GuidanceAssessment | None, dict[str, Any], list[str]]:
-    """Run the permanent raw->typed->canonical guidance path for shadow validation.
-
-    Numeric legacy extraction is deliberately absent. The only legacy component
-    retained is the frozen classifier itself, reached through CanonicalGuidanceLedger,
-    plus the standing no-guidance policy rule when there are no canonical facts.
-    Any document-level parser error makes the ticker fail closed rather than
-    classifying from a partial evidence set.
-    """
+    """Run raw extraction -> semantic ownership -> strict-v4 -> canonical ledger."""
     documents = list(documents)
     validator = GuidanceInvariantValidator()
     binder = GuidanceEvidenceBinder()
@@ -174,7 +156,7 @@ def assess_canonical_guidance_documents(
             policies.append(policy)
         try:
             extraction = extract_canonical_typed_guidance_facts(document)
-        except Exception as exc:  # parser boundary: preserve coverage, never trust partial evidence
+        except Exception as exc:
             extraction_errors.append(
                 f"GUIDANCE_EXTRACT:{document.accession}:{document.document_id}:{type(exc).__name__}"
             )
@@ -184,7 +166,8 @@ def assess_canonical_guidance_documents(
         rejected_candidate_count += len(extraction.rejected_candidates)
         if extraction.facts:
             source_documents[document.source_url] = _source_manifest_row(document)
-        for fact in extraction.facts:
+        for raw_fact in extraction.facts:
+            fact = normalize_typed_guidance_fact(raw_fact, document)
             binding = binder.bind(fact, document)
             if binding.accepted:
                 validated.append(validator.validate(fact))
@@ -259,6 +242,7 @@ def assess_canonical_guidance_documents(
         "canonical_accepted_facts": len(canonical.accepted),
         "canonical_quarantined_facts": len(canonical.quarantined),
         "canonical_quarantine": [_quarantine_summary(item) for item in canonical.quarantined],
+        "semantic_ownership_version": "semantic-ownership-v1",
         "evidence_binder_version": "strict-v4",
         "evidence_binder_rejected_facts": binder_rejected_count,
         "evidence_binder_quarantine": binder_quarantine,
