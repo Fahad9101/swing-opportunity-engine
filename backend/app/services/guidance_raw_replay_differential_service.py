@@ -12,6 +12,7 @@ from app.services.guidance_canonical_assessment_service import assess_canonicali
 from app.services.guidance_canonical_service import CanonicalGuidanceNormalizer, GuidanceInvariantValidator
 from app.services.guidance_evidence_binder_v4 import GuidanceEvidenceBinder
 from app.services.guidance_raw_canonical_extractor import extract_canonical_typed_guidance_facts
+from app.services.guidance_semantic_ownership_service import normalize_typed_guidance_fact
 
 
 _SEC_URL = re.compile(
@@ -46,13 +47,7 @@ def _guidance_payloads(validation: dict[str, Any]):
 
 
 def build_raw_replay_manifest(validation: dict[str, Any]) -> list[RawReplaySource]:
-    """Build the immutable SEC replay manifest from canonical evidence sources.
-
-    New Phase-1.1E artifacts carry `source_documents`, which is authoritative
-    because it includes every document that produced a raw typed guidance fact,
-    including facts later quarantined. Older artifacts fall back to legacy ledger
-    rows so historical acceptance bundles remain replayable.
-    """
+    """Build the immutable SEC replay manifest from canonical evidence sources."""
     by_url: dict[str, RawReplaySource] = {}
     conflicts: list[str] = []
 
@@ -158,14 +153,7 @@ def _canonicalize_ticker(
     *,
     rules_hash: str,
 ) -> tuple[CanonicalizationResult, int, list[dict[str, Any]], list[dict[str, Any]]]:
-    """Replay one ticker through the exact production semantic admission path.
-
-    Raw replay must never be more permissive than production. Every typed fact
-    therefore passes through the canonical strict-v4 GuidanceEvidenceBinder
-    before invariant validation and normalization. A malformed candidate in one
-    document must never abort the population audit; parser failures make the
-    ticker incomplete/fail-closed while the remaining population continues.
-    """
+    """Replay one ticker through the exact production semantic admission path."""
     validator = GuidanceInvariantValidator()
     binder = GuidanceEvidenceBinder()
     validated = []
@@ -178,7 +166,7 @@ def _canonicalize_ticker(
         document = _source_document(source, verified, rules_hash=rules_hash)
         try:
             extraction = extract_canonical_typed_guidance_facts(document)
-        except Exception as exc:  # parser boundary: report, never partially trust
+        except Exception as exc:
             extraction_errors.append(
                 {
                     "ticker": source.ticker,
@@ -199,7 +187,8 @@ def _canonicalize_ticker(
             }
             for candidate in extraction.rejected_candidates
         )
-        for fact in extraction.facts:
+        for raw_fact in extraction.facts:
+            fact = normalize_typed_guidance_fact(raw_fact, document)
             binding = binder.bind(fact, document)
             if binding.accepted:
                 validated.append(validator.validate(fact))
@@ -217,14 +206,7 @@ def raw_sec_replay_differential_report(
     *,
     rules_hash: str | None = None,
 ) -> dict[str, Any]:
-    """Replay exact immutable SEC documents through the production raw architecture.
-
-    `verified_documents` must already have passed byte-hash verification against
-    the immutable acceptance manifest. Missing or parser-failed documents make
-    their ticker incomplete; partial evidence is never classified as complete.
-    The semantic admission layer is exactly the canonical strict-v4 binder used
-    by production guidance assessment.
-    """
+    """Replay exact immutable SEC documents through production semantic admission."""
     effective_rules_hash = rules_hash or str(validation.get("candidate_rules_hash") or "")
     manifest = build_raw_replay_manifest(validation)
     by_ticker: dict[str, list[RawReplaySource]] = defaultdict(list)
@@ -348,6 +330,7 @@ def raw_sec_replay_differential_report(
     complete_tickers = sum(1 for item in ticker_reports if item.get("status") == "COMPLETE")
     return {
         "rules_hash": effective_rules_hash,
+        "semantic_ownership_version": "semantic-ownership-v1",
         "evidence_binder_version": "strict-v4",
         "tickers_with_guidance_payload": len(benchmark),
         "source_manifest_count": len(manifest),
