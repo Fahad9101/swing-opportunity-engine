@@ -106,8 +106,7 @@ else:
     end = canonical.find(end_marker, start)
     assert start >= 0 and end > start
     assert canonical.find(start_marker, start + len(start_marker)) < 0
-    live_block = canonical[start:end]
-    insertion = '''            local_full_year_period = _local_full_year_phrase_before_value(clause, anchor, mention, value)\n            if local_full_year_period is not None:\n                period = local_full_year_period\n'''
+    insertion = "            local_full_year_period = _local_full_year_phrase_before_value(clause, anchor, mention, value)\\n            if local_full_year_period is not None:\\n                period = local_full_year_period\\n"
     canonical = canonical[:end] + insertion + canonical[end:]
 '''.rstrip()
     if brittle_local not in source:
