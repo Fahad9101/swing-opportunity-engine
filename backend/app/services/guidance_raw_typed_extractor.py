@@ -33,7 +33,7 @@ _ACTUAL = re.compile(
 _ACTION_PATTERNS: list[tuple[GuidanceAction, re.Pattern[str]]] = [
     (GuidanceAction.WITHDRAW, re.compile(r"\b(?:withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?)\b", re.I)),
     (GuidanceAction.LOWER, re.compile(r"\b(?:lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)\b", re.I)),
-    (GuidanceAction.RAISE, re.compile(r"\b(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\b", re.I)),
+    (GuidanceAction.RAISE, re.compile(r"\b(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\b", re.I)),
     (GuidanceAction.REAFFIRM, re.compile(r"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b", re.I)),
 ]
 

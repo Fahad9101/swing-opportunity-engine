@@ -159,6 +159,19 @@ _MONEY_UNIT_SCALE = {
     GuidanceUnit.USD_BILLION: 1_000_000_000.0,
 }
 
+_FROM_RANGE_TO_RANGE_MONEY = re.compile(
+    r"\bfrom\s+(?:a\s+)?range\s+(?:of\s+)?"
+    r"(?P<d1>\$)?\s*(?P<old_lo>-?\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s1>billion|million|thousand|bn|mm|m|b)?\s*"
+    r"(?:to|through|-|–|—)\s*(?P<d2>\$)?\s*(?P<old_hi>-?\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s2>billion|million|thousand|bn|mm|m|b)?"
+    r"\s+to\s+(?:a\s+)?range\s+(?:of\s+)?"
+    r"(?P<d3>\$)?\s*(?P<new_lo>-?\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s3>billion|million|thousand|bn|mm|m|b)?\s*"
+    r"(?:to|through|-|–|—)\s*(?P<d4>\$)?\s*(?P<new_hi>-?\d[\d,]*(?:\.\d+)?)\s*"
+    r"(?P<s4>billion|million|thousand|bn|mm|m|b)?\b",
+    re.I,
+)
 _FROM_TO_MONEY = re.compile(
     r"\bfrom\s+(?P<d1>\$)?\s*(?P<old>-?\d[\d,]*(?:\.\d+)?)\s*"
     r"(?P<s1>billion|million|thousand|bn|mm|m|b)?\s+"
@@ -1179,6 +1192,54 @@ def _directional_value_pair(clause: str, anchor: int, mention, action: GuidanceA
         return None, None
     if mention.metric not in {GuidanceMetric.REVENUE, GuidanceMetric.EBITDA, GuidanceMetric.FCF, GuidanceMetric.EPS}:
         return None, None
+
+    # Directional range-to-range revisions need four endpoints, not the scalar
+    # ``from X to Y`` grammar. Preserve the old range as QUOTED_PRIOR and bind
+    # the new range as CURRENT. This is intentionally gated on a directional
+    # RAISE/LOWER action, so ordinary ``guidance ranges from X to Y`` remains a
+    # single current range.
+    range_revision = _FROM_RANGE_TO_RANGE_MONEY.search(clause)
+    if range_revision:
+        aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}
+
+        def compatible_scale(left: str | None, right: str | None) -> str | None:
+            left_norm = aliases.get((left or "").lower(), (left or "").lower())
+            right_norm = aliases.get((right or "").lower(), (right or "").lower())
+            if left_norm and right_norm and left_norm != right_norm:
+                return None
+            return right or left
+
+        old_scale = compatible_scale(range_revision.group("s1"), range_revision.group("s2"))
+        new_scale = compatible_scale(range_revision.group("s3"), range_revision.group("s4"))
+        if old_scale is not None and new_scale is not None:
+            old_unit = _unit_from_scale(
+                old_scale, mention.metric,
+                dollar=bool(range_revision.group("d1") or range_revision.group("d2")),
+            )
+            new_unit = _unit_from_scale(
+                new_scale, mention.metric,
+                dollar=bool(range_revision.group("d3") or range_revision.group("d4")),
+            )
+            if old_unit is not GuidanceUnit.UNKNOWN and new_unit is not GuidanceUnit.UNKNOWN:
+                old_lo = float(range_revision.group("old_lo").replace(",", ""))
+                old_hi = float(range_revision.group("old_hi").replace(",", ""))
+                new_lo = float(range_revision.group("new_lo").replace(",", ""))
+                new_hi = float(range_revision.group("new_hi").replace(",", ""))
+                if old_lo <= old_hi and new_lo <= new_hi:
+                    old_start = range_revision.start("d1") if range_revision.group("d1") else range_revision.start("old_lo")
+                    old_end = range_revision.end("s2") if range_revision.group("s2") else range_revision.end("old_hi")
+                    new_start = range_revision.start("d3") if range_revision.group("d3") else range_revision.start("new_lo")
+                    new_end = range_revision.end("s4") if range_revision.group("s4") else range_revision.end("new_hi")
+                    current = _ValueBinding(
+                        new_lo, new_hi, new_unit, GuidanceValueKind.ABSOLUTE_LEVEL,
+                        clause[new_start:new_end].strip(), new_start, new_end,
+                    )
+                    prior = _ValueBinding(
+                        old_lo, old_hi, old_unit, GuidanceValueKind.ABSOLUTE_LEVEL,
+                        clause[old_start:old_end].strip(), old_start, old_end,
+                    )
+                    return current, prior
+
     by_match = _BY_TO_MONEY.search(clause)
     if by_match:
         scale = by_match.group("s2") or by_match.group("s1")
