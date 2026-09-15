@@ -4,83 +4,91 @@ on:
   push:
     branches:
       - phase-1.1e-canonical-guidance
+    paths:
+      - '.github/workflows/phase-1.1e-semantic-repair.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   actions: read
 
 jobs:
-  consolidated-source-acceptance:
-    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E surgical v5 acceptance') }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    env:
-      SOURCE_ARTIFACT_ID: '10296727219'
-      SEC_USER_AGENT: 'SOE-ConsolidatedSourceAcceptance/1.0 (soe-validation@example.com)'
+  survivor-semantic-repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
           ref: phase-1.1e-canonical-guidance
           fetch-depth: 0
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: pip
+
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
-      - name: Diagnose compact suffix ownership
-        run: python scripts/phase_1_1e_v5_surgical_diagnostics.py
-      - name: Run complete deterministic test suite
-        env:
-          DATABASE_URL: sqlite+pysqlite:///./soe_consolidated_source_acceptance.db
-          PROVIDER_NAME: fixture
-        run: python -m pytest -q
-      - name: Download immutable acceptance artifact
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p semantic-replay-source
-          curl --fail --location \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}/zip" \
-            -o semantic-replay-source/source.zip
-          unzip -q semantic-replay-source/source.zip -d semantic-replay-source/unpacked
-          test -f semantic-replay-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json
-      - name: Replay complete immutable SEC population
-        run: |
-          python -m app.cli_guidance_raw_replay_differential \
-            semantic-replay-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json \
-            --output semantic-surgical-v5-acceptance.json \
-            --min-interval 0.15 \
-            --retries 3
-      - name: Verify source integrity and print semantic footprint
+
+      - name: Apply exact approved survivor semantic repair batch
+        shell: bash
         run: |
           python - <<'PY'
-          import json
-          r=json.load(open('semantic-surgical-v5-acceptance.json'))
-          print(json.dumps({
-            'documents_verified': f"{r['verified_source_count']}/{r['source_manifest_count']}",
-            'fetch_failures': r['fetch_failure_count'],
-            'hash_mismatches': r['hash_mismatch_count'],
-            'extraction_errors': r.get('extraction_error_count', 0),
-            'complete_tickers': f"{r['complete_ticker_count']}/{r['tickers_with_guidance_payload']}",
-            'raw_typed_facts': r['raw_typed_fact_count'],
-            'canonical_facts': r['canonical_fact_count'],
-            'quarantined': r['quarantined_fact_count'],
-            'classification_divergences': r['classification_divergence_count'],
-            'divergence_tickers': [d['ticker'] for d in r.get('classification_divergences', [])],
-          }, indent=2))
-          assert r['source_manifest_count'] == 305
-          assert r['verified_source_count'] == 305
-          assert r['fetch_failure_count'] == 0
-          assert r['hash_mismatch_count'] == 0
-          assert r.get('extraction_error_count', 0) == 0
-          assert r['complete_ticker_count'] == r['tickers_with_guidance_payload'] == 109
+          from pathlib import Path
+          import textwrap
+
+          workflow = Path('.github/workflows/phase-1.1e-survivor-semantic-repair.yml').read_text()
+          marker = "          python - <<'PY'\n"
+          start = workflow.index(marker) + len(marker)
+          end = workflow.index("\n          PY", start)
+          repair_source = textwrap.dedent(workflow[start:end])
+          exec(compile(repair_source, '<phase-1.1e-survivor-semantic-repair>', 'exec'), {})
           PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: phase-1.1e-consolidated-source-acceptance
-          path: semantic-surgical-v5-acceptance.json
-          if-no-files-found: error
+
+      - name: Compile repaired guidance code
+        run: |
+          python -m py_compile \
+            backend/app/services/guidance_raw_typed_extractor.py \
+            backend/app/services/guidance_raw_canonical_extractor.py \
+            backend/tests/test_guidance_survivor_semantic_regressions.py
+
+      - name: Run focused semantic ownership regressions
+        run: |
+          pytest -q \
+            backend/tests/test_guidance_survivor_semantic_regressions.py \
+            backend/tests/test_guidance_range_revision_ownership.py \
+            backend/tests/test_guidance_semantic_ownership_audit_regressions.py \
+            backend/tests/test_guidance_semantic_ownership_repair.py \
+            backend/tests/test_canonical_shadow_guidance_integration.py \
+            backend/tests/test_guidance_raw_replay_differential.py
+
+      - name: Run complete deterministic suite
+        run: pytest -q
+
+      - name: Verify frozen SOE rules and IEE boundary
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+          git diff --exit-code origin/main -- config/soe_v1_0_rules.yaml
+          if git diff --name-only origin/main...HEAD | grep -Ei 'investment.?execution|iee'; then
+            echo 'IEE boundary changed unexpectedly.' >&2
+            exit 1
+          fi
+
+      - name: Commit and push coherent semantic repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            backend/app/services/guidance_raw_typed_extractor.py \
+            backend/app/services/guidance_raw_canonical_extractor.py \
+            backend/tests/test_guidance_survivor_semantic_regressions.py
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'No production repair changes generated.' >&2
+            exit 1
+          fi
+          git commit -m 'Phase 1.1E: harden survivor semantic ownership'
+          git push origin HEAD:phase-1.1e-canonical-guidance
