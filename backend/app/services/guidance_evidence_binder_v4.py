@@ -42,6 +42,42 @@ def _fail(base: GuidanceEvidenceBindingResult, dimension: str, reason: str) -> G
     )
 
 
+def _semantic_issue_dimension(issue: str) -> str:
+    prefix = issue.split(":", 1)[0].strip().lower()
+    return {
+        "metric": "metric",
+        "period": "period",
+        "basis": "basis",
+        "row": "row",
+        "column": "column",
+        "issuer": "issuer",
+        "role": "column",
+        "action": "action",
+        "value": "row",
+    }.get(prefix, "column")
+
+
+def _apply_semantic_quarantine(
+    base: GuidanceEvidenceBindingResult,
+    fact,
+) -> GuidanceEvidenceBindingResult:
+    """Honor deterministic pre-binder ownership diagnostics without re-parsing.
+
+    The semantic ownership stage is responsible for discovering and normalizing
+    generic defects. Strict-v4 remains the final fail-closed admission verifier:
+    any unresolved ownership issue recorded on the typed fact is rejected here.
+    """
+    issues = tuple(str(item) for item in (fact.metadata or {}).get("semantic_ownership_issues", []))
+    result = base
+    for issue in issues:
+        result = _fail(
+            result,
+            _semantic_issue_dimension(issue),
+            f"semantic-v1: {issue}",
+        )
+    return result
+
+
 def _period_from_fact(fact) -> str:
     return (fact.fiscal_period or "").upper().replace(" ", "")
 
@@ -77,14 +113,11 @@ def _full_year_owns_selected_quarter_value(fact) -> bool:
         return False
     nearest = full_year_matches[-1]
     ownership = left[nearest.start():]
-    # A subsequent explicit quarter phrase rebinds the selected value to that
-    # quarter (e.g. 'third quarter and full year guidance. For third quarter...').
     if _EXPLICIT_QUARTER_TOKEN.search(ownership[nearest.end() - nearest.start():]):
         return False
     metric_label = (evidence.metric_text or "").strip()
     if metric_label and re.search(re.escape(metric_label), ownership, re.I):
         return True
-    # Allow standard metric aliases when the raw label is abbreviated.
     metric_patterns = {
         GuidanceMetric.REVENUE: r"\b(?:total\s+)?(?:revenue|revenues|net\s+sales)\b",
         GuidanceMetric.EPS: r"\b(?:adjusted\s+|non[- ]GAAP\s+|GAAP\s+)?(?:EPS|earnings\s+per\s+share)\b",
@@ -111,9 +144,6 @@ def _quarter_results_column_mismatch(fact, text: str) -> bool:
     selected = _period_from_fact(fact)
     if selected not in results_periods:
         return False
-    # Only reject when the same table/text also exposes a different explicit
-    # guidance-period column. This avoids treating a normal results mention as a
-    # comparison table by itself.
     return bool(guidance_periods and selected not in guidance_periods)
 
 
@@ -136,8 +166,10 @@ class GuidanceEvidenceBinder:
         text = evidence.full_text or ""
         local = _selected_value_window(fact)
 
-        # Evaluate v4 ownership guards even if an earlier layer already rejected
-        # the fact, so quarantine diagnostics retain the most specific defect.
+        semantic = _apply_semantic_quarantine(base, fact)
+        if not semantic.accepted and semantic.reasons != base.reasons:
+            return semantic
+
         if _full_year_owns_selected_quarter_value(fact):
             return _fail(base, "period", "period-v4: selected value is explicitly owned by full-year guidance, not the quarter")
 
