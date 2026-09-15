@@ -1,0 +1,92 @@
+name: Phase 1.1E v5 Baseline Audit
+
+on:
+  push:
+    branches:
+      - phase-1.1e-canonical-guidance
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  baseline-audit:
+    if: ${{ startsWith(github.event.head_commit.message, 'Trigger Phase 1.1E v5 baseline audit') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SOURCE_ARTIFACT_ID: '10296727219'
+      SEC_USER_AGENT: 'SOE-v5-BaselineAudit/1.0 (soe-validation@example.com)'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Verify published extractor boundary
+        run: |
+          grep -q '"raw_document_extractor": "guidance-canonical-raw-v5"' backend/app/services/guidance_raw_canonical_extractor.py
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+      - name: Run complete deterministic test suite
+        env:
+          DATABASE_URL: sqlite+pysqlite:///./soe_v5_baseline_audit.db
+          PROVIDER_NAME: fixture
+        run: python -m pytest -q
+      - name: Download immutable acceptance artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p baseline-source
+          curl --fail --location \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}/zip" \
+            -o baseline-source/source.zip
+          unzip -q baseline-source/source.zip -d baseline-source/unpacked
+          test -f baseline-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json
+      - name: Replay published v5 extractor across immutable SEC population
+        run: |
+          python -m app.cli_guidance_raw_replay_differential \
+            baseline-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json \
+            --output phase-1.1e-v5-baseline-detailed.json \
+            --min-interval 0.15 \
+            --retries 3
+      - name: Verify baseline identity and print divergence dossiers
+        run: |
+          python - <<'PY'
+          import json
+          r=json.load(open('phase-1.1e-v5-baseline-detailed.json'))
+          summary={
+            'documents_verified': f"{r['verified_source_count']}/{r['source_manifest_count']}",
+            'fetch_failures': r['fetch_failure_count'],
+            'hash_mismatches': r['hash_mismatch_count'],
+            'extraction_errors': r.get('extraction_error_count',0),
+            'complete_tickers': f"{r['complete_ticker_count']}/{r['tickers_with_guidance_payload']}",
+            'raw_typed_facts': r['raw_typed_fact_count'],
+            'canonical_facts': r['canonical_fact_count'],
+            'quarantined': r['quarantined_fact_count'],
+            'classification_divergences': r['classification_divergence_count'],
+          }
+          print(json.dumps(summary, indent=2))
+          print('DIVERGENCE_TICKERS', [d['ticker'] for d in r['classification_divergences']])
+          assert r['source_manifest_count']==305
+          assert r['verified_source_count']==305
+          assert r['fetch_failure_count']==0
+          assert r['hash_mismatch_count']==0
+          assert r.get('extraction_error_count',0)==0
+          assert r['complete_ticker_count']==r['tickers_with_guidance_payload']==109
+          assert r['raw_typed_fact_count']==1206
+          assert r['canonical_fact_count']==962
+          assert r['quarantined_fact_count']==165
+          assert r['classification_divergence_count']==13
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase-1.1e-v5-baseline-detailed
+          path: phase-1.1e-v5-baseline-detailed.json
+          if-no-files-found: error

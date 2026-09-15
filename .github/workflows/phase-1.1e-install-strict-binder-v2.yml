@@ -1,0 +1,454 @@
+name: Phase 1.1E Install Strict Guidance Binder V2
+
+on:
+  push:
+    branches:
+      - phase-1.1e-canonical-guidance
+
+permissions:
+  contents: write
+
+jobs:
+  install-strict-binder-v2:
+    if: ${{ startsWith(github.event.head_commit.message, 'Install strict guidance binder v2') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./soe_strict_binder_v2.db
+      PROVIDER_NAME: fixture
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Verify SOE-1.0.0 remains frozen
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+
+      - name: Install strict-v2 semantic binder and regressions
+        run: |
+          cat > backend/app/services/guidance_evidence_binder_v2.py <<'PYFILE'
+          from __future__ import annotations
+
+          import re
+
+          from app.domain.guidance_canonical_v1 import GuidancePeriodKind
+          from app.domain.soe_v1_1 import GuidanceAction, GuidanceMetric, SourceDocument
+          from app.services.guidance_evidence_binder import (
+              GuidanceEvidenceBinder as StrictV1GuidanceEvidenceBinder,
+              GuidanceEvidenceBindingResult,
+          )
+
+
+          _ACCOUNTING_LITERATURE = re.compile(
+              r"\b(?:FASB|ASU\s+(?:No\.?\s*)?20\d{2}[-–]\d+|Accounting\s+Standards?\s+Update|Topic\s+\d{3})\b",
+              re.I,
+          )
+          _RPO_SCHEDULE = re.compile(
+              r"\b(?:remaining\s+performance\s+obligations?|performance\s+obligations\s+associated\s+with\s+contracts|"
+              r"recognize\s+(?:net\s+sales|revenues?)\s+(?:relating\s+to|as)\s+(?:existing\s+)?(?:performance\s+)?obligations?|"
+              r"contracts?\s+exceeding\s+one\s+year)\b",
+              re.I,
+          )
+          _THIRD_PARTY_FORECAST = re.compile(
+              r"\b(?:according\s+to\s+[A-Z][A-Za-z&. -]{2,40}|IBISWorld|industry\s+(?:forecast|estimate)|"
+              r"market\s+for\s+.{0,100}\bexpected\s+(?:total\s+)?revenue)\b",
+              re.I | re.S,
+          )
+          _RATE_CASE = re.compile(
+              r"\b(?:general\s+rate\s+case|rate\s+case|request(?:ed|ing)?\s+to\s+increase\s+revenues?\s+by|"
+              r"rates?\s+anticipated\s+to\s+become\s+effective)\b",
+              re.I,
+          )
+          _RPO_OR_REGULATORY = re.compile(
+              rf"(?:{_RPO_SCHEDULE.pattern})|(?:{_RATE_CASE.pattern})",
+              re.I | re.S,
+          )
+          _GENERIC_QUARTER = re.compile(
+              r"\b(?:first|second|third|fourth)\s+(?:fiscal\s+)?quarter\b|"
+              r"\bquarter\s+(?:of\s+)?(?:fiscal\s+year\s+)?20\d{2}\b|"
+              r"\bQ[1-4]\s*(?:FY)?\s*'?20\d{2}\b",
+              re.I,
+          )
+          _EXPLICIT_QUARTER = re.compile(
+              r"\bQ[1-4]\s*(?:FY)?\s*'?20\d{2}\b|"
+              r"\b(?:first|second|third|fourth)\s+(?:fiscal\s+)?quarter(?:\s+(?:of\s+)?(?:fiscal(?:\s+year)?\s*)?20\d{2}|\s+ending\s+[A-Za-z]+\s+\d{1,2},?\s*20\d{2})",
+              re.I,
+          )
+          _ACTUAL_GUIDANCE_TABLE = re.compile(
+              r"\bActual\s+FY\s*(?P<year>20\d{2})\s+Results\b.{0,500}\b(?:FY\s*)?20\d{2}\s+Guidance\s+Range\b|"
+              r"\b(?:FY\s*)?20\d{2}\s+Guidance\s+Range\b.{0,500}\bActual\s+FY\s*(?P<year2>20\d{2})\s+Results\b",
+              re.I | re.S,
+          )
+          _FLATTENED_Q_FY_TABLE = re.compile(
+              r"\b(?:Q[1-4]|First\s+Quarter|Second\s+Quarter|Third\s+Quarter|Fourth\s+Quarter)\s+20\d{2}\s+Guidance\b"
+              r".{0,900}\b(?:FY|Full[- ]Year)\s+20\d{2}\s+Guidance\b|"
+              r"\b(?:FY|Full[- ]Year)\s+20\d{2}\s+Guidance\b.{0,900}"
+              r"\b(?:Q[1-4]|First\s+Quarter|Second\s+Quarter|Third\s+Quarter|Fourth\s+Quarter)\s+20\d{2}\s+Guidance\b",
+              re.I | re.S,
+          )
+          _HISTORICAL_CHANGE = re.compile(
+              r"\b(?:increased|decreased|declined|grew)\b.{0,120}\b(?:year[- ]over[- ]year|sequential(?:ly)?|compared\s+(?:with|to))\b|"
+              r"\b(?:year[- ]over[- ]year|sequential(?:ly)?)\b.{0,120}\b(?:increased|decreased|declined|grew)\b",
+              re.I | re.S,
+          )
+          _OPERATIONAL_LOWER = re.compile(
+              r"\blower\s+(?:fuel\s+costs?|activity|volumes?|pricing|costs?|demand|production|revenue)\b",
+              re.I,
+          )
+          _LONG_TERM_TARGET = re.compile(r"\blong[- ]term\b.{0,80}\b(?:target|goal|revenue|sales|EBITDA|EPS|FCF)\b|\b(?:target|goal)\b.{0,80}\blong[- ]term\b", re.I | re.S)
+          _BASE_YEAR = re.compile(r"\b(?:CAGR\s+)?base\s+year\b", re.I)
+          _COMMODITY_SUFFIX = re.compile(r"^\s*(?:/\s*)?(?:Bbl|WTI|MMBtu|Henry\s+Hub)\b", re.I)
+          _SUBCOMPONENT_REVENUE = re.compile(r"\brevenue\s+from\s+(?:the\s+)?(?:new\s+)?(?:acquisitions?|segment|business|project)\b", re.I)
+
+          _METRIC_AFTER_VALUE: list[tuple[GuidanceMetric, re.Pattern[str]]] = [
+              (GuidanceMetric.FCF, re.compile(r"^\s*(?:of\s+)?(?:adjusted\s+)?(?:free\s+cash\s+flow|FCF)\b", re.I)),
+              (GuidanceMetric.EBITDA, re.compile(r"^\s*(?:of\s+)?(?:adjusted\s+|non[- ]GAAP\s+)?EBITDA\b", re.I)),
+              (GuidanceMetric.EPS, re.compile(r"^\s*(?:of\s+)?(?:adjusted\s+|non[- ]GAAP\s+|GAAP\s+)?(?:diluted\s+)?(?:EPS|earnings\s+per\s+share)\b", re.I)),
+              (GuidanceMetric.REVENUE, re.compile(r"^\s*(?:of\s+)?(?:total\s+)?(?:revenue|revenues|net\s+sales)\b", re.I)),
+          ]
+
+
+          def _fail(base: GuidanceEvidenceBindingResult, dimension: str, reason: str) -> GuidanceEvidenceBindingResult:
+              dimensions = dict(base.dimensions)
+              dimensions[dimension] = False
+              return GuidanceEvidenceBindingResult(
+                  accepted=False,
+                  dimensions=dimensions,
+                  reasons=tuple([*base.reasons, reason]),
+              )
+
+
+          def _local_value_context(fact, radius: int = 180) -> str:
+              evidence = fact.provenance[0].evidence
+              text = evidence.full_text or ""
+              pivot = evidence.value_start
+              if pivot is None:
+                  pivot = evidence.metric_start if evidence.metric_start is not None else 0
+              return text[max(0, pivot - radius):min(len(text), pivot + radius)]
+
+
+          def _selected_suffix(fact, width: int = 100) -> str:
+              evidence = fact.provenance[0].evidence
+              text = evidence.full_text or ""
+              if evidence.value_end is None:
+                  return ""
+              return text[evidence.value_end:min(len(text), evidence.value_end + width)]
+
+
+          def _selected_prefix(fact, width: int = 120) -> str:
+              evidence = fact.provenance[0].evidence
+              text = evidence.full_text or ""
+              if evidence.value_start is None:
+                  return ""
+              return text[max(0, evidence.value_start - width):evidence.value_start]
+
+
+          def _period_year(fiscal_period: str) -> int | None:
+              match = re.search(r"FY(20\d{2})", fiscal_period or "", re.I)
+              return int(match.group(1)) if match else None
+
+
+          class GuidanceEvidenceBinder:
+              """Strict-v2 semantic binder layered on strict-v1.
+
+              V1 proves structural metric×period×basis×row×column×issuer×action
+              consistency. V2 adds negative semantic ownership tests learned from
+              the exhaustive Phase 1.1E population audit. Any ambiguity fails closed.
+              """
+
+              DIMENSIONS = StrictV1GuidanceEvidenceBinder.DIMENSIONS
+
+              def __init__(self) -> None:
+                  self._v1 = StrictV1GuidanceEvidenceBinder()
+
+              def bind(self, fact, document: SourceDocument) -> GuidanceEvidenceBindingResult:
+                  base = self._v1.bind(fact, document)
+                  if not base.accepted:
+                      return base
+
+                  evidence = fact.provenance[0].evidence
+                  text = evidence.full_text or ""
+                  local = _local_value_context(fact)
+                  suffix = _selected_suffix(fact)
+                  prefix = _selected_prefix(fact)
+
+                  # Period ownership: quarter facts require explicit quarter evidence;
+                  # FY facts cannot be inferred from a generic "quarter of 20xx" sentence.
+                  period_blob = f"{evidence.period_text or ''} {local}"
+                  if fact.period_kind is GuidancePeriodKind.QUARTER and not _EXPLICIT_QUARTER.search(period_blob):
+                      return _fail(base, "period", "period-v2: quarter fact lacks an explicit quarter identifier")
+                  if fact.period_kind is GuidancePeriodKind.FULL_YEAR and _GENERIC_QUARTER.search(local):
+                      if not re.search(r"\b(?:full[- ]year|fiscal\s+year|FY\s*20\d{2})\b", local, re.I):
+                          return _fail(base, "period", "period-v2: quarterly context cannot supply a full-year fact")
+                  year = _period_year(fact.fiscal_period)
+                  if year is not None and year > document.source_timestamp.year + 3:
+                      return _fail(base, "period", "period-v2: remote-horizon year is not near-term issuer guidance")
+
+                  # Accounting literature uses the word guidance but is not issuer outlook.
+                  if _ACCOUNTING_LITERATURE.search(local) and re.search(r"\bguidance\b", local, re.I):
+                      return _fail(base, "action", "action-v2: accounting-standard guidance is not company financial guidance")
+
+                  # Contract accounting / RPO recognition schedules are not management guidance.
+                  if _RPO_OR_REGULATORY.search(local):
+                      return _fail(base, "action", "action-v2: contractual recognition or regulatory request is not issuer financial guidance")
+
+                  # Third-party market forecasts cannot be promoted to issuer guidance.
+                  if _THIRD_PARTY_FORECAST.search(local):
+                      return _fail(base, "issuer", "issuer-v2: third-party market forecast is not issuer guidance")
+
+                  # Mixed actual/guidance tables: facts keyed to the explicit actual FY
+                  # column are historical results, not the guidance column.
+                  table_match = _ACTUAL_GUIDANCE_TABLE.search(text)
+                  if table_match:
+                      actual_year = table_match.group("year") or table_match.group("year2")
+                      if actual_year and fact.fiscal_period.upper() == f"FY{actual_year}":
+                          return _fail(base, "column", "column-v2: selected value belongs to the Actual FY Results column")
+
+                  # Flattened quarter + full-year guidance tables are not admissible
+                  # without a deterministic row×column coordinate.
+                  if _FLATTENED_Q_FY_TABLE.search(text):
+                      numeric_count = len(re.findall(r"\$?\s*\d[\d,.]*(?:\s*(?:million|billion|m|b|%))?", text, re.I))
+                      if numeric_count >= 6:
+                          return _fail(base, "column", "column-v2: flattened quarter/full-year table is ambiguous")
+
+                  # Local realized-result values must not become forward guidance simply
+                  # because another part of the headline/document mentions guidance.
+                  if _HISTORICAL_CHANGE.search(local) and not re.search(r"\b(?:guidance|outlook|forecast)\b.{0,90}$", prefix, re.I):
+                      return _fail(base, "action", "action-v2: realized sequential/YoY result is not forward guidance")
+
+                  # LOWER must describe guidance itself, not lower fuel/activity/costs.
+                  if fact.explicit_action is GuidanceAction.LOWER and _OPERATIONAL_LOWER.search(local):
+                      if not re.search(r"\b(?:lower(?:ed|ing)?|reduc(?:ed|ing)?|cut)\b.{0,90}\b(?:guidance|outlook|forecast)\b", local, re.I):
+                          return _fail(base, "action", "action-v2: operational 'lower' language is not a guidance cut")
+
+                  # A fiscal-period fact cannot bind to a long-term target/base-year datum.
+                  if _LONG_TERM_TARGET.search(local) and not re.search(r"\b(?:full[- ]year|fiscal\s+year|FY\s*20\d{2})\b", local, re.I):
+                      return _fail(base, "period", "period-v2: long-term target is not the selected fiscal-period guidance")
+                  if _BASE_YEAR.search(local):
+                      return _fail(base, "action", "action-v2: CAGR/base-year datum is historical, not current guidance")
+
+                  # Financial guidance values cannot be commodity-price assumptions.
+                  if _COMMODITY_SUFFIX.search(suffix):
+                      return _fail(base, "row", "row-v2: selected value is a commodity-price assumption")
+
+                  # Handle grammar like "$700MM of Adjusted Free Cash Flow": a value
+                  # immediately owned by a different following metric cannot be used for
+                  # the preceding metric.
+                  for owner_metric, pattern in _METRIC_AFTER_VALUE:
+                      if owner_metric is not fact.metric and pattern.search(suffix):
+                          return _fail(base, "row", f"row-v2: selected value is owned by following {owner_metric.value} label")
+
+                  # Revenue subcomponents are not consolidated revenue guidance.
+                  if fact.metric is GuidanceMetric.REVENUE and _SUBCOMPONENT_REVENUE.search(local):
+                      if not re.search(r"\b(?:total|consolidated)\s+(?:net\s+sales|revenue|revenues)\b", local, re.I):
+                          return _fail(base, "row", "row-v2: revenue subcomponent is not consolidated revenue guidance")
+
+                  return base
+          PYFILE
+
+          cat > backend/tests/test_guidance_evidence_binder_v2.py <<'PYTEST'
+          from __future__ import annotations
+
+          import hashlib
+          from datetime import UTC, datetime
+
+          from app.domain.guidance_canonical_v1 import (
+              EvidenceBinding, GuidanceFactRole, GuidancePeriodKind, GuidanceProvenance,
+              GuidanceScopeKind, GuidanceUnit, TypedGuidanceFact,
+          )
+          from app.domain.soe_v1_1 import ExtractionMethod, GuidanceAction, GuidanceMetric, SourceDocument
+          from app.services.guidance_evidence_binder_v2 import GuidanceEvidenceBinder
+
+
+          def _doc(ticker: str, text: str, year: int = 2026) -> SourceDocument:
+              ts = datetime(year, 9, 14, tzinfo=UTC)
+              digest = hashlib.sha256(text.encode()).hexdigest()
+              return SourceDocument(
+                  document_id=f"v2-{ticker}-{digest[:12]}", rules_hash="binder-v2-test", ticker=ticker,
+                  cik="0000000001", accession="0000000001-26-999999", form="8-K", filing_date=ts.date(),
+                  source_url=f"https://www.sec.gov/Archives/edgar/data/1/{ticker.lower()}-v2.htm",
+                  source_timestamp=ts, fetched_at=ts, content_hash=digest, content_type="text/plain", content=text,
+              )
+
+
+          def _fact(document, *, metric, period, kind, metric_text, value_text=None, period_text, low=None, high=None,
+                    unit=GuidanceUnit.USD, basis="UNSPECIFIED", action=GuidanceAction.NONE):
+              text=document.content
+              ms=text.index(metric_text); ps=text.index(period_text)
+              vs=text.index(value_text) if value_text else None
+              ev=EvidenceBinding(
+                  full_text=text, metric_text=metric_text, value_text=value_text, period_text=period_text,
+                  action_text=action.value if action is not GuidanceAction.NONE else None,
+                  metric_start=ms, metric_end=ms+len(metric_text),
+                  value_start=vs, value_end=(vs+len(value_text)) if value_text else None,
+                  period_start=ps, period_end=ps+len(period_text),
+              )
+              prov=GuidanceProvenance(
+                  document_id=document.document_id, source=document.source, source_url=document.source_url,
+                  source_accession=document.accession, source_timestamp=document.source_timestamp,
+                  source_document_hash=document.content_hash, evidence=ev,
+              )
+              return TypedGuidanceFact(
+                  ticker=document.ticker, metric=metric, raw_metric_label=metric.value,
+                  fiscal_period=period, authoritative_period=period, period_kind=kind, accounting_basis=basis,
+                  scope_kind=GuidanceScopeKind.COMPANY, scope_label=None, role=GuidanceFactRole.CURRENT,
+                  low=low, high=high, unit=unit, explicit_action=action,
+                  extraction_method=ExtractionMethod.DETERMINISTIC_TEXT, provenance=[prov],
+              )
+
+
+          def test_anet_generic_quarter_context_cannot_become_fy():
+              d=_doc("ANET", "Financial Outlook For the third quarter of 2026, we expect: Revenue of approximately $3.3 billion")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="Revenue", value_text="$3.3 billion", period_text="2026", low=3.3e9, high=3.3e9)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["period"]
+
+
+          def test_quarter_fact_requires_quarter_identifier():
+              d=_doc("CBRE", "The company raised its 2026 core EPS outlook to $7.60 to $7.80.")
+              f=_fact(d, metric=GuidanceMetric.EPS, period="Q1FY2026", kind=GuidancePeriodKind.QUARTER,
+                      metric_text="EPS", value_text="$7.60 to $7.80", period_text="2026", low=7.6, high=7.8,
+                      unit=GuidanceUnit.USD_PER_SHARE, action=GuidanceAction.RAISE)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["period"]
+
+
+          def test_asth_actual_column_rejected():
+              d=_doc("ASTH", "FY 2026 Guidance Range Actual FY 2025 Results $3,800 - $4,100 $3,181.8 Total Revenue $250 - $280 $205.4 Adjusted EBITDA")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2025", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="Revenue", value_text="$250 - $280", period_text="FY 2025", low=250, high=280)
+              # Structural v1 may reject alternate flattened ownership first; v2 must fail closed either way.
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted
+
+
+          def test_accounting_standard_guidance_is_not_company_guidance():
+              d=_doc("TEM", "The Company is evaluating the impact of the guidance on disclosures. FASB issued ASU No. 2025-07 Revenue from Contracts with Customers, which amends existing guidance and reduces disclosure requirements. Revenue 2025.")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2025", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="Revenue", value_text=None, period_text="2025", action=GuidanceAction.LOWER)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["action"]
+
+
+          def test_rpo_schedule_not_guidance():
+              d=_doc("VOYG", "The Company expects to recognize net sales relating to existing performance obligations of approximately $111.8 million for fiscal year 2026.")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="net sales", value_text="$111.8 million", period_text="fiscal year 2026", low=111.8e6, high=111.8e6,
+                      action=GuidanceAction.INITIATE)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["action"]
+
+
+          def test_wfrd_historical_lower_activity_not_cut():
+              d=_doc("WFRD", "Second quarter 2026 Latin America revenue of $197 million decreased by $26 million, or 12% sequentially, primarily from lower Drilling-related Services activity.")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="Q2FY2026", kind=GuidancePeriodKind.QUARTER,
+                      metric_text="revenue", value_text="$197 million", period_text="Second quarter 2026", low=197e6, high=197e6,
+                      action=GuidanceAction.LOWER)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["action"]
+
+
+          def test_kntk_lower_fuel_costs_not_guidance_cut():
+              d=_doc("KNTK", "First quarter 2026 gross margin grew year-over-year on lower fuel costs and higher fee gross margin. 2026 Guidance Affirmed.")
+              f=_fact(d, metric=GuidanceMetric.GROSS_MARGIN, period="Q1FY2026", kind=GuidancePeriodKind.QUARTER,
+                      metric_text="gross margin", value_text=None, period_text="First quarter 2026", action=GuidanceAction.LOWER,
+                      unit=GuidanceUnit.UNKNOWN)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["action"]
+
+
+          def test_gva_realized_q2_revenue_not_fy_guidance():
+              d=_doc("GVA", "Granite Reports Second Quarter 2026 Results. Raised 2026 revenue guidance by $100 million. Q2 revenue increased 29% year-over-year to $1.5 billion.")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="revenue", value_text="$1.5 billion", period_text="2026", low=1.5e9, high=1.5e9)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted
+
+
+          def test_chrd_commodity_assumption_not_fcf_value():
+              d=_doc("CHRD", "In 2026, Chord expects to generate Adjusted Free Cash Flow of approximately $700MM ($64/Bbl WTI).")
+              f=_fact(d, metric=GuidanceMetric.FCF, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="Adjusted Free Cash Flow", value_text="$64", period_text="2026", low=64, high=64,
+                      basis="ADJUSTED")
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["row"]
+
+
+          def test_chrd_value_owned_by_following_fcf_not_ebitda():
+              d=_doc("CHRD", "In 2026, Chord expects Adjusted EBITDA of $2.3B and $700MM of Adjusted Free Cash Flow.")
+              f=_fact(d, metric=GuidanceMetric.EBITDA, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="Adjusted EBITDA", value_text="$700MM", period_text="2026", low=700e6, high=700e6,
+                      basis="ADJUSTED")
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["row"]
+
+
+          def test_shak_flattened_q_and_fy_guidance_fails_closed():
+              d=_doc("SHAK", "Q2 2026 Guidance FY 2026 Guidance Revenue $424m $428m $1.6b $1.7b Adjusted EBITDA $57m $59m $230m $245m")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="Revenue", value_text="$424m", period_text="FY 2026", low=424e6, high=424e6)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["column"]
+
+
+          def test_rate_case_amount_not_revenue_guidance():
+              d=_doc("SWX", "NV regulatory strategy: filed a general rate case requesting to increase revenues by approximately $71.3 million with rates anticipated to become effective October 2026.")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="revenues", value_text="$71.3 million", period_text="2026", low=71.3e6, high=71.3e6)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["action"]
+
+
+          def test_third_party_market_forecast_not_issuer_guidance():
+              d=_doc("BWMN", "The market for engineering services has expected total revenue of $312 billion in 2026, according to IBISWorld.")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="revenue", value_text="$312 billion", period_text="2026", low=312e9, high=312e9)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["issuer"]
+
+
+          def test_remote_reserve_horizon_not_near_term_guidance():
+              d=_doc("ALB", "The reserve estimate assumes the plant can produce until the end of 2058, with revenue of $3,790 million expected over the reserve life.")
+              f=_fact(d, metric=GuidanceMetric.REVENUE, period="FY2058", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="revenue", value_text="$3,790 million", period_text="2058", low=3.79e9, high=3.79e9)
+              r=GuidanceEvidenceBinder().bind(f,d); assert not r.accepted; assert not r.dimensions["period"]
+
+
+          def test_valid_ee_full_year_ebitda_revision_survives_v2():
+              d=_doc("EE", "Revised 2026 Financial Outlook. Adjusted EBITDA for the full year 2026 is now expected to range between $480 million and $510 million.")
+              f=_fact(d, metric=GuidanceMetric.EBITDA, period="FY2026", kind=GuidancePeriodKind.FULL_YEAR,
+                      metric_text="Adjusted EBITDA", value_text="$480 million and $510 million", period_text="full year 2026",
+                      low=480e6, high=510e6, basis="ADJUSTED")
+              # Use a value token compatible with the base binder range grammar.
+              assert GuidanceEvidenceBinder().bind(f,d).accepted
+          PYTEST
+
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('backend/app/services/canonical_shadow_guidance_service.py')
+          s=p.read_text()
+          old='from app.services.guidance_evidence_binder import GuidanceEvidenceBinder'
+          new='from app.services.guidance_evidence_binder_v2 import GuidanceEvidenceBinder'
+          assert old in s
+          s=s.replace(old,new,1)
+          assert '"evidence_binder_version": "strict-v1"' in s
+          s=s.replace('"evidence_binder_version": "strict-v1"','"evidence_binder_version": "strict-v2"',1)
+          p.write_text(s)
+          PY
+
+      - name: Run strict-v2 binder regressions
+        run: python -m pytest -q backend/tests/test_guidance_evidence_binder.py backend/tests/test_guidance_evidence_binder_v2.py backend/tests/test_guidance_manual_audit_regressions.py backend/tests/test_canonical_shadow_guidance_integration.py
+
+      - name: Run complete deterministic suite
+        run: python -m pytest -q
+
+      - name: Reverify frozen rules after repair
+        run: test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+
+      - name: Commit validated strict-v2 repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/app/services/guidance_evidence_binder_v2.py backend/app/services/canonical_shadow_guidance_service.py backend/tests/test_guidance_evidence_binder_v2.py
+          git diff --cached --check
+          git commit -m 'Phase 1.1E: harden strict guidance binder after exhaustive audit'
+          git push origin HEAD:phase-1.1e-canonical-guidance
