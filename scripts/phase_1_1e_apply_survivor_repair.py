@@ -4,6 +4,9 @@ import subprocess
 from pathlib import Path
 
 
+_EXTENSION_SOURCE_COMMIT = "b96fbe2f1e7a231ef9cb68c06e87c637963f2015"
+
+
 def _extract_python_blocks(workflow: str) -> list[str]:
     marker = "          python - <<'PY'\n"
     end_marker = "\n          PY"
@@ -23,8 +26,8 @@ def _extract_python_blocks(workflow: str) -> list[str]:
 
 def _compat_survivor_payload(source: str) -> str:
     """Keep approved semantics while tolerating harmless live-source formatting drift."""
-    brittle = "assert raw.count(old_money) == 1\nraw = raw.replace(old_money, new_money, 1)"
-    structural = '''if raw.count(old_money) == 1:
+    brittle_money = "assert raw.count(old_money) == 1\nraw = raw.replace(old_money, new_money, 1)"
+    structural_money = '''if raw.count(old_money) == 1:
     raw = raw.replace(old_money, new_money, 1)
 else:
     money_marker = "        for match in _MONEY_RANGE.finditer(clause):\\n"
@@ -36,9 +39,26 @@ else:
     assert raw.find(money_marker, start + len(money_marker)) < 0
     raw = raw[:start] + new_money + raw[end:]
 '''.rstrip()
-    if brittle not in source:
+    if brittle_money not in source:
         raise RuntimeError("approved money-range patch guard not found")
-    return source.replace(brittle, structural, 1)
+    source = source.replace(brittle_money, structural_money, 1)
+
+    brittle_compact = "assert canonical.count(compact_old) == 1\ncanonical = canonical.replace(compact_old, compact_new, 1)"
+    structural_compact = '''if canonical.count(compact_old) == 1:
+    canonical = canonical.replace(compact_old, compact_new, 1)
+else:
+    fn_start = canonical.index("def _compact_metric_forward_guidance_value(clause: str, anchor: int, mention)")
+    start_marker = '    s1 = (match.group("s1") or "").lower()\\n'
+    end_marker = '    value_start = mention_end + match.start("lo")\\n'
+    start = canonical.find(start_marker, fn_start)
+    end = canonical.find(end_marker, start)
+    assert start >= 0 and end > start
+    assert canonical.find(start_marker, start + len(start_marker)) < 0
+    canonical = canonical[:start] + compact_new + canonical[end:]
+'''.rstrip()
+    if brittle_compact not in source:
+        raise RuntimeError("approved compact-range patch guard not found")
+    return source.replace(brittle_compact, structural_compact, 1)
 
 
 def _exec(source: str, label: str) -> None:
@@ -69,14 +89,14 @@ def main() -> None:
     source = _compat_survivor_payload(survivor_blocks[0])
     _exec(source, "<phase-1.1e-survivor-semantic-repair>")
 
-    previous = subprocess.check_output(
-        ["git", "show", "HEAD^:.github/workflows/phase-1.1e-semantic-repair.yml"],
+    historical = subprocess.check_output(
+        ["git", "show", f"{_EXTENSION_SOURCE_COMMIT}:.github/workflows/phase-1.1e-semantic-repair.yml"],
         text=True,
     )
-    previous_blocks = _extract_python_blocks(previous)
-    if len(previous_blocks) < 2:
-        raise RuntimeError("approved semantic repair extension not found in parent commit")
-    _exec(previous_blocks[1], "<phase-1.1e-semantic-repair-extension>")
+    historical_blocks = _extract_python_blocks(historical)
+    if len(historical_blocks) < 2:
+        raise RuntimeError("approved semantic repair extension not found in historical source commit")
+    _exec(historical_blocks[1], "<phase-1.1e-semantic-repair-extension>")
 
 
 if __name__ == "__main__":
