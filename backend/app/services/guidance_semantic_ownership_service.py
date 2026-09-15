@@ -211,12 +211,10 @@ def _role_owner(fact: TypedGuidanceFact) -> tuple[GuidanceFactRole, str | None]:
     latest_current = current[-1] if current else None
 
     if fact.role is GuidanceFactRole.QUOTED_PRIOR:
-        if latest_current is not None and (
-            latest_prior is None or latest_current.end() > latest_prior.end()
-        ):
-            return GuidanceFactRole.CURRENT, None
         if latest_prior is None:
             return fact.role, "role: quoted-prior fact lacks local prior-guidance ownership"
+        if latest_current is not None and latest_current.end() > latest_prior.end():
+            return fact.role, "role: quoted-prior fact conflicts with a newer local current-guidance cue"
     elif fact.role is GuidanceFactRole.CURRENT and latest_prior is not None:
         if latest_current is None or latest_prior.end() > latest_current.end():
             return GuidanceFactRole.QUOTED_PRIOR, None
