@@ -169,15 +169,28 @@ def _named_owner_label(fact: TypedGuidanceFact) -> str | None:
 
 def _explicit_period_mentions(text: str, offset: int = 0) -> list[tuple[str, int, int]]:
     periods: list[tuple[str, int, int]] = []
+    quarter_spans: list[tuple[int, int, str]] = []
     for match in _QUARTER.finditer(text):
         q = match.group("q") or _QWORD.get((match.group("word") or "").lower())
         year = match.group("year") or match.group("year2")
         if q and year:
             periods.append((f"Q{q}FY{year}", offset + match.start(), offset + match.end()))
+            quarter_spans.append((match.start(), match.end(), year))
     for match in _FULL_YEAR.finditer(text):
         year = match.group("year") or match.group("year2") or match.group("year3") or match.group("year4")
-        if year:
-            periods.append((f"FY{year}", offset + match.start(), offset + match.end()))
+        if not year:
+            continue
+        # A permissive annual token such as "2026 Guidance" can be a substring
+        # of an explicit quarter heading (for example "Third Quarter 2026 Guidance").
+        # In that case the quarter is the semantic owner; emitting FY2026 as an
+        # overlapping owner creates a false period conflict downstream.
+        overlaps_same_year_quarter = any(
+            q_year == year and q_start < match.end() and match.start() < q_end
+            for q_start, q_end, q_year in quarter_spans
+        )
+        if overlaps_same_year_quarter:
+            continue
+        periods.append((f"FY{year}", offset + match.start(), offset + match.end()))
     return periods
 
 
