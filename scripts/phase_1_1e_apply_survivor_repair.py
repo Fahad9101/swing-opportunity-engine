@@ -75,7 +75,25 @@ else:
 '''.rstrip()
     if brittle_role not in source:
         raise RuntimeError("approved role-locality patch guard not found")
-    return source.replace(brittle_role, structural_role, 1)
+    source = source.replace(brittle_role, structural_role, 1)
+
+    brittle_section = "assert canonical.count(section_use_anchor) == 1\ncanonical = canonical.replace(section_use_anchor, section_use_new, 1)"
+    structural_section = '''if canonical.count(section_use_anchor) == 1:
+    canonical = canonical.replace(section_use_anchor, section_use_new, 1)
+else:
+    extract_start = canonical.index("def extract_canonical_typed_guidance_facts(document: SourceDocument)")
+    start_marker = "            section_period = _nearest_section_heading_period(segment, clause, anchor, mention)\\n"
+    end_marker = "            compact_forward_period_owned = _compact_forward_period_is_owned(clause, compact_forward_value, period)\\n"
+    start = canonical.find(start_marker, extract_start)
+    end = canonical.find(end_marker, start)
+    assert start >= 0 and end >= start
+    assert canonical.find(start_marker, start + len(start_marker)) < 0
+    end += len(end_marker)
+    canonical = canonical[:start] + section_use_new + canonical[end:]
+'''.rstrip()
+    if brittle_section not in source:
+        raise RuntimeError("approved annual-section patch guard not found")
+    return source.replace(brittle_section, structural_section, 1)
 
 
 def _exec(source: str, label: str) -> None:
