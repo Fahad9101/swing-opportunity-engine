@@ -121,6 +121,7 @@ jobs:
                       'canonical_quarantine': list(meta.get('canonical_quarantine') or []),
                       'ledger_records': list(meta.get('ledger_records') or []),
                       'source_documents': list(meta.get('source_documents') or []),
+                      'policy_evidence': meta.get('policy_evidence'),
                       'rejected_candidates': int(meta.get('rejected_candidates') or 0),
                       'documents': int(meta.get('documents') or 0),
                       'extraction_errors': list(meta.get('extraction_errors') or []),
