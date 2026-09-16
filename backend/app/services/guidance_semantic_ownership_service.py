@@ -350,9 +350,95 @@ def _parse_range_at_selected_value(fact: TypedGuidanceFact) -> tuple[float, floa
     return (n1 * scale1) / unit_scale, (n2 * scale2) / unit_scale
 
 
+_PAREN_NEGATIVE_RANGE = re.compile(
+    r"\$\s*\(\s*(?P<n1>\d+(?:\.\d+)?)\s*\)\s*(?P<s1>billion|million|thousand|bn|mm|m|b|k)?\s*"
+    r"(?:to|through|[-–—])\s*\$?\s*(?P<n2>\d+(?:\.\d+)?)\s*(?P<s2>billion|million|thousand|bn|mm|m|b|k)?\b",
+    re.I,
+)
+_FOLLOWING_GUIDANCE_HEADING = re.compile(r"\b(?:F|FY)?\s*20\d{2}\s+(?:GUIDANCE|OUTLOOK)\b", re.I)
+
+
+def _parenthesized_negative_interval(fact: TypedGuidanceFact) -> tuple[float, float] | None:
+    if fact.metric not in {GuidanceMetric.EBITDA, GuidanceMetric.FCF}:
+        return None
+    local = _value_window(fact, 170, 100)
+    match = _PAREN_NEGATIVE_RANGE.search(local)
+    if match is None:
+        return None
+    s1 = match.group("s1") or match.group("s2")
+    s2 = match.group("s2") or match.group("s1")
+    unit_scale = _unit_multiplier(fact.unit)
+    first = -(float(match.group("n1")) * _scale_multiplier(s1)) / unit_scale
+    second = (float(match.group("n2")) * _scale_multiplier(s2)) / unit_scale
+    return min(first, second), max(first, second)
+
+
+def _period_year(fact: TypedGuidanceFact) -> int | None:
+    match = re.search(r"FY(20\d{2})$", fact.fiscal_period or "", re.I)
+    return int(match.group(1)) if match else None
+
+
+def _post_period_preliminary_result(fact: TypedGuidanceFact, document: SourceDocument) -> bool:
+    if fact.period_kind is not GuidancePeriodKind.FULL_YEAR:
+        return False
+    year = _period_year(fact)
+    source_ts = document.source_timestamp or document.fetched_at
+    if year is None or source_ts is None or source_ts.year <= year:
+        return False
+    sentence = _binding_sentence(fact)
+    if re.search(r"\b(?:guidance|outlook|forecast)\b", sentence, re.I):
+        return False
+    return bool(
+        re.search(r"\bexpects?\b", sentence, re.I)
+        and re.search(r"\b(?:increase|decrease|growth|grew|declin|compared|versus|vs\.?)\b", sentence, re.I)
+    )
+
+
+def _table_actual_before_guidance_heading(fact: TypedGuidanceFact) -> bool:
+    evidence = _evidence(fact)
+    text = evidence.full_text or ""
+    if evidence.value_end is None:
+        return False
+    after = text[evidence.value_end:min(len(text), evidence.value_end + 120)]
+    heading = _FOLLOWING_GUIDANCE_HEADING.search(after)
+    if heading is None:
+        return False
+    left = evidence.metric_start if evidence.metric_start is not None else max(0, evidence.value_end - 100)
+    boundary = evidence.value_end + heading.start()
+    fragment = text[left:boundary]
+    # A later quarter heading does not turn an earlier annual-guidance range
+    # into actuals. Require independent table cells, not the two endpoints
+    # of one explicitly bound range.
+    if _parse_range_at_selected_value(fact) is not None:
+        return False
+    return len(list(_MONEY.finditer(fragment))) >= 2 and not _FORWARD_CUE.search(fragment)
+
+
+def _actual_growth_point(fact: TypedGuidanceFact) -> bool:
+    if fact.low is None or fact.high is None or fact.low != fact.high:
+        return False
+    sentence = _binding_sentence(fact)
+    if _FORWARD_CUE.search(sentence):
+        return False
+    evidence = _evidence(fact)
+    text = evidence.full_text or ""
+    end = evidence.value_end if evidence.value_end is not None else 0
+    tail = text[end:min(len(text), end + 90)]
+    metric_of = re.search(
+        r"\b(?:revenue|revenues|net\s+sales|EBITDA|free\s+cash\s+flow|FCF)\b.{0,30}\b(?:of|was|were)\b",
+        sentence,
+        re.I | re.S,
+    )
+    growth_suffix = re.search(r"(?:,\s*[+-]\s*\d|\b(?:grew|growth|increased|decreased|up|down)\b)", tail, re.I)
+    return bool(metric_of and growth_suffix)
+
+
 def _normalize_loss_sign(fact: TypedGuidanceFact) -> tuple[float | None, float | None, str | None]:
     if fact.metric not in {GuidanceMetric.EBITDA, GuidanceMetric.FCF}:
         return fact.low, fact.high, None
+    parenthesized = _parenthesized_negative_interval(fact)
+    if parenthesized is not None:
+        return parenthesized[0], parenthesized[1], None
     local = _value_window(fact, 130, 100)
     if not _LOSS_OWNER.search(local):
         return fact.low, fact.high, None
@@ -427,7 +513,6 @@ def _basis_update(fact: TypedGuidanceFact) -> str | None:
 
 def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocument) -> TypedGuidanceFact:
     """Normalize deterministic semantic ownership before strict-v4 admission."""
-    del document
     updates: dict = {}
     issues: list[str] = []
     metadata = dict(fact.metadata or {})
@@ -446,7 +531,12 @@ def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocum
     if _long_term_owner(fact):
         updates["role"] = GuidanceFactRole.LONG_TERM_TARGET
         updates["period_kind"] = GuidancePeriodKind.LONG_TERM
-    if _historical_actual(fact):
+    if (
+        _historical_actual(fact)
+        or _post_period_preliminary_result(fact, document)
+        or _table_actual_before_guidance_heading(fact)
+        or _actual_growth_point(fact)
+    ):
         updates["role"] = GuidanceFactRole.ACTUAL
 
     role, role_issue = _role_owner(fact)

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: phase-1.1e-canonical-guidance
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
@@ -31,7 +31,7 @@ jobs:
       - name: Install package and test dependencies
         run: python -m pip install -e '.[test]'
 
-      - name: Apply approved semantic repair payload
+      - name: Verify materialized semantic repair
         run: python scripts/phase_1_1e_apply_survivor_repair.py
 
       - name: Compile repaired guidance code
@@ -74,20 +74,5 @@ jobs:
             exit 1
           fi
 
-      - name: Commit and push coherent production repair
-        shell: bash
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add \
-            backend/app/services/guidance_raw_typed_extractor.py \
-            backend/app/services/guidance_raw_canonical_extractor.py \
-            backend/app/services/guidance_semantic_ownership_service.py \
-            backend/tests/test_guidance_survivor_semantic_regressions.py
-          git diff --cached --check
-          if git diff --cached --quiet; then
-            echo 'No production repair changes generated.' >&2
-            exit 1
-          fi
-          git commit -m 'Phase 1.1E: harden survivor semantic ownership'
-          git push origin HEAD:phase-1.1e-canonical-guidance
+      - name: Verify validation did not modify production
+        run: git diff --exit-code

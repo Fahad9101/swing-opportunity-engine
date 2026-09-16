@@ -19,6 +19,7 @@ from app.services.fact_extraction_service import html_to_text
 from app.services.guidance_raw_typed_extractor import (
     RawTypedGuidanceExtraction,
     _ACTION_PATTERNS,
+    _MONEY_RANGE,
     _PeriodBinding,
     _ValueBinding,
     _action,
@@ -27,6 +28,7 @@ from app.services.guidance_raw_typed_extractor import (
     _metric_clause,
     _metric_mentions,
     _normalize_year,
+    _normalized_money_range,
     _segments,
 )
 
@@ -420,28 +422,15 @@ def _compact_metric_forward_guidance_value(clause: str, anchor: int, mention) ->
     if not match:
         return None
 
-    s1 = (match.group("s1") or "").lower()
-    s2 = (match.group("s2") or "").lower()
-    if s1 and s2 and s1 != s2:
-        aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}
-        if aliases.get(s1, s1) != aliases.get(s2, s2):
-            return None
-    scale = match.group("s2") or match.group("s1")
-    if not scale:
-        return None
-
-    unit = _unit_from_scale(
-        scale,
-        mention.metric,
-        dollar=bool(match.group("d1") or match.group("d2")),
+    normalized = _normalized_money_range(
+        match.group("lo"), match.group("hi"), match.group("s1"), match.group("s2"),
+        has_dollar=bool(match.group("d1") or match.group("d2")),
+        text=clause,
+        position=mention_end + match.start(),
     )
-    if unit is GuidanceUnit.UNKNOWN:
+    if normalized is None:
         return None
-
-    low = float(match.group("lo").replace(",", ""))
-    high = float(match.group("hi").replace(",", ""))
-    if low > high:
-        return None
+    low, high, unit = normalized
 
     value_start = mention_end + match.start("lo")
     if match.group("d1"):
@@ -523,6 +512,8 @@ def _value_is_historical_actual(clause: str, anchor: int, value) -> bool:
 
 
 _SECTION_FULL_YEAR_HEADINGS = (
+    re.compile(r"(?:^|[.;:•])\s*(20\d{2})\s+full[- ]year\s+(?:guidance|outlook)\b", re.I),
+    re.compile(r"(?:^|[.;:•])\s*(20\d{2})\s+(?:guidance|outlook)\b", re.I),
     re.compile(r"(?:^|[.;:•])\s*(?:initial\s+|updated\s+|revised\s+|increasing\s+|raising\s+)?full[- ]year\s+(20\d{2})(?:\s+(?:guidance|outlook))?\b", re.I),
     re.compile(r"(?:^|[.;:•])\s*fiscal\s+(20\d{2})\s+full[- ]year\s+(?:guidance|outlook)\b", re.I),
     re.compile(r"(?:^|[.;:•])\s*(?:FY|fiscal\s+year)\s*(20\d{2})\s+(?:guidance|outlook)\b", re.I),
@@ -638,6 +629,8 @@ def _value_is_guidance_delta_not_level(clause: str, value) -> bool:
 
 
 _DOCUMENT_SECTION_HEADINGS = (
+    (re.compile(r"\b(20\d{2})\s+full[- ]year\s+(?:guidance|outlook)\b", re.I), "FY"),
+    (re.compile(r"\b(20\d{2})\s+(?:guidance|outlook)\b", re.I), "FY"),
     (re.compile(r"\bfiscal\s+(20\d{2})\s+full[- ]year\s+(?:guidance|outlook)\b", re.I), "FY"),
     (re.compile(r"\bfull[- ]year\s+(20\d{2})(?:\s+(?:guidance|outlook))?\b", re.I), "FY"),
     (re.compile(r"\b(?:FY|fiscal\s+year)\s*(20\d{2})\s+(?:guidance|outlook)\b", re.I), "FY"),
@@ -906,7 +899,7 @@ def _following_period_is_reference_v19(clause: str, value, period: _PeriodBindin
     bridge = clause[value.end:period.start]
     tail = clause[period.end:min(len(clause), period.end + 100)]
     if re.search(
-        r"\b(?:unchanged\s+from|compared\s+(?:with|to)|from\s+(?:the\s+)?prior|"
+        r"\b(?:unchanged\s+from|compared\s+(?:with|to)|versus|vs\.?|from\s+(?:the\s+)?prior|"
         r"previous(?:ly)?|as\s+reported|reported|results?|reference(?:d)?)\b",
         bridge[-160:],
         re.I,
@@ -1010,6 +1003,67 @@ def _quoted_prior_marker_owned_by_other_metric(clause: str, anchor: int, mention
             owner = max(preceding, key=lambda item: item.end)
             return owner.metric is not mention.metric
     return False
+
+
+def _quoted_prior_locally_owns_value(clause: str, anchor: int, mention, value) -> bool:
+    if value is None:
+        return False
+    before = clause[max(0, value.start - 220):value.start]
+    markers = [match for match in _PRIOR_ROLE_OWNERSHIP_MARKER.finditer(before)]
+    if not markers:
+        return False
+    latest = markers[-1]
+    absolute_marker_start = max(0, value.start - 220) + latest.start()
+    absolute_marker_end = max(0, value.start - 220) + latest.end()
+    if absolute_marker_start >= anchor:
+        return not bool(re.search(r"(?<!\d)\.(?!\d)|[!?•;]", clause[absolute_marker_end:value.start]))
+    bridge = clause[absolute_marker_end:anchor]
+    if re.search(r"(?<!\d)\.(?!\d)|[!?•;]", bridge):
+        return False
+    mentions = _metric_mentions(clause)
+    preceding = [item for item in mentions if item.end <= absolute_marker_start]
+    if preceding:
+        owner = max(preceding, key=lambda item: item.end)
+        if owner.metric is not mention.metric:
+            return False
+    return anchor - absolute_marker_end <= 90
+
+
+def _local_full_year_phrase_before_value(clause: str, anchor: int, mention, value) -> _PeriodBinding | None:
+    if value is None:
+        return None
+    left = max(0, anchor - 150)
+    local = clause[left:value.start]
+    matches = list(re.finditer(r"\b(?:for\s+(?:the\s+)?|during\s+(?:the\s+)?)(?:full[- ]year|fiscal(?:\s+year)?)\s+(20\d{2})\b", local, re.I))
+    if not matches:
+        return None
+    match = matches[-1]
+    start = left + match.start()
+    end = left + match.end()
+    tail = clause[end:value.start]
+    if re.search(r"\b(?:Q[1-4]\s*(?:FY)?\s*'?20\d{2}|[1-4]Q\s*'?20\d{2}|(?:first|second|third|fourth)\s+quarter)\b", tail, re.I):
+        return None
+    year = _normalize_year(match.group(1))
+    return _PeriodBinding(f"FY{year}", GuidancePeriodKind.FULL_YEAR, match.group(0), start, end)
+
+
+_GUIDANCE_VERSION_LABEL = re.compile(r"\b(?:initial|most\s+recent|previous|prior|current)\s+guidance\b", re.I)
+_SPLIT_MONEY_TOKEN = re.compile(r"\$\s*\d{1,3}\s+\d{1,3}\s+(?:billion|million|thousand|bn|mm|m|b)\b", re.I)
+
+
+def _ambiguous_guidance_version_table(text: str) -> bool:
+    labels = {match.group(0).lower() for match in _GUIDANCE_VERSION_LABEL.finditer(text)}
+    if not any("current guidance" == label for label in labels):
+        return False
+    if len(labels) < 2:
+        return False
+    ranges = list(_MONEY_RANGE.finditer(text))
+    return len(ranges) >= 2
+
+
+def _split_money_token_corruption(clause: str, anchor: int, mention) -> bool:
+    local = clause[max(0, anchor - 100):min(len(clause), anchor + len(mention.text) + 220)]
+    return bool(_SPLIT_MONEY_TOKEN.search(local))
 
 
 def _fact_role(clause: str, value) -> GuidanceFactRole:
@@ -1204,6 +1258,30 @@ def _directional_value_pair(clause: str, anchor: int, mention, action: GuidanceA
         clause, anchor + len(mention.text)
     )
     if range_revision:
+        old_normalized = _normalized_money_range(
+            range_revision.group("old_lo"), range_revision.group("old_hi"),
+            range_revision.group("s1"), range_revision.group("s2"),
+            has_dollar=bool(range_revision.group("d1") or range_revision.group("d2")),
+            text=clause, position=range_revision.start("old_lo"),
+        )
+        new_normalized = _normalized_money_range(
+            range_revision.group("new_lo"), range_revision.group("new_hi"),
+            range_revision.group("s3"), range_revision.group("s4"),
+            has_dollar=bool(range_revision.group("d3") or range_revision.group("d4")),
+            text=clause, position=range_revision.start("new_lo"),
+        )
+        if old_normalized is not None and new_normalized is not None:
+            old_lo, old_hi, old_unit = old_normalized
+            new_lo, new_hi, new_unit = new_normalized
+            old_start = range_revision.start("d1") if range_revision.group("d1") else range_revision.start("old_lo")
+            old_end = range_revision.end("s2") if range_revision.group("s2") else range_revision.end("old_hi")
+            new_start = range_revision.start("d3") if range_revision.group("d3") else range_revision.start("new_lo")
+            new_end = range_revision.end("s4") if range_revision.group("s4") else range_revision.end("new_hi")
+            return (
+                _ValueBinding(new_lo, new_hi, new_unit, GuidanceValueKind.ABSOLUTE_LEVEL, clause[new_start:new_end].strip(), new_start, new_end),
+                _ValueBinding(old_lo, old_hi, old_unit, GuidanceValueKind.ABSOLUTE_LEVEL, clause[old_start:old_end].strip(), old_start, old_end),
+            )
+
         aliases = {"m": "million", "mm": "million", "b": "billion", "bn": "billion"}
 
         def compatible_scale(left: str | None, right: str | None) -> str | None:
@@ -1915,6 +1993,24 @@ def _suppress_document_fragments(facts: Iterable[TypedGuidanceFact], rejected: l
                 )
                 break
 
+    directional_actions = {GuidanceAction.RAISE, GuidanceAction.LOWER, GuidanceAction.REAFFIRM}
+    for i, fact in enumerate(items):
+        if i in remove or fact.explicit_action is not GuidanceAction.INITIATE:
+            continue
+        for j, other in enumerate(items):
+            if i == j or j in remove or other.explicit_action not in directional_actions:
+                continue
+            if not _same_economic_identity(fact, other):
+                continue
+            if (fact.low, fact.high, fact.unit, fact.value_kind) != (other.low, other.high, other.unit, other.value_kind):
+                continue
+            fact_doc = fact.provenance[0].document_id if fact.provenance else None
+            other_doc = other.provenance[0].document_id if other.provenance else None
+            if fact_doc == other_doc:
+                remove.add(i)
+                rejected.append({"reason": "generic_initiate_duplicate_of_directional_action", "metric": fact.metric.value, "period": fact.fiscal_period, "value": [fact.low, fact.high]})
+                break
+
     best_by_key: dict[tuple, int] = {}
     for i, fact in enumerate(items):
         if i in remove:
@@ -1978,6 +2074,10 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
             local_action = _metric_action(segment, clause, anchor, mention)
             if not explicit_forward and local_action is GuidanceAction.NONE:
                 continue
+            if _ambiguous_guidance_version_table(segment):
+                rejected.append({"reason": "ambiguous_guidance_version_table", "metric": mention.metric.value, "evidence": clause[:500]}); continue
+            if _split_money_token_corruption(clause, anchor, mention):
+                rejected.append({"reason": "split_money_token_corruption", "metric": mention.metric.value, "evidence": clause[:500]}); continue
             if _ambiguous_parallel_period_table(clause):
                 rejected.append({"reason": "ambiguous_parallel_period_table", "metric": mention.metric.value, "evidence": clause[:500]}); continue
             if _ambiguous_current_prior_table(clause):
@@ -2019,9 +2119,9 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
             if value is not None and (_value_is_historical_actual(clause, anchor, value) or _value_precedes_forward_heading(clause, anchor, value) or _local_preliminary_actual(clause, anchor, mention, value)):
                 rejected.append({"reason": "historical_actual", "metric": mention.metric.value, "value_text": value.text, "evidence": clause[:500]}); continue
             role = GuidanceFactRole.CURRENT if pending_review or previous_now_value is not None else _fact_role(clause, value)
-            if (
-                role is GuidanceFactRole.QUOTED_PRIOR
-                and _quoted_prior_marker_owned_by_other_metric(clause, anchor, mention, value)
+            if role is GuidanceFactRole.QUOTED_PRIOR and (
+                not _quoted_prior_locally_owns_value(clause, anchor, mention, value)
+                or _quoted_prior_marker_owned_by_other_metric(clause, anchor, mention, value)
             ):
                 role = GuidanceFactRole.CURRENT
             canonical_period = _canonical_period_binding(clause, anchor, mention)
@@ -2034,6 +2134,15 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
             if direct_period is not None and (canonical_period is None or canonical_period.end <= direct_period.start):
                 period = direct_period
             section_period = _nearest_section_heading_period(segment, clause, anchor, mention)
+            if (
+                section_period is not None
+                and section_period.kind is GuidancePeriodKind.FULL_YEAR
+                and period is not None
+                and period.kind is GuidancePeriodKind.FULL_YEAR
+                and period.period != section_period.period
+                and direct_period is None
+            ):
+                period = section_period
             compact_forward_period_owned = _compact_forward_period_is_owned(clause, compact_forward_value, period)
             if period is not None and period is not direct_period and not compact_forward_period_owned and (
                 _selected_following_period_crosses_sentence(clause, anchor, mention, value, period)
@@ -2046,6 +2155,9 @@ def extract_canonical_typed_guidance_facts(document: SourceDocument) -> RawTyped
             local_quarter_period_v29 = _local_explicit_quarter_before_value_v29(clause, anchor, mention, value)
             if local_quarter_period_v29 is not None:
                 period = local_quarter_period_v29
+            local_full_year_period = _local_full_year_phrase_before_value(clause, anchor, mention, value)
+            if local_full_year_period is not None:
+                period = local_full_year_period
             strict_segment_quarter_v32 = _strict_segment_quarter_heading_v32(segment, clause, anchor, mention)
             if strict_segment_quarter_v32 is not None and (period is None or period.kind is GuidancePeriodKind.FULL_YEAR):
                 period = strict_segment_quarter_v32

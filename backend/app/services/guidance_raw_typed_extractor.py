@@ -33,7 +33,7 @@ _ACTUAL = re.compile(
 _ACTION_PATTERNS: list[tuple[GuidanceAction, re.Pattern[str]]] = [
     (GuidanceAction.WITHDRAW, re.compile(r"\b(?:withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?)\b", re.I)),
     (GuidanceAction.LOWER, re.compile(r"\b(?:lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)\b", re.I)),
-    (GuidanceAction.RAISE, re.compile(r"\b(?:rais(?:e|es|ed|ing)|increas(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\b", re.I)),
+    (GuidanceAction.RAISE, re.compile(r"\b(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\b|\bincreas(?:e|es|ed|ing)\b(?=[^.;•]{0,100}\b(?:guidance|outlook)\b)", re.I)),
     (GuidanceAction.REAFFIRM, re.compile(r"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b", re.I)),
 ]
 
@@ -133,6 +133,13 @@ _SCALE_UNITS = {
     "mm": GuidanceUnit.USD_MILLION,
     "million": GuidanceUnit.USD_MILLION,
     "thousand": GuidanceUnit.USD_THOUSAND,
+}
+
+_MONEY_UNIT_FACTORS = {
+    GuidanceUnit.USD: 1.0,
+    GuidanceUnit.USD_THOUSAND: 1_000.0,
+    GuidanceUnit.USD_MILLION: 1_000_000.0,
+    GuidanceUnit.USD_BILLION: 1_000_000_000.0,
 }
 
 
@@ -358,6 +365,43 @@ def _source_money_unit(
     return GuidanceUnit.USD if has_dollar else GuidanceUnit.UNKNOWN
 
 
+def _normalized_money_range(
+    lo_text: str,
+    hi_text: str,
+    scale1: str | None,
+    scale2: str | None,
+    *,
+    has_dollar: bool,
+    text: str,
+    position: int,
+) -> tuple[float, float, GuidanceUnit] | None:
+    """Normalize explicit money-range endpoints before ordering them.
+
+    A range such as ``$980 million to $1 billion`` is economically ordered even
+    though the raw numbers are 980 and 1. Missing endpoint scales inherit the
+    explicit partner scale; otherwise the table/header unit is used.
+    """
+    s1 = scale1
+    s2 = scale2
+    if not s1 and s2:
+        s1 = s2
+    if not s2 and s1:
+        s2 = s1
+    u1 = _source_money_unit(s1, None, has_dollar=has_dollar, text=text, position=position)
+    u2 = _source_money_unit(s2, None, has_dollar=has_dollar, text=text, position=position)
+    f1 = _MONEY_UNIT_FACTORS.get(u1)
+    f2 = _MONEY_UNIT_FACTORS.get(u2)
+    if f1 is None or f2 is None:
+        return None
+    lo_base = float(lo_text.replace(",", "")) * f1
+    hi_base = float(hi_text.replace(",", "")) * f2
+    if lo_base > hi_base:
+        return None
+    target = u1 if f1 >= f2 else u2
+    target_factor = _MONEY_UNIT_FACTORS[target]
+    return lo_base / target_factor, hi_base / target_factor, target
+
+
 def _bind_value(clause: str, mention: _MetricMention, anchor: int) -> _ValueBinding | None:
     metric = mention.metric
     candidates: list[_ValueBinding] = []
@@ -406,13 +450,13 @@ def _bind_value(clause: str, mention: _MetricMention, anchor: int) -> _ValueBind
     else:
         for match in _MONEY_RANGE.finditer(clause):
             has_dollar = bool(match.group("d1") or match.group("d2"))
-            unit = _source_money_unit(match.group("s1"), match.group("s2"), has_dollar=has_dollar, text=clause, position=match.start())
-            if unit is GuidanceUnit.UNKNOWN:
+            normalized = _normalized_money_range(
+                match.group("lo"), match.group("hi"), match.group("s1"), match.group("s2"),
+                has_dollar=has_dollar, text=clause, position=match.start(),
+            )
+            if normalized is None:
                 continue
-            low = float(match.group("lo").replace(",", ""))
-            high = float(match.group("hi").replace(",", ""))
-            if low > high:
-                continue
+            low, high, unit = normalized
             candidates.append(_ValueBinding(low, high, unit, GuidanceValueKind.ABSOLUTE_LEVEL, match.group(0), match.start(), match.end()))
         for match in _MONEY_SINGLE.finditer(clause):
             unit = _source_money_unit(None, match.group("scale"), has_dollar=True, text=clause, position=match.start())
