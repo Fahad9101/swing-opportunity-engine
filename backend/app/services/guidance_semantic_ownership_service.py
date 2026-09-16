@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 
 from app.domain.guidance_canonical_v1 import (
     GuidanceFactRole,
@@ -11,6 +12,8 @@ from app.domain.guidance_canonical_v1 import (
     TypedGuidanceFact,
 )
 from app.domain.soe_v1_1 import GuidanceAction, GuidanceMetric, SourceDocument
+from app.services.guidance_raw_typed_extractor import _PERCENT_RANGE
+from app.services.fact_extraction_service import html_to_text
 
 
 _SEMANTIC_VERSION = "semantic-ownership-v1"
@@ -30,14 +33,12 @@ _CURRENT_CUE = re.compile(
     re.I,
 )
 _PRIOR_CUE = re.compile(
-    r"\b(?:prior|previous|previously|former|earlier|original)\b"
-    r"(?:\s+[A-Za-z0-9*.'/-]+){0,6}\s*"
-    r"(?:guidance|outlook|forecast|estimate|expected|provided|stated)?\b",
-    re.I,
+    r"\b(?:prior|previous|previously|former|earlier|original)\b(?!\s+(?:year|quarter)\b)", re.I,
 )
+_SENTENCE_BOUNDARY = re.compile(r"(?<!\d)\.(?!\d)|[;\n•·●]")
 _STRONG_ACTUAL_CUE = re.compile(
     r"\b(?:reported|generated|delivered|achieved|realized|recognized|recorded|"
-    r"totaled|came\s+in\s+at|preliminary|unaudited|"
+    r"exceeded|totaled|came\s+in\s+at|preliminary|unaudited|"
     r"(?:revenue|revenues|sales|EBITDA|free\s+cash\s+flow|FCF|EPS)\s+"
     r"(?:(?:was|were)|(?:increased|decreased|rose|fell|grew|declined)\s+to))\b",
     re.I,
@@ -49,7 +50,7 @@ _LONG_TERM_TARGET = re.compile(
     re.I | re.S,
 )
 _SUBCOMPONENT_REVENUE = re.compile(
-    r"\bremaining\s+performance\s+obligations?\b|"
+    r"\brun[- ]rate\b|\bannual\s+recurring\s+revenue\b|\bremaining\s+performance\s+obligations?\b|"
     r"\b(?:deferred|collaboration|milestone|inorganic|other)\s+revenue\b|"
     r"\brevenue\b.{0,100}\b(?:deferred|collaboration|milestone|inorganic)\b|"
     r"\b(?:recognize|recognized|recognition)\b.{0,120}\b(?:RPO|revenue)\b|"
@@ -110,7 +111,7 @@ _TABLE_CUE = re.compile(
     r"GAAP\s+.*non[- ]GAAP)\b",
     re.I | re.S,
 )
-_PRODUCT_NET_SALES = re.compile(r"\b[A-Z][A-Z0-9-]{3,}(?:\s*\([^)]{1,50}\))?\s+Net\s+Sales(?:\s+Guidance)?\b")
+_PRODUCT_NET_SALES = re.compile(r"\b[A-Z][A-Z0-9-]{3,}(?:\s*\([^)]{1,50}\))?\s+Net\s+Sales(?:\s+Guidance)?\b|\([a-z][a-z -]{2,40}\)\s+(?:20\d{2}\s+)?Net\s+Sales\b")
 
 
 def _evidence(fact: TypedGuidanceFact):
@@ -138,9 +139,9 @@ def _binding_sentence(fact: TypedGuidanceFact) -> str:
         return text
     left_anchor = min(starts)
     right_anchor = max(ends) if ends else left_anchor
-    left = max(text.rfind(".", 0, left_anchor), text.rfind(";", 0, left_anchor), text.rfind("\n", 0, left_anchor), text.rfind("•", 0, left_anchor)) + 1
-    rights = [pos for token in (".", ";", "\n", "•") if (pos := text.find(token, right_anchor)) >= 0]
-    right = min(rights) if rights else len(text)
+    boundaries = list(_SENTENCE_BOUNDARY.finditer(text))
+    left = max((m.end() for m in boundaries if m.end() <= left_anchor), default=0)
+    right = min((m.start() for m in boundaries if m.start() >= right_anchor), default=len(text))
     return text[left:right].strip()
 
 
@@ -162,7 +163,7 @@ def _named_owner_label(fact: TypedGuidanceFact) -> str | None:
     if match is None:
         return None
     label = match.group("label").strip()
-    if _OWNER_RESERVED.search(label) or re.search(r"\b(?:total|company|consolidated|adjusted|non[- ]GAAP|full[- ]year|fiscal)\b", label, re.I):
+    if _OWNER_RESERVED.search(label) or re.search(r"\b(?:total|company|consolidated|adjusted|(?:non[- ])?GAAP|full[- ]year|fiscal)\b", label, re.I):
         return None
     return label
 
@@ -225,6 +226,8 @@ def _owned_period(fact: TypedGuidanceFact) -> str | None:
     if following:
         following.sort(key=lambda item: item[0])
         return following[0][1]
+    if mentions and all(_is_comparator_context(text, start) for _, start, _ in mentions):
+        return "UNRESOLVED_COMPARATOR"
     return None
 
 
@@ -249,6 +252,15 @@ def _historical_actual(fact: TypedGuidanceFact) -> bool:
     if evidence.value_start is None:
         return False
     before = text[max(0, evidence.value_start - 180):evidence.value_start]
+    if re.search(r"\bexceeded\b.{0,40}\bguidance\b", before, re.I):
+        return True
+    after = text[evidence.value_end or evidence.value_start:]
+    if re.search(r"\b(?:above|exceed(?:ed|ing)?)\s+(?:the\s+)?(?:previously\s+reported\s+|prior\s+)?guidance\b", after, re.I):
+        return True
+    # A quarter-result bullet cannot borrow guidance from an adjacent bullet.
+    bullet_before = re.split(r"[•·●]", before)[-1]
+    if re.search(r"\bQ[1-4]\s+20\d{2}\b", bullet_before, re.I) and not _FORWARD_CUE.search(bullet_before):
+        return True
     matches = list(_STRONG_ACTUAL_CUE.finditer(before))
     if matches:
         cue = matches[-1]
@@ -282,20 +294,33 @@ def _role_owner(fact: TypedGuidanceFact) -> tuple[GuidanceFactRole, str | None]:
     evidence = _evidence(fact)
     text = evidence.full_text or ""
     if evidence.value_start is None:
+        if re.search(r"\b(?:prior|previous|earlier)\s+(?:decision|action)\b", text, re.I):
+            return GuidanceFactRole.QUOTED_PRIOR, None
         return fact.role, None
-    before = text[max(0, evidence.value_start - 170):evidence.value_start]
+    metric_start = evidence.metric_start or 0
+    left = max(0, evidence.value_start - 170)
+    # A prior marker for a preceding metric or sentence cannot own this value.
+    boundaries = list(_SENTENCE_BOUNDARY.finditer(text[:metric_start]))
+    if boundaries:
+        left = max(left, boundaries[-1].end())
+    previous_metrics = list(_METRIC_TOKEN.finditer(text[:metric_start]))
+    if previous_metrics:
+        between = text[previous_metrics[-1].end():metric_start]
+        # Only carry shared prior headings across a list when no previous value intervenes.
+        if re.search(r"\d", between):
+            left = max(left, metric_start - len(re.search(r"[A-Za-z -]*$", between).group(0)))
+    before = text[left:evidence.value_start]
+    if re.search(r"\b(?:confirm|re[- ]?affirm|reiterate|maintain)(?:s|ed|ing)?\b.{0,30}\b(?:prior|previous)\b", before, re.I):
+        return GuidanceFactRole.CURRENT, None
     prior = list(_PRIOR_CUE.finditer(before))
     current = list(_CURRENT_CUE.finditer(before))
-    latest_prior = prior[-1] if prior else None
-    latest_current = current[-1] if current else None
+    if prior and (not current or prior[-1].start() > current[-1].start()):
+        return GuidanceFactRole.QUOTED_PRIOR, None
     if fact.role is GuidanceFactRole.QUOTED_PRIOR:
-        if latest_prior is None:
-            return fact.role, "role: quoted-prior fact lacks local prior-guidance ownership"
-        if latest_current is not None and latest_current.end() > latest_prior.end():
-            return fact.role, "role: quoted-prior fact conflicts with a newer local current-guidance cue"
-    elif fact.role is GuidanceFactRole.CURRENT and latest_prior is not None:
-        if latest_current is None or latest_prior.end() > latest_current.end():
-            return GuidanceFactRole.QUOTED_PRIOR, None
+        # An explicitly paired old value still needs local ownership; don't guess.
+        if prior or left > max(0, evidence.value_start - 170):
+            return GuidanceFactRole.CURRENT, None
+        return fact.role, "role: quoted-prior fact lacks local prior-guidance ownership"
     return fact.role, None
 
 
@@ -327,6 +352,10 @@ def _parse_range_at_selected_value(fact: TypedGuidanceFact) -> tuple[float, floa
     text = evidence.full_text or ""
     if evidence.value_start is None:
         return None
+    if fact.unit is GuidanceUnit.PERCENT:
+        for match in _PERCENT_RANGE.finditer(text):
+            if match.start() <= evidence.value_start < match.end() or (evidence.value_end is not None and evidence.value_start <= match.start() < evidence.value_end):
+                return float(match.group("lo")), float(match.group("hi"))
     fragment = text[evidence.value_start:min(len(text), evidence.value_start + 110)]
     first = _MONEY.match(fragment)
     if first is None:
@@ -355,7 +384,7 @@ _PAREN_NEGATIVE_RANGE = re.compile(
     r"(?:to|through|[-–—])\s*\$?\s*(?P<n2>\d+(?:\.\d+)?)\s*(?P<s2>billion|million|thousand|bn|mm|m|b|k)?\b",
     re.I,
 )
-_FOLLOWING_GUIDANCE_HEADING = re.compile(r"\b(?:F|FY)?\s*20\d{2}\s+(?:GUIDANCE|OUTLOOK)\b", re.I)
+_FOLLOWING_GUIDANCE_HEADING = re.compile(r"\b(?:F|FY)?\s*20\d{2}\s+(?:GUIDANCE|OUTLOOK)\b|\bOutlook\s+For\b|\bReconciliation\s+of\b.{0,100}\bGuidance\b", re.I)
 
 
 def _parenthesized_negative_interval(fact: TypedGuidanceFact) -> tuple[float, float] | None:
@@ -379,7 +408,7 @@ def _period_year(fact: TypedGuidanceFact) -> int | None:
 
 
 def _post_period_preliminary_result(fact: TypedGuidanceFact, document: SourceDocument) -> bool:
-    if fact.period_kind is not GuidancePeriodKind.FULL_YEAR:
+    if fact.period_kind not in {GuidancePeriodKind.FULL_YEAR, GuidancePeriodKind.QUARTER}:
         return False
     year = _period_year(fact)
     source_ts = document.source_timestamp or document.fetched_at
@@ -388,10 +417,7 @@ def _post_period_preliminary_result(fact: TypedGuidanceFact, document: SourceDoc
     sentence = _binding_sentence(fact)
     if re.search(r"\b(?:guidance|outlook|forecast)\b", sentence, re.I):
         return False
-    return bool(
-        re.search(r"\bexpects?\b", sentence, re.I)
-        and re.search(r"\b(?:increase|decrease|growth|grew|declin|compared|versus|vs\.?)\b", sentence, re.I)
-    )
+    return bool(re.search(r"\b(?:expects?|expected|anticipates?|anticipated)\b", sentence, re.I))
 
 
 def _table_actual_before_guidance_heading(fact: TypedGuidanceFact) -> bool:
@@ -411,7 +437,9 @@ def _table_actual_before_guidance_heading(fact: TypedGuidanceFact) -> bool:
     # of one explicitly bound range.
     if _parse_range_at_selected_value(fact) is not None:
         return False
-    return len(list(_MONEY.finditer(fragment))) >= 2 and not _FORWARD_CUE.search(fragment)
+    cells = len(list(_MONEY.finditer(fragment)))
+    period_after_value = evidence.period_start is not None and evidence.period_start >= evidence.value_end
+    return (cells >= 2 or (cells >= 1 and period_after_value)) and not _FORWARD_CUE.search(fragment)
 
 
 def _actual_growth_point(fact: TypedGuidanceFact) -> bool:
@@ -429,7 +457,7 @@ def _actual_growth_point(fact: TypedGuidanceFact) -> bool:
         sentence,
         re.I | re.S,
     )
-    growth_suffix = re.search(r"(?:,\s*[+-]\s*\d|\b(?:grew|growth|increased|decreased|up|down)\b)", tail, re.I)
+    growth_suffix = re.search(r"(?:,\s*[+-](?:\s*\d|\s*$)|\b(?:grew|growth|increased|decreased|up|down)\b)", tail, re.I)
     return bool(metric_of and growth_suffix)
 
 
@@ -485,7 +513,7 @@ def _flattened_coordinate_issue(fact: TypedGuidanceFact) -> bool:
     if _TABLE_CUE.search(local) and len(metrics) >= 2:
         return True
     money = list(re.finditer(r"\$\s*\d", sentence))
-    if len(metrics) >= 2 and len(money) >= 3:
+    if len({m.group(0).lower() for m in metrics}) >= 2 and len(money) >= 3:
         evidence = _evidence(fact)
         metric_text = re.escape((evidence.metric_text or "").strip())
         value_text = re.escape((evidence.value_text or "").strip())
@@ -503,11 +531,84 @@ def _basis_update(fact: TypedGuidanceFact) -> str | None:
     text = evidence.full_text or ""
     if evidence.metric_start is None:
         return None
-    local = text[max(0, evidence.metric_start - 30):min(len(text), (evidence.metric_end or evidence.metric_start) + 30)]
+    if fact.metric is GuidanceMetric.REVENUE:
+        return "UNSPECIFIED"
+    local = text[max(0, evidence.metric_start - 30):(evidence.metric_end or evidence.metric_start)]
     if re.search(r"\b(?:adjusted|non[- ]GAAP)\b", local, re.I):
         return "ADJUSTED"
     if re.search(r"\bGAAP\b", local, re.I) and not re.search(r"\bnon[- ]GAAP\b", local, re.I):
         return "GAAP"
+    return None
+
+
+@lru_cache(maxsize=8)
+def _flat_source(content: str) -> str:
+    return re.sub(r"\s+", " ", html_to_text(content)).strip()
+
+
+_SOURCE_OUTLOOK_PERIOD = re.compile(
+    r"\b(?:For\s+(?:the\s+)?|expectations\s+for\s+(?:the\s+)?)(?:"
+    r"(?P<annual>(?:full[- ](?:fiscal\s+)?year|fiscal\s+year))\s+(?P<ay>20\d{2})|"
+    r"year\s+ending\s+[A-Za-z]+\s+\d{1,2},?\s+(?P<ey>20\d{2})|"
+    r"(?P<quarter>first|second|third|fourth)\s+quarter(?:\s+of)?(?:\s+fiscal(?:\s+year)?)?\s+(?P<qy>20\d{2})"
+    r")(?P<tail>[^.;]{0,120}?(?:expects?|anticipates?|are\s+as\s+follows)\s*:?)", re.I,
+)
+
+
+def _source_period_issue(fact: TypedGuidanceFact, document: SourceDocument) -> str | None:
+    evidence = _evidence(fact)
+    needle = re.sub(r"\s+", " ", evidence.full_text or "").strip()
+    if not needle or evidence.metric_start is None:
+        return None
+    source = _flat_source(document.content)
+    metric_offset = len(re.sub(r"\s+", " ", (evidence.full_text or "")[:evidence.metric_start]).lstrip())
+    owners = set()
+    for occurrence in re.finditer(re.escape(needle), source):
+        pivot = occurrence.start() + metric_offset
+        prefix = source[max(0, pivot - 900):pivot]
+        headings = list(_SOURCE_OUTLOOK_PERIOD.finditer(prefix))
+        if not headings:
+            continue
+        heading = headings[-1]
+        year = heading.group("ay") or heading.group("ey") or heading.group("qy")
+        quarter = heading.group("quarter")
+        period = f"Q{_QWORD[quarter.lower()]}FY{year}" if quarter else f"FY{year}"
+        following = prefix[heading.end():]
+        subheadings = list(re.finditer(r"\b(Annual|Quarterly)\s+Outlook\s*:", following, re.I))
+        if subheadings:
+            kind = subheadings[-1].group(1).lower()
+            if kind == "annual" and re.search(r"\bfull\s+year\b", heading.group("tail"), re.I):
+                period = f"FY{year}"
+            elif kind == "quarterly" and not quarter:
+                continue  # An unqualified quarter cannot inherit an annual period.
+        # A new explicit guidance section terminates ownership by the earlier heading.
+        if re.search(r"\b(?:20\d{2}\s+(?:Guidance|Outlook)|(?:Guidance|Outlook)\s+For)\b", following, re.I):
+            continue
+        owners.add(period)
+    if len(owners) == 1 and fact.fiscal_period not in owners:
+        return f"period: source outlook section owns {next(iter(owners))}, not {fact.fiscal_period}"
+    if len(owners) > 1:
+        return "period: repeated evidence fragment has ambiguous source section ownership"
+    return None
+
+
+def _source_fragment_issue(fact: TypedGuidanceFact, document: SourceDocument) -> str | None:
+    """Validate fragment boundaries against the original document, not a clipped window."""
+    evidence = _evidence(fact)
+    if evidence.value_end is None or evidence.value_start is None:
+        return None
+    text = evidence.full_text or ""
+    needle = re.sub(r"\s+", " ", text).strip()
+    source = _flat_source(document.content)
+    starts = [m.start() for m in re.finditer(re.escape(needle), source)] if needle else []
+    if not starts:
+        return None
+    relative_end = len(re.sub(r"\s+", " ", text[:evidence.value_end]).strip())
+    for start in starts:
+        tail = source[start + relative_end:start + relative_end + 60]
+        selected = text[evidence.value_start:evidence.value_end].rstrip()
+        if selected and selected[-1].isdigit() and re.match(r"(?:[.,]?\d|\s+\d+(?:\.\d+)?\s+(?:million|billion|thousand)\b)", tail, re.I):
+            return "value: selected numeric token is truncated or split in source document"
     return None
 
 
@@ -528,6 +629,10 @@ def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocum
     if _PRODUCT_NET_SALES.search(local) and not _is_total_metric_label(fact):
         updates["scope_kind"] = GuidanceScopeKind.PRODUCT
         updates["scope_label"] = "product net sales"
+    if fact.low is not None and re.search(r"\b(?:midpoint|mid-point)\s+guidance\b", sentence, re.I):
+        issues.append("value: quoted guidance midpoint does not establish complete forecast endpoints")
+    if re.search(r"\b(?:treatment|clinical)\s+guidance\b", local, re.I) and fact.low is None:
+        issues.append("action: clinical guidance does not establish a financial guidance action")
     if _long_term_owner(fact):
         updates["role"] = GuidanceFactRole.LONG_TERM_TARGET
         updates["period_kind"] = GuidancePeriodKind.LONG_TERM
@@ -553,6 +658,12 @@ def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocum
         metadata["semantic_sign_normalized"] = True
     if loss_issue:
         issues.append(loss_issue)
+    period_issue = _source_period_issue(fact, document)
+    if period_issue:
+        issues.append(period_issue)
+    source_issue = _source_fragment_issue(fact, document)
+    if source_issue:
+        issues.append(source_issue)
     range_issue = _range_endpoint_issue(fact)
     if range_issue:
         issues.append(range_issue)

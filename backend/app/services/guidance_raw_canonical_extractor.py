@@ -245,7 +245,16 @@ def _owned_directional_action(clause: str, anchor: int, metric_text: str, metric
     owned: list[tuple[int, GuidanceAction]] = []
     for action, pattern in _ACTION_PATTERNS:
         for match in pattern.finditer(clause):
+            # A trailing coordination introduces the next metric's action.
+            if match.start() >= current.end and re.search(r"\band\s*$", clause[current.end:match.start()], re.I):
+                continue
+            # Reaffirming a recently raised forecast does not raise it again.
+            if re.search(r"\brecently\s*$", clause[max(0, match.start()-20):match.start()], re.I):
+                continue
             if match.end() <= current.start:
+                bridge = clause[match.end():current.start]
+                if re.search(r"(?<!\d)\.(?!\d)(?=\s|$)|[;•·●]", bridge):
+                    continue
                 gap = current.start - match.end()
                 if gap > 120:
                     continue
@@ -253,6 +262,9 @@ def _owned_directional_action(clause: str, anchor: int, metric_text: str, metric
                     continue
                 owned.append((gap, action))
             elif match.start() >= current.end:
+                bridge = clause[current.end:match.start()]
+                if re.search(r"(?<!\d)\.(?!\d)(?=\s|$)|[;•·●]", bridge):
+                    continue
                 gap = match.start() - current.end
                 if gap > 120:
                     continue
@@ -491,7 +503,11 @@ def _value_has_local_metric_owner(clause: str, anchor: int, mention, value) -> b
 def _value_is_historical_actual(clause: str, anchor: int, value) -> bool:
     if value is None:
         return False
-    before = clause[max(0, min(anchor, value.start) - 140):value.start]
+    left = max(0, min(anchor, value.start) - 140)
+    boundaries = list(re.finditer(r"(?<!\d)\.(?!\d)|[;•·]", clause[:min(anchor, value.start)]))
+    if boundaries:
+        left = max(left, boundaries[-1].end())
+    before = clause[left:value.start]
     after = clause[value.end:min(len(clause), value.end + 100)]
     forward_before = bool(_FORWARD_SIGNAL.search(before))
     if not forward_before and re.search(

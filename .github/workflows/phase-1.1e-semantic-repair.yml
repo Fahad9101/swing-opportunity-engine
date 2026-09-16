@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/phase-1.1e-semantic-repair.yml'
       - 'scripts/phase_1_1e_apply_survivor_repair.py'
+      - 'backend/app/services/guidance_*.py'
+      - 'backend/tests/test_guidance_*.py'
   workflow_dispatch:
 
 permissions:
@@ -58,7 +60,7 @@ jobs:
           fi
 
       - name: Run focused survivor semantic regressions
-        run: pytest -q backend/tests/test_guidance_survivor_semantic_regressions.py
+        run: pytest -q backend/tests/test_guidance_survivor_semantic_regressions.py backend/tests/test_guidance_survivor_source_audit_regressions.py
 
       - name: Run complete deterministic suite
         run: pytest -q

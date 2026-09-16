@@ -20,7 +20,7 @@ from app.services.fact_extraction_service import html_to_text
 
 _GUIDANCE = re.compile(
     r"\b(?:guidance|outlook|forecast|expects?|anticipat(?:e|es|ed|ing)|"
-    r"project(?:s|ed|ing)|reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|"
+    r"project(?:s|ed|ing)|re[- ]?affirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|"
     r"rais(?:e|es|ed|ing)|lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|"
     r"withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?)\b",
     re.I,
@@ -32,9 +32,9 @@ _ACTUAL = re.compile(
 )
 _ACTION_PATTERNS: list[tuple[GuidanceAction, re.Pattern[str]]] = [
     (GuidanceAction.WITHDRAW, re.compile(r"\b(?:withdraw(?:s|n|ing)?|suspend(?:s|ed|ing)?)\b", re.I)),
-    (GuidanceAction.LOWER, re.compile(r"\b(?:lower(?:s|ed|ing)?|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)\b", re.I)),
+    (GuidanceAction.LOWER, re.compile(r"\b(?:lower(?:s|ed|ing)?(?!\s+(?:end|bound|limit)\b)|reduc(?:e|es|ed|ing)|cut(?:s|ting)?)\b", re.I)),
     (GuidanceAction.RAISE, re.compile(r"\b(?:rais(?:e|es|ed|ing)|boost(?:s|ed|ing)?)\b|\bincreas(?:e|es|ed|ing)\b(?=[^.;•]{0,100}\b(?:guidance|outlook)\b)", re.I)),
-    (GuidanceAction.REAFFIRM, re.compile(r"\b(?:reaffirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b", re.I)),
+    (GuidanceAction.REAFFIRM, re.compile(r"\b(?:re[- ]?affirm(?:s|ed|ing)?|reiterat(?:e|es|ed|ing)|maintain(?:s|ed|ing)?)\b", re.I)),
 ]
 
 _METRICS: list[tuple[GuidanceMetric, str, re.Pattern[str]]] = [
@@ -112,7 +112,7 @@ _MONEY_SINGLE = re.compile(
     re.I,
 )
 _PERCENT_RANGE = re.compile(
-    r"(?P<lo>\d{1,3}(?:\.\d+)?)\s*%\s*(?:to|through|-|–|—)\s*(?P<hi>\d{1,3}(?:\.\d+)?)\s*%",
+    r"(?P<lo>\d{1,3}(?:\.\d+)?)\s*%?\s*(?:and|to|through|-|–|—)\s*(?P<hi>\d{1,3}(?:\.\d+)?)\s*%",
     re.I,
 )
 _PERCENT_SINGLE = re.compile(
@@ -322,6 +322,8 @@ def _metric_clause(segment: str, mentions: list[_MetricMention], index: int) -> 
     mention = mentions[index]
     left = max(0, mention.start - 180)
     right = min(len(segment), mention.end + 320)
+    while right < len(segment) and not segment[right].isspace():
+        right += 1
 
     if index + 1 < len(mentions):
         right = min(right, mentions[index + 1].start)
@@ -441,7 +443,7 @@ def _bind_value(clause: str, mention: _MetricMention, anchor: int) -> _ValueBind
             r"\$?\s*(?P<lo>-?\d+(?:\.\d+)?)\s*(?:to|through|-|–|—)\s*\$?\s*(?P<hi>-?\d+(?:\.\d+)?)(?!\s*%)",
             re.I,
         )
-        eps_single = re.compile(r"\$\s*(?P<value>-?\d+(?:\.\d+)?)(?![\d,]|\s*%)")
+        eps_single = re.compile(r"\$\s*(?P<value>-?\d+(?:\.\d+)?)(?!\d|[.,]\d|\s*%)")
         for match in eps_range.finditer(clause):
             candidates.append(_ValueBinding(float(match.group("lo")), float(match.group("hi")), GuidanceUnit.USD_PER_SHARE, GuidanceValueKind.ABSOLUTE_LEVEL, match.group(0), match.start(), match.end()))
         for match in eps_single.finditer(clause):
