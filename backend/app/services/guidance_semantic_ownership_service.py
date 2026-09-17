@@ -95,7 +95,8 @@ _FULL_YEAR = re.compile(
     r"\b(?:FY|fiscal(?:\s+year)?|full[- ]year)\s*'?(?P<year>20\d{2})\b|"
     r"\b(?P<year2>20\d{2})\s+(?:full[- ]year|annual)\b|"
     r"\b(?:for\s+(?:the\s+)?year\s+ending|year\s+ending)\b.{0,35}\b(?P<year3>20\d{2})\b|"
-    r"\b(?P<year4>20\d{2})\s+(?:guidance|outlook|forecast)\b",
+    r"\b(?P<year4>20\d{2})\s+(?:guidance|outlook|forecast)\b|"
+    r"\b(?P<year5>20\d{2})\s+(?:adjusted\s+)?(?:revenue|EBITDA|EPS|free\s+cash\s+flow)\s*(?:\(\d+\)|\d+)?\s+(?:guidance|outlook)\b",
     re.I,
 )
 _QWORD = {"first": "1", "second": "2", "third": "3", "fourth": "4"}
@@ -178,7 +179,7 @@ def _explicit_period_mentions(text: str, offset: int = 0) -> list[tuple[str, int
             periods.append((f"Q{q}FY{year}", offset + match.start(), offset + match.end()))
             quarter_spans.append((match.start(), match.end(), year))
     for match in _FULL_YEAR.finditer(text):
-        year = match.group("year") or match.group("year2") or match.group("year3") or match.group("year4")
+        year = match.group("year") or match.group("year2") or match.group("year3") or match.group("year4") or match.group("year5")
         if not year:
             continue
         # A permissive annual token such as "2026 Guidance" can be a substring
@@ -415,6 +416,10 @@ def _post_period_preliminary_result(fact: TypedGuidanceFact, document: SourceDoc
     if year is None or source_ts is None or source_ts.year <= year:
         return False
     sentence = _binding_sentence(fact)
+    source = _flat_source(document.content)
+    preliminary_period = re.search(rf"\b{year}\s+(?:revenue\s+)?(?:outlook|results?)\b[^.]*\bpreliminary\b", source, re.I)
+    if preliminary_period:
+        return True
     if re.search(r"\b(?:guidance|outlook|forecast)\b", sentence, re.I):
         return False
     return bool(re.search(r"\b(?:expects?|expected|anticipates?|anticipated)\b", sentence, re.I))
@@ -592,6 +597,26 @@ def _source_period_issue(fact: TypedGuidanceFact, document: SourceDocument) -> s
     return None
 
 
+def _source_prior_comparison(fact: TypedGuidanceFact, document: SourceDocument) -> bool:
+    evidence = _evidence(fact)
+    text = evidence.full_text or ""
+    needle = re.sub(r"\s+", " ", text).strip()
+    if not needle or evidence.metric_start is None:
+        return False
+    source = _flat_source(document.content)
+    offset = len(re.sub(r"\s+", " ", text[:evidence.metric_start]).lstrip())
+    owners = []
+    for occurrence in re.finditer(re.escape(needle), source):
+        prefix = source[max(0, occurrence.start()+offset-450):occurrence.start()+offset]
+        boundaries = list(_SENTENCE_BOUNDARY.finditer(prefix))
+        if boundaries:
+            prefix = prefix[boundaries[-1].end():]
+        markers = list(re.finditer(r"\b(?:previous|prior)\s+guidance\b", prefix, re.I))
+        comparison = bool(markers and re.search(r"\b(?:compares?\s+(?:to|with)|compared\s+(?:to|with)|versus|vs\.?)\b", prefix[:markers[-1].start()], re.I))
+        owners.append(bool(comparison and not _CURRENT_CUE.search(prefix[markers[-1].end():])))
+    return bool(owners) and all(owners)
+
+
 def _source_fragment_issue(fact: TypedGuidanceFact, document: SourceDocument) -> str | None:
     """Validate fragment boundaries against the original document, not a clipped window."""
     evidence = _evidence(fact)
@@ -633,6 +658,12 @@ def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocum
         issues.append("value: quoted guidance midpoint does not establish complete forecast endpoints")
     if re.search(r"\b(?:treatment|clinical)\s+guidance\b", local, re.I) and fact.low is None:
         issues.append("action: clinical guidance does not establish a financial guidance action")
+    if fact.low is None and re.search(r"\b(?:RMB|CNY|EUR|GBP|JPY)\s*\d", local):
+        issues.append("value: unsupported currency interval cannot become qualitative company guidance")
+    if fact.low is None and re.search(r"\brevenue\s+growth\b(?!.{0,15}\b(?:guidance|outlook|forecast)\b).{0,90}\b(?:records?|results?)\b", local, re.I):
+        issues.append("action: result headline is not metric-owned guidance")
+    if fact.period_kind is GuidancePeriodKind.FULL_YEAR and re.search(r"\bthis\s+quarter\b", sentence, re.I):
+        issues.append("period: relative-quarter observation cannot inherit a full-year period")
     if _long_term_owner(fact):
         updates["role"] = GuidanceFactRole.LONG_TERM_TARGET
         updates["period_kind"] = GuidancePeriodKind.LONG_TERM
@@ -647,6 +678,8 @@ def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocum
     role, role_issue = _role_owner(fact)
     if "role" not in updates and role is not fact.role:
         updates["role"] = role
+    if "role" not in updates and _source_prior_comparison(fact, document):
+        updates["role"] = GuidanceFactRole.QUOTED_PRIOR
     effective_role = updates.get("role", fact.role)
     if role_issue:
         issues.append(role_issue)
@@ -664,6 +697,8 @@ def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocum
     source_issue = _source_fragment_issue(fact, document)
     if source_issue:
         issues.append(source_issue)
+    if fact.low is not None and fact.low == fact.high and re.search(r"\b(?:high|low|upper|lower)\s+end\b.{0,80}\b(?:guidance|range)\b", sentence, re.I):
+        issues.append("value: one quoted range endpoint does not establish the complete interval")
     range_issue = _range_endpoint_issue(fact)
     if range_issue:
         issues.append(range_issue)
@@ -701,6 +736,9 @@ def normalize_typed_guidance_fact(fact: TypedGuidanceFact, document: SourceDocum
     if basis is not None and basis != fact.accounting_basis:
         updates["accounting_basis"] = basis
         metadata["semantic_basis_normalized"] = True
+    if fact.explicit_action is GuidanceAction.INITIATE and not re.search(r"\b(?:initiat(?:e|es|ed|ing)|introduc(?:e|es|ed|ing)|initial|first)\b.{0,65}\b(?:guidance|outlook)\b", sentence, re.I):
+        updates["explicit_action"] = GuidanceAction.NONE
+        metadata["semantic_initiation_not_explicit"] = True
     if effective_role is GuidanceFactRole.QUOTED_PRIOR and fact.explicit_action is not GuidanceAction.NONE:
         updates["explicit_action"] = GuidanceAction.NONE
         metadata["semantic_prior_action_normalized"] = True

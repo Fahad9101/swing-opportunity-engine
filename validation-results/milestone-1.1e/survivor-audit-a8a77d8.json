@@ -1,0 +1,2897 @@
+{
+  "status": "FAIL_SYSTEMATIC_SEMANTIC_DEFECTS",
+  "scope": "All 246 ledger records and one policy evidence span reviewed; independent full-source acceptance audit incomplete. No full-market or 100-case acceptance gates authorized by these results.",
+  "sha": "a8a77d80a40fa09f5965bf9b79189e894e013614",
+  "run_id": 35144475127,
+  "artifact_id": 10469695027,
+  "artifact_zip_sha256": "301d257a20f7b939bd52ca17ea9bc481755e6e7bede4356b24f4178713cd3b28",
+  "structural_gates": "PASS: independent exact set equality, 432 unique rows, no missing/duplicates, same capture fingerprint, hash pair, workflow/checkout SHA, strict-v4 all rows",
+  "snapshot_fingerprint": "bb7e318b467d1142ec6ea25d1b6d9dd55ecdcf3e13c44434238f07ef454976a9",
+  "baseline_rules_hash": "59cc7ffe14472434bfbb92b07b89b0b48293d0c5762d5270769bce3b494550ac",
+  "candidate_rules_hash": "bcd0bd71b53a242b4e9d143525d6cd3ea1e0550ae27cca1788540250bf9468ca",
+  "fetch_error_rows": 32,
+  "extraction_error_rows": 0,
+  "cases": [
+    {
+      "ticker": "ACMR",
+      "finding": "FAIL: 1\u20132 preliminary FY2025 results published January 2026; 8 subsidiary RMB range downgraded to qualitative company guidance. Original SEC sources corroborate both.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 850000000.0,
+          "high": 950000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": " (loss) attributable to ACM Research, Inc. and basic and diluted earnings per share, also exclude unrealized gain (loss) on short-term investments. Outlook AC M is maintaining its revenue guidance range of $850 million to $950 million fo r fiscal year 2025. This expectation is based on ACM management\u2019s current assessment of the continuing impact from international trade policy, together with various expected",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000114036125028994/ef20053189_ex99-1.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 885000000.0,
+          "high": 900000000.0,
+          "action": "INITIATE",
+          "evidence_span": "EX-99.1 2 acmr-2025revflashprfinal_v.htm EX-99.1 Document Exhibit 99.1 ACM Research Updates 2025 Revenue Outlook and Provides Initial Outlook for 2026 Revenue \u2014Updated 2025 Revenue Outlook to $885 to $900 Million\u2014",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000168006226000003/acmr-2025revflashprfinal_v.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 885000000.0,
+          "high": 900000000.0,
+          "action": "NONE",
+          "evidence_span": "\u2014Updated 2025 Revenue Outlook to $885 to $900 Million\u2014",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000168006226000003/acmr-2025revflashprfinal_v.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1080000000.0,
+          "high": 1175000000.0,
+          "action": "NONE",
+          "evidence_span": "\u2014Projected 2026 Revenue Outlook of $1,080 to $1,175 Million\u2014",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000168006226000003/acmr-2025revflashprfinal_v.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1080000000.0,
+          "high": 1175000000.0,
+          "action": "INITIATE",
+          "evidence_span": "ACM also announced that it expects revenue for the full year 2026 to be in the range of $1,080 million to $1,175 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000168006226000003/acmr-2025revflashprfinal_v.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1080000000.0,
+          "high": 1175000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "\u201cLooking ahead, we maintain our 2026 revenue outlook of $1.08 billion to $1.175 billion, representing 21-30% growth.\u201d Dr.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026011998/acmr-q42025xearningsreleas.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "ACM Reaffirms 2026 Revenue Outlook",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026027353/a427_acmrprelimq12026reven.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1080000000.0,
+          "high": 1175000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "ACM is maintaining its revenue guidance range of $1.08 billion to $1.175 billion for fiscal year 2026.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026031688/acmr-q12026xearningsreleas.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "ide an update on our order backlog at the end of September.Based on current order trends, business momentum and other operating factors, we continue to maintain our full-year 2026 revenue guidance in the range of RMB 8.20 billion to RMB 8.80 billion.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026044506/recordsofinvestorrelatio.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1125000000.0,
+          "high": 1175000000.0,
+          "action": "RAISE",
+          "evidence_span": " per share, also exclude unrealized gain on short-term investments and its impact to net income attributable to non-controlling interests. Exhibit 99.1 Outlook AC M has raised its revenue guidance range to $1.125 billion to $1.175 billion fo r fiscal year 2026, from the prior range of $1.08 billion to $1.175 billion. This expectation is based on ACM management\u2019s current assessment of the continuing impact from international trade policy, together with various expected spending scenarios of key customers,",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1680062/000162828026054581/acmr-q22026xearningsreleas.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "ANDG",
+      "finding": "No numeric, period, role or scope defect identified in the five evidence spans.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 213000000.0,
+          "high": 220000000.0,
+          "action": "NONE",
+          "evidence_span": "6 Guidance: Revenue expected to be approximately $955 million to $970 million, a growth rate of approximately 14% to 15%, including inorganic revenue of approximately $33 million; Adjusted EBITDA projected at $213 million to $220 million with margins of approximately 22% to 23%.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2065708/000119312526110698/d52201dex991.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 955000000.0,
+          "high": 970000000.0,
+          "action": "NONE",
+          "evidence_span": "2026 Guidance: Revenue expected to be approximately $955 million to $970 million, a growth rate of",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2065708/000119312526110698/d52201dex991.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 980000000.0,
+          "high": 1000000000.0,
+          "action": "NONE",
+          "evidence_span": "ely $190 million to $205 million, equating to a growth rate of approximately 13%, with a projected net loss and negative EPS due to seasonality. \u2022 Updated 2026 Full-Year Guidance: Revenue expected to be in the range of approximately $980 million to $1 billion, equating to a growth rate of approximately 18%, including inorganic ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2065708/000119312526219512/d320761dex991.htm"
+        },
+        {
+          "index": 3,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 225000000.0,
+          "high": 250000000.0,
+          "action": "NONE",
+          "evidence_span": " Looking Ahead \u2022 Reaffirm Full-Year 2026 Guidance: Revenue expected to be in the range of approximately $980 million to $1 billion, equating to a growth rate of approximately 18%. Adjusted EBITDA projected in the range of approximately $225 million to $250 million with Adjusted EBITDA margins in the range of approximately 23% to 25%.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2065708/000119312526346839/d122909dex991.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 980000000.0,
+          "high": 1000000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": " operating leverage inherent in Andersen\u2019s scalable model as revenue outpaced expenses during the six months ended June 30, 2026. Looking Ahead \u2022 Reaffirm Full-Year 2026 Guidance: Revenue expected to be in the range of approximately $980 million to $1 billion, equating to a growth rate of approximately 18%. ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2065708/000119312526346839/d122909dex991.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "APPF",
+      "finding": "Prior rounded midpoint removed. No new value defect; increasing-range action remains implicit rather than RAISE.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 920000000.0,
+          "high": 940000000.0,
+          "action": "NONE",
+          "evidence_span": ", or 11.9% of revenue, in fiscal year 2023. Financial Outlook Based o n information available as of January 30, 2025, AppFolio's outlook for fiscal year 2025 follows: \u2022 Full year revenue is expected to be in the range of $920 million to $940 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1433195/000143319525000005/appfq42024exhibit991.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 920000000.0,
+          "high": 940000000.0,
+          "action": "NONE",
+          "evidence_span": "$43 million, or 22.9% of revenue, in Q1 2024. Financial Outlook Based o n i nformation available as of April 24, 2025, AppFolio's outlook for fiscal year 2025 follows: \u2022 Full year revenue is expected to be in the range of $920 million to $940 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1433195/000143319525000053/appfq12025exhibit991.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 935000000.0,
+          "high": 945000000.0,
+          "action": "NONE",
+          "evidence_span": " $51 million, or 25.8% of revenue, in Q2 2024. Financial Outlook Based o n i nformation available as of July 31, 2025, AppFolio's outlook for fiscal year 2025 follows: \u2022 Full year revenue is expected to be in the range of $935 million to $945 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1433195/000143319525000103/appfq22025exhibit991.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 945000000.0,
+          "high": 950000000.0,
+          "action": "NONE",
+          "evidence_span": "8 million, or 28.1% of revenue, in Q3 2024. Financial Outlook Based o n i nformation available as of October 30, 2025, AppFolio's outlook for fiscal year 2025 follows: \u2022 Full year revenue is expected to be in the range of $945 million to $950 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1433195/000143319525000140/appfq32025exhibit991.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1100000000.0,
+          "high": 1120000000.0,
+          "action": "NONE",
+          "evidence_span": "to $188 million, or 23.7% of revenue in 2024. Financial Outlook Based on information available as of January 29, 2026, AppFolio's outlook for fiscal year 2026 follows: \u2022 Full year revenue is expected to be in the range of $1,100 million to $1,120 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1433195/000143319526000006/appfq42025exhibit991.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1110000000.0,
+          "high": 1125000000.0,
+          "action": "NONE",
+          "evidence_span": "mpany's Class A common stock for $125 million. Financial Outlook Based on i nformation available as of April 23, 2026, AppFolio's outlook for fiscal year 2026 follows: \u2022 Full year revenue range is increasing to $1.110 - $1.125 billion.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1433195/000143319526000021/appfq12026exhibit991.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1117000000.0,
+          "high": 1127000000.0,
+          "action": "NONE",
+          "evidence_span": " to $53 million, or 22.3% of revenue in Q2 2025. Financial Outlook Based on information available as of July 23, 2026, AppFolio's outlook for fiscal year 2026 follows: \u2022 Full year revenue range is increasing to $1.117 - $1.127 billion.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1433195/000143319526000056/appfq22026exhibit991.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "ATMU",
+      "finding": "Numeric/period ownership consistent. Explicit heading actions are incompletely propagated; no clean action-concordance claim.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "eps",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 2.35,
+          "high": 2.6,
+          "action": "INITIATE",
+          "evidence_span": "ny is providing guidance for year 2025 as follows: \u2022 Revenue to be in the range of $1,670 million to $1,735 million \u2022 Adjusted EBITDA margin to be in the range of 19.0% to 20.0% \u2022 Adjusted earnings per share in the range of $2.35 to $2.60",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196325000027/atmu2024q48-kex991.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 1670000000.0,
+          "high": 1735000000.0,
+          "action": "INITIATE",
+          "evidence_span": "for the fourth quarter and $115 million for the full year 2025 Outlook The c ompany is providing guidance for year 2025 as follows: \u2022 Revenue to be in the range of $1,670 million to $1,735 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196325000027/atmu2024q48-kex991.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 1670000000.0,
+          "high": 1735000000.0,
+          "action": "NONE",
+          "evidence_span": "\u2022 Adjusted free cash fl ow was $20 million 2025 Outlook The c ompany is reaffirming guidance for year 2025 as follows: \u2022 Revenue to be in the range of $1,670 million to $1,735 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196325000072/atmu2025q18-kex991.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 1685000000.0,
+          "high": 1735000000.0,
+          "action": "NONE",
+          "evidence_span": "$44 million \u2022 Adjusted free cash fl ow was $36 million 2025 Outlook The company is raising guidance for year 2025 as follows: \u2022 Revenue to be in the range of $1,685 million to $1,735 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196325000119/atmu2025q28-kex991.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 1720000000.0,
+          "high": 1745000000.0,
+          "action": "NONE",
+          "evidence_span": "$82 million \u2022 Adjusted free cash fl ow was $72 million 2025 Outlook The company is raising guidance for year 2025 as follows: \u2022 Revenue to be in the range of $1,720 million to $1,745 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196325000132/atmu2025q38-kex991.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1945000000.0,
+          "high": 2015000000.0,
+          "action": "INITIATE",
+          "evidence_span": "including commercial and industrial HVAC, data centers and power generation environments. 2026 Outlook The c ompany is providing guidance for year 2026 as follows: \u2022 Total company revenue to be in the range of $1,945 million to $2,015 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196326000012/atmu2025q4annual8-kex991.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1945000000.0,
+          "high": 2015000000.0,
+          "action": "NONE",
+          "evidence_span": "ata centers and power generation environments through its Koch Filter \u00ae brand . 2026 Outlook The company is reaffirming guidance for the full year 2026 as follows: \u2022 Total company Net sales to be in the range of $1,945 million to $2,015 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196326000039/atmu2026q1quarterly8-kex991.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1975000000.0,
+          "high": 2030000000.0,
+          "action": "NONE",
+          "evidence_span": "$78 million \u2022 Adjusted free cash fl ow was $67 million 2026 Outlook The company is raising guidance for the full year 2026 as follows: \u2022 Total company Net sales expected to be in the range of $1,975 million to $2,030 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1921963/000192196326000065/atmu2026q2quarterly8-kex991.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "AUPH",
+      "finding": "Numeric, period and scope evidence consistent; duplicate qualitative and numeric reaffirmations retained.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 250000000.0,
+          "high": 260000000.0,
+          "action": "INITIATE",
+          "evidence_span": "For 2025, Aurinia expects total revenue in the range of $250 million to $260 million and net product sales in the range of $240 million to $250 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062025000009/exhibit991_q42024pressrele.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Full Year 2025 Total Revenue and Net Product Sales Guidance For 2025, Aurinia is reiterating its established ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062025000047/exhibit991_q12025earningsr.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 250000000.0,
+          "high": 260000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "For 2025, Aurinia is reiterating its established total revenue guidance in the range of $250 million to $260 million and net product sales guidance in the range of $240 million to $250 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062025000047/exhibit991_q12025earningsr.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 315000000.0,
+          "high": 325000000.0,
+          "action": "INITIATE",
+          "evidence_span": "For 2026, Aurinia expects total revenue of $315 million to $325 million, up 11% to 15% compared to 2025, and net product sales of $305 million to $315 million, up 12% to 16% compared to 2025.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062026000015/exhibit991_q42025earningsr.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 315000000.0,
+          "high": 325000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "Aurinia reiterates its guidance for 2026 total revenue of $315 million to $325 million, up 11% to 15% compared to 2025, and 2026 net product sales of $305 million to $315 million, up 12% to 16% compared to 2025.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062026000048/exhibit991_q12026earningsr.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "2026 Total Revenue and Net Product Sales Guidance Aurinia reiterates its guidance for 2026 ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062026000048/exhibit991_q12026earningsr.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 315000000.0,
+          "high": 325000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "Aurinia reiterates its guidance for 2026 total revenue of $315 million to $325 million, up 11% to 15% compared to 2025, and 2026 net product sales of $305 million to $315 million, up 12% to 16% compared to 2025.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062026000059/exhibit991_q22026earningsr.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "2026 Total Revenue and Net Product Sales Guidance Aurinia reiterates its guidance for 2026 ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1600620/000160062026000059/exhibit991_q22026earningsr.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "BX",
+      "finding": "Policy evidence now present: issuer explicitly does not provide quarterly/annual guidance. Artifact supplies URL, date and evidence span; independent full-document withdrawal search not completed.",
+      "reviewed_records": [],
+      "policy_evidence": {
+        "evidence_span": "on a quarterly basis may be difficult, which could in turn lead to large adverse movements or general increased volatility in the price of our common stock. We do not provide guidance regarding our expected quarterly and annual operating results. The lack of guidance may affect the expectations of public market analysts and could cause incre",
+        "source": "SEC EDGAR",
+        "source_timestamp": "2025-02-28T00:00:00Z",
+        "source_url": "https://www.sec.gov/Archives/edgar/data/1393818/000119312525042469/d912273d10k.htm",
+        "standing_no_guidance_policy": true,
+        "ticker": "BX",
+        "verified": true
+      }
+    },
+    {
+      "ticker": "CDNA",
+      "finding": "Previous current/prior defects resolved. Historical withdrawals now quoted prior. Repeated expectation statements incorrectly assert INITIATE; batch normalizes unproven initiation.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 370000000.0,
+          "high": 370000000.0,
+          "action": "NONE",
+          "evidence_span": "CareDx anticipates revenue of $370 million during 2025.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000119312525004941/d909876dex991.htm"
+        },
+        {
+          "index": 1,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 29000000.0,
+          "high": 33000000.0,
+          "action": "INITIATE",
+          "evidence_span": "CareDx expects full year 2025 adjusted EBITDA gain to be in the range of $29 million to $33 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000007/cdna-20250226_earningsrele.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 365000000.0,
+          "high": 375000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Expects Full Year 2025 Revenue of $365 Million to $375 Million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000007/cdna-20250226_earningsrele.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2023",
+          "role": "QUOTED_PRIOR",
+          "low": null,
+          "high": null,
+          "action": "NONE",
+          "evidence_span": "our prior decision to withdraw our revenue guidance for fiscal 2023",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000012/cdna-20241231.htm"
+        },
+        {
+          "index": 4,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 29000000.0,
+          "high": 33000000.0,
+          "action": "NONE",
+          "evidence_span": "Reaffirms full-year 2025 guidance of $365 million to $375 million in revenue and adjusted EBITDA of $29 million to $33 million, and 2027 target of $500 million in ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000036/cdna-20250430_earningsrele.htm"
+        },
+        {
+          "index": 5,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 29000000.0,
+          "high": 33000000.0,
+          "action": "INITIATE",
+          "evidence_span": "CareDx expects full year 2025 adjusted EBITDA gain to be in the range of $29 million to $33 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000036/cdna-20250430_earningsrele.htm"
+        },
+        {
+          "index": 6,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 29000000.0,
+          "high": 33000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company continues to expect full year 2025 adjusted EBITDA to be in the range of $29 million to $33 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000045/cdna-20250806_earningsrele.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2023",
+          "role": "QUOTED_PRIOR",
+          "low": null,
+          "high": null,
+          "action": "NONE",
+          "evidence_span": "our prior decision to withdraw our revenue guidance for fiscal 2023",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000046/cdna-20250630.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 367000000.0,
+          "high": 373000000.0,
+          "action": "INITIATE",
+          "evidence_span": "For the full year 2025, CareDx now expects revenue to be in the range of $367 million to $373 million, compared to the $365 million to $375 million range that was previously disclosed.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000045/cdna-20250806_earningsrele.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 367000000.0,
+          "high": 373000000.0,
+          "action": "NONE",
+          "evidence_span": "Narrows Full Year 2025 Revenue Guidance to $367 Million to $373 Million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000045/cdna-20250806_earningsrele.htm"
+        },
+        {
+          "index": 10,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 35000000.0,
+          "high": 39000000.0,
+          "action": "RAISE",
+          "evidence_span": "Raised 2025 revenue guidance to $372 million to $376 million and raised 2025 adjusted EBITDA guidance to $35 million to $39 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000062/cdna-20251104_earningsrele.htm"
+        },
+        {
+          "index": 11,
+          "metric": "revenue",
+          "fiscal_period": "FY2023",
+          "role": "QUOTED_PRIOR",
+          "low": null,
+          "high": null,
+          "action": "NONE",
+          "evidence_span": "our prior decision to withdraw our revenue guidance for fiscal 2023",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000063/cdna-20250930.htm"
+        },
+        {
+          "index": 12,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 372000000.0,
+          "high": 376000000.0,
+          "action": "RAISE",
+          "evidence_span": "Raised 2025 Revenue Guidance to $372 Million to $376 Million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723425000062/cdna-20251104_earningsrele.htm"
+        },
+        {
+          "index": 13,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 30000000.0,
+          "high": 45000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company expects full year 2026 adjusted EBITDA to be in the range of $30 million to $45 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723426000015/cdna-2026224_earningsrelea.htm"
+        },
+        {
+          "index": 14,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 420000000.0,
+          "high": 444000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Expects Full Year 2026 Revenue of $420 Million to $444 Million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723426000015/cdna-2026224_earningsrelea.htm"
+        },
+        {
+          "index": 15,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 43000000.0,
+          "high": 57000000.0,
+          "action": "INITIATE",
+          "evidence_span": "evenue to be in the range of $447 million to $465 million, compared to the $420 million to $444 million range that was previously disclosed. The Company now expects full year 2026 adjusted EBITDA to be in the range of $43 million to $57 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000110465926050317/tm2611749d3_ex99-1.htm"
+        },
+        {
+          "index": 16,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 66000000.0,
+          "high": 78000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company now expects full year 2026 adjusted EBITDA to be in the range of $66 million to $78 million, compared to its previously disclosed range of $43 million to $57 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723426000045/cdna-20260730_earningsrele.htm"
+        },
+        {
+          "index": 17,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 490000000.0,
+          "high": 500000000.0,
+          "action": "RAISE",
+          "evidence_span": "Raises 2026 Revenue Guidance to $490 Million to $500 Million and Raises 2026 AEBITDA Guidance to $66 Million to $78 Million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1217234/000121723426000045/cdna-20260730_earningsrele.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "CECO",
+      "finding": "FAIL: 11 results-quarter headline becomes guidance; 15 prior EBITDA range loses prior ownership at page break. Original SEC source confirms 115\u2013135 is previous, not current, guidance.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 90000000.0,
+          "high": 100000000.0,
+          "action": "NONE",
+          "evidence_span": " maintains its previously announced full year 2025 outlook which includes expected Revenue of $700 to $750 million, up approximately 30 percent at the midpoint year over year, and Adjusted EBITDA of $90 to $100 million, up approximately 50 percent at the midpoint versus 2024.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025006565/ceco-ex99_1.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 700000000.0,
+          "high": 750000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "The Company maintains its previously announced full year 2025 outlook which includes expected Revenue of $700 to $750 million, up approximately 30 percent at the midpoint year over year, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025006565/ceco-ex99_1.htm"
+        },
+        {
+          "index": 2,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 90000000.0,
+          "high": 100000000.0,
+          "action": "NONE",
+          "evidence_span": " maintains its previously announced full year 2025 outlook which includes expected Revenue of $700 to $750 million, up approximately 30 percent at the midpoint year over year, and Adjusted EBITDA of $90 to $100 million, up approximately 50 percent at the midpoint versus 2024.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025026061/ceco-ex99_1.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 700000000.0,
+          "high": 750000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "The Company maintains its previously announced full year 2025 outlook which includes expected Revenue of $700 to $750 million, up approximately 30 percent at the midpoint year over year, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025026061/ceco-ex99_1.htm"
+        },
+        {
+          "index": 4,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 90000000.0,
+          "high": 100000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "25 outlook, the Company maintains its expectation to deliver Revenue of $700 to $750 million, up approximately 30 percent at the midpoint year and maintains its expected range for Adjusted EBITDA of $90 to $100 million, up approximately 50 percent at the midpoint versus 2024.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025059552/ceco-ex99_1.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 700000000.0,
+          "high": 750000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "For the full year 2025 outlook, the Company maintains its expectation to deliver Revenue of $700 to $750 million, up approximately 30 percent at the midpoint year and maintains its expected range for ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025059552/ceco-ex99_1.htm"
+        },
+        {
+          "index": 6,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 90000000.0,
+          "high": 100000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "The Company maintains its expected range for adjusted EBITDA of between $90 to $100 million and a ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025099380/ceco-ex99_1.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 725000000.0,
+          "high": 775000000.0,
+          "action": "RAISE",
+          "evidence_span": "For the full year 2025 outlook, the Company has raised its revenue outlook to $725 to $775 million, up approximately 35 percent at the midpoint.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000095017025099380/ceco-ex99_1.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 725000000.0,
+          "high": 775000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "The Company maintains its revenue outlook of $725 to $775 million, up approximately 35 percent at the midpoint and its expected range for ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312525252209/ceco-ex99_1.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Continued Strong Orders and Revenue Growth Headline Multiple Performance Records Reaffirms 2025 Full Year Outlook and Introduces 2026 Outlook",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312525252209/ceco-ex99_1.htm"
+        },
+        {
+          "index": 10,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 850000000.0,
+          "high": 950000000.0,
+          "action": "NONE",
+          "evidence_span": "The Company introduced its 2026 full year outlook with revenue between $850 and $950 million, up approximately 20 percent at the midpoint of the range, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312525252209/ceco-ex99_1.htm"
+        },
+        {
+          "index": 11,
+          "metric": "revenue",
+          "fiscal_period": "Q3FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "EX-99.1 2 ceco-ex99_1.htm EX-99.1 EX-99.1 CECO ENVIRONMENTAL REPORTS THIRD QUARTER 2025 RESULTS Continued Strong Orders and Revenue Growth Headline Multiple Performance Records Reaffirms 2025 Full Year Outlook and Introduces 2026 Outlook",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312525252209/ceco-ex99_1.htm"
+        },
+        {
+          "index": 12,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 925000000.0,
+          "high": 975000000.0,
+          "action": "RAISE",
+          "evidence_span": "The Company raises its 2026 full year outlook to reflect revenue between $925 and $975 million, up approximately 25 percent at the midpoint of the range, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312526065166/ceco-ex99_1.htm"
+        },
+        {
+          "index": 13,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "\u2022 Raising FY\u201926 outlook for Orders, Revenue and Adj.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000110465926018825/tm267105d1_ex99-2.htm"
+        },
+        {
+          "index": 14,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "QUOTED_PRIOR",
+          "low": 850000000.0,
+          "high": 950000000.0,
+          "action": "NONE",
+          "evidence_span": " the range, and Adjusted EBITDA between $115 and $135 million, up approximately 40 percent at the midpoint of the range. The updated outlook compares with the previous guidance of revenues between $850 and $950 million, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312526065166/ceco-ex99_1.htm"
+        },
+        {
+          "index": 15,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 115000000.0,
+          "high": 135000000.0,
+          "action": "NONE",
+          "evidence_span": "million, and adjusted EBITDA between $115 and $135 million. The Company reiterates its full year ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312526183496/ceco-ex99_1.htm"
+        },
+        {
+          "index": 16,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "QUOTED_PRIOR",
+          "low": 925000000.0,
+          "high": 975000000.0,
+          "action": "NONE",
+          "evidence_span": "25 and increases full year Adjusted EBITDA between $120 and $140 million, up approximately 45 percent at the midpoint of the range. This compares to the previous guidance range of revenue between $925 and $975 million, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312526183496/ceco-ex99_1.htm"
+        },
+        {
+          "index": 17,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 940000000.0,
+          "high": 1000000000.0,
+          "action": "RAISE",
+          "evidence_span": "The Company raises its full year outlook for 2026 to reflect revenue between $940 million and $1 billion, up approximately 25 percent at the midpoint of the range when compared to 2025 and increases full year ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312526183496/ceco-ex99_1.htm"
+        },
+        {
+          "index": 18,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 200000000.0,
+          "high": 225000000.0,
+          "action": "NONE",
+          "evidence_span": "d record pipeline and backlog. The updated full year consolidated 2026 outlook is: \u2022 Revenue between $1.300 billion and $1.375 billion, up from $1.275 billion and $1.375 billion \u2022 Adjusted EBITDA between $200 million and $225 million, up from $195 million and $225 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312526341191/ceco-ex99_1.htm"
+        },
+        {
+          "index": 19,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 1300000000.0,
+          "high": 1375000000.0,
+          "action": "NONE",
+          "evidence_span": "mpany is raising its full-year 2026 outlook as a result of the strong first half performance and record pipeline and backlog. The updated full year consolidated 2026 outlook is: \u2022 Revenue between $1.300 billion and $1.375 billion, up from $1.275 billion and $1.375 billion",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/3197/000119312526341191/ceco-ex99_1.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "DXCM",
+      "finding": "Percentage interval and directional action repairs visible. No new numeric or period defect in 21 spans.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 4600000000.0,
+          "high": 4600000000.0,
+          "action": "NONE",
+          "evidence_span": "For 2025, Dexcom currently anticipates total revenue of $4.60 billion, representing expected growth of approximately 14% over 2024.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000004/dxcm991_1132025.htm"
+        },
+        {
+          "index": 1,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 0.64,
+          "high": 0.65,
+          "action": "NONE",
+          "evidence_span": "venue, Non-GAAP Gross Profit Margin, Non-GAAP Operating Margin, and establishing Adjusted EBITDA Margin guidance at the following levels: \u2022 Revenue of $4.60 billion (14% growth) \u2022 Non-GAAP Gross Profit Margin of approximately 64% - 65%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000029/dxcm12312024-exhibit991.htm"
+        },
+        {
+          "index": 2,
+          "metric": "operating_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 0.21,
+          "high": 0.21,
+          "action": "NONE",
+          "evidence_span": "rgin, and establishing Adjusted EBITDA Margin guidance at the following levels: \u2022 Revenue of $4.60 billion (14% growth) \u2022 Non-GAAP Gross Profit Margin of approximately 64% - 65% \u2022 Non-GAAP Operating Margin of approximately 21%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000029/dxcm12312024-exhibit991.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Dexcom is reiterating fiscal year 2025 guidance for Revenue, ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000029/dxcm12312024-exhibit991.htm"
+        },
+        {
+          "index": 4,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 0.62,
+          "high": 0.62,
+          "action": "NONE",
+          "evidence_span": "Gross Profit Margin, and reiterating guidance for Revenue, Non-GAAP Operating Margin, and Adjusted EBITDA Margin at the following levels: \u2022 Revenue of $4.60 billion (14% growth) \u2022 Non-GAAP Gross Profit Margin of approximately 62%. The reduction relative to prior guidance primarily results from incremental costs related to near-term supply dynamics that were previously disclosed as the company reestablishes optimal finished goods inventory levels.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000111/dxcm03312025-exhibit991.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Dexcom is updating fiscal year 2025 guidance for Non-GAAP Gross Profit Margin, and reiterating guidance for Revenue, ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000111/dxcm03312025-exhibit991.htm"
+        },
+        {
+          "index": 6,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Dexcom is raising fiscal year 2025 guidance for Revenue, and reiterating guidance for Non-GAAP Gross Profit Margin, ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000241/dxcm06302025-exhibit991.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Dexcom is raising fiscal year 2025 guidance for Revenue, and reiterating guidance for ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000241/dxcm06302025-exhibit991.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 4600000000.0,
+          "high": 4625000000.0,
+          "action": "NONE",
+          "evidence_span": " fiscal year 2025 guidance for Revenue, and reiterating guidance for Non-GAAP Gross Profit Margin, Non-GAAP Operating Margin, and Adjusted EBITDA Margin at the following levels: \u2022 Revenue of $4.600 - $4.625 billion (14-15% growth)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000241/dxcm06302025-exhibit991.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 4630000000.0,
+          "high": 4650000000.0,
+          "action": "NONE",
+          "evidence_span": "ing fiscal year 2025 guidance for Revenue, and updating guidance for Non-GAAP Gross Profit Margin, Non-GAAP Operating Margin, and Adjusted EBITDA Margin at the following levels: \u2022 Revenue of $4.630 - $4.650 billion (approximately 15% growth)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000278/dxcm09302025-exhibit991.htm"
+        },
+        {
+          "index": 10,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Dexcom is raising fiscal year 2025 guidance for Revenue, and updating guidance for ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355725000278/dxcm09302025-exhibit991.htm"
+        },
+        {
+          "index": 11,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 5160000000.0,
+          "high": 5250000000.0,
+          "action": "NONE",
+          "evidence_span": "For 2026, Dexcom currently anticipates total revenue of $5.16 - $5.25 billion, representing expected growth of approximately 11-13% over 2025.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000003/dxcm20260112-exhibit991.htm"
+        },
+        {
+          "index": 12,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 0.63,
+          "high": 0.64,
+          "action": "NONE",
+          "evidence_span": "fit Margin, Non-GAAP Operating Margin, and establishing Adjusted EBITDA Margin guidance at the following levels: \u2022 Revenue of $5.16 - $5.25 billion (approximately 11-13% growth) \u2022 Non-GAAP Gross Profit Margin of approximately 63-64%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000025/dxcm12312025-exhibit991.htm"
+        },
+        {
+          "index": 13,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Dexcom is reiterating fiscal year 2026 guidance for Revenue, ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000025/dxcm12312025-exhibit991.htm"
+        },
+        {
+          "index": 14,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 5160000000.0,
+          "high": 5250000000.0,
+          "action": "NONE",
+          "evidence_span": "erating fiscal year 2026 guidance for Revenue, Non-GAAP Gross Profit Margin, Non-GAAP Operating Margin, and establishing Adjusted EBITDA Margin guidance at the following levels: \u2022 Revenue of $5.16 - $5.25 billion (approximately 11-13% growth)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000025/dxcm12312025-exhibit991.htm"
+        },
+        {
+          "index": 15,
+          "metric": "operating_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Dexcom is raising fiscal year 2026 guidance for Non-GAAP Operating Margin and Adjusted EBITDA Margin, and reiterating guidance for ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000072/dxcm3312026-exhibit991.htm"
+        },
+        {
+          "index": 16,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Dexcom is raising fiscal year 2026 guidance for Non-GAAP Operating Margin and Adjusted EBITDA Margin, and reiterating guidance for Revenue and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000072/dxcm3312026-exhibit991.htm"
+        },
+        {
+          "index": 17,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 5160000000.0,
+          "high": 5250000000.0,
+          "action": "NONE",
+          "evidence_span": "iscal year 2026 guidance for Non-GAAP Operating Margin and Adjusted EBITDA Margin, and reiterating guidance for Revenue and Non-GAAP Gross Profit Margin at the following levels: \u2022 Revenue of $5.16 - $5.25 billion (approximately 11-13% growth)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000072/dxcm3312026-exhibit991.htm"
+        },
+        {
+          "index": 18,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Dexcom is raising the midpoint of fiscal year 2026 Revenue guidance and increasing fiscal year 2026 guidance for Non-GAAP Gross Profit Margin, ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000142/dxcm06302026-exhibit991.htm"
+        },
+        {
+          "index": 19,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Dexcom is raising the midpoint of fiscal year 2026 Revenue guidance and increasing fiscal year 2026 guidance for ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000142/dxcm06302026-exhibit991.htm"
+        },
+        {
+          "index": 20,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 5180000000.0,
+          "high": 5250000000.0,
+          "action": "NONE",
+          "evidence_span": "r 2026 Revenue guidance and increasing fiscal year 2026 guidance for Non-GAAP Gross Profit Margin, Non-GAAP Operating Margin, and Adjusted EBITDA Margin to the following levels: \u2022 Revenue of $5.18 - $5.25 billion (approximately 11-13% growth)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1093557/000109355726000142/dxcm06302026-exhibit991.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "ESI",
+      "finding": "FAIL: 5 prior quarter EBITDA interval inherits following annual period. Expectation statements also overstate initiation.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 520000000.0,
+          "high": 540000000.0,
+          "action": "NONE",
+          "evidence_span": "Introduces 2025 full year financial guidance for Adjusted EBITDA in the range of $520 million to $540 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000020/aearningsreleaseex99120241.htm"
+        },
+        {
+          "index": 1,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 520000000.0,
+          "high": 540000000.0,
+          "action": "INITIATE",
+          "evidence_span": "For the full year 2025, the Company expects adjusted EBITDA to be in the range of $520 million to $540 million and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000020/aearningsreleaseex99120241.htm"
+        },
+        {
+          "index": 2,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 520000000.0,
+          "high": 540000000.0,
+          "action": "NONE",
+          "evidence_span": "Without more clarity or additional data points, while considering the easing FX headwinds from a weakening US dollar, our initial full year 2025 adjusted EBITDA guidance of $520 million to $540 million remains our best estimate of earnings potential for this year, albeit with more uncertainty given the risk of further tariffs escalation or implementation.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000038/aearningsreleaseex99120253.htm"
+        },
+        {
+          "index": 3,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 520000000.0,
+          "high": 540000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company expects full year 2025 adjusted EBITDA to be in the range of $520 million to $540 million and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000038/aearningsreleaseex99120253.htm"
+        },
+        {
+          "index": 4,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "In that context, we are increasing our adjusted EBITDA guidance for the full year of 2025.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000069/esiprupdatedguidance20257.htm"
+        },
+        {
+          "index": 5,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "QUOTED_PRIOR",
+          "low": 120000000.0,
+          "high": 125000000.0,
+          "action": "NONE",
+          "evidence_span": "and Revised Guidance The Company expects net income in the range of $45 million to $55 million and adjusted EBITDA of approximately $135 million this quarter relative to its prior adjusted EBITDA guidance range of $120 million to $125 million. The Company has also increased its full year 2025 ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000069/esiprupdatedguidance20257.htm"
+        },
+        {
+          "index": 6,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 530000000.0,
+          "high": 550000000.0,
+          "action": "RAISE",
+          "evidence_span": "The Company has increased its full year adjusted EBITDA guidance to a range of $530 million to $550 million from its prior range of $520 million to $540 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000069/esiprupdatedguidance20257.htm"
+        },
+        {
+          "index": 7,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 530000000.0,
+          "high": 550000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company expects full year 2025 adjusted EBITDA to be in the range of $530 million to $550 million and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000075/aearningsreleaseex99120256.htm"
+        },
+        {
+          "index": 8,
+          "metric": "ebitda",
+          "fiscal_period": "Q3FY2025",
+          "role": "CURRENT",
+          "low": 140000000.0,
+          "high": 145000000.0,
+          "action": "INITIATE",
+          "evidence_span": "In addition, the Company expects third quarter 2025 adjusted EBITDA to be in the range of $140 million to $145 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000075/aearningsreleaseex99120256.htm"
+        },
+        {
+          "index": 9,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 545000000.0,
+          "high": 550000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company now expects full year 2025 adjusted EBITDA to be between $545 million and $550 million and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071425000084/aearningsreleaseex99120259.htm"
+        },
+        {
+          "index": 10,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 650000000.0,
+          "high": 670000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Inclusive of the expected contributions of EFC and Micromax, we expect 2026 adjusted EBITDA to be between $650 million and $670 million and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071426000017/aearningsreleaseex99120251.htm"
+        },
+        {
+          "index": 11,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 650000000.0,
+          "high": 670000000.0,
+          "action": "NONE",
+          "evidence_span": "Introduces 2026 full year financial guidance for Adjusted EBITDA in the range of $650 million to $670 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071426000017/aearningsreleaseex99120251.htm"
+        },
+        {
+          "index": 12,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 665000000.0,
+          "high": 685000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company now expects full year 2026 adjusted EBITDA to be in the range of $665 million to $685 million, inclusive of expected contributions from the Micromax and EFC acquisitions on a full-year basis and assuming current exchange rates and metal prices, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071426000039/aearningsreleaseex99120263.htm"
+        },
+        {
+          "index": 13,
+          "metric": "ebitda",
+          "fiscal_period": "Q2FY2026",
+          "role": "CURRENT",
+          "low": 155000000.0,
+          "high": 170000000.0,
+          "action": "INITIATE",
+          "evidence_span": "In addition, the Company expects second quarter 2026 adjusted EBITDA to be between $155 million and $170 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071426000039/aearningsreleaseex99120263.htm"
+        },
+        {
+          "index": 14,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 690000000.0,
+          "high": 710000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The Company now expects full year 2026 adjusted EBITDA to be in the range of $690 million to $710 million, inclusive of expected contributions from the Micromax and EFC acquisitions on a full-year basis and assuming stable exchange rates and metal prices, and an ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071426000063/aearningsreleaseex99120266.htm"
+        },
+        {
+          "index": 15,
+          "metric": "ebitda",
+          "fiscal_period": "Q3FY2026",
+          "role": "CURRENT",
+          "low": 180000000.0,
+          "high": 180000000.0,
+          "action": "INITIATE",
+          "evidence_span": "In addition, the Company expects third quarter 2026 adjusted EBITDA to be approximately $180 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1590714/000159071426000063/aearningsreleaseex99120266.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "ETON",
+      "finding": "Historical results and annual run-rate removed. Threshold-style guidance remains represented as a point under existing extractor convention; no exact-endpoint acceptance claim.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 110000000.0,
+          "high": 110000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Company expects full year 2026 revenue to exceed $110 million with an Adjusted EBITDA margin of over 30%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926009060/ex_889836.htm"
+        },
+        {
+          "index": 1,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 0.7,
+          "high": 0.7,
+          "action": "INITIATE",
+          "evidence_span": "The Company expects full year 2026 adjusted gross margin to exceed 70%.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926017063/ex_935862.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Raising full year revenue guidance - now expect 2026 ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926017063/ex_935862.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 120000000.0,
+          "high": 120000000.0,
+          "action": "RAISE",
+          "evidence_span": "The Company now expects 2026 revenues to exceed $120 million, an increase from prior guidance of $110 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926017063/ex_935862.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "QUOTED_PRIOR",
+          "low": 110000000.0,
+          "high": 110000000.0,
+          "action": "NONE",
+          "evidence_span": "Eton is off to a terrific start in 2026. Based on this strong year-to-date performance, we are raising our full year 2026 revenue guidance. We now expect more than $120 million of revenue, up from our prior guidance of $110 million,\u201d said Sean Brynjelsen, CEO of Eton Pharmaceuticals.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926017063/ex_935862.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 120000000.0,
+          "high": 120000000.0,
+          "action": "NONE",
+          "evidence_span": "Raising full year revenue guidance - now expect 2026 revenue to exceed $120 million, up from previous guidance of $110 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926017063/ex_935862.htm"
+        },
+        {
+          "index": 6,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 0.7,
+          "high": 0.7,
+          "action": "INITIATE",
+          "evidence_span": "The Company expects full year 2026 adjusted gross margin to exceed 70%, inclusive of the potential $4 million commercial milestone referred to above.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926027672/ex_974033.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Raising full year revenue guidance, with 2026 ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926027672/ex_974033.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 145000000.0,
+          "high": 145000000.0,
+          "action": "NONE",
+          "evidence_span": "Raising full year revenue guidance, with 2026 revenue now expected to exceed $145 million, up from previous guidance of more than $120 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926027672/ex_974033.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 145000000.0,
+          "high": 145000000.0,
+          "action": "RAISE",
+          "evidence_span": "The Company now expects 2026 revenues to exceed $145 million, an increase from prior guidance of more than $120 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1710340/000143774926027672/ex_974033.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "FLY",
+      "finding": "Numeric/period evidence consistent; expectation alone incorrectly asserts INITIATE.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 133000000.0,
+          "high": 145000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Firefly expects 2025 full-year revenue to be between $133 million and $145 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1860160/000119312525211266/fly-ex99_1.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 150000000.0,
+          "high": 158000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Firefly expects 2025 full-year revenue to be between $150 million and $158 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1860160/000119312525277565/fly-ex99_1.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 420000000.0,
+          "high": 450000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Firefly expects 2026 full-year revenue to be between $420 million and $450 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1860160/000119312526115970/fly-ex99_1.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 420000000.0,
+          "high": 450000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Firefly expects 2026 full-year revenue to be between $420 million and $450 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1860160/000186016026000008/fly-ex99_1.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 420000000.0,
+          "high": 450000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Firefly expects 2026 full-year revenue to be between $420 million and $450 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1860160/000186016026000022/fly-ex99_1.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "FROG",
+      "finding": "All 14 revenue records have consistent numeric and quarter/year evidence.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 499000000.0,
+          "high": 503000000.0,
+          "action": "NONE",
+          "evidence_span": "llion o Non-GAAP net income per diluted share between $0.15 and $0.17, assuming approximately 118 million weighted average diluted shares outstanding \u2022 Fiscal Year 2025 Outlook: o Revenue between $499.0 million to $503.0 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000095017025019881/frog-ex99_1.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "Q1FY2025",
+          "role": "CURRENT",
+          "low": 116000000.0,
+          "high": 118000000.0,
+          "action": "NONE",
+          "evidence_span": " discovery of thousands of publicly-exposed secrets and proactive community protection against exposure. First Quarter and Fiscal Year 2025 Outlook \u2022 First Quarter 2025 Outlook: o Revenue between $116.0 million and $118.0 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000095017025019881/frog-ex99_1.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 500000000.0,
+          "high": 505000000.0,
+          "action": "NONE",
+          "evidence_span": "llion o Non-GAAP net income per diluted share between $0.15 and $0.17, assuming approximately 120 million weighted average diluted shares outstanding \u2022 Fiscal Year 2025 Outlook: o Revenue between $500.0 million to $505.0 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000095017025066960/frog-ex99_1.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "Q2FY2025",
+          "role": "CURRENT",
+          "low": 121500000.0,
+          "high": 123500000.0,
+          "action": "NONE",
+          "evidence_span": " Chain State of the Union\u201d report, illuminating enterprise software management and security practices. Second Quarter and Fiscal Year 2025 Outlook \u2022 Second Quarter 2025 Outlook: o Revenue between $121.5 million and $123.5 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000095017025066960/frog-ex99_1.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 507000000.0,
+          "high": 510000000.0,
+          "action": "NONE",
+          "evidence_span": "llion o Non-GAAP net income per diluted share between $0.15 and $0.17, assuming approximately 122 million weighted average diluted shares outstanding \u2022 Fiscal Year 2025 Outlook: o Revenue between $507.0 million to $510.0 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000095017025105041/frog-ex99_1.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "Q3FY2025",
+          "role": "CURRENT",
+          "low": 127000000.0,
+          "high": 129000000.0,
+          "action": "NONE",
+          "evidence_span": "\u2022 Announced release of remote MCP server to enable agentic AI interaction with the JFrog Platform. 1 Third Quarter and Fiscal Year 2025 Outlook \u2022 Third Quarter 2025 Outlook: o Revenue between $127.0 million and $129.0 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000095017025105041/frog-ex99_1.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 523000000.0,
+          "high": 525000000.0,
+          "action": "NONE",
+          "evidence_span": "llion o Non-GAAP net income per diluted share between $0.18 and $0.20, assuming approximately 125 million weighted average diluted shares outstanding \u2022 Fiscal Year 2025 Outlook: o Revenue between $523 million to $525 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312525269563/frog-ex99_1.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "Q4FY2025",
+          "role": "CURRENT",
+          "low": 136500000.0,
+          "high": 138500000.0,
+          "action": "NONE",
+          "evidence_span": "\u2022 Announced appointment of Sigal Zarmi to JFrog\u2019s Board, effective November 1, 2025. 1 Fourth Quarter and Fiscal Year 2025 Outlook \u2022 Fourth Quarter 2025 Outlook: o Revenue between $136.5 million and $138.5 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312525269563/frog-ex99_1.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 623000000.0,
+          "high": 628000000.0,
+          "action": "NONE",
+          "evidence_span": "llion o Non-GAAP net income per diluted share between $0.20 and $0.22, assuming approximately 127 million weighted average diluted shares outstanding \u2022 Fiscal Year 2026 Outlook: o Revenue between $623 million to $628 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312526048726/frog-ex99_1.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "Q1FY2026",
+          "role": "CURRENT",
+          "low": 146000000.0,
+          "high": 148000000.0,
+          "action": "NONE",
+          "evidence_span": " \u2022 Announced appointment of Genefa Murphy as JFrog\u2019s Chief Marketing Officer, effective January 5, 2026. First Quarter and Fiscal Year 2026 Outlook \u2022 First Quarter 2026 Outlook: o Revenue between $146 million and $148 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312526048726/frog-ex99_1.htm"
+        },
+        {
+          "index": 10,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 628000000.0,
+          "high": 632000000.0,
+          "action": "NONE",
+          "evidence_span": "llion o Non-GAAP net income per diluted share between $0.23 and $0.25, assuming approximately 126 million weighted average diluted shares outstanding \u2022 Fiscal Year 2026 Outlook: o Revenue between $628 million to $632 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312526211940/frog-ex99_1.htm"
+        },
+        {
+          "index": 11,
+          "metric": "revenue",
+          "fiscal_period": "Q2FY2026",
+          "role": "CURRENT",
+          "low": 154000000.0,
+          "high": 156000000.0,
+          "action": "NONE",
+          "evidence_span": "\u2022 Launched JFrog Skills Registry alongside NVIDIA to bring a trust layer to AI agent skills. 1 Second Quarter and Fiscal Year 2026 Outlook \u2022 Second Quarter 2026 Outlook: o Revenue between $154 million and $156 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312526211940/frog-ex99_1.htm"
+        },
+        {
+          "index": 12,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 648000000.0,
+          "high": 652000000.0,
+          "action": "NONE",
+          "evidence_span": "llion o Non-GAAP net income per diluted share between $0.22 and $0.24, assuming approximately 130 million weighted average diluted shares outstanding \u2022 Fiscal Year 2026 Outlook: o Revenue between $648 million to $652 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312526337998/frog-ex99_1.htm"
+        },
+        {
+          "index": 13,
+          "metric": "revenue",
+          "fiscal_period": "Q3FY2026",
+          "role": "CURRENT",
+          "low": 164000000.0,
+          "high": 166000000.0,
+          "action": "NONE",
+          "evidence_span": "ity to Claude Code. \u2022 Delivered security solutions to >1M AI developers with Cursor Coding agent plugin. Third Quarter and Fiscal Year 2026 Outlook \u2022 Third Quarter 2026 Outlook: o Revenue between $164 million and $166 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1800667/000119312526337998/frog-ex99_1.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "GKOS",
+      "finding": "Current FY2026 role repaired; 25 records reviewed without another numeric/period defect.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 475000000.0,
+          "high": 485000000.0,
+          "action": "INITIATE",
+          "evidence_span": "The company expects 2025 net sales to be in the range of $475 million to $485 million based on the latest foreign currency exchange rates.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025001217/gkos-20250220xex99d1.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 475000000.0,
+          "high": 485000000.0,
+          "action": "NONE",
+          "evidence_span": "Introduced 2025 net sales guidance of $475 million to $485 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025001217/gkos-20250220xex99d1.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 475000000.0,
+          "high": 485000000.0,
+          "action": "NONE",
+          "evidence_span": "ort-Term Investments, and Restricted Cash $323.6 million as of December 31, 2024 (versus $267.2 million as of September 30, 2024) FY2025 Sales Guidance FY 2025 global consolidated revenues of $475 - $485 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025001217/gkos-20250220xex99d2.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "2025 Revenue Guidance Reaffirmed",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025005999/gkos-20250430xex99d2.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 475000000.0,
+          "high": 485000000.0,
+          "action": "NONE",
+          "evidence_span": ", Short-Term Investments, and Restricted Cash $303.4 million as of March 31, 2025 (versus $323.6 million as of December 31, 2024) FY2025 Sales Guidance FY 2025 global consolidated revenues of $475 - $485 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025005999/gkos-20250430xex99d2.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 475000000.0,
+          "high": 485000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "Reaffirmed 2025 net sales guidance of $475 million to $485 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025005999/gkos-20250430xex99d1.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 480000000.0,
+          "high": 486000000.0,
+          "action": "RAISE",
+          "evidence_span": "Raised 2025 net sales guidance to $480 million to $486 million, compared to $475 million to $485 million previously.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025009798/gkos-20250730xex99d1.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "2025 Revenue Guidance Raised to Reflect Strong Momentum",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025009798/gkos-20250730xex99d2.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 480000000.0,
+          "high": 486000000.0,
+          "action": "NONE",
+          "evidence_span": "ents, Short-Term Investments, and Restricted Cash $278.6 million as of June 30, 2025 (versus $303.4 million as of March 31, 2025) FY2025 Sales Guidance FY 2025 global consolidated revenues of $480 - $486 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000155837025009798/gkos-20250730xex99d2.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 490000000.0,
+          "high": 495000000.0,
+          "action": "NONE",
+          "evidence_span": ", Short-Term Investments, and Restricted Cash $277.5 million as of September 30, 2025 (versus $278.6 million as of June 30, 2025) FY2025 Sales Guidance FY 2025 global consolidated revenues of $490 - $495 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465925103722/gkos-20251029xex99d2.htm"
+        },
+        {
+          "index": 10,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "2025 Revenue Guidance Raised to Reflect Strong Momentum",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465925103722/gkos-20251029xex99d2.htm"
+        },
+        {
+          "index": 11,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 490000000.0,
+          "high": 495000000.0,
+          "action": "RAISE",
+          "evidence_span": "Raised 2025 net sales guidance to $490 million to $495 million, compared to $480 million to $486 million previously.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465925103722/gkos-20251029xex99d1.htm"
+        },
+        {
+          "index": 12,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 600000000.0,
+          "high": 620000000.0,
+          "action": "NONE",
+          "evidence_span": "Guidance FY 2025 global consolidated revenues of $490 - $495 million expected (versus $480 - $486 million previously) FY2026 Preliminary Sales Guidance FY 2026 global consolidated revenues of $600 - $620 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465925103722/gkos-20251029xex99d2.htm"
+        },
+        {
+          "index": 13,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 600000000.0,
+          "high": 620000000.0,
+          "action": "NONE",
+          "evidence_span": "Introduced preliminary 2026 net sales guidance of $600 million to $620 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465925103722/gkos-20251029xex99d1.htm"
+        },
+        {
+          "index": 14,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 600000000.0,
+          "high": 620000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "signed to meaningfully advance the standard of care and improve outcomes for patients suffering from chronic eye diseases.\u201d \u200b 2026 Revenue Guidance T he company reaffirms its 2026 net sales guidance range of $600 million to $620 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465926003321/gkos-20260113xex99d1.htm"
+        },
+        {
+          "index": 15,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 600000000.0,
+          "high": 620000000.0,
+          "action": "NONE",
+          "evidence_span": "2026 net sales guidance range of $600 million to $620 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465926003321/gkos-20260113xex99d1.htm"
+        },
+        {
+          "index": 16,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 600000000.0,
+          "high": 620000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "Reaffirmed 2026 net sales guidance of $600 million to $620 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465926016410/gkos-20260217xex99d1.htm"
+        },
+        {
+          "index": 17,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 600000000.0,
+          "high": 620000000.0,
+          "action": "NONE",
+          "evidence_span": "ort-Term Investments, and Restricted Cash $282.6 million as of December 31, 2025 (versus $277.5 million as of September 30, 2025) FY2026 Sales Guidance FY 2026 global consolidated revenues of $600 - $620 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465926016410/gkos-20260217xex99d2.htm"
+        },
+        {
+          "index": 18,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "2026 Revenue Guidance Reaffirmed",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000110465926016410/gkos-20260217xex99d2.htm"
+        },
+        {
+          "index": 19,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 620000000.0,
+          "high": 635000000.0,
+          "action": "RAISE",
+          "evidence_span": "Raised 2026 net sales guidance to $620 million to $635 million, compared to $600 million to $620 million previously.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000119312526191553/gkos-ex99_1.htm"
+        },
+        {
+          "index": 20,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 620000000.0,
+          "high": 635000000.0,
+          "action": "NONE",
+          "evidence_span": ", Short-Term Investments, and Restricted Cash $280.5 million as of March 31, 2026 (versus $282.6 million as of December 31, 2025) FY2026 Sales Guidance FY 2026 global consolidated revenues of $620 - $635 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000119312526191553/gkos-ex99_2.htm"
+        },
+        {
+          "index": 21,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "2026 Revenue Guidance Raised to Reflect Strong Momentum",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000119312526191553/gkos-ex99_2.htm"
+        },
+        {
+          "index": 22,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 680000000.0,
+          "high": 700000000.0,
+          "action": "RAISE",
+          "evidence_span": "Raised 2026 net sales guidance to $680 million to $700 million, compared to $620 million to $635 million previously.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000119312526323729/gkos-ex99_1.htm"
+        },
+        {
+          "index": 23,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 680000000.0,
+          "high": 700000000.0,
+          "action": "NONE",
+          "evidence_span": "ents, Short-Term Investments, and Restricted Cash $289.3 million as of June 30, 2026 (versus $280.5 million as of March 31, 2026) FY2026 Sales Guidance FY 2026 global consolidated revenues of $680 - $700 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000119312526323729/gkos-ex99_2.htm"
+        },
+        {
+          "index": 24,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "2026 Revenue Guidance Raised to Reflect Strong Momentum",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1192448/000119312526323729/gkos-ex99_2.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "HTFL",
+      "finding": "Truncated $21 removed and current gross-margin role repaired; four remaining spans consistent.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 173000000.0,
+          "high": 173500000.0,
+          "action": "INITIATE",
+          "evidence_span": "Initiates Full Year 2025 Revenue Guidance of $173.0 Million to $173.5 Million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1464521/000146452125000018/exhibit991-8xk_11122025.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 228000000.0,
+          "high": 232000000.0,
+          "action": "NONE",
+          "evidence_span": "Total revenue of $228 million to $232 million (approximately 29% to 32% growth year-over-year), compared to previous guidance of $218 million to $222 million (approximately 24% to 26% growth year-over-year)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1464521/000146452126000069/htfl-20260514xex99_1.htm"
+        },
+        {
+          "index": 2,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 0.82,
+          "high": 0.82,
+          "action": "NONE",
+          "evidence_span": "Non-GAAP gross margin of approximately 82%, compared to previous guidance of approximately 81%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1464521/000146452126000129/htfl-20260813xex99_1.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 246000000.0,
+          "high": 250000000.0,
+          "action": "NONE",
+          "evidence_span": "Total revenue of $246 million to $250 million (approximately 40% to 42% growth year-over-year), compared to previous guidance of $228 million to $232 million (approximately 29% to 32% growth year-over-year)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1464521/000146452126000129/htfl-20260813xex99_1.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "IRTC",
+      "finding": "Revenue basis repair visible. Record 0 is the high endpoint of a quoted prior range represented as a point; unresolved endpoint semantics.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2024",
+          "role": "QUOTED_PRIOR",
+          "low": 587500000.0,
+          "high": 587500000.0,
+          "action": "NONE",
+          "evidence_span": "Recent Operational Highlights and Financial Outlook \u2022 Anticipate full year 2024 revenue slightly above high end of previously stated guidance range of $587.5 million provided in October 2024 ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000003/irtc_2025jpmconferencebu.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 675000000.0,
+          "high": 685000000.0,
+          "action": "NONE",
+          "evidence_span": "iRhythm projects revenue for the full year 2025 between $675 million to $685 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000026/irtcq42024ex991pressrelease.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Increased fiscal year 2025 guidance for revenue and adjusted EBITDA margin",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000105/irtcq12025ex991pressrelease.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 690000000.0,
+          "high": 700000000.0,
+          "action": "NONE",
+          "evidence_span": "iRhythm projects revenue for the full year 2025 between $690 million to $700 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000105/irtcq12025ex991pressrelease.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Increased fiscal year 2025 guidance for revenue and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000194/irtcq22025ex991pressrelease.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 720000000.0,
+          "high": 730000000.0,
+          "action": "NONE",
+          "evidence_span": "iRhythm projects revenue for the full year 2025 between $720 million to $730 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000194/irtcq22025ex991pressrelease.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "RAISE",
+          "evidence_span": "Increased fiscal year 2025 guidance for revenue and adjusted EBITDA margin",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000216/irtcq32025ex991pressrelease.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 735000000.0,
+          "high": 740000000.0,
+          "action": "NONE",
+          "evidence_span": "iRhythm projects revenue for the full year 2025 between $735 million to $740 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865825000216/irtcq32025ex991pressrelease.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 870000000.0,
+          "high": 880000000.0,
+          "action": "INITIATE",
+          "evidence_span": "For the full year 2026, iRhythm expects revenue of $870 million to $880 million and adjusted EBITDA margin of 11.5% to 12.5%, reflecting continued volume-led growth, ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000009/irtcq42025ex991pressrelease.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 875000000.0,
+          "high": 885000000.0,
+          "action": "RAISE",
+          "evidence_span": "Increased fiscal year 2026 revenue guidance to $875 million to $885 million and adjusted EBITDA margin to 12.0% to 13.0%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000038/irtcq12026ex991pressrelease.htm"
+        },
+        {
+          "index": 10,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 880000000.0,
+          "high": 890000000.0,
+          "action": "RAISE",
+          "evidence_span": "Increased fiscal year 2026 revenue guidance to $880 million to $890 million and adjusted EBITDA margin guidance to 13.0% to 14.0%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1388658/000138865826000070/irtcq22026ex991pressrelease.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "ISRG",
+      "finding": "Six percentage ranges now complete and fiscal periods consistent; expectation alone incorrectly asserts INITIATE.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 0.67,
+          "high": 0.68,
+          "action": "INITIATE",
+          "evidence_span": "ocedures to increase approximately 13% to 16% in 2025 as compared to 2024. Worldwide da Vinci procedure growth was 17% in 2024 as compared to 2023. \u2022 The Company expects non-GAAP* gross profit margin to be within a range of 67% and 68% of net ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1035267/000103526725000008/q424ex-991earningsrelease.htm"
+        },
+        {
+          "index": 1,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 0.65,
+          "high": 0.665,
+          "action": "INITIATE",
+          "evidence_span": "he Company expects the following results for the full year of 2025: \u2022 Worldwide da Vinci procedure growth of approximately 15% to 17% in 2025, compared to 17% in 2024. \u2022 Non-GAAP* gross profit margin to be within a range of 65% and 66.5% of ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1035267/000103526725000106/q125ex-991earningsrelease.htm"
+        },
+        {
+          "index": 2,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 0.66,
+          "high": 0.67,
+          "action": "INITIATE",
+          "evidence_span": " Company expects the following results for the full year of 2025: \u2022 Worldwide da Vinci procedure growth of approximately 15.5% to 17% in 2025, compared to 17% in 2024. \u2022 Non-GAAP* gross profit margin to be within a range of 66% and 67% of ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1035267/000103526725000183/q225ex-991earningsrelease.htm"
+        },
+        {
+          "index": 3,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 0.67,
+          "high": 0.675,
+          "action": "INITIATE",
+          "evidence_span": " Company expects the following results for the full year of 2025: \u2022 Worldwide da Vinci procedure growth of approximately 17% to 17.5% in 2025, compared to 17% in 2024. \u2022 Non-GAAP* gross profit margin to be within a range of 67% and 67.5% of ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1035267/000103526725000206/q325ex-991earningsrelease.htm"
+        },
+        {
+          "index": 4,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 0.67,
+          "high": 0.68,
+          "action": "INITIATE",
+          "evidence_span": "he Company expects the following results for the full year of 2026: \u2022 Worldwide da Vinci procedure growth of approximately 13% to 15% in 2026, compared to 18% in 2025. \u2022 Non-GAAP* gross profit margin to be within a range of 67% and 68% of ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1035267/000103526726000006/q425ex-991earningsrelease.htm"
+        },
+        {
+          "index": 5,
+          "metric": "gross_margin",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 0.68,
+          "high": 0.69,
+          "action": "INITIATE",
+          "evidence_span": "r the full year of 2026: \u2022 Worldwide da Vinci procedure growth of approximately 13.5% to 15.5% in 2026. The Company expects to be closer to the midpoint of this range. \u2022 Non-GAAP* gross profit margin to be within a range of 68.0% to 69.0% of ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1035267/000103526726000047/q226ex-991earningsrelease.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "LB",
+      "finding": "FAIL: 9 duplicates annual EBITDA as Q1; bare year/metric/footnote owner is explicit. Reaffirmation repair visible.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 170000000.0,
+          "high": 190000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "with $190 million of proceeds from the Private Placement (defined below) and $55 million of borrowings under its debt facilities. LandBridge re-affirms its recently increased 2025 Adjusted EBITDA 1 guidance of $170 million to $190 million, which includes expected earnings accretion from the Wolf Bone Ranch",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312524284426/d917931dex991.htm"
+        },
+        {
+          "index": 1,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 170000000.0,
+          "high": 190000000.0,
+          "action": "NONE",
+          "evidence_span": "its recently increased 2025 Adjusted EBITDA 1 guidance of $170 million to $190 million, which includes expected earnings accretion from the Wolf Bone Ranch",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312524284426/d917931dex991.htm"
+        },
+        {
+          "index": 2,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 170000000.0,
+          "high": 190000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": " Total liquidity was $107.0 million as of December 31, 2024. 4 Outlook The Company re-affirms the following outlook for fiscal year 2025: For fiscal year 2025, the Company expects Adjusted EBITDA to be between $170 million and $190 million, driven by:",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000095017025033854/lb-ex99_1.htm"
+        },
+        {
+          "index": 3,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 170000000.0,
+          "high": 190000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "ired cash distribution to DBR Land Holdings LLC unitholders. 3 Outlook The Company re-affirms the following outlook for fiscal year 2025: For fiscal year 2025, the Company expects Adjusted EBITDA to be between $170 million and $190 million, driven by:",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000095017025065886/lb-ex99_1.htm"
+        },
+        {
+          "index": 4,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 160000000.0,
+          "high": 180000000.0,
+          "action": "NONE",
+          "evidence_span": "In anticipation of the execution of the DBR Solar opportunity with a large public renewable energy developer and operator, we are adjusting our guidance for fiscal year 2025 to an Adjusted EBITDA range between $160 million and $180 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000095017025104333/lb-ex99_1.htm"
+        },
+        {
+          "index": 5,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 165000000.0,
+          "high": 175000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "The Company reaffirms the midpoint of its outlook for fiscal year 2025, with Adjusted EBITDA expected to be between $165 million and $175 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312525277972/lb-ex99_1.htm"
+        },
+        {
+          "index": 6,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 205000000.0,
+          "high": 225000000.0,
+          "action": "INITIATE",
+          "evidence_span": "For the full year 2026, the Company expects Adjusted EBITDA to be between $205 million and $225 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526071867/lb-ex99_1.htm"
+        },
+        {
+          "index": 7,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 205000000.0,
+          "high": 225000000.0,
+          "action": "NONE",
+          "evidence_span": "\u2022 Obtained authorization from Board of Directors to opportunistically repurchase up to $50 million in Class A shares through year-end 2027 \u2022 Announced 2026 Adjusted EBITDA (2) guidance range of $205 million to 225 million, representing projected year-over-year growth of over 20% at the midpoint of the range",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526071867/lb-ex99_1.htm"
+        },
+        {
+          "index": 8,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 205000000.0,
+          "high": 225000000.0,
+          "action": "NONE",
+          "evidence_span": "Announces full year 2026 EBITDA outlook of $205 million to $225 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526071867/lb-ex99_1.htm"
+        },
+        {
+          "index": 9,
+          "metric": "ebitda",
+          "fiscal_period": "Q1FY2026",
+          "role": "CURRENT",
+          "low": 205000000.0,
+          "high": 225000000.0,
+          "action": "NONE",
+          "evidence_span": "e first quarter of 2026 \u2022 Obtained authorization from Board of Directors to opportunistically repurchase up to $50 million in Class A shares through year-end 2027 \u2022 Announced 2026 Adjusted EBITDA (2) guidance range of $205 million to 225 million, representing projected year-over-year growth of over 20% at the midpoint of the range",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526071867/lb-ex99_1.htm"
+        },
+        {
+          "index": 10,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 210000000.0,
+          "high": 230000000.0,
+          "action": "RAISE",
+          "evidence_span": "Increases full-year 2026 Adjusted EBITDA outlook to $210 million to $230 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526209075/lb-ex99_1.htm"
+        },
+        {
+          "index": 11,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 210000000.0,
+          "high": 230000000.0,
+          "action": "REAFFIRM",
+          "evidence_span": "The Company reaffirms its outlook for fiscal year 2026, with Adjusted EBITDA expected to be between $210 million and $230 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1995807/000119312526335296/lb-ex99_1.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "LOAR",
+      "finding": "Five spans reviewed; no new numeric/role defect. Forward-year scope of narrative-only heading still requires full-source corroboration.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "\u201cGiven the visibility provided by our backlog we are reaffirming our topline and Adjusted EBITDA 2025 guidance as well as updating the guidance for the",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2000178/000119312525030870/d921315dex991.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 470000000.0,
+          "high": 480000000.0,
+          "action": "NONE",
+          "evidence_span": "d EBITDA 2025 guidance as well as updating the guidance for the impact of the secondary offering completed in December 2024\u201d stated Glenn D\u2019Alessandro, Loar\u2019s Treasurer and CFO. \u2022 Net sales - between $470 million and $480 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2000178/000119312525030870/d921315dex991.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 480000000.0,
+          "high": 488000000.0,
+          "action": "NONE",
+          "evidence_span": "ress being made against our key productivity and value pricing initiatives. As a result, we are revising our guidance upward to align with our current view,\u201d stated Mr. Charles. \u2022 Net sales \u2013 between $480 million and $488 million up from between $470 million and $480 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2000178/000095017025047232/ck0002000178-ex99_1.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 540000000.0,
+          "high": 550000000.0,
+          "action": "NONE",
+          "evidence_span": "he products and capabilities. Leveraging this backdrop, and taking into account a robust backlog, we anticipate that 2026 will be an exciting year for Loar,\u201d stated Mr. Charles. \u2022 Net sales \u2013 between $540 million and $550 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2000178/000119312525276115/ck0002000178-ex99_1.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 665000000.0,
+          "high": 675000000.0,
+          "action": "NONE",
+          "evidence_span": " look ahead, we remain well positioned to capitalize on attractive growth opportunities while continuing to deliver strong results.\u201d Our outlook for the full year 2026 includes: \u2022 Net sales \u2013 between $665 million and $675 million, up from between $645 million and $655 million.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2000178/000119312526336895/ck0002000178-ex99_1.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "NVCR",
+      "finding": "Current negative EBITDA role/sign correct; four spans consistent.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 675000000.0,
+          "high": 705000000.0,
+          "action": "NONE",
+          "evidence_span": "ation Committee. Mr. Vernon continues to serve as a director of Novocure\u2019s board. 2026 Financial Guidance Novocure\u2019s guidance for the full year 2026 is summarized below. Total net revenues $675 million - $705 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1645113/000164511326000018/nvcr-20251231xpr1.htm"
+        },
+        {
+          "index": 1,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": -15000000.0,
+          "high": 0.0,
+          "action": "NONE",
+          "evidence_span": "re\u2019s updated guidance for the full year 2026, as of April 30, 2026, is summarized below: \u2022 Total net revenue: $690 million - $710 million (previous: $675 million - $705 million) \u2022 Adjusted EBITDA*: $(15) million - $0 million (previous: $(20) million - $0 million) This guidance assumes full-year mid-single digit net ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1645113/000164511326000043/nvcr-20260331xpr.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 690000000.0,
+          "high": 710000000.0,
+          "action": "NONE",
+          "evidence_span": "nab-paclitaxel alone in the historical control. 2026 Financial Guidance: Novocure\u2019s updated guidance for the full year 2026, as of April 30, 2026, is summarized below: \u2022 Total net revenue: $690 million - $710 million (previous: $675 million - $705 million)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1645113/000164511326000043/nvcr-20260331xpr.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 710000000.0,
+          "high": 725000000.0,
+          "action": "NONE",
+          "evidence_span": "c) in accordance with guideline recommendations. 2026 financial guidance: Novocure\u2019s updated guidance for the full year 2026, as of July 23, 2026, is summarized below: \u2022 Total net revenue: $710 million - $725 million (previous: $690 million - $710 million)",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1645113/000164511326000063/nvcr-20260630xpr.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "OMDA",
+      "finding": "Annual versus quarter/comparator duplicates removed; expectation statements overstate initiation.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": -9000000.0,
+          "high": -5000000.0,
+          "action": "INITIATE",
+          "evidence_span": "on-GAAP measures at the end of this press release. Financial Outlook For the year ending December 31, 2025, Omada expects: \u2022 Revenue in the range of $235 million to $241 million \u2022 Adjusted EBITDA loss in the range of $9 million to $5 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000161111525000013/q2pressrelease.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 235000000.0,
+          "high": 241000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Measures section below and reconciliations of GAAP to non-GAAP measures at the end of this press release. Financial Outlook For the year ending December 31, 2025, Omada expects: \u2022 Revenue in the range of $235 million to $241 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000161111525000013/q2pressrelease.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 251500000.0,
+          "high": 254500000.0,
+          "action": "INITIATE",
+          "evidence_span": "Measures section below and reconciliations of GAAP to non-GAAP measures at the end of this press release. Financial Outlook For the year ending December 31, 2025, Omada expects: \u2022 Revenue in the range of $251.5 million to $254.5 million, up from a prior range of $235 million to $241 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828025050158/q3pressrelease.htm"
+        },
+        {
+          "index": 3,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 7000000.0,
+          "high": 15000000.0,
+          "action": "INITIATE",
+          "evidence_span": "utlook For the year ending December 31, 2026, Omada expects: \u2022 Revenue in the range of $312 million to $322 million, with the midpoint representing 22% growth compared with 2025 \u2022 Adjusted EBITDA in the range of $7 million to $15 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015153/q42025pressrelease.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 312000000.0,
+          "high": 322000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Measures section below and reconciliations of GAAP to non-GAAP measures at the end of this press release. Financial Outlook For the year ending December 31, 2026, Omada expects: \u2022 Revenue in the range of $312 million to $322 million, with the midpoint representing 22% growth compared with 2025",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026015153/q42025pressrelease.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 322000000.0,
+          "high": 330000000.0,
+          "action": "INITIATE",
+          "evidence_span": "Measures section below and reconciliations of GAAP to non-GAAP measures at the end of this press release. Financial Outlook For the year ending December 31, 2026, Omada expects: \u2022 Revenue in the range of $322 million to $330 million, with the midpoint representing 25% growth compared with 2025",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026032063/q1fy26pressrelease.htm"
+        },
+        {
+          "index": 6,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 334000000.0,
+          "high": 340000000.0,
+          "action": "INITIATE",
+          "evidence_span": "adjusted EBITDA, reflecting our extraordinary second\u2011quarter performance and our path of sustainable profitability.\u201d For the year ending December 31, 2026, Omada Health expects: \u2022 Revenue in the range of $334 million to $340 million, with the midpoint representing 30% growth compared with 2025",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000162828026054266/q2fy26pressrelease.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "ORCL",
+      "finding": "EPS 8.05 and reaffirmed prior-current role repaired. One-sided revenue floor remains represented as a point under existing convention.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 67000000000.0,
+          "high": 67000000000.0,
+          "action": "INITIATE",
+          "evidence_span": "For fiscal year 2026, we expect revenue of $67 billion and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526100148/orcl-ex99_1.htm"
+        },
+        {
+          "index": 1,
+          "metric": "eps",
+          "fiscal_period": "FY2027",
+          "role": "CURRENT",
+          "low": 8.05,
+          "high": 8.05,
+          "action": "RAISE",
+          "evidence_span": "For fiscal year 2027, we confirm our prior revenue guidance of $90 billion total revenue and raise our non-GAAP EPS guidance to $8.05, which is growth of 18%",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526265848/orcl-ex99_1.htm"
+        },
+        {
+          "index": 2,
+          "metric": "revenue",
+          "fiscal_period": "FY2027",
+          "role": "CURRENT",
+          "low": 90000000000.0,
+          "high": 90000000000.0,
+          "action": "NONE",
+          "evidence_span": "For fiscal year 2027, we confirm our prior revenue guidance of $90 billion ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526265848/orcl-ex99_1.htm"
+        },
+        {
+          "index": 3,
+          "metric": "eps",
+          "fiscal_period": "FY2027",
+          "role": "CURRENT",
+          "low": 8.1,
+          "high": 8.1,
+          "action": "NONE",
+          "evidence_span": "For fiscal year 2027, we now expect total revenue to be at least $90 billion, and non-GAAP EPS to be at $8.10.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-ex99_1.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2027",
+          "role": "CURRENT",
+          "low": 90000000000.0,
+          "high": 90000000000.0,
+          "action": "NONE",
+          "evidence_span": "For fiscal year 2027, we now expect total revenue to be at least $90 billion, and ",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1341439/000119312526387905/orcl-ex99_1.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "PTRN",
+      "finding": "Prior revenue comparison no longer relabels current EBITDA; all 14 spans numerically and temporally consistent.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "ebitda",
+          "fiscal_period": "Q4FY2025",
+          "role": "CURRENT",
+          "low": 38000000.0,
+          "high": 40000000.0,
+          "action": "NONE",
+          "evidence_span": "drive outsized growth.\u201d For the fourth quarter 2025, Pattern anticipates: \u2022 Revenues in the range of $680 million to $700 million, representing 32% to 36% growth year over year. \u2022 Adjusted EBITDA (non-GAAP) in the range of $38 million to $40 million, representing 44% to 48% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193525000055/ptrn-20250930xearningsrele.htm"
+        },
+        {
+          "index": 1,
+          "metric": "revenue",
+          "fiscal_period": "Q4FY2025",
+          "role": "CURRENT",
+          "low": 680000000.0,
+          "high": 700000000.0,
+          "action": "NONE",
+          "evidence_span": "ate in a massive space. We believe that is the winning formula for success and our team is executing to drive outsized growth.\u201d For the fourth quarter 2025, Pattern anticipates: \u2022 Revenues in the range of $680 million to $700 million, representing 32% to 36% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193525000055/ptrn-20250930xearningsrele.htm"
+        },
+        {
+          "index": 2,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 180000000.0,
+          "high": 182000000.0,
+          "action": "NONE",
+          "evidence_span": "ear over year. For the full year 2026, Pattern anticipates: Revenues in the range of $3,120 million to $3,160 million, representing approximately 25% to 26% growth year over year. Adjusted EBITDA (non-GAAP) in the range of $180 million to $182 million, representing 17% to 19% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000012/ptrn-20251231xearningsrele.htm"
+        },
+        {
+          "index": 3,
+          "metric": "ebitda",
+          "fiscal_period": "Q1FY2026",
+          "role": "CURRENT",
+          "low": 41000000.0,
+          "high": 42000000.0,
+          "action": "NONE",
+          "evidence_span": "luded Beesley. For the first quarter 2026, Pattern anticipates: Revenues in the range of $710 million to $720 million, representing approximately 31% to 33% growth year over year. Adjusted EBITDA (non-GAAP) in the range of $41 million to $42 million, representing 22% to 24% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000012/ptrn-20251231xearningsrele.htm"
+        },
+        {
+          "index": 4,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 3120000000.0,
+          "high": 3160000000.0,
+          "action": "NONE",
+          "evidence_span": " year over year. Adjusted EBITDA (non-GAAP) in the range of $41 million to $42 million, representing 22% to 24% growth year over year. For the full year 2026, Pattern anticipates: Revenues in the range of $3,120 million to $3,160 million, representing approximately 25% to 26% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000012/ptrn-20251231xearningsrele.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "Q1FY2026",
+          "role": "CURRENT",
+          "low": 710000000.0,
+          "high": 720000000.0,
+          "action": "NONE",
+          "evidence_span": " are operating from a position of strength and are committed to creating long-term value for our shareholders,\u201d concluded Beesley. For the first quarter 2026, Pattern anticipates: Revenues in the range of $710 million to $720 million, representing approximately 31% to 33% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000012/ptrn-20251231xearningsrele.htm"
+        },
+        {
+          "index": 6,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 199000000.0,
+          "high": 201000000.0,
+          "action": "NONE",
+          "evidence_span": "of $3.29 billion to $3.33 billion, representing approximately 32% to 33% growth year over year, up from our prior guidance range of approximately 25% to 26% growth year over year. Adjusted EBITDA (non-GAAP) in the range of $199 million to $201 million, representing approximately 30% to 32% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000037/ptrn-20260331xearningsrele.htm"
+        },
+        {
+          "index": 7,
+          "metric": "ebitda",
+          "fiscal_period": "Q2FY2026",
+          "role": "CURRENT",
+          "low": 45000000.0,
+          "high": 46000000.0,
+          "action": "NONE",
+          "evidence_span": "est of 2026.\" For the second quarter 2026, Pattern anticipates: Revenues in the range of $810 million to $820 million, representing approximately 35% to 37% growth year over year. Adjusted EBITDA (non-GAAP) in the range of $45 million to $46 million, representing approximately 30% to 33% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000037/ptrn-20260331xearningsrele.htm"
+        },
+        {
+          "index": 8,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 3290000000.0,
+          "high": 3330000000.0,
+          "action": "NONE",
+          "evidence_span": "r. Adjusted EBITDA (non-GAAP) in the range of $45 million to $46 million, representing approximately 30% to 33% growth year over year. For the full year 2026, Pattern anticipates: Revenues in the range of $3.29 billion to $3.33 billion, representing approximately 32% to 33% growth year over year, up from our prior guidance range of approximately 25% to 26% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000037/ptrn-20260331xearningsrele.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "Q2FY2026",
+          "role": "CURRENT",
+          "low": 810000000.0,
+          "high": 820000000.0,
+          "action": "NONE",
+          "evidence_span": "ncial profile of this business continues to improve. We are operating from a position of strength heading into the rest of 2026.\" For the second quarter 2026, Pattern anticipates: Revenues in the range of $810 million to $820 million, representing approximately 35% to 37% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000037/ptrn-20260331xearningsrele.htm"
+        },
+        {
+          "index": 10,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 211000000.0,
+          "high": 213000000.0,
+          "action": "NONE",
+          "evidence_span": " year over year. For the full year 2026, Pattern anticipates: Revenues in the range of $3.42 billion to $3.46 billion, representing approximately 37% to 38% growth year over year. Adjusted EBITDA (non-GAAP) in the range of $211 million to $213 million, representing approximately 38% to 40% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000051/ptrn-20260630xearningsrele.htm"
+        },
+        {
+          "index": 11,
+          "metric": "ebitda",
+          "fiscal_period": "Q3FY2026",
+          "role": "CURRENT",
+          "low": 51000000.0,
+          "high": 53000000.0,
+          "action": "NONE",
+          "evidence_span": "and partners.\" For the third quarter 2026, Pattern anticipates: Revenues in the range of $840 million to $860 million, representing approximately 31% to 34% growth year over year. Adjusted EBITDA (non-GAAP) in the range of $51 million to $53 million, representing approximately 25% to 29% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000051/ptrn-20260630xearningsrele.htm"
+        },
+        {
+          "index": 12,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 3420000000.0,
+          "high": 3460000000.0,
+          "action": "NONE",
+          "evidence_span": "r. Adjusted EBITDA (non-GAAP) in the range of $51 million to $53 million, representing approximately 25% to 29% growth year over year. For the full year 2026, Pattern anticipates: Revenues in the range of $3.42 billion to $3.46 billion, representing approximately 37% to 38% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000051/ptrn-20260630xearningsrele.htm"
+        },
+        {
+          "index": 13,
+          "metric": "revenue",
+          "fiscal_period": "Q3FY2026",
+          "role": "CURRENT",
+          "low": 840000000.0,
+          "high": 860000000.0,
+          "action": "NONE",
+          "evidence_span": "ne this year. We are seeing strong momentum across the business and look forward to continuing to deliver for our brand partners.\" For the third quarter 2026, Pattern anticipates: Revenues in the range of $840 million to $860 million, representing approximately 31% to 34% growth year over year.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1811935/000181193526000051/ptrn-20260630xearningsrele.htm"
+        }
+      ],
+      "policy_evidence": null
+    },
+    {
+      "ticker": "TIC",
+      "finding": "FAIL: 1 risk-list maintain profitability leaks to FCF; 9 compound run-and-maintain in historical revenue mix becomes reaffirmation.",
+      "reviewed_records": [
+        {
+          "index": 0,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "Acuren reiterates its full-year 2025 expectation for revenue growth to be in the low-to-mid-single digit percent range as compared to full year 2024.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000203296625000017/acurencorporation-x1q25ear.htm"
+        },
+        {
+          "index": 1,
+          "metric": "fcf",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "long-term growth, (iv) value creation, benefits and synergies of the combination with NV5, (v) its ability to maintain strong profitability levels, (vi) its net leverage ratio and free cash flow, (vii) its strategic plans, (viii) its success in the remainder of 2025 and beyond, (ix) consolidated guidance, and (x) its integration plans.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000203296625000025/acurencorporation-x2q25ear.htm"
+        },
+        {
+          "index": 2,
+          "metric": "ebitda",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 240000000.0,
+          "high": 250000000.0,
+          "action": "NONE",
+          "evidence_span": "corporate purposes, including integration-related initiatives. Guidance For the full year 2025, TIC Solutions reaffirms its prior guidance of: \u2022 Revenue: $1,530 \u2013 $1,565 million \u2022 Adjusted EBITDA: $240 \u2013 $250 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828025051293/ticsolutions-x3q25earnings.htm"
+        },
+        {
+          "index": 3,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": 1530000000.0,
+          "high": 1565000000.0,
+          "action": "NONE",
+          "evidence_span": "additional flexibility for general corporate purposes, including integration-related initiatives. Guidance For the full year 2025, TIC Solutions reaffirms its prior guidance of: \u2022 Revenue: $1,530 \u2013 $1,565 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828025051293/ticsolutions-x3q25earnings.htm"
+        },
+        {
+          "index": 4,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 330000000.0,
+          "high": 355000000.0,
+          "action": "INITIATE",
+          "evidence_span": " at any time by the Board of Directors in its sole discretion. Guidance For the full year 2026, TIC Solutions expects the following ranges: \u2022 Revenue of $2,150 to $2,250 million \u2022 Adjusted EBITDA of $330 to $355 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026017010/confidential-ticsolutionsx.htm"
+        },
+        {
+          "index": 5,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 2150000000.0,
+          "high": 2250000000.0,
+          "action": "INITIATE",
+          "evidence_span": " be modified, suspended, or terminated at any time by the Board of Directors in its sole discretion. Guidance For the full year 2026, TIC Solutions expects the following ranges: \u2022 Revenue of $2,150 to $2,250 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026017010/confidential-ticsolutionsx.htm"
+        },
+        {
+          "index": 6,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 330000000.0,
+          "high": 355000000.0,
+          "action": "NONE",
+          "evidence_span": " of unamortized debt issuance costs at quarter end. Guidance TIC Solutions is reaffirming its previously issued full-year 2026 guidance of: \u2022 Revenue of $2,150 to $2,250 million \u2022 Adjusted EBITDA of $330 to $355 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026030884/ticsolutions-x1q26earnings.htm"
+        },
+        {
+          "index": 7,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 2150000000.0,
+          "high": 2250000000.0,
+          "action": "NONE",
+          "evidence_span": "l term loan debt was $1.6 billion, net of unamortized debt issuance costs at quarter end. Guidance TIC Solutions is reaffirming its previously issued full-year 2026 guidance of: \u2022 Revenue of $2,150 to $2,250 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026030884/ticsolutions-x1q26earnings.htm"
+        },
+        {
+          "index": 8,
+          "metric": "ebitda",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 330000000.0,
+          "high": 355000000.0,
+          "action": "NONE",
+          "evidence_span": "erage the balance sheet.\u201d Fiscal Year 2026 Financial Outlook TIC Solutions is reaffirming its previously issued full-year 2026 guidance of: \u2022 Revenue of $2,150 to $2,250 million \u2022 Adjusted EBITDA of $330 to $355 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026053818/ticsolutions-x2q26earnings.htm"
+        },
+        {
+          "index": 9,
+          "metric": "revenue",
+          "fiscal_period": "FY2025",
+          "role": "CURRENT",
+          "low": null,
+          "high": null,
+          "action": "REAFFIRM",
+          "evidence_span": "llion during the six months ended June 30, 2025. The decrease was primarily driven by lower volumes of higher-margin outage and capital project activity and an associated shift in revenue mix toward run-and-maintain and callout activity relative to the prior-year period.",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026053831/tic-20260630.htm"
+        },
+        {
+          "index": 10,
+          "metric": "revenue",
+          "fiscal_period": "FY2026",
+          "role": "CURRENT",
+          "low": 2150000000.0,
+          "high": 2250000000.0,
+          "action": "NONE",
+          "evidence_span": "the business while continuing to deleverage the balance sheet.\u201d Fiscal Year 2026 Financial Outlook TIC Solutions is reaffirming its previously issued full-year 2026 guidance of: \u2022 Revenue of $2,150 to $2,250 million",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2032966/000162828026053818/ticsolutions-x2q26earnings.htm"
+        }
+      ],
+      "policy_evidence": null
+    }
+  ]
+}

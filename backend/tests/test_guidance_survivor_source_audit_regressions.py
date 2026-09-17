@@ -135,3 +135,51 @@ def test_actual_exceeding_prior_guidance_is_not_new_guidance():
 def test_historical_quarter_bullet_does_not_borrow_adjacent_guidance():
     facts = admitted("2026 revenue guidance increased to $120 million ● Q1 2026 fully diluted GAAP EPS of $0.05, non-GAAP fully diluted EPS of $0.14, and Adjusted EBITDA of $5.7 million")
     assert not [f for f in facts if f.metric is GuidanceMetric.EBITDA]
+
+
+def test_explicit_year_metric_footnote_does_not_inherit_prior_quarter():
+    facts = admitted("During the first quarter of 2026 • Obtained authorization to repurchase shares • Announced 2026 Adjusted EBITDA (2) guidance range of $205 million to 225 million, representing projected growth of over 20%.")
+    assert not [f for f in facts if f.fiscal_period == "Q1FY2026"]
+
+
+def test_relative_quarter_prior_range_does_not_inherit_following_year():
+    facts = admitted("The Company expects adjusted EBITDA of approximately $135 million this quarter relative to its prior adjusted EBITDA guidance range of $120 million to $125 million. The Company has also increased its full year 2025 guidance.")
+    assert not [f for f in facts if f.low == 120 and f.fiscal_period == "FY2025"]
+
+
+def test_unsupported_currency_not_downgraded_to_qualitative_guidance():
+    assert not admitted("We continue to maintain our full-year 2026 revenue guidance in the range of RMB 8.20 billion to RMB 8.80 billion.")
+
+
+def test_compound_run_and_maintain_is_not_a_reaffirmation():
+    assert not admitted("Fiscal year 2026 guidance. Revenue mix shifted toward run-and-maintain and callout activity relative to the prior-year period.")
+
+
+def test_enumerated_risk_subject_does_not_own_other_metric():
+    assert not admitted("2026 guidance risks include (iv) our ability to maintain strong profitability levels, (v) our net leverage ratio and free cash flow, (vi) our strategic plans.")
+
+
+def test_result_growth_headline_is_not_qualitative_guidance():
+    assert not admitted("Reports third quarter 2025 results. Continued Strong Orders and Revenue Growth Headline Multiple Performance Records Reaffirms 2025 Full Year Outlook and Introduces 2026 Outlook")
+
+
+def test_expectation_does_not_assert_initiation():
+    facts = admitted("The Company continues to expect full year 2026 adjusted EBITDA of $29 million to $33 million.")
+    assert facts and all(f.explicit_action is not GuidanceAction.INITIATE for f in facts)
+
+
+def test_previous_completed_year_preliminary_outlook_is_not_current():
+    facts = admitted("Updated 2025 Revenue Outlook to $885 to $900 Million. The 2025 revenue outlook included in this press release is preliminary. Actual results are subject to audit. We expect 2026 revenue of $1,080 to $1,175 million.")
+    assert not [f for f in facts if f.fiscal_period == "FY2025" and f.role is GuidanceFactRole.CURRENT]
+    assert any(f.fiscal_period == "FY2026" for f in facts)
+
+
+def test_page_fragment_preserves_source_prior_guidance_ownership():
+    text = "2026 Full Year Guidance Update. This compares to the previous guidance range of revenue between $925 and $975\nmillion, and adjusted EBITDA between $115 and $135 million. The Company reiterates its full year free cash flow guidance."
+    facts = admitted(text)
+    assert not [f for f in facts if f.metric is GuidanceMetric.EBITDA and f.role is GuidanceFactRole.CURRENT]
+
+
+def test_quoted_range_high_endpoint_does_not_become_prior_point():
+    facts = admitted("Anticipate full year 2026 revenue slightly above high end of previously stated guidance range of $587.5 million provided in October 2025.")
+    assert not [f for f in facts if f.low == f.high == 587.5]

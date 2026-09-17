@@ -245,6 +245,12 @@ def _owned_directional_action(clause: str, anchor: int, metric_text: str, metric
     owned: list[tuple[int, GuidanceAction]] = []
     for action, pattern in _ACTION_PATTERNS:
         for match in pattern.finditer(clause):
+            if (match.start() and clause[match.start()-1] == "-") or (match.end() < len(clause) and clause[match.end()] == "-"):
+                continue
+            # Enumerated risk disclosures have independent subjects.
+            bridge = clause[min(match.end(), current.end):max(match.start(), current.start)]
+            if re.search(r"\([ivx]+\)", bridge, re.I):
+                continue
             # A trailing coordination introduces the next metric's action.
             if match.start() >= current.end and re.search(r"\band\s*$", clause[current.end:match.start()], re.I):
                 continue
@@ -754,7 +760,7 @@ def _direct_guidance_period(clause: str, anchor: int, mention) -> _PeriodBinding
     local = clause[left:right]
     candidates: list[tuple[int, _PeriodBinding]] = []
     patterns = [
-        re.compile(rf"\b(20\d{{2}})\s+{metric_pattern}\s+(?:guidance|outlook)\b", re.I),
+        re.compile(rf"\b(20\d{{2}})\s+{metric_pattern}\s*(?:\(\d+\)|\d+)?\s+(?:guidance|outlook)\b", re.I),
         re.compile(rf"\b(?:guidance|outlook)\s+(?:for\s+)?(?:full[- ]year\s+|fiscal(?:\s+year)?\s+)?(20\d{{2}})\b[^.;]{{0,90}}\b{metric_pattern}\b", re.I),
     ]
     for pattern in patterns:
