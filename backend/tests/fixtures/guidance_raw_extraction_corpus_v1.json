@@ -1,0 +1,223 @@
+[
+  {
+    "name": "RELY emits revenue, never false EBITDA",
+    "ticker": "RELY",
+    "text": "2025 Financial Outlook. For fiscal year 2025, Remitly currently expects total revenue in the range of $1.565 billion to $1.580 billion.",
+    "expected": [
+      {
+        "metric": "revenue",
+        "period": "FY2025",
+        "basis": "UNSPECIFIED",
+        "scope": "COMPANY",
+        "low": 1.565,
+        "high": 1.58,
+        "unit": "USD_BILLION",
+        "accepted": true
+      }
+    ],
+    "forbidden_metrics": ["ebitda"]
+  },
+  {
+    "name": "BLBD binds revenue and adjusted EBITDA separately",
+    "ticker": "BLBD",
+    "text": "Full-year 2025 guidance: Revenue at approximately $1.45 billion and raising our Adjusted EBITDA guidance to $205 million to $215 million.",
+    "expected": [
+      {
+        "metric": "revenue",
+        "period": "FY2025",
+        "basis": "UNSPECIFIED",
+        "scope": "COMPANY",
+        "low": 1.45,
+        "high": 1.45,
+        "unit": "USD_BILLION",
+        "accepted": true
+      },
+      {
+        "metric": "ebitda",
+        "period": "FY2025",
+        "basis": "ADJUSTED",
+        "scope": "COMPANY",
+        "low": 205.0,
+        "high": 215.0,
+        "unit": "USD_MILLION",
+        "accepted": true
+      }
+    ]
+  },
+  {
+    "name": "AXON EBITDA margin cannot bind stock compensation dollars",
+    "ticker": "AXON",
+    "text": "Full Year 2026 Guidance. Adjusted EBITDA margin of 25.5%; stock-based compensation expense of $590 million to $620 million.",
+    "expected": [],
+    "forbidden_metrics": ["ebitda"]
+  },
+  {
+    "name": "EXPE EBITDA margin bps are not EBITDA dollars",
+    "ticker": "EXPE",
+    "text": "Business Outlook Fiscal Year 2025. Q3 2025 presentation. EBITDA margin expansion of 75 to 100 basis points.",
+    "expected": [],
+    "forbidden_metrics": ["ebitda"]
+  },
+  {
+    "name": "FLYW percentage growth is typed non-absolute and quarantined",
+    "ticker": "FLYW",
+    "text": "FY 2026 Guidance Assumptions. Revenue approximately 1.5% inorganic growth. Adjusted Gross Profit margin to decline 200 to 300 basis points in FY2026.",
+    "expected": [
+      {
+        "metric": "revenue",
+        "period": "FY2026",
+        "basis": "UNSPECIFIED",
+        "scope": "COMPANY",
+        "low": 1.5,
+        "high": 1.5,
+        "unit": "PERCENT",
+        "value_kind": "GROWTH_RATE",
+        "accepted": false
+      },
+      {
+        "metric": "gross_margin",
+        "period": "FY2026",
+        "basis": "ADJUSTED",
+        "scope": "COMPANY",
+        "low": 200.0,
+        "high": 300.0,
+        "unit": "BASIS_POINTS",
+        "value_kind": "DELTA",
+        "accepted": false
+      }
+    ]
+  },
+  {
+    "name": "FRPT annual guidance outranks presentation quarter",
+    "ticker": "FRPT",
+    "text": "Q3 2025 Earnings Presentation. FY 2025 Guidance. Adjusted Gross Margin: now expect to be flat for the year at 13%.",
+    "expected": [
+      {
+        "metric": "gross_margin",
+        "period": "FY2025",
+        "basis": "ADJUSTED",
+        "scope": "COMPANY",
+        "low": 13.0,
+        "high": 13.0,
+        "unit": "PERCENT",
+        "accepted": true
+      }
+    ]
+  },
+  {
+    "name": "HRMY annual revenue guidance outranks Q1 presentation context",
+    "ticker": "HRMY",
+    "text": "Q1 2026 Financial Results & Business Update. Reiterating 2026 Net Revenue Guidance of $1.00 billion to $1.04 billion.",
+    "expected": [
+      {
+        "metric": "revenue",
+        "period": "FY2026",
+        "basis": "UNSPECIFIED",
+        "scope": "COMPANY",
+        "low": 1.0,
+        "high": 1.04,
+        "unit": "USD_BILLION",
+        "accepted": true,
+        "action": "REAFFIRM"
+      }
+    ]
+  },
+  {
+    "name": "ESI FCF survives unrelated basis-point text",
+    "ticker": "ESI",
+    "text": "Adjusted EBITDA margin increased by 20 basis points. 2025 Guidance: The Company now expects full year 2025 adjusted EBITDA between $545 million and $550 million and adjusted free cash flow approximately $280 million.",
+    "expected": [
+      {
+        "metric": "ebitda",
+        "period": "FY2025",
+        "basis": "ADJUSTED",
+        "scope": "COMPANY",
+        "low": 545.0,
+        "high": 550.0,
+        "unit": "USD_MILLION",
+        "accepted": true
+      },
+      {
+        "metric": "fcf",
+        "period": "FY2025",
+        "basis": "ADJUSTED",
+        "scope": "COMPANY",
+        "low": 280.0,
+        "high": 280.0,
+        "unit": "USD_MILLION",
+        "accepted": true
+      }
+    ]
+  },
+  {
+    "name": "CLS table range inherits billions and separates EPS bases",
+    "ticker": "CLS",
+    "text": "Q4 2025 Guidance. Revenue (in billions) $3.655 $3.325 to $3.575. GAAP EPS $2.31. Adjusted EPS $1.65 to $1.81.",
+    "expected": [
+      {
+        "metric": "revenue",
+        "period": "Q4FY2025",
+        "basis": "UNSPECIFIED",
+        "scope": "COMPANY",
+        "low": 3.325,
+        "high": 3.575,
+        "unit": "USD_BILLION",
+        "accepted": true
+      },
+      {
+        "metric": "eps",
+        "period": "Q4FY2025",
+        "basis": "GAAP",
+        "scope": "COMPANY",
+        "low": 2.31,
+        "high": 2.31,
+        "unit": "USD_PER_SHARE",
+        "accepted": true
+      },
+      {
+        "metric": "eps",
+        "period": "Q4FY2025",
+        "basis": "ADJUSTED",
+        "scope": "COMPANY",
+        "low": 1.65,
+        "high": 1.81,
+        "unit": "USD_PER_SHARE",
+        "accepted": true
+      }
+    ]
+  },
+  {
+    "name": "KNSA named product revenue is typed product and quarantined",
+    "ticker": "KNSA",
+    "text": "Financial Guidance. Kiniksa expects 2026 ARCALYST net product revenue of between $980 million and $995 million.",
+    "expected": [
+      {
+        "metric": "revenue",
+        "period": "FY2026",
+        "basis": "UNSPECIFIED",
+        "scope": "PRODUCT",
+        "low": 980.0,
+        "high": 995.0,
+        "unit": "USD_MILLION",
+        "accepted": false
+      }
+    ]
+  },
+  {
+    "name": "IOVA total product revenue remains company-wide",
+    "ticker": "IOVA",
+    "text": "Full-year 2026 guidance. The company expects total product revenue between $350 million and $370 million.",
+    "expected": [
+      {
+        "metric": "revenue",
+        "period": "FY2026",
+        "basis": "UNSPECIFIED",
+        "scope": "COMPANY",
+        "low": 350.0,
+        "high": 370.0,
+        "unit": "USD_MILLION",
+        "accepted": true
+      }
+    ]
+  }
+]

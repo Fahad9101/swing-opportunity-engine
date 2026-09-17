@@ -41,6 +41,25 @@ def filing_index_json_url(cik: str | int, accession: str) -> str:
     return sec_archive_url(cik, accession, "index.json")
 
 
+def complete_submission_text_reference(filing: SecDocumentReference) -> SecDocumentReference:
+    """Return the official complete-submission text as an index-failure fallback.
+
+    This is used only when SEC filing-directory discovery fails. It preserves the
+    issuer filing date/accession and exposes all embedded exhibits without guessing
+    an issuer-specific filename.
+    """
+    name = f"{filing.accession}.txt"
+    return SecDocumentReference(
+        ticker=filing.ticker,
+        cik=filing.cik,
+        accession=filing.accession,
+        form=filing.form,
+        filing_date=filing.filing_date,
+        primary_document=name,
+        source_url=sec_archive_url(filing.cik, filing.accession, name),
+    )
+
+
 def index_submissions_payload(
     ticker: str,
     cik: str | int,

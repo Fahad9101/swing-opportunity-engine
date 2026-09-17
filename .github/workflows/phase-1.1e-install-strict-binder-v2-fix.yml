@@ -1,0 +1,138 @@
+name: Phase 1.1E Install Strict Guidance Binder V2 Fix
+
+on:
+  push:
+    branches:
+      - phase-1.1e-canonical-guidance
+
+permissions:
+  contents: write
+
+jobs:
+  install-strict-binder-v2-fix:
+    if: ${{ startsWith(github.event.head_commit.message, 'Fix strict guidance binder v2 installer') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./soe_strict_binder_v2_fix.db
+      PROVIDER_NAME: fixture
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Verify SOE-1.0.0 remains frozen
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+
+      - name: Recover strict-v2 candidate and fix the two blocked regressions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import textwrap
+
+          source = Path('.github/workflows/phase-1.1e-install-strict-binder-v2.yml').read_text()
+
+          def heredoc(marker: str, terminator: str) -> str:
+              start = source.index(marker) + len(marker)
+              end = source.index('\n          ' + terminator, start)
+              return textwrap.dedent(source[start:end].lstrip('\n'))
+
+          code = heredoc("cat > backend/app/services/guidance_evidence_binder_v2.py <<'PYFILE'", 'PYFILE')
+          tests = heredoc("cat > backend/tests/test_guidance_evidence_binder_v2.py <<'PYTEST'", 'PYTEST')
+
+          explicit_block = '''_EXPLICIT_QUARTER = re.compile(
+              r"\\bQ[1-4]\\s*(?:FY)?\\s*'?20\\d{2}\\b|"
+              r"\\b(?:first|second|third|fourth)\\s+(?:fiscal\\s+)?quarter(?:\\s+(?:of\\s+)?(?:fiscal(?:\\s+year)?\\s*)?20\\d{2}|\\s+ending\\s+[A-Za-z]+\\s+\\d{1,2},?\\s*20\\d{2})",
+              re.I,
+          )
+          '''
+          assert explicit_block in code
+          code = code.replace(
+              explicit_block,
+              explicit_block + '''_UPDATE_TIMING_QUARTER = re.compile(
+              r"\\b(?:reviewing|reassessing|evaluating)\\b.{0,220}\\b(?:guidance|outlook)\\b.{0,220}"
+              r"\\b(?:update|announcement)\\b.{0,60}\\b(?:during|in)\\s+(?:the\\s+)?"
+              r"(?:first|second|third|fourth)\\s+quarter\\b",
+              re.I | re.S,
+          )
+          _QUARTER_GUIDANCE_HEADER = re.compile(
+              r"\\b(?:Q[1-4]\\s+(?:FY\\s*)?20\\d{2}|(?:First|Second|Third|Fourth)\\s+Quarter(?:\\s+(?:of\\s+)?(?:FY\\s*)?20\\d{2})?)\\s+Guidance\\b",
+              re.I,
+          )
+          _FULL_YEAR_GUIDANCE_HEADER = re.compile(
+              r"\\b(?:FY\\s*20\\d{2}|Full[- ]Year\\s+20\\d{2})\\s+Guidance\\b",
+              re.I,
+          )
+          ''',
+              1,
+          )
+
+          old_guard = '''if fact.period_kind is GuidancePeriodKind.FULL_YEAR and _GENERIC_QUARTER.search(local):
+              if not re.search(r"\\b(?:full[- ]year|fiscal\\s+year|FY\\s*20\\d{2})\\b", local, re.I):
+                  return _fail(base, "period", "period-v2: quarterly context cannot supply a full-year fact")'''
+          new_guard = '''if (
+              fact.period_kind is GuidancePeriodKind.FULL_YEAR
+              and _GENERIC_QUARTER.search(local)
+              and not _UPDATE_TIMING_QUARTER.search(local)
+          ):
+              if not re.search(r"\\b(?:full[- ]year|fiscal\\s+year|FY\\s*20\\d{2})\\b", local, re.I):
+                  return _fail(base, "period", "period-v2: quarterly context cannot supply a full-year fact")'''
+          assert old_guard in code
+          code = code.replace(old_guard, new_guard, 1)
+
+          old_table = '''if _FLATTENED_Q_FY_TABLE.search(text):
+              numeric_count = len(re.findall(r"\\$?\\s*\\d[\\d,.]*(?:\\s*(?:million|billion|m|b|%))?", text, re.I))
+              if numeric_count >= 6:
+                  return _fail(base, "column", "column-v2: flattened quarter/full-year table is ambiguous")'''
+          new_table = '''has_quarter_guidance = bool(_QUARTER_GUIDANCE_HEADER.search(text))
+          has_full_year_guidance = bool(_FULL_YEAR_GUIDANCE_HEADER.search(text))
+          if has_quarter_guidance and has_full_year_guidance:
+              numeric_count = len(re.findall(r"\\$?\\s*\\d[\\d,.]*(?:\\s*(?:million|billion|m|b|%))?", text, re.I))
+              if numeric_count >= 6:
+                  return _fail(base, "column", "column-v2: flattened quarter/full-year table is ambiguous")'''
+          assert old_table in code
+          code = code.replace(old_table, new_table, 1)
+
+          Path('backend/app/services/guidance_evidence_binder_v2.py').write_text(code)
+          Path('backend/tests/test_guidance_evidence_binder_v2.py').write_text(tests)
+
+          p = Path('backend/app/services/canonical_shadow_guidance_service.py')
+          s = p.read_text()
+          old = 'from app.services.guidance_evidence_binder import GuidanceEvidenceBinder'
+          new = 'from app.services.guidance_evidence_binder_v2 import GuidanceEvidenceBinder'
+          assert old in s
+          s = s.replace(old, new, 1)
+          assert '"evidence_binder_version": "strict-v1"' in s
+          s = s.replace('"evidence_binder_version": "strict-v1"', '"evidence_binder_version": "strict-v2"', 1)
+          p.write_text(s)
+          PY
+
+      - name: Run strict-v2 binder regressions
+        run: python -m pytest -q backend/tests/test_guidance_evidence_binder.py backend/tests/test_guidance_evidence_binder_v2.py backend/tests/test_guidance_manual_audit_regressions.py backend/tests/test_canonical_shadow_guidance_integration.py
+
+      - name: Run complete deterministic suite
+        run: python -m pytest -q
+
+      - name: Reverify frozen rules after repair
+        run: test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+
+      - name: Commit validated strict-v2 repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/app/services/guidance_evidence_binder_v2.py backend/app/services/canonical_shadow_guidance_service.py backend/tests/test_guidance_evidence_binder_v2.py
+          git diff --cached --check
+          git commit -m 'Phase 1.1E: harden strict guidance binder after exhaustive audit'
+          git push origin HEAD:phase-1.1e-canonical-guidance

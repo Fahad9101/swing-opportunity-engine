@@ -1,0 +1,218 @@
+name: Phase 1.1E Final Table Binding Repair
+
+on:
+  push:
+    branches:
+      - phase-1.1e-canonical-guidance
+    paths:
+      - '.github/workflows/phase-1.1e-final-table-binding-repair.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  repair-and-validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: phase-1.1e-canonical-guidance
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[test]'
+
+      - name: Apply generic row×column ownership repair and permanent regressions
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          binder_path = Path('backend/app/services/guidance_evidence_binder_v2.py')
+          binder = binder_path.read_text()
+
+          helper_anchor = 'def _period_year(fiscal_period: str) -> int | None:\n'
+          helper = '''def _row_coordinate_ambiguity(fact) -> str | None:\n    """Reject numeric bindings whose exact row ownership cannot be reconstructed.\n\n    SEC HTML tables can flatten into text with metric labels, value columns, and\n    period headers serialized in either direction. A selected value is not owned\n    by a metric merely because it is nearby: another numeric token between the\n    metric label and the selected span means the row/cell intersection is\n    ambiguous. Revenue mentioned as the denominator of a percentage is likewise\n    a reference label, not a revenue row owner.\n    """\n    evidence = fact.provenance[0].evidence\n    text = evidence.full_text or ""\n    if fact.low is None and fact.high is None:\n        return None\n    if evidence.metric_start is None or evidence.metric_end is None or evidence.value_start is None:\n        return None\n    if evidence.metric_end > evidence.value_start:\n        return None  # strict-v1 already rejects values preceding their metric label.\n\n    between = text[evidence.metric_end:evidence.value_start]\n    if _TABLE_VALUE_TOKEN.search(between):\n        return "row-v2: intervening numeric table value breaks metric-to-value ownership"\n\n    if fact.metric is GuidanceMetric.REVENUE:\n        metric_prefix = text[max(0, evidence.metric_start - 100):evidence.metric_start]\n        if re.search(r"(?:%|\\bpercent(?:age)?)\\s+(?:of\\s+)?$", metric_prefix, re.I):\n            return "row-v2: revenue label is a percentage denominator/reference, not a revenue row owner"\n\n    return None\n\n\n'''
+          if '_row_coordinate_ambiguity' not in binder:
+              assert binder.count(helper_anchor) == 1, 'period-year anchor changed'
+              binder = binder.replace(helper_anchor, helper + helper_anchor, 1)
+
+          bind_anchor = '        # Document-level row/column ambiguity is evaluated even when strict-v1\n'
+          bind_insert = '''        row_ambiguity = _row_coordinate_ambiguity(fact)\n        if row_ambiguity is not None:\n            return _fail(base, "row", row_ambiguity)\n\n'''
+          if 'row_ambiguity = _row_coordinate_ambiguity(fact)' not in binder:
+              assert binder.count(bind_anchor) == 1, 'bind anchor changed'
+              binder = binder.replace(bind_anchor, bind_insert + bind_anchor, 1)
+
+          binder_path.write_text(binder)
+
+          test_path = Path('backend/tests/test_guidance_evidence_binder_v2.py')
+          tests = test_path.read_text()
+          marker = 'def test_shak_exact_reversed_flattened_table_rejects_intervening_value():'
+          if marker not in tests:
+              tests += r'''
+
+
+def test_shak_exact_reversed_flattened_table_rejects_intervening_value():
+    text = (
+        "amortization expense Pre-opening costs Net income Adjusted EBITDA Adjusted Pro Forma Tax Rate "
+        "60 – 65 40 – 45 $1.6b – 1.7b $57.0m - $59.0m + LSD % 22.0% - 23.0% "
+        "12.0% to 13.0% of Total revenue $28m $124m - $128m $26m – $28m "
+        "$45m - $55m $225m - $235m 25% - 27% FY 2026 Guidance"
+    )
+    d = _doc("SHAK", text)
+    f = _fact(
+        d,
+        metric=GuidanceMetric.REVENUE,
+        period="FY2026",
+        kind=GuidancePeriodKind.FULL_YEAR,
+        metric_text="Total revenue",
+        value_text="$124m - $128m",
+        period_text="FY 2026",
+        low=124e6,
+        high=128e6,
+    )
+    r = GuidanceEvidenceBinder().bind(f, d)
+    assert not r.accepted
+    assert not r.dimensions["row"]
+    assert any("intervening numeric table value" in reason for reason in r.reasons)
+
+
+def test_percentage_of_revenue_reference_is_not_revenue_row_owner():
+    d = _doc("TABL", "Adjusted occupancy expense 12.0% to 13.0% of Total revenue $28m FY 2026 Guidance")
+    f = _fact(
+        d,
+        metric=GuidanceMetric.REVENUE,
+        period="FY2026",
+        kind=GuidancePeriodKind.FULL_YEAR,
+        metric_text="Total revenue",
+        value_text="$28m",
+        period_text="FY 2026",
+        low=28e6,
+        high=28e6,
+    )
+    r = GuidanceEvidenceBinder().bind(f, d)
+    assert not r.accepted
+    assert not r.dimensions["row"]
+    assert any("percentage denominator/reference" in reason for reason in r.reasons)
+
+
+def test_valid_simple_single_period_table_values_before_header_survives():
+    d = _doc("GOOD", "Total revenue $1.6 billion - $1.7 billion Adjusted EBITDA $225 million - $235 million FY 2026 Guidance")
+    f = _fact(
+        d,
+        metric=GuidanceMetric.REVENUE,
+        period="FY2026",
+        kind=GuidancePeriodKind.FULL_YEAR,
+        metric_text="Total revenue",
+        value_text="$1.6 billion - $1.7 billion",
+        period_text="FY 2026",
+        low=1.6e9,
+        high=1.7e9,
+    )
+    assert GuidanceEvidenceBinder().bind(f, d).accepted
+
+
+def test_valid_simple_single_period_table_header_before_values_survives():
+    d = _doc("GOOD", "FY 2026 Guidance Total revenue $1.6 billion - $1.7 billion Adjusted EBITDA $225 million - $235 million")
+    f = _fact(
+        d,
+        metric=GuidanceMetric.REVENUE,
+        period="FY2026",
+        kind=GuidancePeriodKind.FULL_YEAR,
+        metric_text="Total revenue",
+        value_text="$1.6 billion - $1.7 billion",
+        period_text="FY 2026",
+        low=1.6e9,
+        high=1.7e9,
+    )
+    assert GuidanceEvidenceBinder().bind(f, d).accepted
+
+
+def test_valid_quarter_and_fy_narrative_sections_survive():
+    d = _doc(
+        "GOOD",
+        "Q2 2026 Guidance: Revenue $424m - $428m. "
+        "FY 2026 Guidance: Consolidated revenue $1.6 billion - $1.7 billion.",
+    )
+    f = _fact(
+        d,
+        metric=GuidanceMetric.REVENUE,
+        period="FY2026",
+        kind=GuidancePeriodKind.FULL_YEAR,
+        metric_text="Consolidated revenue",
+        value_text="$1.6 billion - $1.7 billion",
+        period_text="FY 2026",
+        low=1.6e9,
+        high=1.7e9,
+    )
+    assert GuidanceEvidenceBinder().bind(f, d).accepted
+
+
+def test_valid_explicit_raise_survives_row_coordinate_guard():
+    d = _doc("GOOD", "The company raised FY 2026 guidance for Total revenue to $1.6 billion - $1.7 billion.")
+    f = _fact(
+        d,
+        metric=GuidanceMetric.REVENUE,
+        period="FY2026",
+        kind=GuidancePeriodKind.FULL_YEAR,
+        metric_text="Total revenue",
+        value_text="$1.6 billion - $1.7 billion",
+        period_text="FY 2026",
+        low=1.6e9,
+        high=1.7e9,
+        action=GuidanceAction.RAISE,
+    )
+    assert GuidanceEvidenceBinder().bind(f, d).accepted
+'''
+              test_path.write_text(tests)
+          PY
+
+      - name: Compile guidance binder
+        run: python -m py_compile backend/app/services/guidance_evidence_binder_v2.py backend/tests/test_guidance_evidence_binder_v2.py
+
+      - name: Run targeted table-binding and historical guidance regressions
+        run: |
+          pytest -q \
+            backend/tests/test_guidance_evidence_binder_v2.py \
+            backend/tests/test_guidance_manual_audit_regressions.py \
+            backend/tests/test_canonical_shadow_guidance_integration.py
+
+      - name: Run point-in-time and leakage tests when present
+        shell: bash
+        run: |
+          mapfile -t TESTS < <(grep -RIlE 'point.?in.?time|look.?ahead|leakage' backend/tests --include='test_*.py' || true)
+          if [ "${#TESTS[@]}" -gt 0 ]; then
+            pytest -q "${TESTS[@]}"
+          else
+            echo 'No separately named point-in-time/leakage test file; covered by full deterministic suite.'
+          fi
+
+      - name: Run complete deterministic suite
+        run: pytest -q
+
+      - name: Verify SOE-1.0.0 remains frozen
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          test "$(git rev-parse HEAD:config/soe_v1_0_rules.yaml)" = "$(git rev-parse origin/main:config/soe_v1_0_rules.yaml)"
+          git diff --exit-code origin/main -- config/soe_v1_0_rules.yaml
+
+      - name: Commit and push permanent semantic repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/app/services/guidance_evidence_binder_v2.py backend/tests/test_guidance_evidence_binder_v2.py
+          if git diff --cached --quiet; then
+            echo 'No permanent changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Phase 1.1E: require deterministic table row ownership'
+          git push origin HEAD:phase-1.1e-canonical-guidance

@@ -16,7 +16,7 @@ from app.domain.catalyst_surprise_v1_1 import CatalystSurpriseInput
 from app.domain.catalyst_v1_1 import CatalystEventFamily
 from app.domain.distress_v1_1 import DistressAssessment, DistressSectorAdapter
 from app.domain.schemas import CorporateEvent, FundamentalSnapshot, Instrument
-from app.domain.soe_v1_1 import GuidanceAssessment, GuidanceMetricRecord, GuidancePolicyEvidence
+from app.domain.soe_v1_1 import GuidanceAssessment
 from app.providers.sec_distress import normalize_distress_companyfacts
 from app.providers.sec_edgar import COMPANYFACTS_URL, TICKER_MAP_URL
 from app.providers.yahoo_analyst import YahooAnalystEstimateProvider
@@ -29,10 +29,16 @@ from app.services.distress_classifier import classify_distress
 from app.services.distress_fact_extraction_service import extract_hard_distress_flags, finalize_hard_distress_screen
 from app.services.distress_metric_service import derive_distress_inputs
 from app.services.distress_sector_service import route_distress_sector
-from app.services.fact_extraction_service import extract_guidance_facts
-from app.services.guidance_ledger_service import GuidanceLedger
+from app.services.canonical_shadow_guidance_service import (
+    assess_canonical_guidance_documents,
+    guidance_comparable_pair_count,
+)
 from app.services.shadow_validation_service import CatalystStructuralOverride, catalyst_event_key
-from app.services.source_document_service import SourceDocumentService, index_submissions_payload
+from app.services.source_document_service import (
+    SourceDocumentService,
+    complete_submission_text_reference,
+    index_submissions_payload,
+)
 
 
 SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik}.json"
@@ -51,34 +57,6 @@ class StructuralEnrichmentResult:
     distress: dict[str, Any] = field(default_factory=dict)
     catalysts: list[dict[str, Any]] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
-
-
-def _guidance_record_key(record: GuidanceMetricRecord) -> tuple[Any, ...]:
-    return (
-        record.comparison_key,
-        record.source_timestamp,
-        record.low,
-        record.high,
-        record.midpoint,
-        record.unit,
-        record.explicit_action.value,
-    )
-
-
-def _dedupe_guidance(records: list[GuidanceMetricRecord]) -> list[GuidanceMetricRecord]:
-    chosen: dict[tuple[Any, ...], GuidanceMetricRecord] = {}
-    for record in records:
-        key = _guidance_record_key(record)
-        existing = chosen.get(key)
-        if existing is None or record.source_url < existing.source_url:
-            chosen[key] = record
-    return sorted(chosen.values(), key=lambda item: (item.source_timestamp, item.metric.value, item.fiscal_period))
-
-
-def guidance_comparable_pair_count(ledger: GuidanceLedger, ticker: str) -> int:
-    current, prior = ledger.current_and_prior(ticker)
-    prior_keys = {item.comparison_key for item in prior if item.midpoint is not None}
-    return sum(1 for item in current if item.midpoint is not None and item.comparison_key in prior_keys)
 
 
 def nonfinancial_distress_decision_evidence(inputs, rules: dict[str, Any]) -> tuple[bool, list[str]]:
@@ -179,6 +157,7 @@ class ShadowStructuralEnricher:
         self._ticker_map: dict[str, str] | None = None
         self._submissions_cache: dict[str, dict[str, Any]] = {}
         self._document_cache: dict[tuple[str, int, int, tuple[str, ...]], list[Any]] = {}
+        self._document_error_cache: dict[tuple[str, int, int, tuple[str, ...]], list[str]] = {}
 
     @staticmethod
     def _open_archive(path: Path) -> zipfile.ZipFile | None:
@@ -279,20 +258,28 @@ class ShadowStructuralEnricher:
     def _documents(self, ticker: str, *, forms: set[str], lookback_days: int, limit: int, max_exhibits: int) -> tuple[list[Any], list[str]]:
         cache_key = (ticker.upper(), lookback_days, limit, tuple(sorted(forms)))
         if cache_key in self._document_cache:
-            return list(self._document_cache[cache_key]), []
+            return list(self._document_cache[cache_key]), list(self._document_error_cache.get(cache_key, []))
         documents: list[Any] = []
         errors: list[str] = []
         for filing in reversed(self._filings(ticker, forms=forms, lookback_days=lookback_days, limit=limit)):
             try:
                 refs = self.document_service.filing_documents(filing, max_exhibits=max_exhibits)
-            except (httpx.HTTPError, ValueError, json.JSONDecodeError):
+            except (httpx.HTTPError, ValueError, json.JSONDecodeError) as exc:
+                errors.append(f"INDEX:{filing.accession}:{type(exc).__name__}")
                 refs = [filing]
+                if filing.form in {"8-K", "6-K"}:
+                    refs.append(complete_submission_text_reference(filing))
+            seen_urls: set[str] = set()
             for ref in refs:
+                if ref.source_url in seen_urls:
+                    continue
+                seen_urls.add(ref.source_url)
                 try:
                     documents.append(self.document_service.fetch(ref, rules_hash=self.rules_hash))
                 except (httpx.HTTPError, OSError, ValueError) as exc:
                     errors.append(f"DOC:{ref.accession}:{ref.primary_document}:{type(exc).__name__}")
         self._document_cache[cache_key] = list(documents)
+        self._document_error_cache[cache_key] = list(errors)
         return documents, errors
 
     def assess_guidance(self, ticker: str) -> tuple[GuidanceAssessment | None, dict[str, Any], list[str]]:
@@ -303,31 +290,13 @@ class ShadowStructuralEnricher:
             limit=32,
             max_exhibits=4,
         )
-        records: list[GuidanceMetricRecord] = []
-        policies: list[GuidancePolicyEvidence] = []
-        for document in documents:
-            extraction = extract_guidance_facts(document, rules_hash=self.rules_hash)
-            records.extend(extraction.records)
-            if extraction.policy_evidence is not None:
-                policies.append(extraction.policy_evidence)
-        records = _dedupe_guidance(records)
-        ledger = GuidanceLedger(records)
-        comparable_pairs = guidance_comparable_pair_count(ledger, ticker) if records else 0
-        policy = max(policies, key=lambda item: item.source_timestamp) if policies else None
-        assessment = ledger.assess(ticker, self.rules, rules_hash=self.rules_hash, policy=policy) if records or policy else None
-        meta = {
-            "records": len(records),
-            "ledger_records": [record.model_dump(mode="json") for record in records],
-            "policy_evidence": policy.model_dump(mode="json") if policy else None,
-            "documents": len(documents),
-            "comparable_pairs": comparable_pairs,
-            "sufficient_comparable_guidance": comparable_pairs > 0,
-            "classification": assessment.classification.value if assessment else "UNKNOWN",
-            "guidance_deterioration": assessment.guidance_deterioration if assessment else None,
-            "rule_path": assessment.rule_path if assessment else "guidance_v1_1.no_extracted_primary_guidance",
-            "sources": assessment.sources if assessment else [],
-            "reasons": assessment.reasons if assessment else ["No supported primary-source guidance fact extracted."],
-        }
+        assessment, meta, extraction_errors = assess_canonical_guidance_documents(
+            ticker,
+            documents,
+            self.rules,
+            rules_hash=self.rules_hash,
+        )
+        errors.extend(extraction_errors)
         return assessment, meta, errors
 
     def _distress_screen_refs(self, ticker: str, *, lookback_days: int = 500, max_event_filings: int = 16):

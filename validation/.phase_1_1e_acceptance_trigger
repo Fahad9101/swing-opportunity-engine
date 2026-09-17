@@ -1,0 +1,12 @@
+Full-market acceptance trigger for canonical guidance integration.
+Source integration commit: 141f41d1a8db564ae756b3a52c5e25736c783e83
+Consolidated replay trigger commit: 856939c8fd1d9652cc86faf919cc16c0a6b5253f
+Guidance sufficiency metadata repair commit: d45d05df021be8e17395ed98f3f256054c1f51d5
+Metadata-publisher cleanup commit: 944e7c68446e924e7a7bda2a2640969278ec361a
+Manual-audit guidance source repair commit: a564943ced08d9386115484ceba2f5a54dba5780
+Manual-audit workflow cleanup commit: 6b56ae4e621006d9ded0854351edd57362a0dcf2
+Manual-audit script cleanup commit: 50e3d14edf3f7f61c2542aeb55f19ff24fe1f4a7
+Fresh manual-audit guidance source repair commit: e1ee79ab0c0f3f6bb0ef34d58008219d1883ce2f
+Fresh manual-audit repair workflow cleanup commit: ed8d675402fa85f36922945e2e2e85f56033abcc
+Fresh manual-audit repair patcher cleanup commit: 6038005c1dc968ac0ef65ad1d98b854b6283dcc5
+Fresh manual-audit corrected patcher cleanup commit: e7eb7f06ea5f6afeadb0d9fc25297fb8de46f9f3

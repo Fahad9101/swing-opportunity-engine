@@ -1,0 +1,71 @@
+name: Canonical Guidance Differential
+
+on:
+  push:
+    branches: [phase-1.1e-canonical-guidance]
+    paths:
+      - 'backend/app/domain/guidance_canonical_v1.py'
+      - 'backend/app/services/guidance_canonical_*.py'
+      - 'backend/tests/fixtures/guidance_golden_corpus_v1.json'
+      - 'backend/tests/test_guidance_canonical_*.py'
+      - '.github/workflows/canonical-guidance-differential.yml'
+  workflow_dispatch:
+    inputs:
+      artifact_id:
+        description: 'Phase 1.1E shadow-validation artifact ID'
+        required: false
+        default: '10296727219'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  differential:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_ARTIFACT_ID: ${{ inputs.artifact_id || '10296727219' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install package
+        run: python -m pip install -e '.[test]'
+      - name: Download immutable acceptance artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p differential-source
+          curl --fail --location \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${SOURCE_ARTIFACT_ID}/zip" \
+            -o differential-source/source.zip
+          unzip -q differential-source/source.zip -d differential-source/unpacked
+          test -f differential-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json
+      - name: Run canonical differential audit
+        run: |
+          python -m app.cli_guidance_canonical_differential \
+            differential-source/unpacked/validation-results/milestone-1.1e/shadow_validation.json \
+            --output canonical-guidance-differential.json
+          python - <<'PY'
+          import json
+          report = json.load(open('canonical-guidance-differential.json'))
+          print(json.dumps({
+              'tickers': report['tickers_with_guidance_payload'],
+              'legacy_records': report['legacy_record_count'],
+              'canonical_facts': report['canonical_fact_count'],
+              'quarantined': report['quarantined_fact_count'],
+              'quarantine_codes': report['quarantine_codes'],
+              'classification_divergences': report['classification_divergence_count'],
+          }, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: canonical-guidance-differential
+          path: canonical-guidance-differential.json
+          if-no-files-found: error
