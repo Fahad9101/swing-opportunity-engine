@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     sec_submissions_zip_path: Path = PROJECT_ROOT / ".cache" / "soe" / "sec" / "submissions.zip"
     cache_dir: Path = PROJECT_ROOT / ".cache" / "soe"
     production_allow_partial: bool = True
+    scan_api_enabled: bool = True
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

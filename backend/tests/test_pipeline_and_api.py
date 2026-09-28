@@ -43,6 +43,25 @@ def test_persisted_opportunity_filters_and_market_regime():
         assert biotech.status_code == 200
         assert biotech.json()["count"] == 1
         assert biotech.json()["data"][0]["ticker"] == "BIOCAT"
+        body = biotech.json()
+        assert body["scan_run_id"] is not None
+        assert body["data_as_of"] is not None
+        assert body["stale"] is False
         regime = client.get("/api/v1/market-regime")
         assert regime.status_code == 200
         assert regime.json()["regime"] == "GREEN"
+
+
+def test_scan_api_can_be_disabled_for_hosted_deployments(monkeypatch):
+    from app.core.config import get_settings
+
+    monkeypatch.setenv("SCAN_API_ENABLED", "false")
+    get_settings.cache_clear()
+    try:
+        with TestClient(app) as client:
+            response = client.post("/api/v1/scans")
+        assert response.status_code == 403
+        assert response.json()["error"]["code"] == "SCAN_API_DISABLED"
+    finally:
+        monkeypatch.delenv("SCAN_API_ENABLED")
+        get_settings.cache_clear()

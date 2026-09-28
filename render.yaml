@@ -1,0 +1,19 @@
+# Render Blueprint for the read-only SOE API used by the Swing Screener iOS app.
+# Scans run in GitHub Actions (.github/workflows/nightly-scan.yml); this service only serves results.
+services:
+  - type: web
+    name: soe-api
+    runtime: python
+    plan: free
+    buildCommand: pip install .
+    startCommand: PYTHONPATH=backend uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: DATABASE_URL
+        sync: false
+      - key: PROVIDER_NAME
+        value: fixture
+      - key: SCAN_API_ENABLED
+        value: "false"
