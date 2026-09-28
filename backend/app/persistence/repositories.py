@@ -82,6 +82,9 @@ class ScanRepository:
 
     def commit(self) -> None: self.session.commit()
 
+    def latest_completed_run(self) -> ScanRunORM | None:
+        return self.session.execute(select(ScanRunORM).where(ScanRunORM.status == "COMPLETED").order_by(ScanRunORM.completed_at.desc())).scalars().first()
+
     def latest_opportunities(self) -> list[dict]:
         latest = self.session.execute(select(ScanRunORM).where(ScanRunORM.status == "COMPLETED").order_by(ScanRunORM.completed_at.desc())).scalars().first()
         if not latest: return []

@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import APIRouter
 
+from app.core.config import get_settings
 from app.core.errors import SOEError
 from app.orchestration.scan_pipeline import run_full_scan, scan_manager
 
@@ -15,6 +16,8 @@ _tasks: set[asyncio.Task] = set()
 
 @router.post("/scans", status_code=202)
 async def start_scan() -> dict:
+    if not get_settings().scan_api_enabled:
+        raise SOEError("SCAN_API_DISABLED", "Scans run on the nightly schedule and cannot be started through this API.", status_code=403)
     state = scan_manager.create()
     task = asyncio.create_task(run_full_scan(state.scan_run_id))
     _tasks.add(task)

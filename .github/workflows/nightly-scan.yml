@@ -1,0 +1,91 @@
+name: Nightly Scan
+
+# Runs the free/public full-market scan after the US close and writes results to the hosted
+# Postgres database (DATABASE_URL secret) that the API serves from.
+on:
+  schedule:
+    # 17:30 America/New_York on weekdays. Both UTC slots are listed so the run survives the
+    # daylight-saving change; the gate step below keeps only the one that is 17:xx in New York.
+    - cron: "30 21 * * 1-5"
+    - cron: "30 22 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+      PROVIDER_NAME: free_public
+      SEC_COMPANYFACTS_ZIP_PATH: .cache/soe/sec/companyfacts.zip
+      SEC_SUBMISSIONS_ZIP_PATH: .cache/soe/sec/submissions.zip
+      CACHE_DIR: .cache/soe
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Keep only the 17:30 New York slot
+        id: gate
+        shell: bash
+        run: |
+          hour=$(TZ=America/New_York date +%H)
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$hour" != "17" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"; echo "Skipping: it is ${hour}:xx in New York."
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check secrets are configured
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          test -n "$DATABASE_URL" || { echo "::error::DATABASE_URL secret is not set"; exit 1; }
+          test -n "$SEC_USER_AGENT" || { echo "::error::SEC_USER_AGENT secret is not set"; exit 1; }
+
+      - name: Checkout
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        if: steps.gate.outputs.run == 'true'
+        run: python -m pip install -e .
+
+      - name: Download and validate SEC public bulk archives
+        if: steps.gate.outputs.run == 'true'
+        run: PYTHONPATH=backend python -m app.cli_sec_bulk
+
+      - name: Run full-market scan
+        if: steps.gate.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=backend python -m app.cli > scan_report.json
+          python - <<'PY'
+          import json
+          report = json.load(open("scan_report.json"))
+          print(f"status={report['status']} universe={report['universe_size']} candidates={report['candidate_count']} fully_scored={report['fully_scored_count']}")
+          if report["status"] != "COMPLETED":
+              raise SystemExit(f"Scan did not complete: {report['errors']}")
+          PY
+
+      - name: Upload scan report
+        if: always() && steps.gate.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-scan-report
+          if-no-files-found: warn
+          retention-days: 14
+          path: scan_report.json
