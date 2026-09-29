@@ -95,3 +95,29 @@ class ScanRepository:
         row = self.session.execute(select(MarketRegimeORM).join(ScanRunORM, MarketRegimeORM.scan_run_id == ScanRunORM.id).where(ScanRunORM.status == "COMPLETED").order_by(ScanRunORM.completed_at.desc())).scalars().first()
         if row is None: return None
         return {"regime": row.regime, "regime_score": row.regime_score, "spy_data": row.spy_data, "qqq_data": row.qqq_data, "iwm_data": row.iwm_data, "vix_data": row.vix_data, "breadth_data": row.breadth_data, "timestamp": row.timestamp.isoformat(), "reasons": []}
+
+    def ticker_rows(self, run_id: str, ticker: str) -> dict:
+        def rows(model):
+            return self.session.execute(select(model).where(model.scan_run_id == run_id, model.ticker == ticker)).scalars().all()
+        market, fundamentals, estimates = rows(MarketSnapshotORM), rows(FundamentalSnapshotORM), rows(EstimateSnapshotORM)
+        opportunity = rows(OpportunityORM)
+        return {
+            "instrument": self.session.get(InstrumentORM, ticker),
+            "market": market[-1] if market else None,
+            "fundamental": fundamentals[-1] if fundamentals else None,
+            "estimates": estimates[-1] if estimates else None,
+            "opportunity": opportunity[0] if opportunity else None,
+            "catalysts": rows(CatalystORM),
+            "corporate_events": rows(CorporateEventORM),
+            "scanner_matches": rows(ScannerMatchORM),
+            "validation_issues": rows(ValidationIssueORM),
+        }
+
+    def run_events(self, run_id: str, ticker: str | None = None) -> tuple[list[CatalystORM], list[CorporateEventORM]]:
+        catalysts, events = select(CatalystORM).where(CatalystORM.scan_run_id == run_id), select(CorporateEventORM).where(CorporateEventORM.scan_run_id == run_id)
+        if ticker is not None:
+            catalysts, events = catalysts.where(CatalystORM.ticker == ticker), events.where(CorporateEventORM.ticker == ticker)
+        return list(self.session.execute(catalysts).scalars().all()), list(self.session.execute(events).scalars().all())
+
+    def shortlist_tickers(self, run_id: str) -> set[str]:
+        return set(self.session.execute(select(OpportunityORM.ticker).where(OpportunityORM.scan_run_id == run_id)).scalars().all())
