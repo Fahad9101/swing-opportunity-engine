@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     # Supabase publishable (anon) key. Kept on the server so the iOS app ships
     # no key; used only to relay email sign-in codes to Supabase Auth.
     supabase_anon_key: str | None = None
+    # Where the sign-in email's link sends the user: the iOS app's URL scheme.
+    # Must also be listed under Supabase Auth > URL Configuration > Redirect URLs.
+    auth_redirect_url: str = "swingscreener://auth-callback"
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
