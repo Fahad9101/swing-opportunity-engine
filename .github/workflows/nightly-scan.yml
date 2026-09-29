@@ -5,7 +5,9 @@ name: Nightly Scan
 on:
   schedule:
     # 17:30 America/New_York on weekdays. Both UTC slots are listed so the run survives the
-    # daylight-saving change; the gate step below keeps only the one that is 17:xx in New York.
+    # daylight-saving change; the gate step keeps the slot that matches New York's current UTC
+    # offset. GitHub often starts scheduled runs late, so the gate checks which cron fired rather
+    # than the wall-clock hour.
     - cron: "30 21 * * 1-5"
     - cron: "30 22 * * 1-5"
   workflow_dispatch:
@@ -34,9 +36,10 @@ jobs:
         id: gate
         shell: bash
         run: |
-          hour=$(TZ=America/New_York date +%H)
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$hour" != "17" ]; then
-            echo "run=false" >> "$GITHUB_OUTPUT"; echo "Skipping: it is ${hour}:xx in New York."
+          offset=$(TZ=America/New_York date +%z)
+          case "$offset" in -0400) slot="30 21 * * 1-5" ;; *) slot="30 22 * * 1-5" ;; esac
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "${{ github.event.schedule }}" != "$slot" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"; echo "Skipping the ${{ github.event.schedule }} slot; New York is at UTC${offset}."
           else
             echo "run=true" >> "$GITHUB_OUTPUT"
           fi
