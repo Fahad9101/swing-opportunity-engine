@@ -10,6 +10,7 @@ from app.api.routes_market import router as market_router
 from app.api.routes_opportunities import router as opportunities_router
 from app.api.routes_ticker import router as ticker_router
 from app.api.routes_watchlist import router as watchlist_router
+from app.api.routes_auth import router as auth_router
 from app.api.routes_scan import router as scan_router
 from app.core.config import get_settings
 from app.core.constants import MODEL_NAME, MODEL_VERSION
@@ -37,5 +38,5 @@ async def request_id_middleware(request: Request, call_next):
     return response
 
 
-for router in (health_router, scan_router, opportunities_router, market_router, ticker_router, watchlist_router):
+for router in (health_router, scan_router, opportunities_router, market_router, ticker_router, watchlist_router, auth_router):
     app.include_router(router, prefix="/api/v1")

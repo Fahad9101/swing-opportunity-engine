@@ -21,3 +21,7 @@ services:
       # it lets the API verify sign-in tokens for the watchlist endpoints.
       - key: SUPABASE_URL
         sync: false
+      # Supabase publishable (anon) key. Kept here so the iOS app ships no key;
+      # the API adds it when relaying email sign-in codes to Supabase Auth.
+      - key: SUPABASE_ANON_KEY
+        sync: false
