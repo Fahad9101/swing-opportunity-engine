@@ -134,7 +134,9 @@ Endpoints: `GET /api/v1/health`, `POST /api/v1/scans`, `GET /api/v1/scans/{id}`,
 
 `GET /api/v1/ticker/{symbol}` returns a due-diligence card from the latest completed scan: company facts, the full score breakdown, scanner conditions, red flags (rejections, penalties, data-quality warnings), market/fundamental/estimate snapshots with provenance, and dated catalysts. It returns 404 `TICKER_NOT_IN_SCAN` when the ticker was not scanned.
 
-`GET /api/v1/catalysts?days=30&ticker=&shortlist_only=false&status=` returns a calendar of upcoming catalysts and corporate events. Each event shows `status` (`confirmed`, `estimated` or `speculative`, from SOE's A/B/C date confidence), `source`, and `last_checked`. These endpoints are display-only and change no score, scanner, or threshold. Both carry `data_as_of`, `stale`, and the "Screening tool, not financial advice." disclaimer.
+`GET /api/v1/catalysts?days=30&ticker=&shortlist_only=false&status=` returns a calendar of upcoming catalysts and corporate events. Each event shows `status` (`confirmed`, `estimated` or `speculative`, from SOE's A/B/C date confidence), `source`, and `last_checked`. These endpoints are display-only and change no score, scanner, or threshold.
+
+`GET /api/v1/watchlist`, `PUT /api/v1/watchlist/{symbol}` (optional JSON body `{"note": "..."}`), and `DELETE /api/v1/watchlist/{symbol}` manage a per-user watchlist (at most 100 tickers). They require `Authorization: Bearer <Supabase access token>`. The API verifies the token against the Supabase project's public signing keys (set `SUPABASE_URL`) or, for legacy HS256 projects, `SUPABASE_JWT_SECRET`. It holds no Supabase service key. `GET /watchlist` adds each ticker's latest score, whether it is on the shortlist, and its next catalyst within 90 days. Both carry `data_as_of`, `stale`, and the "Screening tool, not financial advice." disclaimer.
 
 ## Validation and audit
 

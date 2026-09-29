@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     cache_dir: Path = PROJECT_ROOT / ".cache" / "soe"
     production_allow_partial: bool = True
     scan_api_enabled: bool = True
+    # Supabase Auth: the project URL (public) enables verification of the
+    # asymmetric JWT signing keys; the legacy HS256 secret is optional.
+    supabase_url: str | None = None
+    supabase_jwt_secret: str | None = None
+    supabase_jwt_audience: str = "authenticated"
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

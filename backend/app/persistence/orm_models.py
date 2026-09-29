@@ -190,3 +190,13 @@ class ValidationIssueORM(Base):
     expected: Mapped[str | None] = mapped_column(Text)
     source: Mapped[str | None] = mapped_column(String(100))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class WatchlistItemORM(Base):
+    __tablename__ = "watchlist_items"
+    __table_args__ = (UniqueConstraint("user_id", "ticker", name="uq_watchlist_user_ticker"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(String(64), index=True)
+    ticker: Mapped[str] = mapped_column(String(16))
+    note: Mapped[str | None] = mapped_column(Text)
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
