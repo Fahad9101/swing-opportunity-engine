@@ -17,3 +17,7 @@ services:
         value: fixture
       - key: SCAN_API_ENABLED
         value: "false"
+      # Supabase project URL (https://<ref>.supabase.co). Public, not a secret;
+      # it lets the API verify sign-in tokens for the watchlist endpoints.
+      - key: SUPABASE_URL
+        sync: false

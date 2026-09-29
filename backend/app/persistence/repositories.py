@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.domain.schemas import Catalyst, CorporateEvent, EstimateSnapshot, FundamentalSnapshot, Instrument, MarketRegimeResult, MarketSnapshot, OpportunityResult, ScanRunState, ScannerMatch, ValidationIssue
-from app.persistence.orm_models import CatalystORM, CorporateEventORM, EstimateSnapshotORM, FundamentalSnapshotORM, InstrumentORM, MarketRegimeORM, MarketSnapshotORM, OpportunityORM, ProviderErrorORM, ScanRunORM, ScannerMatchORM, ValidationIssueORM
+from app.persistence.orm_models import CatalystORM, CorporateEventORM, EstimateSnapshotORM, FundamentalSnapshotORM, InstrumentORM, MarketRegimeORM, MarketSnapshotORM, OpportunityORM, ProviderErrorORM, ScanRunORM, ScannerMatchORM, ValidationIssueORM, WatchlistItemORM
 
 
 def _json(model) -> dict:
@@ -113,11 +113,51 @@ class ScanRepository:
             "validation_issues": rows(ValidationIssueORM),
         }
 
-    def run_events(self, run_id: str, ticker: str | None = None) -> tuple[list[CatalystORM], list[CorporateEventORM]]:
+    def run_events(self, run_id: str, ticker: str | None = None, tickers: set[str] | None = None) -> tuple[list[CatalystORM], list[CorporateEventORM]]:
         catalysts, events = select(CatalystORM).where(CatalystORM.scan_run_id == run_id), select(CorporateEventORM).where(CorporateEventORM.scan_run_id == run_id)
         if ticker is not None:
             catalysts, events = catalysts.where(CatalystORM.ticker == ticker), events.where(CorporateEventORM.ticker == ticker)
+        if tickers is not None:
+            catalysts, events = catalysts.where(CatalystORM.ticker.in_(tickers)), events.where(CorporateEventORM.ticker.in_(tickers))
         return list(self.session.execute(catalysts).scalars().all()), list(self.session.execute(events).scalars().all())
 
     def shortlist_tickers(self, run_id: str) -> set[str]:
         return set(self.session.execute(select(OpportunityORM.ticker).where(OpportunityORM.scan_run_id == run_id)).scalars().all())
+
+    def opportunity_scores(self, run_id: str, tickers: set[str]) -> dict[str, float]:
+        rows = self.session.execute(select(OpportunityORM.ticker, OpportunityORM.opportunity_score).where(OpportunityORM.scan_run_id == run_id, OpportunityORM.ticker.in_(tickers))).all()
+        return {ticker: score for ticker, score in rows}
+
+
+class WatchlistRepository:
+    """Per-user watchlist rows. Every method is scoped to one user id."""
+
+    def __init__(self, session: Session, user_id: str):
+        self.session, self.user_id = session, user_id
+
+    def items(self) -> list[WatchlistItemORM]:
+        return list(self.session.execute(select(WatchlistItemORM).where(WatchlistItemORM.user_id == self.user_id).order_by(WatchlistItemORM.added_at)).scalars().all())
+
+    def get(self, ticker: str) -> WatchlistItemORM | None:
+        return self.session.execute(select(WatchlistItemORM).where(WatchlistItemORM.user_id == self.user_id, WatchlistItemORM.ticker == ticker)).scalars().first()
+
+    def count(self) -> int:
+        return len(self.items())
+
+    def upsert(self, ticker: str, note: str | None) -> tuple[WatchlistItemORM, bool]:
+        row = self.get(ticker)
+        created = row is None
+        if row is None:
+            row = WatchlistItemORM(user_id=self.user_id, ticker=ticker, note=note, added_at=datetime.now(UTC))
+            self.session.add(row)
+        else:
+            row.note = note
+        self.session.commit()
+        return row, created
+
+    def remove(self, ticker: str) -> bool:
+        row = self.get(ticker)
+        if row is None: return False
+        self.session.delete(row)
+        self.session.commit()
+        return True
