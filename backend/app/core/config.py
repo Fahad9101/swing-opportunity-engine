@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_jwt_secret: str | None = None
     supabase_jwt_audience: str = "authenticated"
+    # Supabase publishable (anon) key. Kept on the server so the iOS app ships
+    # no key; used only to relay email sign-in codes to Supabase Auth.
+    supabase_anon_key: str | None = None
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
