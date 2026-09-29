@@ -37,7 +37,8 @@ def test_email_code_is_relayed_with_server_side_key(supabase):
         response = client.post("/api/v1/auth/email-code", json={"email": "fahad@example.com"})
     assert response.status_code == 204
     request = calls[-1]
-    assert str(request.url) == f"{SUPABASE_URL}/auth/v1/otp"
+    assert f"{request.url.scheme}://{request.url.host}{request.url.path}" == f"{SUPABASE_URL}/auth/v1/otp"
+    assert request.url.params["redirect_to"] == "swingscreener://auth-callback"
     assert request.headers["apikey"] == "publishable-key"
     assert json.loads(request.content) == {"email": "fahad@example.com", "create_user": True}
 

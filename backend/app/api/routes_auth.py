@@ -1,4 +1,9 @@
-"""Email one-time-code sign-in, relayed to Supabase Auth.
+"""Email sign-in, relayed to Supabase Auth.
+
+Supabase's free plan sends its default email, which carries a "Log In" link
+(and, if the template is customised, a one-time code). The link redirects to
+the app's URL scheme with the session in the URL fragment; `/verify` still
+accepts a code for projects whose template includes one.
 
 The iOS app never holds a Supabase key: it calls these endpoints, and the
 server adds the publishable key when it forwards the request. Supabase issues
@@ -61,7 +66,7 @@ async def _supabase(path: str, body: dict, *, params: dict | None = None) -> dic
 
 @router.post("/email-code", status_code=204)
 async def send_email_code(payload: EmailCodeRequest) -> Response:
-    await _supabase("otp", {"email": payload.email, "create_user": True})
+    await _supabase("otp", {"email": payload.email, "create_user": True}, params={"redirect_to": get_settings().auth_redirect_url})
     return Response(status_code=204)
 
 
