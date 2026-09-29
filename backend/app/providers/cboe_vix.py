@@ -12,7 +12,8 @@ from app.services.cache_service import JsonFileCache
 from app.services.trading_calendar_service import is_eod_stale
 
 
-VIX_HISTORY_URL = "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv"
+# Cboe moved this file from cdn.cboe.com (which now answers 307) in September 2026.
+VIX_HISTORY_URL = "https://cdn-api.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv"
 
 
 class CboeVixProvider:
@@ -30,7 +31,7 @@ class CboeVixProvider:
             text = ""
             for attempt in range(self.max_retries + 1):
                 try:
-                    async with httpx.AsyncClient(timeout=self.timeout_seconds, transport=self.transport) as client:
+                    async with httpx.AsyncClient(timeout=self.timeout_seconds, transport=self.transport, follow_redirects=True) as client:
                         response = await client.get(VIX_HISTORY_URL)
                     response.raise_for_status()
                     text, fetched_at = response.text, datetime.now(UTC)
