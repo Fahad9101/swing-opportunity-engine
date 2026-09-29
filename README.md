@@ -130,7 +130,11 @@ API:
 uvicorn app.main:app --app-dir backend --reload
 ```
 
-Endpoints: `GET /api/v1/health`, `POST /api/v1/scans`, `GET /api/v1/scans/{id}`, `GET /api/v1/opportunities`, and `GET /api/v1/market-regime`. Errors are JSON-only.
+Endpoints: `GET /api/v1/health`, `POST /api/v1/scans`, `GET /api/v1/scans/{id}`, `GET /api/v1/opportunities`, `GET /api/v1/market-regime`, `GET /api/v1/ticker/{symbol}`, and `GET /api/v1/catalysts`. Errors are JSON-only.
+
+`GET /api/v1/ticker/{symbol}` returns a due-diligence card from the latest completed scan: company facts, the full score breakdown, scanner conditions, red flags (rejections, penalties, data-quality warnings), market/fundamental/estimate snapshots with provenance, and dated catalysts. It returns 404 `TICKER_NOT_IN_SCAN` when the ticker was not scanned.
+
+`GET /api/v1/catalysts?days=30&ticker=&shortlist_only=false&status=` returns a calendar of upcoming catalysts and corporate events. Each event shows `status` (`confirmed`, `estimated` or `speculative`, from SOE's A/B/C date confidence), `source`, and `last_checked`. These endpoints are display-only and change no score, scanner, or threshold. Both carry `data_as_of`, `stale`, and the "Screening tool, not financial advice." disclaimer.
 
 ## Validation and audit
 
